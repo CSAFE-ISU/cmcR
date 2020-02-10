@@ -3,5 +3,8 @@
 export("%>%")
 export(cellCCF)
 export(findPlaneRansac)
+export(gaussianFilterBF)
 export(selectBFImpression)
+export(selectBFImpression_resize)
+export(selectBFImpression_sample_x3p)
 importFrom(magrittr,"%>%")

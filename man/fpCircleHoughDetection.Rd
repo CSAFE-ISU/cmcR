@@ -6,7 +6,7 @@
 impression scan}
 \usage{
 fpCircleHoughDetection(
-  im,
+  surfaceMat,
   smootherSize,
   aggregation_function,
   meshSize,
@@ -14,7 +14,7 @@ fpCircleHoughDetection(
 )
 }
 \arguments{
-\item{im}{a surface matrix representing a breech face impression scan}
+\item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
 \item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
 

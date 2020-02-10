@@ -124,11 +124,11 @@ gaussianFilter <- function(surfaceMat,
   return(imFiltered)
 }
 
-#' @name filterSelectedBF
+#' @name gaussianFilterBF
 #'
 #' @export
 
-filterSelectedBF <- function(selectedBF_x3p,
+gaussianFilterBF <- function(selectedBF_x3p,
                              res = selectedBF_x3p$header.info$incrementY,
                              wavelength,
                              filtertype = "bp"){
