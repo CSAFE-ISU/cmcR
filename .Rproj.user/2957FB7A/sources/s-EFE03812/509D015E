@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580959973964.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2465682045",
+    "id" : "509D015E",
+    "lastKnownWriteTime" : 1581289672,
+    "last_content_update" : 1581289672138,
+    "path" : "~/cmcR/R/gaussianFilter.R",
+    "project_path" : "R/gaussianFilter.R",
+    "properties" : {
+        "cursorPosition" : "153,48",
+        "scrollLine" : "110",
+        "tempName" : "Untitled3"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,7 @@
+"0",""
+"0","cmcR:::filterSelectedBF(dat2,"
+"0","                        wavelength = c(16,250),"
+"0","                        filtertype = ""bp"") %>%"
+"0","  .$surface.matrix %>%"
+"0","  as.cimg() %>%"
+"0","  plot()"

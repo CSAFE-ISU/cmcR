@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580955606564.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "41392719",
+    "id" : "4BCFA57D",
+    "lastKnownWriteTime" : 1581289887,
+    "last_content_update" : 1581289887273,
+    "path" : "~/cmcR/R/breechFaceSelection.R",
+    "project_path" : "R/breechFaceSelection.R",
+    "properties" : {
+        "cursorPosition" : "200,42",
+        "scrollLine" : "171",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

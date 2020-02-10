@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(imager)
+library(x3ptools)
+
+rm(dat,dat1,dat2)
+
+dat <- x3ptools::read_x3p("~/bulletCartridgeScans/Fadul (2011)/cc/Fadul 1-2.x3p")
+
+dat1 <- cmcR:::selectBFImpression_sample("~/bulletCartridgeScans/Fadul (2011)/cc/Fadul 1-1.x3p",
+                                         use_residuals = TRUE,
+                                         ransacInlierThresh = (10^-5))
+
+dat2 <- cmcR:::selectBFImpression("~/bulletCartridgeScans/Fadul (2011)/cc/Fadul 1-1.x3p",
+                                         use_residuals = TRUE,
+                                         ransacInlierThresh = (10^-5))
+
+dat1 %>%
+  .$surface.matrix %>%
+  # multiply_by(10^5) %>%
+  as.cimg() %>%
+  # rotate_xy(angle = 90,cx = nrow(.)/2,cy = ncol(.)/2) %>%
+  plot()
+
+dat2 %>%
+  .$surface.matrix %>%
+  # multiply_by(10^5) %>%
+  as.cimg() %>%
+  # rotate_xy(angle = 90,cx = nrow(.)/2,cy = ncol(.)/2) %>%
+  plot()
+```
+
+
+```{r}
+cmcR:::filterSelectedBF(dat1,
+                        wavelength = c(16,250),
+                        filtertype = "bp") %>%
+  .$surface.matrix %>%
+  as.cimg() %>%
+  plot()
+
+cmcR:::filterSelectedBF(dat2,
+                        wavelength = c(16,250),
+                        filtertype = "bp") %>%
+  .$surface.matrix %>%
+  as.cimg() %>%
+  plot()
+```
+
