@@ -25,29 +25,29 @@ gaussianFilter <- function(surfaceMat,
 
     filterSize <- {2*ceiling(2.6*sig) + 1} %>%
       magrittr::add(. %% 2)
+
     kern <- gaussianKernel(size = filterSize,
                            sig = sig)
 
-    dimPadded <- {dim(surfaceMat) + filterSize} %>%
-      magrittr::add(. %% 2) #imager::pad works best if number to pad is even
+    surfaceMatP <- surfaceMat #may need to pad rows/cols with 0s to make even dims
 
-    if((dimPadded[1] - dim(surfaceMat)[1]) %% 2 == 1){
-      surfaceMat <- surfaceMat %>%
+    if((filterSize - dim(surfaceMat)[1]) %% 2 == 1){
+      surfaceMatP <- surfaceMatP %>%
         rbind(rep(0,times = ncol(.)))
     }
-    if((dimPadded[2] - dim(surfaceMat)[2]) %% 2 == 1){
-      surfaceMat <- surfaceMat %>%
+    if((filterSize - dim(surfaceMat)[2]) %% 2 == 1){
+      surfaceMatP <- surfaceMatP %>%
         cbind(rep(0,times = nrow(.)))
     }
 
-    imPadded <- surfaceMat %>%
+    dimPadded <- dim(surfaceMatP) + filterSize
+
+    imPadded <- surfaceMatP %>%
       imager::as.cimg() %>%
-      imager::pad(nPix = {dimPadded[1] - dim(surfaceMat)[1]} %>%
-                    magrittr::add(-1*(. %% 2)),
+      imager::pad(nPix = dimPadded[1] - dim(surfaceMatP)[1],
                   axes = "y",
                   pos = 0) %>%
-      imager::pad(nPix = {dimPadded[2] - dim(surfaceMat)[2]} %>%
-                    magrittr::add(-1*(. %% 2)),
+      imager::pad(nPix = dimPadded[2] - dim(surfaceMatP)[2],
                   axes = "x",
                   pos = 0) %>%
       as.matrix()
@@ -70,14 +70,15 @@ gaussianFilter <- function(surfaceMat,
       fft() %>%
       magrittr::multiply_by(fft(kernPadded)) %>%
       fft(inverse = TRUE) %>%
-      magrittr::divide_by(prod(dimPadded))
+      magrittr::divide_by(prod(dimPadded)) %>%
+      cartridges3D:::fftshift()
 
     imFiltered <- Re(imFiltered) %>%
-      as.cimg() %>%
-      imager::crop.borders(nx = {dimPadded[1] - dim(surfaceMat)[1]} %>%
+      imager::as.cimg() %>%
+      imager::crop.borders(nx = {dimPadded[1] - dim(surfaceMatP)[1]} %>%
                              magrittr::add(-1*(. %% 2)) %>%
                              magrittr::divide_by(2),
-                           ny = {dimPadded[2] - dim(surfaceMat)[2]} %>%
+                           ny = {dimPadded[2] - dim(surfaceMatP)[2]} %>%
                              magrittr::add(-1*(. %% 2)) %>%
                              magrittr::divide_by(2)) %>%
       as.matrix()
@@ -93,11 +94,11 @@ gaussianFilter <- function(surfaceMat,
     imFiltered <- imPadded - imFilteredLP
 
     imFiltered <- Re(imFiltered) %>%
-      as.cimg() %>%
-      imager::crop.borders(nx = {dimPadded[1] - dim(surfaceMat)[1]} %>%
+      imager::as.cimg() %>%
+      imager::crop.borders(nx = {dimPadded[1] - dim(surfaceMatP)[1]} %>%
                              magrittr::add(-1*(. %% 2)) %>%
                              magrittr::divide_by(2),
-                           ny = {dimPadded[2] - dim(surfaceMat)[2]} %>%
+                           ny = {dimPadded[2] - dim(surfaceMatP)[2]} %>%
                              magrittr::add(-1*(. %% 2)) %>%
                              magrittr::divide_by(2)) %>%
       as.matrix()
@@ -109,8 +110,7 @@ gaussianFilter <- function(surfaceMat,
                                                   filtertype = "hp"),
                                  res = res,
                                  wavelength = min(wavelength),
-                                 filtertype = "lp") %>%
-      cartridges3D:::fftshift()
+                                 filtertype = "lp")
   }
 
   #remove extra row/col that was artificially added to make dim of surfaceMat even, if needed
@@ -145,9 +145,9 @@ gaussianFilterBF <- function(selectedBF_x3p,
   surfaceMatFake <- surfaceMatFake*(10^6) #scale to microns (avoids small number numerical issues?)
 
   surfaceMatFiltered <- cmcR:::gaussianFilter(surfaceMat = surfaceMatFake,
-                                        res = res,
-                                        wavelength = wavelength,
-                                        filtertype = filtertype)
+                                              res = res,
+                                              wavelength = wavelength,
+                                              filtertype = filtertype)
 
   surfaceMatFiltered[surfaceMatMissing] <- NA
 
