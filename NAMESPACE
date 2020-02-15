@@ -2,6 +2,8 @@
 
 export("%>%")
 export(cellCCF)
+export(compareBFs_bothDirections)
+export(countInitialCMCs)
 export(findPlaneRansac)
 export(gaussianFilterBF)
 export(selectBFImpression)

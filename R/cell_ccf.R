@@ -9,7 +9,7 @@
 
 cellDivision <- function(surfaceMat,
                          horizSplits = 8,
-                         vertSplits = 8){
+                         vertSplits = 8,...){
 
   splitSurfaceMat <- surfaceMat %>%
     imager::as.cimg() %>%
@@ -36,7 +36,7 @@ cellDivision <- function(surfaceMat,
 #'   and right indices of the cell's location in the surface matrix.
 
 extractCellbyCornerLocs <- function(cornerLocs,
-                                    rotatedSurfaceMat){
+                                    rotatedSurfaceMat,...){
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B
   splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top.y"]]:cornerLocs[["bottom.y"]],
@@ -47,7 +47,7 @@ extractCellbyCornerLocs <- function(cornerLocs,
 
 rotateSurfaceMatrix <- function(surfaceMat,
                                 theta = 0,
-                                interpolation = 0){
+                                interpolation = 0,...){
   surfaceMatFake <- (surfaceMat*10^5) + 1 #scale and shift all non-NA pixels up 1 (meter)
   # imFakeRotated <- :bilinearInterpolation(imFake,theta)
   surfaceMatFakeRotated <- surfaceMatFake %>%
@@ -75,7 +75,7 @@ rotateSurfaceMatrix <- function(surfaceMat,
 #'   values (i.e., non-NA values) and FALSE otherwise.
 
 checkForBreechface <- function(cell,
-                               bfMinimumProp = .15){
+                               bfMinimumProp = .15,...){
   containsBreechfaceBool <- (sum(!is.na(cell)) > bfMinimumProp*length(as.vector(cell)))
   return(containsBreechfaceBool)
 }
@@ -87,13 +87,14 @@ checkForBreechface <- function(cell,
 #' @param mean average pixel value to shift an image by
 #'
 #' @description This is a helper for the cellCCF function.
-shiftSurfaceMatbyMean <- function(surfaceMat,m){
+shiftSurfaceMatbyMean <- function(surfaceMat,
+                                  m,...){
   surfaceMat <- surfaceMat - m
   surfaceMat[is.na(surfaceMat)] <- 0
   return(surfaceMat)
 }
 
-splitSurfaceMat1 <- function(surfaceMat,horizSplits,vertSplits){
+splitSurfaceMat1 <- function(surfaceMat,horizSplits,vertSplits,...){
 
   surfaceMat_split <- cellDivision(surfaceMat,
                                    horizSplits = horizSplits,
@@ -129,7 +130,7 @@ splitSurfaceMat1 <- function(surfaceMat,horizSplits,vertSplits){
 
 getMat2SplitLocations <- function(cellIDs,
                                   cellSideLengths,
-                                  mat2Dim){
+                                  mat2Dim,...){
   mat2_splitCorners <- cellIDs %>%
     #pull all numbers from cellID strings:
     purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
@@ -214,7 +215,7 @@ cellCCF <- function(mat1,
                     mat2,
                     thetas = seq(-30,30,by = 3),
                     horizSplits = 7,
-                    vertSplits = 7){
+                    vertSplits = 7,...){
   #Needed tests:
   # mat1 and mat2 must be matrices
   # thetas, horizsplits, and vertsplits should be integers (horizsplits and vertsplits would optimally be equal - maybe print a warning if not?)
@@ -301,25 +302,36 @@ cellCCF <- function(mat1,
   allResults <- allResults %>%
     purrr::map(~ dplyr::select(.,cellID,corr,dx,dy)) #rearrange columns in allResults)
 
-  return(allResults)
+  return(list(
+    "params" = list("theta" = theta,
+                              "horizSplits" = horizSplits,
+                              "vertSplits" = vertSplits),
+    "ccfResults" = allResults
+    ))
 }
 
-# cellCCF_topResults <- function(ccfAllResults){
-#Initialize df to contain maximum CCF values per cell
-# topResults <- data.frame(cellID = mat1_split$cellIDs,
-#                          CCFmax = 0,
-#                          dx = NA,
-#                          dy = NA,
-#                          theta = NA)
-#   for(iden in filteredCellID){
-#     oldRow <- dplyr::filter(topResults,cellID == iden)
-#     comparisonRow <- dplyr::filter(corrValues,cellID == iden) %>%
-#       dplyr::select(-cellID) #corr,dx,dy values for a given cell on this rotation value
-#
-#     if(!purrr::is_empty(comparisonRow$corr) &
-#        oldRow$CCFmax < comparisonRow$corr){
-#       #replace CCFmax,dx,dy,theta with new maximum values for each cell
-#       topResults[which(topResults$cell_ID == iden),2:5] <- c(comparisonRow, theta)
-#     }
-#   }
-# }
+#' @name compareBFs_bothDirections
+#'
+#' @export
+
+compareBFs_bothDirections <- function(x3p1,
+                                      x3p2,
+                                      thetas = seq(-30,30,by = 3),
+                                      horizSplits = 7,
+                                      vertSplits = 7,...){
+
+  comparison_1to2 <- cmcR::cellCCF(mat1 = x3p1$surface.matrix,
+                                   mat2 = x3p2$surface.matrix,
+                                   thetas = thetas,
+                                   horizSplits = horizSplits,
+                                   vertSplits = vertSplits)
+
+  comparison_2to1 <- cmcR::cellCCF(mat1 = x3p2$surface.matrix,
+                                   mat2 = x3p1$surface.matrix,
+                                   thetas = thetas,
+                                   horizSplits = horizSplits,
+                                   vertSplits = vertSplits)
+
+  return(list("comparison_1to2" = comparison_1to2,
+              "comparison_2to1" = comparison_2to1))
+}

@@ -69,7 +69,7 @@ circshift <- function(x, vec) {
   dimx <- dim(x)
   # row first
   if (vec[1] != 0) {
-    #out <- rbind(x[(dimx[1] - vec[1] + 1):dimx[1], ], x[1:(dimx[1] - vec[1]), ])
+    # out <- rbind(x[(dimx[1] - vec[1] + 1):dimx[1], ], x[1:(dimx[1] - vec[1]), ])
     tmp <- c(t(x))
     x <- matrix(c( tail(tmp, vec[1]*dimx[2]) , head(tmp, -vec[1]*dimx[2]) ), byrow = TRUE, nrow = dimx[1])
   }
@@ -88,7 +88,10 @@ comparison <- function(im1, im2) {
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]
   d_offset <- floor(dim(im1)/2)
   dx <- tmp[["row"]] - d_offset[2] - 1
-  dy <- (tmp[["col"]] - d_offset[1] - 1)
+  dy <- tmp[["col"]] - d_offset[1] - 1
+
+  # dx <- tmp[["col"]] - d_offset[2] - 1
+  # dy <- tmp[["row"]] - d_offset[1] - 1
 
   ret <- list(corr = corr, dx = dx, dy = dy)
   return(ret)

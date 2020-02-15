@@ -4,7 +4,7 @@
 \alias{shiftSurfaceMatbyMean}
 \title{Subtract the average pixel value from an image and replace NAs with 0}
 \usage{
-shiftSurfaceMatbyMean(surfaceMat, m)
+shiftSurfaceMatbyMean(surfaceMat, m, ...)
 }
 \arguments{
 \item{surfaceMat}{surface matrix}

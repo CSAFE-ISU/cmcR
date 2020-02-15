@@ -10,7 +10,8 @@ cellCCF(
   mat2,
   thetas = seq(-30, 30, by = 3),
   horizSplits = 7,
-  vertSplits = 7
+  vertSplits = 7,
+  ...
 )
 }
 \arguments{

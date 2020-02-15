@@ -4,7 +4,7 @@
 \alias{cellDivision}
 \title{Divides an image into cells}
 \usage{
-cellDivision(surfaceMat, horizSplits = 8, vertSplits = 8)
+cellDivision(surfaceMat, horizSplits = 8, vertSplits = 8, ...)
 }
 \arguments{
 \item{surfaceMat}{surface matrix of a breech face impression}
