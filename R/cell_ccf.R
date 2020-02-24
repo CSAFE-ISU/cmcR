@@ -2,22 +2,22 @@
 #' @name cellDivision
 #'
 #' @param surfaceMat surface matrix of a breech face impression
-#' @param horizSplits number of splits along horizontal axis
-#' @param vertSplits number of splits along vertical axis
+#' @param cellNumHoriz number of splits along horizontal axis
+#' @param cellNumVert number of splits along vertical axis
 #'
 #' @description This is a helper for the cellCCF function.
 
 cellDivision <- function(surfaceMat,
-                         horizSplits = 8,
-                         vertSplits = 8,...){
+                         cellNumHoriz = 8,
+                         cellNumVert = 8,...){
 
   splitSurfaceMat <- surfaceMat %>%
     imager::as.cimg() %>%
     imager::imsplit(axis = "x",
-                    nb = horizSplits) %>%
+                    nb = cellNumHoriz) %>%
     purrr::map(.f = ~ imager::imsplit(.x,
                                       axis = "y",
-                                      nb = vertSplits)) %>%
+                                      nb = cellNumVert)) %>%
     purrr::map_depth(.depth = 2,
                      .f = as.matrix)
 
@@ -39,8 +39,8 @@ extractCellbyCornerLocs <- function(cornerLocs,
                                     rotatedSurfaceMat,...){
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B
-  splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top.y"]]:cornerLocs[["bottom.y"]],
-                                              cornerLocs[["left.x"]]:cornerLocs[["right.x"]]]
+  splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
+                                              cornerLocs[["left"]]:cornerLocs[["right"]]]
 
   return(splitRotatedSurfaceMat)
 }
@@ -75,30 +75,31 @@ rotateSurfaceMatrix <- function(surfaceMat,
 #'   values (i.e., non-NA values) and FALSE otherwise.
 
 checkForBreechface <- function(cell,
-                               bfMinimumProp = .15,...){
-  containsBreechfaceBool <- (sum(!is.na(cell)) > bfMinimumProp*length(as.vector(cell)))
+                               minObservedProp = .15,...){
+  containsBreechfaceBool <- (sum(!is.na(cell)) > minObservedProp*length(as.vector(cell)))
   return(containsBreechfaceBool)
 }
 
 #' Subtract the average pixel value from an image and replace NAs with 0
-#' @name shiftSurfaceMatbyMean
+#' @name standardizeSurfaceMat
 #'
 #' @param surfaceMat surface matrix
 #' @param mean average pixel value to shift an image by
 #'
 #' @description This is a helper for the cellCCF function.
-shiftSurfaceMatbyMean <- function(surfaceMat,
-                                  m,...){
-  surfaceMat <- surfaceMat - m
+standardizeSurfaceMat <- function(surfaceMat,
+                                  m,
+                                  s,...){
+  surfaceMat <- (surfaceMat - m)/s
   surfaceMat[is.na(surfaceMat)] <- 0
   return(surfaceMat)
 }
 
-splitSurfaceMat1 <- function(surfaceMat,horizSplits,vertSplits,...){
+splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp,...){
 
   surfaceMat_split <- cellDivision(surfaceMat,
-                                   horizSplits = horizSplits,
-                                   vertSplits = vertSplits) #split image 1 into cells
+                                   cellNumHoriz = cellNumHoriz,
+                                   cellNumVert = cellNumVert) #split image 1 into cells
 
   #create a cell ID column based on x,y location in image:
   cellIDs <- purrr::map(names(surfaceMat_split),
@@ -119,7 +120,7 @@ splitSurfaceMat1 <- function(surfaceMat,horizSplits,vertSplits,...){
   #was causing the function to fail)
   matPixCounts <- surfaceMat_split %>%
     purrr::map_depth(.depth = 2,
-                     checkForBreechface) %>%
+                     ~ checkForBreechface(cell = .,minObservedProp = minObservedProp)) %>%
     unlist()
 
   return(list(surfaceMat_split = surfaceMat_split,
@@ -144,21 +145,26 @@ getMat2SplitLocations <- function(cellIDs,
                 .y = cellSideLengths,
                 function(xyLoc,sideLength){
                   expandedCellCorners <-
-                    c("left" = floor(xyLoc["x"] - sideLength["col"]),
-                      "right" = ceiling(xyLoc["x"] + sideLength["col"]),
-                      "top" = floor(xyLoc["y"] - sideLength["row"]),
-                      "bottom" = ceiling(xyLoc["y"] + sideLength["row"]))
+                    c(floor(xyLoc["y"] - sideLength["col"]),
+                      ceiling(xyLoc["y"] + sideLength["col"]),
+                      floor(xyLoc["x"] - sideLength["row"]),
+                      ceiling(xyLoc["x"] + sideLength["row"])) %>%
+                    setNames(c("left","right","top","bottom"))
 
                   #replace negative indices with 0 (left/upper-most cells):
                   expandedCellCorners[expandedCellCorners <= 0] <- 1
-                  #replace indices greater than the maximum index with the maximum index
-                  #(right/bottom-most cells):
-                  #Note that imager treats the rows of a matrix as the "x" axis and the columns as the "y" axis, contrary to intuition. As such, we need to swap the dimensions for when we subset the image further down in the function
-                  if(expandedCellCorners[c("right.x")] > mat2Dim[1]){
-                    expandedCellCorners[c("right.x")] <- mat2Dim[1]
+                  #replace indices greater than the maximum index with the
+                  #maximum index (right/bottom-most cells): Note that imager
+                  #treats the rows of a matrix as the "x" axis and the columns
+                  #as the "y" axis, contrary to intuition - effectively treating
+                  #a matrix as its transpose. As such, we need
+                  #to swap the dimensions for when we subset the image further
+                  #down in the function
+                  if(expandedCellCorners[c("right")] > mat2Dim[2]){
+                    expandedCellCorners[c("right")] <- mat2Dim[2]
                   }
-                  if(expandedCellCorners[c("bottom.y")] > mat2Dim[2]){
-                    expandedCellCorners[c("bottom.y")] <- mat2Dim[2]
+                  if(expandedCellCorners[c("bottom")] > mat2Dim[1]){
+                    expandedCellCorners[c("bottom")] <- mat2Dim[1]
                   }
 
                   return(expandedCellCorners)
@@ -168,19 +174,46 @@ getMat2SplitLocations <- function(cellIDs,
   return(mat2_splitCorners)
 }
 
+#' @name swapCellIDAxes
+#'
+
+swapCellIDAxes <- function(cellID){
+  sSplit <- stringr::str_split(string = cellID,pattern = ",",n = 2)
+
+  paste0(stringr::str_replace(string = sSplit[[1]][1],pattern = "x",replacement = "y"),
+         ",",
+         stringr::str_replace(string = sSplit[[1]][2],pattern = "y",replacement = "x"))
+}
+
 #' Calculate the maximum correlation between two breech face impressions split
 #' into cells for range of rotation values
 #' @name cellCCF
 #' @export
 #'
-#' @param mat1 a matrix representing the surface matrix of a breech face
-#'   impression
-#' @param mat2 a matrix representing the surface matrix of a breech face
-#'   impression to be compared to mat1
-#' @param thetas rotation values (in degrees) for which mat2 will be rotated,
-#'   split into cells, and compared to mat1
-#' @param horizSplits number of splits along horizontal axis to divide mat1 into
-#' @param vertSplits number of splits along vertical axis to divide mat1 into
+#' @param x3p1 (no default) an x3p object containing the surface matrix of a
+#'   breech face impression
+#' @param x3p2 (no default) an x3p object containing the surface matrix of a
+#'   breech face impression to be compared to that in x3p1
+#' @param thetas (default seq(from = -30,to = 30,by = 3)) rotation values (in
+#'   degrees) for which x3p2$surface.matrix will be rotated, split into cells,
+#'   and compared to x3p1$surface.matrix
+#' @param cellNumHoriz (default 7) number of cells along horizontal axis to
+#'   divide x3p1$surface.matrix into
+#' @param cellNumVert (default equal to cellNumHoriz) number of cells along
+#'   vertical axis to divide x3p1$surface.matrix into
+#' @param minObservedProp (default 15) the minimum proportion of a cell that
+#'   needs to contain observed (i.e., non-NA) values for it to be included in
+#'   the CCF calculation procedure
+#' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
+#'   shifted prior to CCF calculation. Default is that no shifting is performed.
+#'   If set to "wholeMatrix", then each cell is subracted by the mean of the
+#'   whole matrix. If set to "individualCell", then each cell is subtracted by
+#'   its particular mean.
+#' @param scaleCell **OPTIONAL** (default missing) dictates if cell is to be
+#'   scaled prior to CCF calculation. Default is that no scaling is performed.
+#'   If set to "wholeMatrix", then each cell is divided by the standard
+#'   deviation of the whole matrix. If set to "individualCell", then each cell
+#'   is divided by its particular standard deviation.
 #'
 #' @return The list allResults contains the CCF values, horizontal, and vertical
 #'   translations calculated for each cell, for each rotation value. The data
@@ -188,52 +221,81 @@ getMat2SplitLocations <- function(cellIDs,
 #'   translation, and rotation value at which each cell in mat1 achieved its
 #'   highest CCF with its paired cell in mat2.
 #'
-#' @description (Move this description elsewhere) This is an R implementation of the Congruent Matching Cells
-#'   algorithm as described in 'Proposed "Congruent Matching Cells (CMC) Method
-#'   for Ballistic Identification and Error Rate Estimation' by John Song
-#'   (2015). The method works by first dividing mat1, the surface matrix
-#'   representing the height values of a breech face impression microscopy scan,
-#'   into pairwise disjoint cells. mat2, the surface matrix of a breech face
-#'   impression scan to be compared to mat1, is also broken up into cells
-#'   centered at the same location as those in mat1. However, the cells in mat2
-#'   are larger than those in mat1 (typically 4 times the size except on the
-#'   border of mat2). The cross-correlation function (CCF) is then calculated
-#'   between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-#'   Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-#'   well as the necessary horizontal and vertical translations to align the mat1
-#'   cell with the mat2 cell to achieve this max CCF are recorded. mat2 is then
-#'   rotated by some amount (say, 2.5 degrees) and the process of dividing mat2
-#'   into cells and calculating the max CCF for each cell in mat1 is repeated.
-#'   The rotations performed on mat2 are dictated by the value(s) passed to the
-#'   theta argument.
+#' @description (Move this description elsewhere) This is an R implementation of
+#'   the Congruent Matching Cells algorithm as described in 'Proposed "Congruent
+#'   Matching Cells (CMC) Method for Ballistic Identification and Error Rate
+#'   Estimation' by John Song (2015). The method works by first dividing mat1,
+#'   the surface matrix representing the height values of a breech face
+#'   impression microscopy scan, into pairwise disjoint cells. mat2, the surface
+#'   matrix of a breech face impression scan to be compared to mat1, is also
+#'   broken up into cells centered at the same location as those in mat1.
+#'   However, the cells in mat2 are larger than those in mat1 (typically 4 times
+#'   the size except on the border of mat2). The cross-correlation function
+#'   (CCF) is then calculated between each cell in mat1 and its larger, paired
+#'   cell in mat2 using a Fast Fourier Transform. For each mat1, mat2 cell pair,
+#'   the maximum CCF value as well as the necessary horizontal and vertical
+#'   translations to align the mat1 cell with the mat2 cell to achieve this max
+#'   CCF are recorded. mat2 is then rotated by some amount (say, 2.5 degrees)
+#'   and the process of dividing mat2 into cells and calculating the max CCF for
+#'   each cell in mat1 is repeated. The rotations performed on mat2 are dictated
+#'   by the value(s) passed to the theta argument.
 #'
 #' @seealso
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #'
 
-cellCCF <- function(mat1,
-                    mat2,
+cellCCF <- function(x3p1,
+                    x3p2,
                     thetas = seq(-30,30,by = 3),
-                    horizSplits = 7,
-                    vertSplits = 7,...){
-  #Needed tests:
-  # mat1 and mat2 must be matrices
-  # thetas, horizsplits, and vertsplits should be integers (horizsplits and vertsplits would optimally be equal - maybe print a warning if not?)
+                    cellNumHoriz = 7,
+                    cellNumVert = cellNumHoriz,
+                    minObservedProp = .15,
+                    centerCell,
+                    scaleCell,...){
+  #Needed tests: mat1 and mat2 must be matrices thetas, cellNumHoriz, and
+  #cellNumVert should be integers (cellNumHoriz and cellNumVert would optimally be
+  #equal - maybe print a warning if not?)
 
-  mat1_mean <- mean(as.vector(mat1),na.rm = TRUE)
-  mat2_mean <- mean(as.vector(mat2),na.rm = TRUE)
+  mat1 <- x3p1$surface.matrix
+  mat2 <- x3p2$surface.matrix
+
+  if(missing(centerCell)){
+    m1 <- 0
+    m2 <- 0
+  }
+  if(missing(scaleCell)){
+    sd1 <- 1
+    sd2 <- 1
+  }
+
+  if(!missing(centerCell)){
+    if(centerCell == "wholeMatrix"){
+      m1 <- mean(as.vector(mat1),na.rm = TRUE)
+
+      m2 <- mean(as.vector(mat2),na.rm = TRUE)
+    }
+  }
+
+  if(!missing(scaleCell)){
+    if(scaleCell == "wholeMatrix"){
+      sd1 <- sd(as.vector(mat1),na.rm = TRUE)
+
+      sd2 <- sd(as.vector(mat2),na.rm = TRUE)
+    }
+  }
 
   #initialize list to contain all CCF values for each theta value
   allResults <- purrr::map(thetas,
                            function(theta) theta = data.frame(cell_ID = NA,
-                                                              corr = NA,
+                                                              ccf = NA,
                                                               dx = NA,
                                                               dy = NA)) %>%
     setNames(thetas)
 
   mat1_split <- splitSurfaceMat1(surfaceMat = mat1,
-                                 horizSplits = horizSplits,
-                                 vertSplits = vertSplits)
+                                 cellNumHoriz = cellNumHoriz,
+                                 cellNumVert = cellNumVert,
+                                 minObservedProp = minObservedProp)
 
   #Now we want to split image B into cells with the same centers as those in
   #image A, but with twice the side length (these wider cells will intersect
@@ -247,16 +309,16 @@ cellCCF <- function(mat1,
     #rotate image 2 and split into cells:
 
     mat2_rotated <- mat2 %>%
-      rotateSurfaceMatrix(theta) %>%
-      t() #because cellDivision starts in the left hand corner of image A and
+      rotateSurfaceMatrix(theta) #%>%
+    #t() #because cellDivision starts in the left hand corner of image A and
     #moves down in tiling, we need to transpose image B so that the
     #correct cells match up (extractCellbyCornerLocs starts in the
     #left-hand corner but moves right.)
 
     #Now that we've rotated image B, we want to create a list consisting of the
     #cells that we are to compare to image A's cells. These will be 4 times
-    #larger than Image A's cells (up to image B's boundary) and defined by the expandedCellCorners x,y
-    #pairs calculated above.
+    #larger than Image A's cells (up to image B's boundary) and defined by the
+    #expandedCellCorners x,y pairs calculated above.
     mat2_splitRotated <-
       purrr::map(mat2_splitCorners,
                  ~ extractCellbyCornerLocs(cornerLocs = .,
@@ -266,7 +328,7 @@ cellCCF <- function(mat1,
     #information (for some reason checking for more than 0 pixels of
     #breechface was causing the function to fail)
     mat2PixCounts <- mat2_splitRotated %>%
-      purrr::map(checkForBreechface) %>%
+      purrr::map(~ checkForBreechface(cell = .,minObservedProp = minObservedProp)) %>%
       unlist()
 
     #remove cells that don't include enough breechface:
@@ -279,58 +341,111 @@ cellCCF <- function(mat1,
 
     #shift the pixel values in each image so that they both have 0 mean. Then
     #replace the NA values with 0 (FFTs can't deal with NAs)
-    im1_splitShifted <- mat1_splitFiltered %>%
-      purrr::map(~ shiftSurfaceMatbyMean(.,mat1_mean)) %>%
+
+    if(!missing(centerCell)){
+      if(centerCell == "individualCell"){
+        m1 <- mat1_splitFiltered %>%
+          map(~ mean(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+
+        m2 <-  mat2_splitFiltered %>%
+          map(~ mean(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+      }
+    }
+
+    if(!missing(scaleCell)){
+      if(scaleCell == "individualCell"){
+        sd1 <-  mat1_splitFiltered %>%
+          map(~ sd(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+
+        sd2 <-  mat2_splitFiltered %>%
+          map(~ sd(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+      }
+    }
+
+    mat1_splitShifted <- purrr::pmap(list(mat1_splitFiltered,m1,sd1),
+                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
+                                                             m = ..2,
+                                                             s = ..3)) %>%
       setNames(filteredCellID) #Need to set the names to avoid repeated list
     #labels
 
     #shift the pixel values in each image so that they both have 0 mean. Then
     #replace the NA values with 0 (FFTs can't deal with NAs)
-    im2_splitShifted <- mat2_splitFiltered %>%
-      purrr::map(~ shiftSurfaceMatbyMean(.,mat2_mean)) %>%
-      setNames(filteredCellID)
+    mat2_splitShifted <- purrr::pmap(list(mat2_splitFiltered,m2,sd2),
+                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
+                                                             m = ..2,
+                                                             s = ..3)) %>%
+      setNames(filteredCellID) #Need to set the names to avoid repeated list
+    #labels
 
     #calculate the correlation of each cell pair
-    corrValues <- purrr::map2_dfr(.x = im1_splitShifted,
-                                  .y = im2_splitShifted,
-                                  .f = ~ data.frame(purrr::flatten(comparison(.x,t(.y))))) %>% #returns a nested list of corr,dx,dy value
-      dplyr::mutate(cellID = filteredCellID)
+    ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
+                                 .y = mat2_splitShifted,
+                                 .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
+      dplyr::mutate(cellID = filteredCellID %>%
+                      purrr::map_chr(swapCellIDAxes))
 
-    allResults[paste0(theta)][[1]] <- corrValues
+    allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellID,corr,dx,dy)) #rearrange columns in allResults)
+    purrr::map(~ dplyr::select(.,cellID,ccf,dx,dy)) #rearrange columns in allResults
+
+  if(missing(centerCell)){
+    centerCell <- "none"
+  }
+  if(missing(scaleCell)){
+    scaleCell <- "none"
+  }
 
   return(list(
     "params" = list("theta" = theta,
-                              "horizSplits" = horizSplits,
-                              "vertSplits" = vertSplits),
+                    "cellNumHoriz" = cellNumHoriz,
+                    "cellNumVert" = cellNumVert,
+                    "minObservedProp" = minObservedProp,
+                    "centerCell" = centerCell,
+                    "mat1Shift" = m1,
+                    "mat2Shift" = m2,
+                    "scaleCell" = scaleCell,
+                    "mat1ScaleFactor" = sd1,
+                    "mat2ScaleFactor" = sd2),
     "ccfResults" = allResults
-    ))
+  ))
 }
 
-#' @name compareBFs_bothDirections
+#' @name cellCCF_bothDirections
 #'
 #' @export
 
-compareBFs_bothDirections <- function(x3p1,
-                                      x3p2,
-                                      thetas = seq(-30,30,by = 3),
-                                      horizSplits = 7,
-                                      vertSplits = 7,...){
+cellCCF_bothDirections <- function(x3p1,
+                                   x3p2,
+                                   thetas = seq(-30,30,by = 3),
+                                   cellNumHoriz = 7,
+                                   cellNumVert = cellNumHoriz,
+                                   centerCell,
+                                   scaleCell,...){
 
-  comparison_1to2 <- cmcR::cellCCF(mat1 = x3p1$surface.matrix,
-                                   mat2 = x3p2$surface.matrix,
-                                   thetas = thetas,
-                                   horizSplits = horizSplits,
-                                   vertSplits = vertSplits)
 
-  comparison_2to1 <- cmcR::cellCCF(mat1 = x3p2$surface.matrix,
-                                   mat2 = x3p1$surface.matrix,
+
+  comparison_1to2 <- cmcR::cellCCF(x3p1 = x3p1,
+                                   x3p2 = x3p2,
                                    thetas = thetas,
-                                   horizSplits = horizSplits,
-                                   vertSplits = vertSplits)
+                                   cellNumHoriz = cellNumHoriz,
+                                   cellNumVert = cellNumVert,
+                                   centerCell = centerCell,
+                                   scaleCell = scaleCell)
+
+  comparison_2to1 <- cmcR::cellCCF(x3p1 = x3p2,
+                                   x3p2 = x3p1,
+                                   thetas = thetas,
+                                   cellNumHoriz = cellNumHoriz,
+                                   cellNumVert = cellNumVert,
+                                   centerCell = centerCell,
+                                   scaleCell = scaleCell)
 
   return(list("comparison_1to2" = comparison_1to2,
               "comparison_2to1" = comparison_2to1))

@@ -3,11 +3,11 @@
 \name{cropScanWhitespace}
 \alias{cropScanWhitespace}
 \title{Crop out rows/columns outside of the breech face impression in a cartridge
-case scan}
+case scan. Helper for selectBFImpression}
 \usage{
-cropScanWhitespace(surfaceMat, croppingThreshold = 10, ...)
+cropScanWhitespace(surfaceMat, croppingThresh = 1, ...)
 }
 \description{
 Crop out rows/columns outside of the breech face impression in a cartridge
-case scan
+case scan. Helper for selectBFImpression
 }

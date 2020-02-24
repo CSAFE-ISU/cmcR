@@ -4,23 +4,33 @@
 \alias{findPlaneRansac}
 \title{Finds plane of breechface marks using RANSAC}
 \usage{
-findPlaneRansac(surfaceMat, inlierTreshold = 10^(-5), iters = 75, ...)
+findPlaneRansac(surfaceMat, inlierTreshold = 2 * (10^(-5)), iters = 150, ...)
 }
 \arguments{
 \item{surfaceMat}{matrix of input depths in microns.}
+
+\item{iters}{number of candidate planes to fit (higher value yields more
+stable breech face estimate)}
+
+\item{inlierThreshold}{threshold to declare an observed value close to the
+fitted plane an "inlier".}
 }
 \value{
-List object containing fitted plane and selected breechface marks.
+List object containing fitted plane (as an lm object) and selected
+breechface marks (matrix of same size as original matrix containing all
+inliers close to fitted plane).
 }
 \description{
 Given input depths (in microns), find best-fitting plane using RANSAC. This
-should be the plane that the breechface marks are on. Adapted from cartridges3D::findPlaneRansac function
+should be the plane that the breechface marks are on. Adapted from
+cartridges3D::findPlaneRansac function
 }
 \examples{
 \dontrun{
     set.seed(0)
     testImage <- findPlaneRansac(surfaceMat)
 }
+
 }
 \seealso{
 cartridges3D package (LINK)

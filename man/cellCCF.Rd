@@ -6,27 +6,49 @@
 into cells for range of rotation values}
 \usage{
 cellCCF(
-  mat1,
-  mat2,
+  x3p1,
+  x3p2,
   thetas = seq(-30, 30, by = 3),
-  horizSplits = 7,
-  vertSplits = 7,
+  cellNumHoriz = 7,
+  cellNumVert = cellNumHoriz,
+  minObservedProp = 0.15,
+  centerCell,
+  scaleCell,
   ...
 )
 }
 \arguments{
-\item{mat1}{a matrix representing the surface matrix of a breech face
-impression}
+\item{x3p1}{(no default) an x3p object containing the surface matrix of a
+breech face impression}
 
-\item{mat2}{a matrix representing the surface matrix of a breech face
-impression to be compared to mat1}
+\item{x3p2}{(no default) an x3p object containing the surface matrix of a
+breech face impression to be compared to that in x3p1}
 
-\item{thetas}{rotation values (in degrees) for which mat2 will be rotated,
-split into cells, and compared to mat1}
+\item{thetas}{(default seq(from = -30,to = 30,by = 3)) rotation values (in
+degrees) for which x3p2$surface.matrix will be rotated, split into cells,
+and compared to x3p1$surface.matrix}
 
-\item{horizSplits}{number of splits along horizontal axis to divide mat1 into}
+\item{cellNumHoriz}{(default 7) number of cells along horizontal axis to
+divide x3p1$surface.matrix into}
 
-\item{vertSplits}{number of splits along vertical axis to divide mat1 into}
+\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
+vertical axis to divide x3p1$surface.matrix into}
+
+\item{minObservedProp}{(default 15) the minimum proportion of a cell that
+needs to contain observed (i.e., non-NA) values for it to be included in
+the CCF calculation procedure}
+
+\item{centerCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
+shifted prior to CCF calculation. Default is that no shifting is performed.
+If set to "wholeMatrix", then each cell is subracted by the mean of the
+whole matrix. If set to "individualCell", then each cell is subtracted by
+its particular mean.}
+
+\item{scaleCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
+scaled prior to CCF calculation. Default is that no scaling is performed.
+If set to "wholeMatrix", then each cell is divided by the standard
+deviation of the whole matrix. If set to "individualCell", then each cell
+is divided by its particular standard deviation.}
 }
 \value{
 The list allResults contains the CCF values, horizontal, and vertical
@@ -36,24 +58,24 @@ translation, and rotation value at which each cell in mat1 achieved its
 highest CCF with its paired cell in mat2.
 }
 \description{
-(Move this description elsewhere) This is an R implementation of the Congruent Matching Cells
-algorithm as described in 'Proposed "Congruent Matching Cells (CMC) Method
-for Ballistic Identification and Error Rate Estimation' by John Song
-(2015). The method works by first dividing mat1, the surface matrix
-representing the height values of a breech face impression microscopy scan,
-into pairwise disjoint cells. mat2, the surface matrix of a breech face
-impression scan to be compared to mat1, is also broken up into cells
-centered at the same location as those in mat1. However, the cells in mat2
-are larger than those in mat1 (typically 4 times the size except on the
-border of mat2). The cross-correlation function (CCF) is then calculated
-between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-well as the necessary horizontal and vertical translations to align the mat1
-cell with the mat2 cell to achieve this max CCF are recorded. mat2 is then
-rotated by some amount (say, 2.5 degrees) and the process of dividing mat2
-into cells and calculating the max CCF for each cell in mat1 is repeated.
-The rotations performed on mat2 are dictated by the value(s) passed to the
-theta argument.
+(Move this description elsewhere) This is an R implementation of
+the Congruent Matching Cells algorithm as described in 'Proposed "Congruent
+Matching Cells (CMC) Method for Ballistic Identification and Error Rate
+Estimation' by John Song (2015). The method works by first dividing mat1,
+the surface matrix representing the height values of a breech face
+impression microscopy scan, into pairwise disjoint cells. mat2, the surface
+matrix of a breech face impression scan to be compared to mat1, is also
+broken up into cells centered at the same location as those in mat1.
+However, the cells in mat2 are larger than those in mat1 (typically 4 times
+the size except on the border of mat2). The cross-correlation function
+(CCF) is then calculated between each cell in mat1 and its larger, paired
+cell in mat2 using a Fast Fourier Transform. For each mat1, mat2 cell pair,
+the maximum CCF value as well as the necessary horizontal and vertical
+translations to align the mat1 cell with the mat2 cell to achieve this max
+CCF are recorded. mat2 is then rotated by some amount (say, 2.5 degrees)
+and the process of dividing mat2 into cells and calculating the max CCF for
+each cell in mat1 is repeated. The rotations performed on mat2 are dictated
+by the value(s) passed to the theta argument.
 }
 \seealso{
 \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}

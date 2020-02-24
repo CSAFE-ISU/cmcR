@@ -7,6 +7,10 @@ ccfMap <- function(mat1,mat2){
     mat2[is.na(mat2)] <- 0
   }
 
+  ccfMat <- filterViaFFT(mat1,mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
+
+  return(Re(ccfMat))
+
   #this function should only be used on matrices that have been pre-processed - at the very least, had NAs replaced by another value prior to use.
 
   #Call "mat1" whichever the the smaller mat is and "mat2" the larger
@@ -45,22 +49,23 @@ ccfMap <- function(mat1,mat2){
   # }
 
   # ccfMat <- ccfMat_validRegion / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-
-  ccfMat <- filterViaFFT(mat1,mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-
-  return(Re(ccfMat))
 }
 
 #' @name ccfMapPlot
+#'
+#' @export
+
+#TODO: add theta and cellID to the plot table
 
 ccfMapPlot <- function(mat1,
                        mat2,
+                       params,
                        returnGrob = FALSE){
 
   ccfMat <- cmcR:::ccfMap(mat1,mat2)
 
   ccfDF <- ccfMat %>%
-    Re() %>%
+    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
     imager::as.cimg() %>%
     as.data.frame() %>%
     dplyr::mutate(dx = x - max(x)/2,
@@ -71,14 +76,20 @@ ccfMapPlot <- function(mat1,
     dplyr::filter(CCF == max(CCF)) %>%
     dplyr::mutate(CCF = round(CCF,3))
 
+  mat1 <- (mat1 - mean(mat1,na.rm = TRUE))/(sd(mat1,na.rm = TRUE))
+  mat2 <- (mat2 - mean(mat2,na.rm = TRUE))/(sd(mat2,na.rm = TRUE))
+
   mat1Plot <- mat1 %>%
+    t() %>%
     imager::as.cimg() %>%
     as.data.frame() %>%
     # mutate(x = x + floor(max(nrow(mat1),nrow(mat2))/4),
     #        y = y + floor(max(ncol(mat1),ncol(mat2))/4)) %>%
     ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-    ggplot2::scale_fill_gradientn(colours = c("grey0","grey50","grey100")) +
+    ggplot2::scale_fill_gradient2(low = "grey0",
+                                  mid = "grey50",
+                                  high = "grey100") +
     ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
                          ylim = c(0,max(ncol(mat1),ncol(mat2)))) +
     ggplot2::theme_bw() +
@@ -89,11 +100,15 @@ ccfMapPlot <- function(mat1,
                    axis.title.y = ggplot2::element_blank())
 
   mat2Plot <- mat2 %>%
+    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
     imager::as.cimg() %>%
     as.data.frame() %>%
     ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-    ggplot2::scale_fill_gradientn(colours = c("grey0","grey50","grey100")) +
+    ggplot2::scale_fill_gradient2(low = "grey0",
+                                  mid = "grey50",
+                                  high = "grey100",
+                                  midpoint = 0) +
     ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
                          ylim = c(0,max(ncol(mat1),ncol(mat2)))) +
     ggplot2::theme_bw() +
@@ -111,8 +126,8 @@ ccfMapPlot <- function(mat1,
       colour = "orange")
 
   ccfPlot <- ccfDF %>%
-    mutate(dx = rev(dx),
-           dy = rev(dy)) %>%
+    dplyr::mutate(dx = rev(dx),
+                  dy = rev(dy)) %>%
     ggplot2::ggplot(ggplot2::aes(x = dx,y = dy,fill = CCF)) +
     ggplot2::geom_tile() +
     ggplot2::coord_fixed() +
@@ -127,9 +142,9 @@ ccfMapPlot <- function(mat1,
 
   ccfMaxSummary <- ccfMaxInfo %>%
     dplyr::select(-c(x,y)) %>%
-    mutate(dx = -dx,
-           dy = -dy) %>%
-    t() %>%
+    dplyr::mutate(dx = -dx,
+                  dy = -dy) %>%
+    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
     gridExtra::tableGrob(rows = c("CCFmax","dx","dy"),
                          cols = "CCFmax.Summary")
 

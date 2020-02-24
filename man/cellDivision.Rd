@@ -4,14 +4,14 @@
 \alias{cellDivision}
 \title{Divides an image into cells}
 \usage{
-cellDivision(surfaceMat, horizSplits = 8, vertSplits = 8, ...)
+cellDivision(surfaceMat, cellNumHoriz = 8, cellNumVert = 8, ...)
 }
 \arguments{
 \item{surfaceMat}{surface matrix of a breech face impression}
 
-\item{horizSplits}{number of splits along horizontal axis}
+\item{cellNumHoriz}{number of splits along horizontal axis}
 
-\item{vertSplits}{number of splits along vertical axis}
+\item{cellNumVert}{number of splits along vertical axis}
 }
 \description{
 This is a helper for the cellCCF function.

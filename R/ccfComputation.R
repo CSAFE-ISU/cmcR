@@ -87,12 +87,16 @@ comparison <- function(im1, im2) {
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]
   d_offset <- floor(dim(im1)/2)
-  dx <- tmp[["row"]] - d_offset[2] - 1
-  dy <- tmp[["col"]] - d_offset[1] - 1
 
   # dx <- tmp[["col"]] - d_offset[2] - 1
-  # dy <- tmp[["row"]] - d_offset[1] - 1
+  # dy <- -(tmp[["row"]] - d_offset[1] - 1)
 
-  ret <- list(corr = corr, dx = dx, dy = dy)
+  # dx <- tmp[["row"]] - d_offset[2] - 1
+  # dy <- tmp[["col"]] - d_offset[1] - 1
+
+  dx <- tmp[["col"]] - d_offset[2] - 1
+  dy <- tmp[["row"]] - d_offset[1] - 1
+
+  ret <- list("ccf" = corr, "dx" = dx, "dy" = dy)
   return(ret)
 }

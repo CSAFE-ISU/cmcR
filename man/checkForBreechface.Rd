@@ -4,7 +4,7 @@
 \alias{checkForBreechface}
 \title{Determines whether a matrix contains enough non-NA values.}
 \usage{
-checkForBreechface(cell, bfMinimumProp = 0.15, ...)
+checkForBreechface(cell, minObservedProp = 0.15, ...)
 }
 \arguments{
 \item{cell}{a matrix representing a cell from a breech face impression image}

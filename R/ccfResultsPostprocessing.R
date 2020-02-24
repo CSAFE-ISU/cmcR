@@ -8,7 +8,9 @@
 #' Must provide the parameters under which the comparison was made in the form
 #' of a list containing, in this order, (1) the grid of theta values, (2) the
 #' number of horizontal splits, and (3) the number of vertical splits. For
-#' example, list(theta = seq(-30,30,by = 3), horizSplits = 7,vertSplits = 7)
+#' example, list(theta = seq(-30,30,by = 3), cellNumHoriz = 7,cellNumVert = 7)
+#'
+#' @param ... arguments to be passed to applyCMCLogic function
 
 getHighCCFPairs <- function(x3p1,
                             x3p2,
@@ -21,7 +23,7 @@ getHighCCFPairs <- function(x3p1,
   #Get the initial "CMC candidate" cells from the CCF results
   if(initialCMCsOnly){
     topResults <- cellCCF_results %>%
-      cmcR:::countInitialCMCs(...)
+      cmcR:::applyCMCLogic(...)
   }
   else{
     topResults <- cellCCF_results %>%
@@ -34,8 +36,12 @@ getHighCCFPairs <- function(x3p1,
   }
 
   mat1_split <- x3p1$surface.matrix %>%
-    cmcR:::splitSurfaceMat1(horizSplits = params[[2]],
-                            vertSplits = params[[3]])
+    cmcR:::splitSurfaceMat1(cellNumHoriz = params$cellNumHoriz,
+                            cellNumVert = params$cellNumVert,
+                            minObservedProp = params$minObservedProp)
+
+  mat1_split$cellIDs <- mat1_split$cellIDs %>%
+    purrr::map_chr(cmcR:::swapCellIDAxes)
 
   mat2_splitCorners <- cmcR:::getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
                                                     cellSideLengths = mat1_split$cellSideLengths,
@@ -56,8 +62,7 @@ getHighCCFPairs <- function(x3p1,
                                       theta <- as.numeric(unique(ccfResults$theta))
 
                                       mat2_rotated <- cmcR:::rotateSurfaceMatrix(surfaceMat = x3p2$surface.matrix,
-                                                                                 theta = theta) %>%
-                                        t()
+                                                                                 theta = theta)
 
                                       mat2_splitRotated <-
                                         purrr::map(mat2_splitCorners,
@@ -72,6 +77,19 @@ getHighCCFPairs <- function(x3p1,
   #the order of the cmcCandidate cells in im2 will likely be out of the order we want them to match up with the cells in im1, so we need to reorder them:
   mat2_highCCFRegions <- mat2_highCCFRegions[match(names(mat1_highCCFCells),
                                                    names(mat2_highCCFRegions))]
+
+  #No apply the same shifing/scaling performed in the original cellCCF function
+  m1 <- params$mat1Shift
+  m2 <- params$mat2Shift
+
+  sd1 <- params$mat1ScaleFactor
+  sd2 <- params$mat2ScaleFactor
+
+  mat1_highCCFCells <- purrr::pmap(list(mat1_highCCFCells,m1,sd1),
+                                   ~ (..1 - ..2)/..3)
+
+  mat2_highCCFRegions <- purrr::pmap(list(mat2_highCCFRegions,m2,sd2),
+                                     ~ (..1 - ..2)/..3)
 
   #Return the "CMC candidate" pairs with the theta values at which they were most similar
   highCCFPairs <- purrr::map2(mat1_highCCFCells,
@@ -208,7 +226,7 @@ calcRawCorr <- function(x3p1,
                             function(pair){
                               if(any(
                                 all(is.na(as.vector(pair[[1]]))) | all(is.na(as.vector(pair[[2]])))
-                                )){
+                              )){
                                 return(NA)
                               }
                               else{

@@ -18,13 +18,16 @@ gaussianKernel <- function(size,sig){
 gaussianFilter <- function(surfaceMat,
                            res,
                            wavelength,
-                           filtertype = "bp"){
+                           filtertype = "bp",
+                           filterSize = NULL){
 
   if(filtertype %in% c("lp","hp")){
     sig <- (wavelength/res)/(2*pi)
 
+  if(is.null(filterSize)){
     filterSize <- {2*ceiling(2.6*sig) + 1} %>%
       magrittr::add(. %% 2)
+  }
 
     kern <- gaussianKernel(size = filterSize,
                            sig = sig)
