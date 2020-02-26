@@ -6,7 +6,11 @@
 #'
 #' @param surfaceMat matrix of input depths in microns.
 #' @param inlierThreshold threshold to declare an observed value close to the
-#'   fitted plane an "inlier".
+#'   fitted plane an "inlier". A smaller value will yield a more stable
+#'   estimate.
+#' @param finalSelectionThreshold once the RANSAC plane is fitted based on the
+#'   inlierThreshold, this argument dictates which observations are selected as
+#'   the final breech face estimate.
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
 #'
@@ -22,7 +26,8 @@
 #' @seealso cartridges3D package (LINK)
 
 findPlaneRansac <- function(surfaceMat,
-                            inlierTreshold = 2*(10^(-5)),
+                            inlierTreshold = (10^(-5)), # 1 micron
+                            finalSelectionThreshold = 2*(10^(-5)), # 2 micron
                             iters = 150,...) {
   inlierCount <- 0
 
@@ -44,7 +49,8 @@ findPlaneRansac <- function(surfaceMat,
     errors <- abs(preds - observedPixelLocations$depth)
     inlierBool <- errors < inlierTreshold
 
-    if (sum(inlierBool) > inlierCount) {
+    if (sum(inlierBool) > inlierCount) { #if candidate plane is closer to more observed values, make this the new fitted plane
+      finalPlaneErrors <- errors
       inlierCount <- sum(inlierBool)
       inliers <- inlierBool
     }
@@ -52,14 +58,18 @@ findPlaneRansac <- function(surfaceMat,
 
   # final coefs only computed using inliers
   finalRansacPlane <- lm(depth ~ row + col,
-                         data = observedPixelLocations[inliers, ])
+                         data = observedPixelLocations[inliers, ]) #fit the plane based on what we've identified to be inliers
 
+  #Once the plane is fitted based on the inliers identified, we want to take a potentially larger band of observations around the fitted plane than just the inlier threshold:
+  finalInliers <- finalPlaneErrors < finalSelectionThreshold
+
+  inlierLocations <- cbind(observedPixelLocations$row[finalInliers],
+                           observedPixelLocations$col[finalInliers])
+
+  #Now populate a new matrix to contain the estimated breech face
   estimatedBreechFace <- matrix(NA, nrow = nrow(surfaceMat), ncol = ncol(surfaceMat))
 
-  inlierLocations <- cbind(observedPixelLocations$row[inliers],
-                           observedPixelLocations$col[inliers])
-
-  estimatedBreechFace[inlierLocations] <- observedPixelLocations$depth[inliers]
+  estimatedBreechFace[inlierLocations] <- observedPixelLocations$depth[finalInliers]
 
   return(list(ransacPlane = finalRansacPlane,
               estimatedBreechFace = estimatedBreechFace))
@@ -76,9 +86,15 @@ levelBFImpression <- function(ransacFit,
                               useResiduals = FALSE,...){
 
   if(useResiduals){ #if the residuals from the RANSAC method are desired...
-    fittedPlane <- ransacFit$estimatedBreechFace
+    esimatedBFdf <- data.frame(which(!is.na(ransacFit$estimatedBreechFace),
+                                     arr.ind = TRUE)) %>%
+      dplyr::mutate(depth = ransacFit$estimatedBreechFace[!is.na(ransacFit$estimatedBreechFace)])
 
-    fittedPlane[!is.na(fittedPlane)] <- ransacFit$ransacPlane$fitted.values
+    preds <- predict(ransacFit$ransacPlane,
+                     newdata = esimatedBFdf)
+
+    fittedPlane <- ransacFit$estimatedBreechFace
+    fittedPlane[!is.na(fittedPlane)] <- preds
 
     # then take residuals
     resids <- ransacFit$estimatedBreechFace - fittedPlane
@@ -165,7 +181,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @seealso x3ptools (LINK)
 
 selectBFImpression <- function(x3p_path,
-                               ransacInlierThresh = 2*(10^(-5)),
+                               ransacInlierThresh = (10^(-5)),
+                               ransacFinalSelectThresh = 2*(10^(-5)),
                                ransacIters = 150,
                                useResiduals = FALSE,
                                croppingThresh = 1,
@@ -181,6 +198,7 @@ selectBFImpression <- function(x3p_path,
   #First, we want to find the approximate height value(s) of the breech face impression within the cartridge case scan. We can find this using the RANSAC method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
     cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
