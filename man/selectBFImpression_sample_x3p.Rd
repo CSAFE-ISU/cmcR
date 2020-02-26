@@ -6,8 +6,9 @@
 \usage{
 selectBFImpression_sample_x3p(
   x3p_path,
-  ransacInlierThresh = 2 * (10^(-5)),
-  ransacIters = 75,
+  ransacInlierThresh = (10^(-5)),
+  ransacFinalSelectThresh = 2 * (10^(-5)),
+  ransacIters = 150,
   useResiduals = FALSE,
   croppingThresh = 1,
   standardizeBF = FALSE,
@@ -42,6 +43,10 @@ direction and every mYth value is included in y direction}
 
 \item{offsetY}{integer value between 0 and mY-1 to specify different offsets
 for x and y direction}
+
+\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
+inlierThreshold, this argument dictates which observations are selected as
+the final breech face estimate.}
 
 \item{standardizedBF}{subtract mean and divide by standard deviation of
 processed surface matrix}

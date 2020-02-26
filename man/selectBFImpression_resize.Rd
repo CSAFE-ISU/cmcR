@@ -7,8 +7,9 @@ arbitrary size.}
 \usage{
 selectBFImpression_resize(
   x3p_path,
-  ransacInlierThresh = 2 * (10^(-5)),
-  ransacIters = 75,
+  ransacInlierThresh = (10^(-5)),
+  ransacFinalSelectThresh = 2 * (10^(-5)),
+  ransacIters = 150,
   useResiduals = FALSE,
   croppingThresh = 1,
   standardizeBF = FALSE,

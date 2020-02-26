@@ -4,16 +4,27 @@
 \alias{findPlaneRansac}
 \title{Finds plane of breechface marks using RANSAC}
 \usage{
-findPlaneRansac(surfaceMat, inlierTreshold = 2 * (10^(-5)), iters = 150, ...)
+findPlaneRansac(
+  surfaceMat,
+  inlierTreshold = (10^(-5)),
+  finalSelectionThreshold = 2 * (10^(-5)),
+  iters = 150,
+  ...
+)
 }
 \arguments{
 \item{surfaceMat}{matrix of input depths in microns.}
+
+\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
+inlierThreshold, this argument dictates which observations are selected as
+the final breech face estimate.}
 
 \item{iters}{number of candidate planes to fit (higher value yields more
 stable breech face estimate)}
 
 \item{inlierThreshold}{threshold to declare an observed value close to the
-fitted plane an "inlier".}
+fitted plane an "inlier". A smaller value will yield a more stable
+estimate.}
 }
 \value{
 List object containing fitted plane (as an lm object) and selected

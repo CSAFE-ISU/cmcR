@@ -159,6 +159,9 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @param x3p_path path to a .x3p file
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
+#' @param finalSelectionThreshold once the RANSAC plane is fitted based on the
+#'   inlierThreshold, this argument dictates which observations are selected as
+#'   the final breech face estimate.
 #' @param ransacIters number of candidate planes to fit for the RANSAC method
 #'   (higher value yields more stable breech face estimate)
 #' @param useResiduals dictates whether the difference between the estimated
@@ -240,6 +243,9 @@ selectBFImpression <- function(x3p_path,
 #' @param x3p_path path to a .x3p file
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
+#' @param finalSelectionThreshold once the RANSAC plane is fitted based on the
+#'   inlierThreshold, this argument dictates which observations are selected as
+#'   the final breech face estimate.
 #' @param ransacIters number of candidate planes to fit for the RANSAC method
 #'   (higher value yields more stable breech face estimate)
 #' @param useResiduals dictates whether the difference between the estimated
@@ -272,7 +278,8 @@ selectBFImpression <- function(x3p_path,
 #' @seelalso x3ptools package (LINK)
 
 selectBFImpression_sample_x3p <- function(x3p_path,
-                                          ransacInlierThresh = 2*(10^(-5)),
+                                          ransacInlierThresh = (10^(-5)),
+                                          ransacFinalSelectThresh = 2*(10^(-5)),
                                           ransacIters = 150,
                                           useResiduals = FALSE,
                                           croppingThresh = 1,
@@ -295,6 +302,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
     cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
@@ -375,7 +383,8 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @seelalso imager package (LINK)
 
 selectBFImpression_resize <- function(x3p_path,
-                                      ransacInlierThresh = 2*(10^(-5)),
+                                      ransacInlierThresh = (10^(-5)),
+                                      ransacFinalSelectThresh = 2*(10^(-5)),
                                       ransacIters = 150,
                                       useResiduals = FALSE,
                                       croppingThresh = 1,
@@ -399,6 +408,7 @@ selectBFImpression_resize <- function(x3p_path,
   #First, we want to find the approximate height value(s) of the breech face impression within the cartridge case scan. We can find this using the RANSAC method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
     cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
