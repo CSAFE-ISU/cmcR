@@ -417,8 +417,11 @@ cellCCF <- function(x3p1,
   ))
 }
 
+#' Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
+#' for x3p2 vs. x3p1. See cellCCF function documentation for more details.
 #' @name cellCCF_bothDirections
 #'
+#' @seealso cellCCF function
 #' @export
 
 cellCCF_bothDirections <- function(x3p1,
