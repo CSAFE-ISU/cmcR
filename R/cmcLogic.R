@@ -152,7 +152,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                consensus_function_theta = consensus_function,...){
 
   initialCMCs <- cellCCF_bothDirections_output %>%
-    map(~ cmcR::topResultsPerCell(.$ccfResults) %>%
+    purrr::map(~ cmcR::topResultsPerCell(.$ccfResults) %>%
           cmcR:::cmcFilter(consensus_function = consensus_function,
                            ccf_thresh = ccf_thresh,
                            dx_thresh = dx_thresh,
@@ -161,7 +161,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                            consensus_function_theta = consensus_function_theta))
 
   cmcPerTheta <-  cellCCF_bothDirections_output %>%
-    map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
+    purrr::map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
                                    consensus_function = consensus_function,
                                    ccf_thresh = ccf_thresh,
                                    dx_thresh = dx_thresh,
@@ -169,7 +169,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                    theta_thresh = theta_thresh,
                                    consensus_function_theta = consensus_function_theta,...))
 
-  thetaMax <- map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
+  thetaMax <- purrr::map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
 
   if(all(is.na(thetaMax))){
     print("Note: neither comparison produces a valid max CMC theta value. The initial CMCs based on the top results per cell will be returned.")

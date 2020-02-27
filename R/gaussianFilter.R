@@ -131,10 +131,12 @@ gaussianFilter <- function(surfaceMat,
 #'
 #' @export
 
-gaussianFilterBF <- function(selectedBF_x3p,
+gaussianFilterBF <- function(selectBFImpression_output,
                              res = selectedBF_x3p$header.info$incrementY,
                              wavelength,
                              filtertype = "bp"){
+
+  selectedBF_x3p <- selectBFImpression_output$x3p
 
   if(res < .00001){ #if resolution measured in meters:
     res <- res*(10^(6)) #rescale to microns
@@ -156,7 +158,6 @@ gaussianFilterBF <- function(selectedBF_x3p,
 
   surfaceMatFiltered <- surfaceMatFiltered/(10^6)
 
-  selectedBF_x3p$surface.matrix <- surfaceMatFiltered
-
-  return(selectedBF_x3p)
+  selectBFImpression_output$x3p$surface.matrix <- surfaceMatFiltered
+  return(selectBFImpression_output)
 }

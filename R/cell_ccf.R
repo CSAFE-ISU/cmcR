@@ -36,11 +36,52 @@ cellDivision <- function(surfaceMat,
 #'   and right indices of the cell's location in the surface matrix.
 
 extractCellbyCornerLocs <- function(cornerLocs,
-                                    rotatedSurfaceMat,...){
+                                    rotatedSurfaceMat,
+                                    mat2Dim){
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B
   splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
                                               cornerLocs[["left"]]:cornerLocs[["right"]]]
+
+  if(nrow(splitRotatedSurfaceMat) != ncol(splitRotatedSurfaceMat)){ #if the matrix isn't square...
+
+    #if the rows need padding...
+    if(nrow(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+
+      rowsToPad <- ncol(splitRotatedSurfaceMat) - nrow(splitRotatedSurfaceMat)
+      rowPadder <- matrix(NA,nrow = rowsToPad,ncol = ncol(splitRotatedSurfaceMat))
+
+      #if the split comes from the top of the overall matrix...
+      if(cornerLocs[["top"]] == 1){
+        splitRotatedSurfaceMat <- rbind(rowPadder,
+                                        splitRotatedSurfaceMat)
+      }
+
+      #if the split comes from the bottom of the overall matrix....
+      if(cornerLocs[["bottom"]] == mat2Dim[1]){
+        splitRotatedSurfaceMat <- rbind(splitRotatedSurfaceMat,
+                                        rowPadder)
+      }
+    }
+
+    #if the cols need padding...
+    if(ncol(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+
+      colsToPad <- nrow(splitRotatedSurfaceMat) - ncol(splitRotatedSurfaceMat)
+      colPadder <- matrix(NA,ncol = colsToPad,nrow = nrow(splitRotatedSurfaceMat))
+
+      #if the split comes from the left side of the overall matrix...
+      if(cornerLocs[["left"]] == 1){
+        splitRotatedSurfaceMat <- cbind(colPadder,
+                                        splitRotatedSurfaceMat)
+      }
+      #if the split comes from the right side of the overall matrix....
+      if(cornerLocs[["right"]] == mat2Dim[2]){
+        splitRotatedSurfaceMat <- cbind(splitRotatedSurfaceMat,
+                                        colPadder)
+      }
+    }
+  }
 
   return(splitRotatedSurfaceMat)
 }
@@ -309,20 +350,31 @@ cellCCF <- function(x3p1,
     #rotate image 2 and split into cells:
 
     mat2_rotated <- mat2 %>%
-      rotateSurfaceMatrix(theta) #%>%
-    #t() #because cellDivision starts in the left hand corner of image A and
-    #moves down in tiling, we need to transpose image B so that the
-    #correct cells match up (extractCellbyCornerLocs starts in the
-    #left-hand corner but moves right.)
+      rotateSurfaceMatrix(theta)
 
     #Now that we've rotated image B, we want to create a list consisting of the
     #cells that we are to compare to image A's cells. These will be 4 times
     #larger than Image A's cells (up to image B's boundary) and defined by the
-    #expandedCellCorners x,y pairs calculated above.
+    #expandedCellCorners x,y pairs calculated above. mat2_splitRotated contains
+    #regions that lie on the edge of mat2. The getMat2SplitLoctaions function
+    #ensures that the way in which we define these regions doesn't extend past
+    #the dimensions of mat2. However, the corresponding dx and dy values
+    #assocated with the max CCF, while "correct" for a particular matrix pair in
+    #the sense that they indeed yield the correct trnaslation values to align
+    #the mat2 region to the mat1 cell, are difficult to compare between the
+    #nicely square interior regions (the dx and dy values often disagree
+    #considerably, which is a problem when we look for consensus among the dx
+    #and dy values). Thus, it is necessary to pad these edge images until they
+    #are square. Through experimentation, it has been observed that padding the
+    #matrices with constant values does not affect the CCF score. We determine
+    #which matrices need to be padded based on whether the associated cellID
+    #contains 1 or the maximum value of the cellIDs (containing either part of
+    #the first row/col of the matrix or the last)
     mat2_splitRotated <-
-      purrr::map(mat2_splitCorners,
-                 ~ extractCellbyCornerLocs(cornerLocs = .,
-                                           rotatedSurfaceMat = mat2_rotated))
+      purrr::map(.x = mat2_splitCorners,
+                 ~ extractCellbyCornerLocs(cornerLocs = .x,
+                                           rotatedSurfaceMat = mat2_rotated,
+                                           mat2Dim = dim(mat2)))
 
     #Determine whether a cell contains more than 10 pixels of breechface
     #information (for some reason checking for more than 0 pixels of
@@ -341,7 +393,6 @@ cellCCF <- function(x3p1,
 
     #shift the pixel values in each image so that they both have 0 mean. Then
     #replace the NA values with 0 (FFTs can't deal with NAs)
-
     if(!missing(centerCell)){
       if(centerCell == "individualCell"){
         m1 <- mat1_splitFiltered %>%
@@ -374,7 +425,7 @@ cellCCF <- function(x3p1,
     #labels
 
     #shift the pixel values in each image so that they both have 0 mean. Then
-    #replace the NA values with 0 (FFTs can't deal with NAs)
+    #replace the NA values with 0 (FFTs can't deal with NAs).
     mat2_splitShifted <- purrr::pmap(list(mat2_splitFiltered,m2,sd2),
                                      ~ standardizeSurfaceMat(surfaceMat = ..1,
                                                              m = ..2,
@@ -387,7 +438,7 @@ cellCCF <- function(x3p1,
                                  .y = mat2_splitShifted,
                                  .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
       dplyr::mutate(cellID = filteredCellID %>%
-                      purrr::map_chr(swapCellIDAxes))
+                      purrr::map_chr(swapCellIDAxes)) #imager swaps x and y axes, so we need to swap them back to be more interpretable
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }

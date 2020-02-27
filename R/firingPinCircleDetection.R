@@ -175,12 +175,13 @@ nms <- function(im,sigma){
 #'   argument. Once the longest sequence of high hough score radii values is
 #'   found, the average of these radii values is used as the final radius
 #'   estimate.
+#' @export
 
 fpCircleHoughDetection <- function(surfaceMat,
-                                   smootherSize,
-                                   aggregation_function,
-                                   meshSize,
-                                   houghScoreQuant){
+                                   aggregation_function = mean,
+                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
+                                   meshSize = 1,
+                                   houghScoreQuant = .9){
 
   firingPinRadiusEstimate <- fpRadiusGridSearch(surfaceMat,smootherSize = smootherSize,
                                                 aggregation_function = aggregation_function) %>%

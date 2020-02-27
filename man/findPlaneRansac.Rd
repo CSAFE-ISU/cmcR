@@ -38,7 +38,6 @@ cartridges3D::findPlaneRansac function
 }
 \examples{
 \dontrun{
-    set.seed(0)
     testImage <- findPlaneRansac(surfaceMat)
 }
 

@@ -67,7 +67,8 @@ getHighCCFPairs <- function(x3p1,
                                       mat2_splitRotated <-
                                         purrr::map(mat2_splitCorners,
                                                    ~ cmcR:::extractCellbyCornerLocs(cornerLocs = .,
-                                                                                    rotatedSurfaceMat = mat2_rotated)) %>%
+                                                                                    rotatedSurfaceMat = mat2_rotated,
+                                                                                    mat2Dim = dim(x3p2$surface.matrix))) %>%
                                         setNames(mat1_split$cellIDs)
 
                                       return(mat2_splitRotated[names(mat2_splitRotated) %in% ccfResults$cellID])

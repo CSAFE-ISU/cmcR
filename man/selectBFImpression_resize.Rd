@@ -16,7 +16,8 @@ selectBFImpression_resize(
   size_x,
   size_y = size_x,
   interpolation_type = 1,
-  boundary_conditions = 0
+  boundary_conditions = 0,
+  ...
 )
 }
 \arguments{
@@ -38,6 +39,10 @@ breech face impression}
 \item{interpolation_type}{= 1,}
 
 \item{boundary_conditions}{= 0}
+
+\item{...}{arguments to be passed to fpCircleHoughDetection function. This is
+useful if, for example, the Hough transform appears to be mis-estimating
+where the firing pin impression circle is in the scan.}
 
 \item{standardizedBF}{subtract mean and divide by standard deviation of
 processed surface matrix}

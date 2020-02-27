@@ -19,7 +19,6 @@
 #'   inliers close to fitted plane).
 #' @examples
 #' \dontrun{
-#'     set.seed(0)
 #'     testImage <- findPlaneRansac(surfaceMat)
 #' }
 #'
@@ -173,6 +172,9 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #'   processed surface matrix
 #' @param preProcess if FALSE, then no pre-processing is performed. Equivalent
 #'   to calling x3ptools::read_x3p(x3p_path)
+#' @param ... arguments to be passed to fpCircleHoughDetection function. This is
+#'   useful if, for example, the Hough transform appears to be mis-estimating
+#'   where the firing pin impression circle is in the scan.
 #' @return x3p object containing the processed breech face
 #' @examples
 #' \dontrun{
@@ -212,11 +214,8 @@ selectBFImpression <- function(x3p_path,
   #the firing pin impression circle and filtering out any pixels within that
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
-  fpImpressionCircle <- fpCircleHoughDetection(bfImpression_ransacSelected,
-                                               aggregation_function = mean,
-                                               smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                               meshSize = 1,
-                                               houghScoreQuant = .9)
+  fpImpressionCircle <- fpCircleHoughDetection(surfaceMat = bfImpression_ransacSelected,
+                                               ...)
 
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
@@ -261,6 +260,9 @@ selectBFImpression <- function(x3p_path,
 #' @param offset integer value between 0 and m-1 to specify offset of the sample
 #' @param offsetY integer value between 0 and mY-1 to specify different offsets
 #'   for x and y direction
+#' @param ... arguments to be passed to fpCircleHoughDetection function. This is
+#'   useful if, for example, the Hough transform appears to be mis-estimating
+#'   where the firing pin impression circle is in the scan.
 #'
 #' @note Given a matrix, x3ptools populates an x3p object's surface matrix
 #'   starting in the top left corner moving right by reading the the matrix from
@@ -287,7 +289,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                           m = 2,
                                           mY = m,
                                           offset = 0,
-                                          offsetY = offset){
+                                          offsetY = offset,...){
 
   x3p <- x3p_path %>%
     x3ptools::read_x3p() %>%
@@ -314,10 +316,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
   fpImpressionCircle <- fpCircleHoughDetection(bfImpression_ransacSelected,
-                                               aggregation_function = mean,
-                                               smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                               meshSize = 1,
-                                               houghScoreQuant = .9)
+                                               ...)
 
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
@@ -368,6 +367,9 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @param size_y,
 #' @param interpolation_type = 1,
 #' @param boundary_conditions = 0
+#' @param ... arguments to be passed to fpCircleHoughDetection function. This is
+#'   useful if, for example, the Hough transform appears to be mis-estimating
+#'   where the firing pin impression circle is in the scan.
 #'
 #' @note imager treats a matrix as its transpose (i.e., x and y axes are
 #'   swapped). As such the size_x argument corresponds to changing the number of
@@ -392,7 +394,7 @@ selectBFImpression_resize <- function(x3p_path,
                                       size_x,
                                       size_y = size_x,
                                       interpolation_type = 1,
-                                      boundary_conditions = 0){
+                                      boundary_conditions = 0,...){
 
   x3p <- x3p_path %>%
     x3ptools::read_x3p()
@@ -414,11 +416,8 @@ selectBFImpression_resize <- function(x3p_path,
     cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
 
   #Some additional, unwanted pixels remain in the middle of the cartridge scan even after the RANSAC method has selected the breech face impression height values. We can remove these unwanted pixels by identifying the equation of the firing pin impression circle and filtering out any pixels within that circle. The following returns the estimated center and radius of the firing pin impression circle:
-  fpImpressionCircle <- fpCircleHoughDetection(bfImpression_ransacSelected,
-                                               aggregation_function = mean,
-                                               smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                               meshSize = 1,
-                                               houghScoreQuant = .9)
+  fpImpressionCircle <- fpCircleHoughDetection(surfaceMat = bfImpression_ransacSelected,
+                                               ...)
 
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
