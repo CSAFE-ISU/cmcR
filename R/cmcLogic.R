@@ -106,6 +106,10 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     dplyr::ungroup() %>%
     dplyr::filter(n == max(n))
 
+  if(is.null(cmcMax$theta)){
+    return(NA)
+  }
+
   #there may be more than one theta tied with the maximum CMC - in which case
   #we should determine if such thetas are "close" to each other, where
   #proximity is defined based on the theta_tresh set. If not, then we can rule
