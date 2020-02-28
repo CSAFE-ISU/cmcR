@@ -190,10 +190,10 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
     # print(paste0("Note: max CMC thetas disagree. Comparison of x3p1 to x3p2: ",thetaMax$comparison_1to2," degrees vs. Comparison of x3p2 to x3p1: ",thetaMax$comparison_2to1," degrees. If one is NA, then it will be replaced with the opposite of the other for final CMC calculation."))
   # }
 
-  if(is.na(thetaMax$comparison_1to2) | purrr::is.empty(thetaMax$comparison_1to2)){
+  if(is.na(thetaMax$comparison_1to2) | purrr::is_empty(thetaMax$comparison_1to2)){
       thetaMax$comparison_1to2 <- -thetaMax$comparison_2to1
     }
-  if(is.na(thetaMax$comparison_2to1) | purrr::is.empty(thetaMax$comparison_2to1)){
+  if(is.na(thetaMax$comparison_2to1) | purrr::is_empty(thetaMax$comparison_2to1)){
     thetaMax$comparison_2to1 <- -thetaMax$comparison_1to2
   }
 
