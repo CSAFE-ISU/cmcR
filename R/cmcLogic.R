@@ -175,7 +175,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
   thetaMax <- purrr::map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
 
-  if(all(is.na(thetaMax)) | (is.null(thetaMax$comparison_1to2) & is.null(thetaMax$comparison_2to1))){
+  if(all(is.na(thetaMax)) | (is.empty(thetaMax$comparison_1to2) & is.empty(thetaMax$comparison_2to1))){
     # print("Note: neither comparison produces a valid max CMC theta value. The initial CMCs based on the top results per cell will be returned.")
     return(list("params" = list(consensus_function = consensus_function,
                                 ccf_thresh = ccf_thresh,
