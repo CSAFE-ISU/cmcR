@@ -85,28 +85,28 @@ km2Unknown2CCF_nonResiduals <- cellCCF_bothDirections(x3p1 = km2_nonResiduals$x3
 km1Unknown1CMCs_nonResiduals <- cmcFilter_improved(km1Unknown1CCF_nonResiduals,
                                                    consensus_function = median,
                                                    ccf_thresh = .4,
-                                                   dx_thresh = 30,
+                                                   dx_thresh = 25,
                                                    theta_thresh = 3,
                                                    consensus_function_theta = median)
 
 km1Unknown2CMCs_nonResiduals <- cmcFilter_improved(km1Unknown2CCF_nonResiduals,
                                                    consensus_function = median,
                                                    ccf_thresh = .4,
-                                                   dx_thresh = 30,
+                                                   dx_thresh = 25,
                                                    theta_thresh = 3,
                                                    consensus_function_theta = median)
 
 km2Unknown1CMCs_nonResiduals <- cmcFilter_improved(km2Unknown1CCF_nonResiduals,
                                                    consensus_function = median,
                                                    ccf_thresh = .4,
-                                                   dx_thresh = 30,
+                                                   dx_thresh = 25,
                                                    theta_thresh = 3,
                                                    consensus_function_theta = median)
 
 km2Unknown2CMCs_nonResiduals <- cmcFilter_improved(km2Unknown2CCF_nonResiduals,
                                                    consensus_function = median,
                                                    ccf_thresh = .4,
-                                                   dx_thresh = 30,
+                                                   dx_thresh = 25,
                                                    theta_thresh = 3,
                                                    consensus_function_theta = median)
 
