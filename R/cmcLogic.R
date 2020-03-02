@@ -106,7 +106,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     dplyr::ungroup() %>%
     dplyr::filter(n == max(n))
 
-  if(is.null(cmcMax$theta)){
+  if(purrr::is_empty(cmcMax$theta)){
     return(NA)
   }
 
@@ -130,7 +130,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     dplyr::pull(distanceToCMCMax) %>%
     max()
 
-  if(maxDistancetoCMCMax > theta_thresh){
+  if(all(maxDistancetoCMCMax > theta_thresh)){
     return(NA)
   }
   else{
