@@ -4,7 +4,7 @@
 \alias{extractCellbyCornerLocs}
 \title{Cuts out a cell in a surface matrix.}
 \usage{
-extractCellbyCornerLocs(cornerLocs, rotatedSurfaceMat, ...)
+extractCellbyCornerLocs(cornerLocs, rotatedSurfaceMat, mat2Dim)
 }
 \arguments{
 \item{cornerLocs}{the location (indices) of the desired cell in the image}

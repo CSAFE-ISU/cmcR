@@ -304,8 +304,7 @@ dat3 <- cellCCF_bothDirections(x3p1 = dat1_filtered$x3p,
                                x3p2 = dat2_filtered$x3p,
                                thetas = seq(-30,30,by = 3),
                                cellNumHoriz = 8,
-                               cellNumVert = 8,
-                               centerCell = "wholeMatrix")
+                               cellNumVert = 8)
 
 dat3 %>%
   cmcFilter_improved(dx_thresh = 20)

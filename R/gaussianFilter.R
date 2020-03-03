@@ -126,38 +126,3 @@ gaussianFilter <- function(surfaceMat,
 
   return(imFiltered)
 }
-
-#' @name gaussianFilterBF
-#'
-#' @export
-
-gaussianFilterBF <- function(selectBFImpression_output,
-                             res = selectedBF_x3p$header.info$incrementY,
-                             wavelength,
-                             filtertype = "bp"){
-
-  selectedBF_x3p <- selectBFImpression_output$x3p
-
-  if(res < .00001){ #if resolution measured in meters:
-    res <- res*(10^(6)) #rescale to microns
-  }
-
-  surfaceMatMissing <- is.na(selectedBF_x3p$surface.matrix)
-
-  surfaceMatFake <- selectedBF_x3p$surface.matrix - mean(as.vector(selectedBF_x3p$surface.matrix),na.rm=TRUE)
-  surfaceMatFake[is.na(surfaceMatFake)] <- 0
-
-  surfaceMatFake <- surfaceMatFake*(10^6) #scale to microns (avoids small number numerical issues?)
-
-  surfaceMatFiltered <- cmcR:::gaussianFilter(surfaceMat = surfaceMatFake,
-                                              res = res,
-                                              wavelength = wavelength,
-                                              filtertype = filtertype)
-
-  surfaceMatFiltered[surfaceMatMissing] <- NA
-
-  surfaceMatFiltered <- surfaceMatFiltered/(10^6)
-
-  selectBFImpression_output$x3p$surface.matrix <- surfaceMatFiltered
-  return(selectBFImpression_output)
-}
