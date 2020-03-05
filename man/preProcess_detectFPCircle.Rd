@@ -47,4 +47,6 @@ determine "high" hough scores is determined by the houghScoreQuant
 argument. Once the longest sequence of high hough score radii values is
 found, the average of these radii values is used as the final radius
 estimate.
+
+@keywords internal
 }

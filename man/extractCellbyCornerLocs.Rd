@@ -17,3 +17,4 @@ This is a helper for the cellCCF function. This function
 cuts out a cell in a surface matrix based on the most top, bottom, left,
 and right indices of the cell's location in the surface matrix.
 }
+\keyword{internal}

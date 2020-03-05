@@ -52,6 +52,8 @@ cmcFilter <- function(ccfResults,
 #' @name cmcFilterPerTheta
 #' @param ... arguments to be passed to consensus_function or
 #'   consensus_function_theta if necessary
+#'
+#' @keywords internal
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
@@ -94,6 +96,8 @@ getMode <- function(x){
 }
 
 #' @name calcMaxCMCTheta
+#'
+#' @keywords internal
 
 calcMaxCMCTheta <- function(cmcPerTheta,
                             highCMC_thresh = 1,
@@ -119,7 +123,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   }
   #
   maxDistancetoCMCMax <- cmcCountPerTheta %>%
-    dplyr::filter(n >= cmcMax$n - highCMC_thresh) %>%
+    dplyr::filter(all(n >= cmcMax$n - highCMC_thresh)) %>%
     dplyr::group_by(theta) %>%
     #if there may be multiple theta values tied for cmcMax that are within
     #theta_thresh of each other, then we can't discount any of them as being

@@ -14,3 +14,4 @@ standardizeSurfaceMat(surfaceMat, m, s, ...)
 \description{
 This is a helper for the cellCCF function.
 }
+\keyword{internal}

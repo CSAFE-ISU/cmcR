@@ -8,8 +8,7 @@ preProcess_ransac(
   surfaceMat,
   inlierTreshold = (10^(-5)),
   finalSelectionThreshold = 2 * (10^(-5)),
-  iters = 150,
-  ...
+  iters = 150
 )
 }
 \arguments{

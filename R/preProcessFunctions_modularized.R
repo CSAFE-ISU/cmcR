@@ -30,7 +30,7 @@
 preProcess_ransac <- function(surfaceMat,
                                    inlierTreshold = (10^(-5)), # 1 micron
                                    finalSelectionThreshold = 2*(10^(-5)), # 2 micron
-                                   iters = 150,...) {
+                                   iters = 150) {
   inlierCount <- 0
 
   # sample from this
@@ -88,7 +88,7 @@ preProcess_ransac <- function(surfaceMat,
 #' @export
 
 preProcess_levelBF <- function(ransacFit,
-                               useResiduals = FALSE,...){
+                               useResiduals = FALSE){
 
   if(useResiduals){ #if the residuals from the RANSAC method are desired...
     esimatedBFdf <- data.frame(which(!is.na(ransacFit$estimatedBreechFace),
@@ -127,7 +127,7 @@ preProcess_levelBF <- function(ransacFit,
 #' @export
 
 preProcess_cropWS <- function(surfaceMat,
-                              croppingThresh = 2,...){
+                              croppingThresh = 2){
   #Look at the middle 20% of columns and count the number of non-NA pixels in each
   colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
                          (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
@@ -184,7 +184,8 @@ preProcess_cropWS <- function(surfaceMat,
 #'   argument. Once the longest sequence of high hough score radii values is
 #'   found, the average of these radii values is used as the final radius
 #'   estimate.
-#' @export
+#'
+#'   @keywords internal
 
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregation_function = mean,
@@ -241,15 +242,19 @@ preProcess_detectFPCircle <- function(surfaceMat,
   return(houghCircleLoc)
 }
 
-#' Given a surface matrix and the output of preProcess_detectFPCircle, filters
-#' any pixels within the estimated firing pin impression circle
+#' Given a surface matrix, estimates and filters any pixels within the estimated
+#' firing pin impression circle
 #'
 #' @name preProcess_removeFPCircle
 #'
 #' @param surfaceMat a surface matrix representing a breech face impression scan
-#' @param fpImpressionCircle data frame containing 3 columns: "x" and "y"
-#'   containing the estimated center of the firing pin impression circle and "r"
-#'   containing the estimated radius
+#' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
+#' @param aggregation_function function to select initial radius estimate from
+#'   those calculated using fpRadiusGridSearch
+#' @param meshSize size of radius mesh to be used for further refinement of the
+#'   radius estimate obtained from fpRadiusGridSearch
+#' @param houghScoreQuant quantile cut-off to be used when determining a final
+#'   radius estimate using the score values returned by the imager::hough_circle
 #'
 #' @note imager treats a matrix as its transpose (i.e., x and y axes are
 #'   swapped). As such, relative to the original surface matrix, the x and y
@@ -259,7 +264,19 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'
 #' @export
 
-preProcess_removeFPCircle <- function(surfaceMat,fpImpressionCircle){
+preProcess_removeFPCircle <- function(surfaceMat,
+                                      aggregation_function = mean,
+                                      smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
+                                      meshSize = 1,
+                                      houghScoreQuant = .9){
+
+
+  fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = surfaceMat,
+                                                aggregation_function = aggregation_function,
+                                                smootherSize = smootherSize,
+                                                meshSize = meshSize,
+                                                houghScoreQuant = houghScoreQuant)
+
   breechFace_firingPinFiltered <- surfaceMat %>%
     imager::as.cimg() %>%
     as.data.frame() %>%

@@ -11,6 +11,8 @@
 #' example, list(theta = seq(-30,30,by = 3), cellNumHoriz = 7,cellNumVert = 7)
 #'
 #' @param ... arguments to be passed to applyCMCLogic function
+#'
+#' @export
 
 getHighCCFPairs <- function(x3p1,
                             x3p2,
@@ -103,6 +105,8 @@ getHighCCFPairs <- function(x3p1,
 }
 
 #' @name stampOutMat1ShapeFromMat2
+#'
+#' @keywords internal
 
 stampOutMat1ShapeFromMat2 <- function(pair,
                                       dx,
@@ -188,6 +192,8 @@ stampOutMat1ShapeFromMat2 <- function(pair,
 }
 
 #' @name extractMatchedCells
+#'
+#' @keywords internal
 
 extractMatchedCells <- function(x3p1,
                                 x3p2,
@@ -211,6 +217,10 @@ extractMatchedCells <- function(x3p1,
 }
 
 #' @name calcRawCorr
+#'
+#' Export this?
+#'
+#' @keywords internal
 
 calcRawCorr <- function(x3p1,
                         x3p2,
@@ -218,7 +228,9 @@ calcRawCorr <- function(x3p1,
                         initialCMCsOnly = FALSE,
                         use = "pairwise.complete.obs",...){
 
-  highCCFCells <- cmcR:::extractMatchedCells(x3p1,
+  highCCFCel
+
+  ls <- cmcR:::extractMatchedCells(x3p1,
                                              x3p2,
                                              cellCCF_results,
                                              initialCMCsOnly = FALSE,...)

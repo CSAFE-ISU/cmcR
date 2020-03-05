@@ -45,6 +45,7 @@
 #'   modes) can be differentiated from noise introduced by spotty missing
 #'   values. The size of the kernel used in the roll_mean function is
 #'   indicated by the nonNA_sum_smootherSize argument.
+#'   @keywords internal
 
 fpRadiusEstimation <- function(surfaceMat,
                                sum_over = "row",
@@ -92,6 +93,8 @@ fpRadiusEstimation <- function(surfaceMat,
 #'   radii estimates are reduced to a single, rough radius estimate (e.g.,
 #'   minimum was determined to be an effective aggregation function in
 #'   preliminary tests).
+#'
+#' @keywords internal
 
 fpRadiusGridSearch <- function(surfaceMat,
                                smootherSize,
@@ -134,9 +137,16 @@ fpRadiusGridSearch <- function(surfaceMat,
               "individualEstims" = unlist(estim_rotated)))
 }
 
+#' Non-maxima suppression
+#'
+#' @name nms
+#'
+#' @seealso #https://www.rdocumentation.org/packages/imager/versions/0.41.2/topics/hough_circle
+#' @keywords internal
+
 nms <- function(im,sigma){
   #non-maxima suppression
-  #https://www.rdocumentation.org/packages/imager/versions/0.41.2/topics/hough_circle
+
   im[imager::dilate_square(im,sigma) != im] <- 0
 
   return(im)

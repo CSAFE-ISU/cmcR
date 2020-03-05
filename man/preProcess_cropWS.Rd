@@ -5,7 +5,7 @@
 \title{Crop out rows/columns outside of the breech face impression in a cartridge
 case scan.}
 \usage{
-preProcess_cropWS(surfaceMat, croppingThresh = 2, ...)
+preProcess_cropWS(surfaceMat, croppingThresh = 2)
 }
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}

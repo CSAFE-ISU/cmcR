@@ -16,3 +16,4 @@ cellDivision(surfaceMat, cellNumHoriz = 8, cellNumVert = 8, ...)
 \description{
 This is a helper for the cellCCF function.
 }
+\keyword{internal}

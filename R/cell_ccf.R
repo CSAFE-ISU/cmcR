@@ -6,6 +6,8 @@
 #' @param cellNumVert number of splits along vertical axis
 #'
 #' @description This is a helper for the cellCCF function.
+#'
+#' @keywords internal
 
 cellDivision <- function(surfaceMat,
                          cellNumHoriz = 8,
@@ -34,6 +36,8 @@ cellDivision <- function(surfaceMat,
 #' @description This is a helper for the cellCCF function. This function
 #'   cuts out a cell in a surface matrix based on the most top, bottom, left,
 #'   and right indices of the cell's location in the surface matrix.
+#'
+#' @keywords internal
 
 extractCellbyCornerLocs <- function(cornerLocs,
                                     rotatedSurfaceMat,
@@ -86,6 +90,10 @@ extractCellbyCornerLocs <- function(cornerLocs,
   return(splitRotatedSurfaceMat)
 }
 
+#' @name rotateSurfaceMatrix
+#'
+#' @keywords internal
+
 rotateSurfaceMatrix <- function(surfaceMat,
                                 theta = 0,
                                 interpolation = 0,...){
@@ -114,6 +122,8 @@ rotateSurfaceMatrix <- function(surfaceMat,
 #' @description This is a helper for the cellCCF function. This function
 #'   returns TRUE if a given cell contains more than 225 pixels of observed
 #'   values (i.e., non-NA values) and FALSE otherwise.
+#'
+#' @keywords internal
 
 checkForBreechface <- function(cell,
                                minObservedProp = .15,...){
@@ -128,6 +138,9 @@ checkForBreechface <- function(cell,
 #' @param mean average pixel value to shift an image by
 #'
 #' @description This is a helper for the cellCCF function.
+#'
+#' @keywords internal
+
 standardizeSurfaceMat <- function(surfaceMat,
                                   m,
                                   s,...){
@@ -135,6 +148,10 @@ standardizeSurfaceMat <- function(surfaceMat,
   surfaceMat[is.na(surfaceMat)] <- 0
   return(surfaceMat)
 }
+
+#' @name splitSurfaceMat1
+#'
+#' @keywords internal
 
 splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp,...){
 
@@ -169,6 +186,10 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
               cellSideLengths = cellSideLengths,
               mat1PixCounts = matPixCounts))
 }
+
+#' @name getMat2SplitLocations
+#'
+#' @keywords internal
 
 getMat2SplitLocations <- function(cellIDs,
                                   cellSideLengths,
@@ -217,6 +238,7 @@ getMat2SplitLocations <- function(cellIDs,
 
 #' @name swapCellIDAxes
 #'
+#' @keywords internal
 
 swapCellIDAxes <- function(cellID){
   sSplit <- stringr::str_split(string = cellID,pattern = ",",n = 2)

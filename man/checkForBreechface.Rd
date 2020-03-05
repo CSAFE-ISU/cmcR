@@ -14,3 +14,4 @@ This is a helper for the cellCCF function. This function
 returns TRUE if a given cell contains more than 225 pixels of observed
 values (i.e., non-NA values) and FALSE otherwise.
 }
+\keyword{internal}

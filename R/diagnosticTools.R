@@ -1,4 +1,6 @@
 #' @name ccfMap
+#'
+#' @keywords internal
 
 ccfMap <- function(mat1,mat2){
   #Test that mat1,mat2 contain no NAs

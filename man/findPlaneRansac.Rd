@@ -45,3 +45,4 @@ cartridges3D::findPlaneRansac function
 \seealso{
 cartridges3D package (LINK)
 }
+\keyword{internal}

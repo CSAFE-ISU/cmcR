@@ -4,7 +4,7 @@
 \alias{preProcess_levelBF}
 \title{Given the output of preProcess_ransac, extracts values (either raw or residual) from the surface matrix to which the RANSAC plane was fit.}
 \usage{
-preProcess_levelBF(ransacFit, useResiduals = FALSE, ...)
+preProcess_levelBF(ransacFit, useResiduals = FALSE)
 }
 \arguments{
 \item{useResiduals}{dictates whether the difference between the estimated

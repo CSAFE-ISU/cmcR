@@ -15,8 +15,7 @@ selectBFImpression_sample_x3p(
   m = 2,
   mY = m,
   offset = 0,
-  offsetY = offset,
-  ...
+  offsetY = offset
 )
 }
 \arguments{
@@ -43,11 +42,7 @@ direction and every mYth value is included in y direction}
 \item{offset}{integer value between 0 and m-1 to specify offset of the sample}
 
 \item{offsetY}{integer value between 0 and mY-1 to specify different offsets
-for x and y direction}
-
-\item{...}{arguments to be passed to fpCircleHoughDetection function. This is
-useful if, for example, the Hough transform appears to be mis-estimating
-where the firing pin impression circle is in the scan.}
+for x and y direction.}
 
 \item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
 inlierThreshold, this argument dictates which observations are selected as

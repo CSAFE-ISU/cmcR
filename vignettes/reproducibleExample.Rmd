@@ -14,11 +14,96 @@ vignette: >
   )
   ```
   
-  ```{r setup}
+```{r setup}
   library(cmcR)
+  library(magrittr)
 ```
 
 Select breech face impressions selecting raw values around the RANSAC fitted plane.
+
+```{r}
+km1_residuals <- x3ptools::read_x3p(file = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p") %>%
+  x3ptools::sample_x3p()
+
+km2_residuals <- x3ptools::read_x3p(file = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p") %>%
+  x3ptools::sample_x3p()
+
+km1_residuals$surface.matrix <- km1_residuals$surface.matrix %>%
+  cmcR::preProcess_ransac() %>%
+  cmcR::preProcess_levelBF(useResiduals = TRUE) %>%
+  cmcR::preProcess_cropWS()
+
+km2_residuals$surface.matrix <- km2_residuals$surface.matrix %>%
+  cmcR::preProcess_ransac() %>%
+  cmcR::preProcess_levelBF(useResiduals = TRUE) %>%
+  cmcR::preProcess_cropWS()
+```
+
+```{r}
+km1_residuals$surface.matrix %>%
+  multiply_by(10^5) %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white") +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
+km2_residuals$surface.matrix %>%
+  multiply_by(10^5) %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white") +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+```
+
+
+```{r}
+houghCircle <- cmcR::preProcess_detectFPCircle(km1_residuals$surface.matrix)
+
+km1_residuals$surface.matrix <- cmcR::preProcess_removeFPCircle(surfaceMat = km1_residuals$surface.matrix,
+                                                                fpImpressionCircle = houghCircle)
+```
+
+```{r}
+km1_residuals$surface.matrix %>%
+  multiply_by(10^5) %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white") +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+```
 
 ```{r}
 km1_nonResiduals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p",

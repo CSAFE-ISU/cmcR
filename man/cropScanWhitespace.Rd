@@ -7,7 +7,11 @@ case scan. Helper for selectBFImpression}
 \usage{
 cropScanWhitespace(surfaceMat, croppingThresh = 1, ...)
 }
+\arguments{
+\item{croppingThresh}{}
+}
 \description{
 Crop out rows/columns outside of the breech face impression in a cartridge
 case scan. Helper for selectBFImpression
 }
+\keyword{internal}

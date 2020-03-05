@@ -5,7 +5,13 @@
 \title{Given a surface matrix and the output of preProcess_detectFPCircle, filters
 any pixels within the estimated firing pin impression circle}
 \usage{
-preProcess_removeFPCircle(surfaceMat, fpImpressionCircle)
+preProcess_removeFPCircle(
+  surfaceMat,
+  aggregation_function = mean,
+  smootherSize = 2 * round((0.1 * nrow(surfaceMat)/2)) + 1,
+  meshSize = 1,
+  houghScoreQuant = 0.9
+)
 }
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
