@@ -110,7 +110,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     dplyr::ungroup() %>%
     dplyr::filter(n == max(n))
 
-  if(purrr::is_empty(cmcMax$theta)){
+  if(purrr::is_empty(cmcMax$theta) | nrow(cmcMax) == 0){
     return(NA)
   }
 
@@ -123,7 +123,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   }
   #
   maxDistancetoCMCMax <- cmcCountPerTheta %>%
-    dplyr::filter(all(n >= cmcMax$n - highCMC_thresh)) %>%
+    dplyr::filter(all(n >= unique(cmcMax$n) - highCMC_thresh)) %>%
     dplyr::group_by(theta) %>%
     #if there may be multiple theta values tied for cmcMax that are within
     #theta_thresh of each other, then we can't discount any of them as being

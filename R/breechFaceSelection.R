@@ -221,7 +221,7 @@ selectBFImpression <- function(x3p_path,
   #the firing pin impression circle and filtering out any pixels within that
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
-  fpImpressionCircle <-  preProcess_detectFPCircle(surfaceMat,
+  fpImpressionCircle <-  preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
                                                    aggregation_function = mean,
                                                    smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
                                                    meshSize = 1,
@@ -322,7 +322,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #the firing pin impression circle and filtering out any pixels within that
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
-  fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat,
+  fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
                                                   aggregation_function = mean,
                                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
                                                   meshSize = 1,
@@ -423,7 +423,7 @@ selectBFImpression_resize <- function(x3p_path,
     cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
 
   #Some additional, unwanted pixels remain in the middle of the cartridge scan even after the RANSAC method has selected the breech face impression height values. We can remove these unwanted pixels by identifying the equation of the firing pin impression circle and filtering out any pixels within that circle. The following returns the estimated center and radius of the firing pin impression circle:
-  fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat,
+  fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
                                                   aggregation_function = mean,
                                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
                                                   meshSize = 1,

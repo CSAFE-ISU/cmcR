@@ -306,7 +306,7 @@ preProcess_removeFPCircle <- function(surfaceMat,
 #' @export
 
 preProcess_gaussFilter <- function(surfaceMat,
-                                   res = selectedBF_x3p$header.info$incrementY,
+                                   res = 6.25e-06, #resolution of "raw" Fadul scans
                                    wavelength,
                                    filtertype = "bp"){
 
@@ -314,9 +314,9 @@ preProcess_gaussFilter <- function(surfaceMat,
     res <- res*(10^(6)) #rescale to microns
   }
 
-  surfaceMatMissing <- is.na(selectedBF_x3p$surface.matrix)
+  surfaceMatMissing <- is.na(surfaceMat)
 
-  surfaceMatFake <- selectedBF_x3p$surface.matrix - mean(as.vector(selectedBF_x3p$surface.matrix),na.rm=TRUE)
+  surfaceMatFake <- surfaceMat - mean(as.vector(surfaceMat),na.rm=TRUE)
   surfaceMatFake[is.na(surfaceMatFake)] <- 0
 
   surfaceMatFake <- surfaceMatFake*(10^6) #scale to microns (avoids small number numerical issues?)
@@ -330,6 +330,5 @@ preProcess_gaussFilter <- function(surfaceMat,
 
   surfaceMatFiltered <- surfaceMatFiltered/(10^6)
 
-  selectBFImpression_output$x3p$surface.matrix <- surfaceMatFiltered
-  return(selectBFImpression_output)
+  return(surfaceMatFiltered)
 }
