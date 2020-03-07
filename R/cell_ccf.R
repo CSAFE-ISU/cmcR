@@ -418,11 +418,11 @@ cellCCF <- function(x3p1,
     if(!missing(centerCell)){
       if(centerCell == "individualCell"){
         m1 <- mat1_splitFiltered %>%
-          map(~ mean(.,na.rm = TRUE)) %>%
+          purrr::map(~ mean(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)
 
         m2 <-  mat2_splitFiltered %>%
-          map(~ mean(.,na.rm = TRUE)) %>%
+          purrr::map(~ mean(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)
       }
     }
@@ -430,11 +430,11 @@ cellCCF <- function(x3p1,
     if(!missing(scaleCell)){
       if(scaleCell == "individualCell"){
         sd1 <-  mat1_splitFiltered %>%
-          map(~ sd(.,na.rm = TRUE)) %>%
+          purrr::map(~ sd(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)
 
         sd2 <-  mat2_splitFiltered %>%
-          map(~ sd(.,na.rm = TRUE)) %>%
+          purrr::map(~ sd(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)
       }
     }

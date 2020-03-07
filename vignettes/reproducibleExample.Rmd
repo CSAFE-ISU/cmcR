@@ -168,102 +168,6 @@ km1_residuals$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 ```
 
-```{r}
-km1_nonResiduals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p",
-                                                  ransacIters = 200,
-                                                  ransacInlierThresh = 10^-5,
-                                                  ransacFinalSelectThresh = 2*(10^-5),
-                                                  useResiduals = FALSE)
-km2_nonResiduals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                                  ransacIters = 200,
-                                                  ransacInlierThresh = 10^-5,
-                                                  ransacFinalSelectThresh = 2*(10^-5),
-                                                  useResiduals = FALSE)
-unknown1_nonResiduals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p",
-                                                       ransacIters = 200,
-                                                       ransacInlierThresh = 10^-5,
-                                                       ransacFinalSelectThresh = 2*(10^-5),
-                                                       useResiduals = FALSE)
-unknown2_nonResiduals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_2/cc/Fadul 2-1.x3p",
-                                                       ransacIters = 200,
-                                                       ransacInlierThresh = 10^-5,
-                                                       ransacFinalSelectThresh = 2*(10^-5),
-                                                       useResiduals = FALSE)
-```
-
-```{r}
-imager::imlist(imager::as.cimg(km1_nonResiduals$x3p$surface.matrix),
-               imager::as.cimg(km2_nonResiduals$x3p$surface.matrix),
-               imager::as.cimg(unknown1_nonResiduals$x3p$surface.matrix),
-               imager::as.cimg(unknown2_nonResiduals$x3p$surface.matrix)) %>%
-  plot()
-```
-
-```{r}
-km1Unknown1CCF_nonResiduals <- cellCCF_bothDirections(x3p1 = km1_nonResiduals$x3p,
-                                                      x3p2 = unknown1_nonResiduals$x3p,
-                                                      thetas = seq(-30,30,by = 3),
-                                                      cellNumHoriz = 8,
-                                                      cellNumVert = 8,
-                                                      centerCell = "wholeMatrix")
-
-km1Unknown2CCF_nonResiduals <- cellCCF_bothDirections(x3p1 = km1_nonResiduals$x3p,
-                                                      x3p2 = unknown2_nonResiduals$x3p,
-                                                      thetas = seq(-30,30,by = 3),
-                                                      cellNumHoriz = 8,
-                                                      cellNumVert = 8,
-                                                      centerCell = "wholeMatrix")
-
-km2Unknown1CCF_nonResiduals <- cellCCF_bothDirections(x3p1 = km2_nonResiduals$x3p,
-                                                      x3p2 = unknown1_nonResiduals$x3p,
-                                                      thetas = seq(-30,30,by = 3),
-                                                      cellNumHoriz = 8,
-                                                      cellNumVert = 8,
-                                                      centerCell = "wholeMatrix")
-
-km2Unknown2CCF_nonResiduals <- cellCCF_bothDirections(x3p1 = km2_nonResiduals$x3p,
-                                                      x3p2 = unknown2_nonResiduals$x3p,
-                                                      thetas = seq(-30,30,by = 3),
-                                                      cellNumHoriz = 8,
-                                                      cellNumVert = 8,
-                                                      centerCell = "wholeMatrix")
-```
-
-```{r}
-km1Unknown1CMCs_nonResiduals <- cmcFilter_improved(km1Unknown1CCF_nonResiduals,
-                                                   consensus_function = median,
-                                                   ccf_thresh = .4,
-                                                   dx_thresh = 25,
-                                                   theta_thresh = 3,
-                                                   consensus_function_theta = median)
-
-km1Unknown2CMCs_nonResiduals <- cmcFilter_improved(km1Unknown2CCF_nonResiduals,
-                                                   consensus_function = median,
-                                                   ccf_thresh = .4,
-                                                   dx_thresh = 25,
-                                                   theta_thresh = 3,
-                                                   consensus_function_theta = median)
-
-km2Unknown1CMCs_nonResiduals <- cmcFilter_improved(km2Unknown1CCF_nonResiduals,
-                                                   consensus_function = median,
-                                                   ccf_thresh = .4,
-                                                   dx_thresh = 25,
-                                                   theta_thresh = 3,
-                                                   consensus_function_theta = median)
-
-km2Unknown2CMCs_nonResiduals <- cmcFilter_improved(km2Unknown2CCF_nonResiduals,
-                                                   consensus_function = median,
-                                                   ccf_thresh = .4,
-                                                   dx_thresh = 25,
-                                                   theta_thresh = 3,
-                                                   consensus_function_theta = median)
-
-km1Unknown1CMCs_nonResiduals$finalCMCs
-km1Unknown2CMCs_nonResiduals$finalCMCs
-km2Unknown1CMCs_nonResiduals$finalCMCs
-km2Unknown2CMCs_nonResiduals$finalCMCs
-```
-
 Select breech face impressions selecting the residuals between the RANSAC fitted plane and raw values.
 
 ```{r}
@@ -287,16 +191,52 @@ unknown2_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCart
                                                     ransacInlierThresh = 10^-5,
                                                     ransacFinalSelectThresh = 2*(10^-5),
                                                     useResiduals = TRUE)
-```
 
+x3p1 <- x3ptools::read_x3p("path/to/file") %>%
+  x3ptools::sample_x3p(m = 2,offset = 0)
+
+x3p1$surface.matrix <- x3p1$surface.matrix %>%
+  preProcess_ransac(inlierTreshold = 10^(-5), #1 micron
+                    finalSelectionThreshold = 2*10^(-5), #2 microns
+                    iters =  200) %>%
+  preProcess_levelBF(useResiduals = TRUE) %>%
+  preProcess_cropWS(croppingThresh = 2) %>%
+  preProcess_removeFPCircle() %>%
+  preProcess_gaussFilter(res = x3p$header.info$incrementY,#resolution of downsampled scan
+                         wavelength = c(16,250),
+                         filtertype = "bp")
+```
 
 ```{r}
-imager::imlist(imager::as.cimg(km1_Residuals$x3p$surface.matrix),
-               imager::as.cimg(km2_Residuals$x3p$surface.matrix),
-               imager::as.cimg(unknown1_Residuals$x3p$surface.matrix),
-               imager::as.cimg(unknown2_Residuals$x3p$surface.matrix)) %>%
-  plot()
+unknown2_Residuals$x3p$surface.matrix %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white") +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
 ```
+
+```{r}
+dat <- cellCCF(km1_Residuals$x3p,km2_Residuals$x3p,
+        thetas = seq(-30,30,by = 3),
+        cellNumHoriz = 8,
+        cellNumVert = 8,
+        centerCell = "individualCell",
+        scaleCell = "individualCell")
+
+dat$ccfResults %>% topResultsPerCell()
+```
+
 
 ```{r}
 km1Unknown1CCF_Residuals <- cellCCF_bothDirections(x3p1 = km1_Residuals$x3p,
@@ -304,7 +244,8 @@ km1Unknown1CCF_Residuals <- cellCCF_bothDirections(x3p1 = km1_Residuals$x3p,
                                                    thetas = seq(-30,30,by = 3),
                                                    cellNumHoriz = 8,
                                                    cellNumVert = 8,
-                                                   centerCell = "wholeMatrix")
+                                                   centerCell = "wholeMatrix",
+                                                   scaleCell = "wholeMatrix")
 
 km1Unknown2CCF_Residuals <- cellCCF_bothDirections(x3p1 = km1_Residuals$x3p,
                                                    x3p2 = unknown2_Residuals$x3p,
