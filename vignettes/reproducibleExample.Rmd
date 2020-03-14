@@ -19,6 +19,94 @@ library(cmcR)
 library(magrittr)
 ```
 
+```{r}
+km1_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p")
+km2_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p")
+unknown1_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p")
+unknown2_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_2/cc/Fadul 2-1.x3p")
+
+km1_raw$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(km1_raw$surface.matrix,
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
+km2_raw$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(km2_raw$surface.matrix,
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
+unknown1_raw$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(unknown1_raw$surface.matrix,
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
+unknown2_raw$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(unknown2_raw$surface.matrix,
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+```
+
+
 Select breech face impressions selecting the residuals between the RANSAC fitted plane and raw values.
 
 ```{r}
@@ -46,6 +134,7 @@ unknown2_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCart
 
 ```{r}
 km1_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -63,6 +152,7 @@ km1_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 km2_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -80,6 +170,7 @@ km2_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 unknown1_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -97,6 +188,7 @@ unknown1_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 unknown2_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -142,6 +234,7 @@ unknown2_Residuals$x3p$surface.matrix <-
 
 ```{r}
 km1_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -159,6 +252,7 @@ km1_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 km2_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -176,6 +270,7 @@ km2_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 unknown1_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -193,6 +288,7 @@ unknown1_Residuals$x3p$surface.matrix %>%
                  axis.title.y = ggplot2::element_blank())
 
 unknown2_Residuals$x3p$surface.matrix %>% 
+  t() %>%
   imager::as.cimg() %>%
   as.data.frame() %>%
   ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
@@ -318,44 +414,54 @@ km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               ccf_thresh = .3,
                                               dx_thresh = 20)
 
-km1_unknown1_cmcs$initialCMCs[[1]][[1]]  %>%
+km1_unknown1_cmcs$initialCMCs[[1]][[2]]  %>%
   dplyr::arrange(cellNum)
 
-km1_unknown2_cmcs$initialCMCs[[1]][[1]]  %>%
+km1_unknown2_cmcs$initialCMCs[[1]][[2]]  %>%
+  dplyr::arrange(cellNum)
+
+km1_unknown1_cmcs$finalCMCs  %>%
   dplyr::arrange(cellNum)
 ```
 
 ```{r}
 blankImage <- matrix(NA,
-                     nrow = nrow(km1_Residuals$x3p$surface.matrix),
-                     ncol = ncol(km1_Residuals$x3p$surface.matrix))
+                     nrow = nrow(unknown1_Residuals$x3p$surface.matrix),
+                     ncol = ncol(unknown1_Residuals$x3p$surface.matrix))
 
-cmcR::getHighCCFPairs(km1_Residuals$x3p,
-                      unknown1_Residuals$x3p,
-                      cellCCF_output = km1_unknown1_comparison$comparison_1to2)
+cmcLocs <- km1_unknown1_cmcs$initialCMCs[[1]][[2]]$cellID %>%
+  stringr::str_extract_all(pattern = "[0-9]{1,}") %>%
+  purrr::map(as.numeric)
 
-for(ind in 1:length(im1_splitShifted)){
-  cellRowInd <- cellLocs[[ind]][1]:cellLocs[[ind]][2]
-  cellColInd <- cellLocs[[ind]][3]:cellLocs[[ind]][4]
-  blankImage[cellRowInd,cellColInd] <- as.matrix(im1_splitShifted[[ind]])
+# cmcLocs <- km1_unknown2_cmcs$initialCMCs[[1]][[2]]$cellID %>%
+#   stringr::str_extract_all(pattern = "[0-9]{1,}") %>%
+#   purrr::map(as.numeric)
+
+for(ind in 1:length(cmcLocs)){
+  cellRowInd <- cmcLocs[[ind]][1]:min(nrow(unknown1_Residuals$x3p$surface.matrix),cmcLocs[[ind]][2])
+  cellColInd <- cmcLocs[[ind]][3]:min(ncol(unknown1_Residuals$x3p$surface.matrix),cmcLocs[[ind]][4])
+  
+  blankImage[cellRowInd,cellColInd] <- 
+    as.matrix(unknown1_Residuals$x3p$surface.matrix[cellRowInd,cellColInd],nrow = max(cellRowInd),ncol = max(cellColInd))
 }
 
-imager::imlist(
-  "fadul1" = blankImage %>%
-    t() %>%
-    imager::as.cimg() %>%
-    imager::imrotate(angle = -90),
-  "fadul2" = congruentMatchingCells:::rotateSurfaceMatrix(fadul2_cropped,
-                                                          theta = -24) %>%
-    t() %>%
-    imager::as.cimg() %>%
-    imager::imrotate(angle = -90)
-) %>%
-  plot(xlim = c(0,max(nrow(fadul1_cropped),
-                      nrow(fadul2_cropped))),
-       ylim = c(0,max(ncol(fadul1_cropped),
-                      ncol(fadul2_cropped))),
-       layout = "row")
+blankImage %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white") +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
 ```
 
 

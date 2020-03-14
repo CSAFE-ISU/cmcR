@@ -526,6 +526,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    x3p2,
                                    thetas = seq(-30,30,by = 3),
                                    cellNumHoriz = 7,
+                                   regionToCellProp = 9,
                                    cellNumVert = cellNumHoriz,
                                    centerCell,
                                    scaleCell,...){
@@ -537,6 +538,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    thetas = thetas,
                                    cellNumHoriz = cellNumHoriz,
                                    cellNumVert = cellNumVert,
+                                   regionToCellProp = regionToCellProp,
                                    centerCell = centerCell,
                                    scaleCell = scaleCell)
 
@@ -545,6 +547,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    thetas = thetas,
                                    cellNumHoriz = cellNumHoriz,
                                    cellNumVert = cellNumVert,
+                                   regionToCellProp = regionToCellProp,
                                    centerCell = centerCell,
                                    scaleCell = scaleCell)
 
