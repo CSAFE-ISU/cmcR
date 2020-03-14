@@ -47,7 +47,8 @@ getHighCCFPairs <- function(x3p1,
 
   mat2_splitCorners <- cmcR:::getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
                                                     cellSideLengths = mat1_split$cellSideLengths,
-                                                    mat2Dim = dim(x3p2$surface.matrix))
+                                                    mat2Dim = dim(x3p2$surface.matrix),
+                                                    sidelengthMultiplier = floor(sqrt(params$regionToCellProp)))
 
   topResults_perTheta <- topResults %>%
     split(f = .$theta)

@@ -193,7 +193,9 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 
 getMat2SplitLocations <- function(cellIDs,
                                   cellSideLengths,
-                                  mat2Dim,...){
+                                  mat2Dim,
+                                  sidelengthMultiplier,
+                                  ...){
   mat2_splitCorners <- cellIDs %>%
     #pull all numbers from cellID strings:
     purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
@@ -207,10 +209,10 @@ getMat2SplitLocations <- function(cellIDs,
                 .y = cellSideLengths,
                 function(xyLoc,sideLength){
                   expandedCellCorners <-
-                    c(floor(xyLoc["y"] - sideLength["col"]),
-                      ceiling(xyLoc["y"] + sideLength["col"]),
-                      floor(xyLoc["x"] - sideLength["row"]),
-                      ceiling(xyLoc["x"] + sideLength["row"])) %>%
+                    c(floor(xyLoc["y"] - sidelengthMultiplier*sideLength["col"]/2),
+                      ceiling(xyLoc["y"] + sidelengthMultiplier*sideLength["col"]/2),
+                      floor(xyLoc["x"] - sidelengthMultiplier*sideLength["row"]/2),
+                      ceiling(xyLoc["x"] + sidelengthMultiplier*sideLength["row"]/2)) %>%
                     setNames(c("left","right","top","bottom"))
 
                   #replace negative indices with 0 (left/upper-most cells):
@@ -244,7 +246,7 @@ swapCellIDAxes <- function(cellID){
   sSplit <- stringr::str_split(string = cellID,pattern = ",",n = 2)
 
   paste0(stringr::str_replace(string = sSplit[[1]][1],pattern = "x",replacement = "y"),
-         ",",
+         ", ",
          stringr::str_replace(string = sSplit[[1]][2],pattern = "y",replacement = "x"))
 }
 
@@ -264,6 +266,9 @@ swapCellIDAxes <- function(cellID){
 #'   divide x3p1$surface.matrix into
 #' @param cellNumVert (default equal to cellNumHoriz) number of cells along
 #'   vertical axis to divide x3p1$surface.matrix into
+#' @param regionToCellProp determines how much larger the x3p2 regions will be
+#'   relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
+#'   the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)
 #' @param minObservedProp (default 15) the minimum proportion of a cell that
 #'   needs to contain observed (i.e., non-NA) values for it to be included in
 #'   the CCF calculation procedure
@@ -312,6 +317,7 @@ cellCCF <- function(x3p1,
                     thetas = seq(-30,30,by = 3),
                     cellNumHoriz = 7,
                     cellNumVert = cellNumHoriz,
+                    regionToCellProp = 9,
                     minObservedProp = .15,
                     centerCell,
                     scaleCell,...){
@@ -360,13 +366,22 @@ cellCCF <- function(x3p1,
                                  cellNumVert = cellNumVert,
                                  minObservedProp = minObservedProp)
 
+  #creating this df is necessary so that we can compare cells in similar
+  #positions between two comparisons (since their "cellID" may differ since
+  #the scans aren't the same size)
+  cellIDdf <- data.frame(cellNum = seq_along(mat1_split$cellIDs),
+                         cellID = mat1_split$cellIDs)
+
   #Now we want to split image B into cells with the same centers as those in
   #image A, but with twice the side length (these wider cells will intersect
   #each other). We will first get the dimensions (the x,y locations of each
   #cells' corners) of where each cell should be in image B.
+  sidelengthMultiplier <- floor(sqrt(regionToCellProp))
+
   mat2_splitCorners <- getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
                                              cellSideLengths = mat1_split$cellSideLengths,
-                                             mat2Dim = dim(mat2))
+                                             mat2Dim = dim(mat2),
+                                             sidelengthMultiplier = sidelengthMultiplier)
 
   for(theta in thetas){
     #rotate image 2 and split into cells:
@@ -412,6 +427,16 @@ cellCCF <- function(x3p1,
     #grab the cell IDs for each cell not removed above. This is used to update
     #topResults below
     filteredCellID <- mat1_split$cellIDs[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
+
+
+    #creating this df is necessary so that we can compare cells in similar
+    #positions between two comparisons (since their "cellID" may differ since
+    #the scans aren't the same size)
+    cellIDdf_filtered <- cellIDdf %>%
+      dplyr::filter(cellID %in% filteredCellID) %>%
+      #imager swaps x and y axes, so we need to swap them back to be more
+      #interpretable:
+      dplyr::mutate(cellID = purrr::map_chr(cellID,swapCellIDAxes))
 
     #shift the pixel values in each image so that they both have 0 mean. Then
     #replace the NA values with 0 (FFTs can't deal with NAs)
@@ -459,14 +484,13 @@ cellCCF <- function(x3p1,
     ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
                                  .y = mat2_splitShifted,
                                  .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
-      dplyr::mutate(cellID = filteredCellID %>%
-                      purrr::map_chr(swapCellIDAxes)) #imager swaps x and y axes, so we need to swap them back to be more interpretable
+      dplyr::bind_cols(cellIDdf_filtered,.)
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellID,ccf,dx,dy)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,dx,dy)) #rearrange columns in allResults
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -479,6 +503,7 @@ cellCCF <- function(x3p1,
     "params" = list("theta" = theta,
                     "cellNumHoriz" = cellNumHoriz,
                     "cellNumVert" = cellNumVert,
+                    "regionToCellProp" = regionToCellProp,
                     "minObservedProp" = minObservedProp,
                     "centerCell" = centerCell,
                     "mat1Shift" = m1,

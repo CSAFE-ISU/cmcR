@@ -106,6 +106,10 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     dplyr::group_by(theta) %>%
     dplyr::tally()
 
+  if(nrow(cmcCountPerTheta) == 0){
+    return(NA)
+  }
+
   cmcMax <- cmcCountPerTheta %>%
     dplyr::ungroup() %>%
     dplyr::filter(n == max(n))
@@ -121,15 +125,15 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   if(any(diff(cmcMax$theta) > theta_thresh)){
     return(NA)
   }
-  #
+
+  #if there may be multiple theta values tied for cmcMax that are within
+  #theta_thresh of each other, then we can't discount any of them as being
+  #the "true" theta value (alternatively, may be we should discount all as
+  #NOT being the true theta value?). Instead we'll consider how far the
+  #"high CMC" theta values are from the closest tied maxCMC theta value.
   maxDistancetoCMCMax <- cmcCountPerTheta %>%
-    dplyr::filter(all(n >= unique(cmcMax$n) - highCMC_thresh)) %>%
+    dplyr::filter(n >= unique(cmcMax$n) - highCMC_thresh) %>%
     dplyr::group_by(theta) %>%
-    #if there may be multiple theta values tied for cmcMax that are within
-    #theta_thresh of each other, then we can't discount any of them as being
-    #the "true" theta value (alternatively, may be we should discount all as
-    #NOT being the true theta value?). Instead we'll consider how far the
-    #"high CMC" theta values are from the closest tied maxCMC theta value.
     dplyr::summarise(distanceToCMCMax = min(abs(cmcMax$theta - theta))) %>%
     dplyr::pull(distanceToCMCMax) %>%
     max()
@@ -195,7 +199,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   }
 
   if(all(is.na(thetaMax))){
-    # print("Note: neither comparison produces a valid max CMC theta value. The initial CMCs based on the top results per cell will be returned.")
+    # print("Note: neither comparison produces a valid max CMC theta value. The
+    # initial CMCs based on the top results per cell will be returned.")
     return(list("params" = list(consensus_function = consensus_function,
                                 ccf_thresh = ccf_thresh,
                                 dx_thresh = dx_thresh,
@@ -209,13 +214,14 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                      names(cmcPerTheta),
                                      thetaMax),
                            function(cmcs,compName,th){
-                             cmcs %>%
-                               dplyr::filter(theta >= th - 3 & theta <= th + 3) %>%
+                             purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
                                dplyr::mutate(comparison = rep(compName,times = nrow(.)))
                            }) %>%
     dplyr::bind_rows() %>%
-    dplyr::group_by(cellID) %>%
-    dplyr::filter(ccf == max(ccf))
+    dplyr::distinct() %>%
+    dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
+    dplyr::filter(ccf == max(ccf)) %>%
+    dplyr::ungroup()
 
   return(list("params" = list(consensus_function = consensus_function,
                               ccf_thresh = ccf_thresh,
