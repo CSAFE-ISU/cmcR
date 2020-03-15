@@ -25,6 +25,50 @@ km2_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1
 unknown1_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p")
 unknown2_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_2/cc/Fadul 2-1.x3p")
 
+
+mat1 <- cmcR::selectBFImpression("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p",useResiduals = FALSE)
+mat2 <- cmcR::selectBFImpression("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",useResiduals = FALSE)
+
+mat1$x3p$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(as.vector(mat1$x3p$surface.matrix),
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
+mat2$x3p$surface.matrix %>%
+  t() %>%
+  imager::as.cimg() %>%
+  as.data.frame() %>%
+  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  ggplot2::scale_fill_gradient2(low = "grey0",
+                                mid = "grey50",
+                                high = "grey100",
+                                na.value = "white",
+                                midpoint = median(as.vector(median(as.vector(mat2$x3p$surface.matrix),
+                                                            na.rm = TRUE)))) +
+  ggplot2::coord_fixed(expand = FALSE) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                 panel.grid.minor = ggplot2::element_blank(),
+                 legend.position = "none",
+                 axis.title.x = ggplot2::element_blank(),
+                 axis.title.y = ggplot2::element_blank())
+
 km1_raw$surface.matrix %>%
   t() %>%
   imager::as.cimg() %>%

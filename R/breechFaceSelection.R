@@ -50,18 +50,23 @@ findPlaneRansac <- function(surfaceMat,
     errors <- abs(preds - observedPixelLocations$depth)
     inlierBool <- errors < inlierTreshold
 
-    if (sum(inlierBool) > inlierCount) { #if candidate plane is closer to more observed values, make this the new fitted plane
+    #if candidate plane is closer to more observed values, make this the new
+    #fitted plane
+    if (sum(inlierBool) > inlierCount) {
       finalPlaneErrors <- errors
       inlierCount <- sum(inlierBool)
       inliers <- inlierBool
     }
   }
 
-  # final coefs only computed using inliers
+  # final coefs only computed using inliers. fit the plane based on what we've
+  # identified to be inliers
   finalRansacPlane <- lm(depth ~ row + col,
-                         data = observedPixelLocations[inliers, ]) #fit the plane based on what we've identified to be inliers
+                         data = observedPixelLocations[inliers, ])
 
-  #Once the plane is fitted based on the inliers identified, we want to take a potentially larger band of observations around the fitted plane than just the inlier threshold:
+  #Once the plane is fitted based on the inliers identified, we want to take a
+  #potentially larger band of observations around the fitted plane than just the
+  #inlier threshold:
   finalInliers <- finalPlaneErrors < finalSelectionThreshold
 
   inlierLocations <- cbind(observedPixelLocations$row[finalInliers],
@@ -125,7 +130,8 @@ levelBFImpression <- function(ransacFit,
 
 cropScanWhitespace <- function(surfaceMat,
                                croppingThresh = 1,...){
-  #Look at the middle 20% of columns and count the number of non-NA pixels in each
+  #Look at the middle 20% of columns and count the number of non-NA pixels in
+  #each
   colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
                          (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
     is.na() %>%
@@ -164,6 +170,9 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 }
 
 #' @name selectBFImpression
+#'
+#' @description Given a string representing a path to a cartridge case scan .x3p file, this function will read and process the scan including (1) use the RANSAC iterative plane fitting method to detect the height value at which the breech face impressions are in the scan, (2) crop out extra whitespace, NA values from the exterior of the resulting breech face impression surface matrix, and (3) detect and filter the inner firing pin impression circle using a circular Hough transform. Note that the RANSAC method is applied twice to the scan: once to get a rough estimate of the breech face impression height values (controlled with the ransacInlierThresh and ransacIters arguments) and again using .1*ransacInlierThresh and 2*ransacIters to get a more precise estimate.
+#'
 #' @param x3p_path path to a .x3p file
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
@@ -207,13 +216,24 @@ selectBFImpression <- function(x3p_path,
     return(x3p)
   }
 
-  #First, we want to find the approximate height value(s) of the breech face impression within the cartridge case scan. We can find this using the RANSAC method
+  #First, we want to find the approximate height value(s) of the breech face
+  #impression within the cartridge case scan. We can find this using the RANSAC
+  #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
-    levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
-    cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
+    #either returns residuals between fitted RANSAC plane and observed cartridge
+    #case scan values or just returns the raw values of the estimated bf
+    #impression
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #do it again, but with more restrictive thresholds:
+    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    iters = 2*ransacIters) %>%
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #also crop out whitespace on exterior of cartridge case scan
+    cropScanWhitespace(croppingThresh = croppingThresh)
 
   #Some additional, unwanted pixels remain in the middle of the cartridge scan
   #even after the RANSAC method has selected the breech face impression height
@@ -313,8 +333,17 @@ selectBFImpression_sample_x3p <- function(x3p_path,
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
-    levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
-    cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
+    #either returns residuals between fitted RANSAC plane and observed cartridge
+    #case scan values or just returns the raw values of the estimated bf
+    #impression
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #do it again, but with more restrictive thresholds:
+    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    iters = 2*ransacIters) %>%
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #also crop out whitespace on exterior of cartridge case scan
+    cropScanWhitespace(croppingThresh = croppingThresh)
 
   #Some additional, unwanted pixels remain in the middle of the cartridge scan
   #even after the RANSAC method has selected the breech face impression height
@@ -419,10 +448,24 @@ selectBFImpression_resize <- function(x3p_path,
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
-    levelBFImpression(useResiduals = useResiduals) %>% #either returns residuals between fitted RANSAC plane and observed cartridge case scan values or just returns the raw values of the estimated bf impression
-    cropScanWhitespace(croppingThresh = croppingThresh) #also crop out whitespace on exterior of cartridge case scan
+    #either returns residuals between fitted RANSAC plane and observed cartridge
+    #case scan values or just returns the raw values of the estimated bf
+    #impression
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #do it again, but with more restrictive thresholds:
+    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    iters = 2*ransacIters) %>%
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #also crop out whitespace on exterior of cartridge case scan
+    cropScanWhitespace(croppingThresh = croppingThresh)
 
-  #Some additional, unwanted pixels remain in the middle of the cartridge scan even after the RANSAC method has selected the breech face impression height values. We can remove these unwanted pixels by identifying the equation of the firing pin impression circle and filtering out any pixels within that circle. The following returns the estimated center and radius of the firing pin impression circle:
+  #Some additional, unwanted pixels remain in the middle of the cartridge scan
+  #even after the RANSAC method has selected the breech face impression height
+  #values. We can remove these unwanted pixels by identifying the equation of
+  #the firing pin impression circle and filtering out any pixels within that
+  #circle. The following returns the estimated center and radius of the firing
+  #pin impression circle:
   fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
                                                   aggregation_function = mean,
                                                   smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
@@ -437,7 +480,11 @@ selectBFImpression_resize <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  #Important note: x3ptools and imager read an image from a surface matrix starting from the bottom left corner and moving upwards. Thus, a matrix ends up being treated like its transpose within these packages. For example, the "Y" axis of an x3p object actually refers to the columns in the surface matrix
+  #Important note: x3ptools and imager read an image from a surface matrix
+  #starting from the bottom left corner and moving upwards. Thus, a matrix ends
+  #up being treated like its transpose within these packages. For example, the
+  #"Y" axis of an x3p object actually refers to the columns in the surface
+  #matrix
   x3p$header.info <- list(sizeY = ncol(bfImpressionFinal),
                           sizeX = nrow(bfImpressionFinal),
                           incrementY = (x3p$incrementY/x3p$sizeY)*size_y,
