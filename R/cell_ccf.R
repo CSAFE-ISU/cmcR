@@ -250,6 +250,119 @@ swapCellIDAxes <- function(cellID){
          stringr::str_replace(string = sSplit[[1]][2],pattern = "y",replacement = "x"))
 }
 
+#' @name calcRawCorr
+#'
+#' @keywords internal
+
+calcRawCorr <- function(cell,region,dx,dy){
+  regionCenter <- floor(dim(region)/2)
+
+  alignedCenter <- regionCenter - c(dy,dx)
+
+  alignedRows <- c((alignedCenter[1] - floor(dim(cell)[1]/2)),(alignedCenter[1] + floor(dim(cell)[1]/2)))
+
+  alignedCols <- c((alignedCenter[2] - floor(dim(cell)[2]/2)),(alignedCenter[2] + floor(dim(cell)[2]/2)))
+
+  regionCroppedInitial <- region[max(1,alignedRows[1]):min(nrow(region),alignedRows[2]),
+                                 max(1,alignedCols[1]):min(ncol(region),alignedCols[2])]
+
+  #build-in some contingencies in case the regionCropped isn't same size as
+  #the cell. If the dimensions don't agree, then we need to consider copies
+  #of regionCroppedInitial that have been had rows/cols (whichever
+  #applicable) cropped from the top/bottom or left/right
+  regionCroppedList <- list("initial" = regionCroppedInitial)
+
+  if(any(dim(regionCroppedInitial) != dim(cell))){
+
+    #two copies if rows are off
+    if(nrow(regionCroppedInitial) > nrow(cell) & ncol(regionCroppedInitial) <= ncol(cell)){
+      rowsToCrop <- abs(nrow(regionCroppedInitial) - nrow(cell))
+
+      regionCroppedRowPre <- regionCroppedInitial[-rowsToCrop,]
+      regionCroppedRowPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),]
+
+      regionCroppedList$rowPre <- regionCroppedRowPre
+      regionCroppedList$rowPost <- regionCroppedRowPost
+    }
+
+    #2 copies if cols are off
+    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) <= nrow(cell)){
+      colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
+
+      regionCroppedColPre <- regionCroppedInitial[,-colsToCrop]
+      regionCroppedColPost <- regionCroppedInitial[,-(ncol(regionCroppedInitial) - colsToCrop)]
+
+      regionCroppedList$colPre <- regionCroppedColPre
+      regionCroppedList$colPost <- regionCroppedColPost
+    }
+
+    #4 different copies if both dimensions are off
+    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) > nrow(cell)){
+      colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
+
+      rowsToCrop <- abs(nrow(regionCroppedInitial) - nrow(cell))
+
+      regionCroppedBothPre <- regionCroppedInitial[-rowsToCrop,
+                                                   -colsToCrop]
+
+      regionCroppedRowPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),
+                                                   -colsToCrop]
+
+      regionCroppedColPost <- regionCroppedInitial[-rowsToCrop,
+                                                  -(ncol(regionCroppedInitial) - colsToCrop)]
+
+      regionCroppedBothPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),
+                                                   -(ncol(regionCroppedInitial) - colsToCrop)]
+
+      regionCroppedList$bothPre <- regionCroppedBothPre
+      regionCroppedList$RowPost <- regionCroppedRowPost
+      regionCroppedList$colPost <- regionCroppedColPost
+      regionCroppedList$BothPost <- regionCroppedBothPost
+    }
+
+    #these make sure that the indices that we've cropped the region by aren't
+    #less than 1 or larger than the dimension of the region
+    if(alignedRows[1] < 1){
+      rowsToPad <- -1*alignedRows[1] + 1
+
+      regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
+                                    regionCroppedInitial)
+    }
+    if(alignedRows[2] > nrow(region)){
+      rowsToPad <- alignedRows[2] - nrow(region)
+
+      regionCroppedInitial <- rbind(regionCroppedInitial,
+                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
+    }
+    if(alignedCols[1] < 1){
+      colsToPad <- -1*alignedCols[1] + 1
+
+      regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
+                                    regionCroppedInitial)
+    }
+    if(alignedCols[2] > ncol(region)){
+      colsToPad <- alignedCols[2] - ncol(region)
+
+      regionCroppedInitial <- cbind(regionCroppedInitial,
+                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
+    }
+  }
+
+  #return NA if cor fails.
+  corSafe <- purrr::safely(cor,otherwise = NA,quiet = TRUE)
+
+  corrVals <- purrr::map_dbl(regionCroppedList,function(croppedRegion){
+
+    corVal <- corSafe(as.vector(cell),
+                      as.vector(croppedRegion),
+                      use = "pairwise.complete.obs")
+
+    as.numeric(corVal[1])
+  })
+
+  as.numeric(corrVals[which.max(corrVals)])
+}
+
 #' Calculate the maximum correlation between two breech face impressions split
 #' into cells for range of rotation values
 #' @name cellCCF
@@ -431,7 +544,8 @@ cellCCF <- function(x3p1,
 
     #creating this df is necessary so that we can compare cells in similar
     #positions between two comparisons (since their "cellID" may differ since
-    #the scans aren't the same size)
+    #the scans aren't the same size, but their absolute position in the grid
+    #(e.g., 4th from the left in the top row) will remain the same)
     cellIDdf_filtered <- cellIDdf %>%
       dplyr::filter(cellID %in% filteredCellID) %>%
       #imager swaps x and y axes, so we need to swap them back to be more
@@ -484,13 +598,18 @@ cellCCF <- function(x3p1,
     ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
                                  .y = mat2_splitShifted,
                                  .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
-      dplyr::bind_cols(cellIDdf_filtered,.)
+      dplyr::bind_cols(cellIDdf_filtered,.) %>%
+      dplyr::mutate(rawCorr = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
+                                                        mat2_splitFiltered,
+                                                        .$dx,
+                                                        .$dy),
+                                              .f = calcRawCorr))
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,dx,dy)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,rawCorr,ccf,dx,dy)) #rearrange columns in allResults
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -500,7 +619,7 @@ cellCCF <- function(x3p1,
   }
 
   return(list(
-    "params" = list("theta" = theta,
+    "params" = list("theta" = thetas,
                     "cellNumHoriz" = cellNumHoriz,
                     "cellNumVert" = cellNumVert,
                     "regionToCellProp" = regionToCellProp,

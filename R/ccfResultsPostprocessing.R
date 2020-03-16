@@ -217,39 +217,39 @@ extractMatchedCells <- function(x3p1,
   return(alignedCells)
 }
 
-#' @name calcRawCorr
-#'
-#' Export this?
-#'
-#' @keywords internal
+##' @name calcRawCorr
+##'
+##' Export this?
+##'
+##' @keywords internal
 
-calcRawCorr <- function(x3p1,
-                        x3p2,
-                        cellCCF_results,
-                        initialCMCsOnly = FALSE,
-                        use = "pairwise.complete.obs",...){
-
-  highCCFCel
-
-  ls <- cmcR:::extractMatchedCells(x3p1,
-                                             x3p2,
-                                             cellCCF_results,
-                                             initialCMCsOnly = FALSE,...)
-
-  rawCorr <- purrr::map_dbl(highCCFCells,
-                            function(pair){
-                              if(any(
-                                all(is.na(as.vector(pair[[1]]))) | all(is.na(as.vector(pair[[2]])))
-                              )){
-                                return(NA)
-                              }
-                              else{
-                                cor(as.vector(pair[[1]]),
-                                    as.vector(pair[[2]]),
-                                    use = use)
-                              }
-                            })
-
-  return(rawCorr)
-}
+# calcRawCorr <- function(x3p1,
+#                         x3p2,
+#                         cellCCF_results,
+#                         initialCMCsOnly = FALSE,
+#                         use = "pairwise.complete.obs",...){
+#
+#   highCCFCel
+#
+#   ls <- cmcR:::extractMatchedCells(x3p1,
+#                                    x3p2,
+#                                    cellCCF_results,
+#                                    initialCMCsOnly = FALSE,...)
+#
+#   rawCorr <- purrr::map_dbl(highCCFCells,
+#                             function(pair){
+#                               if(any(
+#                                 all(is.na(as.vector(pair[[1]]))) | all(is.na(as.vector(pair[[2]])))
+#                               )){
+#                                 return(NA)
+#                               }
+#                               else{
+#                                 cor(as.vector(pair[[1]]),
+#                                     as.vector(pair[[2]]),
+#                                     use = use)
+#                               }
+#                             })
+#
+#   return(rawCorr)
+# }
 

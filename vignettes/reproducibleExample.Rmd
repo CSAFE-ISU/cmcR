@@ -1,16 +1,21 @@
 ---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
 title: "Cartridge Case Reproducible Example"
 output: rmarkdown::html_vignette
 vignette: >
 %\VignetteIndexEntry{Cartridge Case Reproducible Example}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
-  ---
-  
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
+---
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-collapse = TRUE,
-comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 ```
 
@@ -19,7 +24,7 @@ library(cmcR)
 library(magrittr)
 ```
 
-```{r}
+```{r eval=FALSE}
 km1_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p")
 km2_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p")
 unknown1_raw <- x3ptools::read_x3p("../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p")
@@ -40,7 +45,7 @@ mat1$x3p$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(as.vector(mat1$x3p$surface.matrix),
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -60,7 +65,7 @@ mat2$x3p$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(as.vector(mat2$x3p$surface.matrix),
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -80,7 +85,7 @@ km1_raw$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(km1_raw$surface.matrix,
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -100,7 +105,7 @@ km2_raw$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(km2_raw$surface.matrix,
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -120,7 +125,7 @@ unknown1_raw$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(unknown1_raw$surface.matrix,
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -140,7 +145,7 @@ unknown2_raw$surface.matrix %>%
                                 high = "grey100",
                                 na.value = "white",
                                 midpoint = median(as.vector(median(unknown2_raw$surface.matrix,
-                                                            na.rm = TRUE)))) +
+                                                                   na.rm = TRUE)))) +
   ggplot2::coord_fixed(expand = FALSE) +
   ggplot2::theme_bw() +
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -153,30 +158,32 @@ unknown2_raw$surface.matrix %>%
 
 Select breech face impressions selecting the residuals between the RANSAC fitted plane and raw values.
 
-```{r}
+```{r }
+set.seed(3152020)
+
 km1_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-1.x3p",
-                                               ransacIters = 200,
+                                               ransacIters = 150,
                                                ransacInlierThresh = 10^-5,
                                                ransacFinalSelectThresh = 2*(10^-5),
                                                useResiduals = TRUE)
 km2_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                               ransacIters = 200,
+                                               ransacIters = 150,
                                                ransacInlierThresh = 10^-5,
                                                ransacFinalSelectThresh = 2*(10^-5),
                                                useResiduals = TRUE)
 unknown1_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p",
-                                                    ransacIters = 200,
+                                                    ransacIters = 150,
                                                     ransacInlierThresh = 10^-5,
                                                     ransacFinalSelectThresh = 2*(10^-5),
                                                     useResiduals = TRUE)
 unknown2_Residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_2/cc/Fadul 2-1.x3p",
-                                                    ransacIters = 200,
+                                                    ransacIters = 150,
                                                     ransacInlierThresh = 10^-5,
                                                     ransacFinalSelectThresh = 2*(10^-5),
                                                     useResiduals = TRUE)
 ```
 
-```{r}
+```{r eval=FALSE}
 km1_Residuals$x3p$surface.matrix %>% 
   t() %>%
   imager::as.cimg() %>%
@@ -355,9 +362,9 @@ unknown2_Residuals$x3p$surface.matrix %>%
 km1_unknown1_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
                                                   unknown1_Residuals$x3p,
                                                   thetas = seq(-30,30,by = 3),
-                                                  cellNumHoriz = 7,
-                                                  cellNumVert = 7,
-                                                  regionToCellProp = 9,
+                                                  cellNumHoriz = 8,
+                                                  cellNumVert = 8,
+                                                  regionToCellProp = 4,
                                                   minObservedProp = .15,
                                                   centerCell = "individualCell",
                                                   scaleCell = "individualCell")
@@ -365,29 +372,29 @@ km1_unknown1_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
 dplyr::bind_rows(
   km1_unknown1_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .3,
-                             dx_thresh = 20,
-                             dy_thresh = 20,
+                             ccf_thresh = .4,
+                             dx_thresh = 15,
+                             dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "A vs. B"),
   km1_unknown1_comparison$comparison_2to1$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .3,
-                             dx_thresh = 20,
-                             dy_thresh = 20,
+                             ccf_thresh = .4,
+                             dx_thresh = 15,
+                             dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "B vs. A")
 ) %>%
   dplyr::group_by(comparison,theta) %>%
   dplyr::tally() %>%
-  dplyr::mutate(cmcHigh = max(n) - 1) %>%
+  dplyr::mutate(cmcHigh = max(n) - 1)  %>%
   ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
   ggplot2::geom_bar(stat = "identity") +
-  ggplot2::theme_bw() +
+  ggplot2::theme_bw()  +
   ggplot2::xlab(expression(theta*" (degree)")) +
   ggplot2::ylab("CMC number") +
-  ggplot2::facet_wrap(~ comparison,ncol = 1) +
-  ggplot2::ylim(c(NA,15)) +
+  ggplot2::facet_wrap(~ comparison,ncol = 1)  +
+  ggplot2::ylim(c(NA,20)) +
   ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
                       colour = "black",
                       linetype = "dashed") +
@@ -403,9 +410,9 @@ dplyr::bind_rows(
 km1_unknown2_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
                                                   unknown2_Residuals$x3p,
                                                   thetas = seq(-30,30,by = 3),
-                                                  cellNumHoriz = 7,
-                                                  cellNumVert = 7,
-                                                  regionToCellProp = 9,
+                                                  cellNumHoriz = 8,
+                                                  cellNumVert = 8,
+                                                  regionToCellProp = 4,
                                                   minObservedProp = .15,
                                                   centerCell = "individualCell",
                                                   scaleCell = "individualCell")
@@ -413,16 +420,16 @@ km1_unknown2_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
 dplyr::bind_rows(
   km1_unknown2_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .3,
-                             dx_thresh = 20,
-                             dy_thresh = 20,
+                             ccf_thresh = .4,
+                             dx_thresh = 15,
+                             dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "A vs. B"),
   km1_unknown2_comparison$comparison_2to1$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .3,
-                             dx_thresh = 20,
-                             dy_thresh = 20,
+                             ccf_thresh = .4,
+                             dx_thresh = 15,
+                             dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "B vs. A")
 ) %>%
@@ -435,7 +442,7 @@ dplyr::bind_rows(
   ggplot2::xlab(expression(theta*" (degree)")) +
   ggplot2::ylab("CMC number") +
   ggplot2::facet_wrap(~ comparison,ncol = 1) +
-  ggplot2::ylim(c(NA,15))  +
+  ggplot2::ylim(c(NA,20))  +
   ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
                       colour = "black",
                       linetype = "dashed") +
@@ -450,235 +457,84 @@ dplyr::bind_rows(
 ```{r}
 km1_unknown1_cmcs <- cmcR::cmcFilter_improved(km1_unknown1_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .3,
-                                              dx_thresh = 20)
+                                              ccf_thresh = .4,
+                                              dx_thresh = 15)
 
 km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .3,
-                                              dx_thresh = 20)
-
-km1_unknown1_cmcs$initialCMCs[[1]][[2]]  %>%
-  dplyr::arrange(cellNum)
-
-km1_unknown2_cmcs$initialCMCs[[1]][[2]]  %>%
-  dplyr::arrange(cellNum)
-
-km1_unknown1_cmcs$finalCMCs  %>%
-  dplyr::arrange(cellNum)
+                                              ccf_thresh = .4,
+                                              dx_thresh = 15)
 ```
 
 ```{r}
-blankImage <- matrix(NA,
-                     nrow = nrow(unknown1_Residuals$x3p$surface.matrix),
-                     ncol = ncol(unknown1_Residuals$x3p$surface.matrix))
+km2_unknown1_comparison <- cellCCF_bothDirections(km2_Residuals$x3p,
+                                                  unknown1_Residuals$x3p,
+                                                  thetas = seq(-30,30,by = 3),
+                                                  cellNumHoriz = 8,
+                                                  cellNumVert = 8,
+                                                  regionToCellProp = 4,
+                                                  minObservedProp = .15,
+                                                  centerCell = "individualCell",
+                                                  scaleCell = "individualCell")
 
-cmcLocs <- km1_unknown1_cmcs$initialCMCs[[1]][[2]]$cellID %>%
-  stringr::str_extract_all(pattern = "[0-9]{1,}") %>%
-  purrr::map(as.numeric)
+km2_unknown2_comparison <- cellCCF_bothDirections(km2_Residuals$x3p,
+                                                  unknown2_Residuals$x3p,
+                                                  thetas = seq(-30,30,by = 3),
+                                                  cellNumHoriz = 8,
+                                                  cellNumVert = 8,
+                                                  regionToCellProp = 4,
+                                                  minObservedProp = .15,
+                                                  centerCell = "individualCell",
+                                                  scaleCell = "individualCell")
 
-# cmcLocs <- km1_unknown2_cmcs$initialCMCs[[1]][[2]]$cellID %>%
-#   stringr::str_extract_all(pattern = "[0-9]{1,}") %>%
-#   purrr::map(as.numeric)
+km2_unknown1_cmcs <- cmcR::cmcFilter_improved(km2_unknown1_comparison,
+                                              consensus_function = median,
+                                              ccf_thresh = .4,
+                                              dx_thresh = 15)
 
-for(ind in 1:length(cmcLocs)){
-  cellRowInd <- cmcLocs[[ind]][1]:min(nrow(unknown1_Residuals$x3p$surface.matrix),cmcLocs[[ind]][2])
-  cellColInd <- cmcLocs[[ind]][3]:min(ncol(unknown1_Residuals$x3p$surface.matrix),cmcLocs[[ind]][4])
+km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
+                                              consensus_function = median,
+                                              ccf_thresh = .4,
+                                              dx_thresh = 15)
+```
+
+```{r eval=FALSE}
+cmcR::cmcPlot(unknown1_Residuals$x3p,
+              cmcDF = km1_unknown1_cmcs$initialCMCs[[1]][[2]],
+              method = "ggplot2")
+```
+
+
+
+```{r eval=FALSE}
+cmcR::cmcPlot(unknown2_Residuals$x3p,
+              cmcDF = km1_unknown2_cmcs$initialCMCs[[1]][[2]],
+              method = "ggplot2")
+```
+
+```{r}
+cmcR::cmcPlot(unknown1_Residuals$x3p,
+              cmcDF = km2_unknown1_cmcs$initialCMCs[[1]][[1]],
+              method = "ggplot2")
+```
+
+```{r}
+cmcR::cmcPlot(unknown2_Residuals$x3p,
+              cmcDF = km2_unknown2_cmcs$initialCMCs[[1]][[2]],
+              method = "ggplot2")
+```
+
+```{r}
+cmcR::cmcPlot(unknown1_Residuals$x3p,
+              cmcDF = km2_unknown1_cmcs$finalCMCs,
+              method = "ggplot2")
+```
+
+TODO:
+  Get calcRawCorr working
+  Function tests
+  Better documentation
+  Add an official "cmc" function that just calls cellCCF_bothDirections and cmcFilter_improved
   
-  blankImage[cellRowInd,cellColInd] <- 
-    as.matrix(unknown1_Residuals$x3p$surface.matrix[cellRowInd,cellColInd],nrow = max(cellRowInd),ncol = max(cellColInd))
-}
-
-blankImage %>%
-  t() %>%
-  imager::as.cimg() %>%
-  as.data.frame() %>%
-  ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
-  ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-  ggplot2::scale_fill_gradient2(low = "grey0",
-                                mid = "grey50",
-                                high = "grey100",
-                                na.value = "white") +
-  ggplot2::coord_fixed(expand = FALSE) +
-  ggplot2::theme_bw() +
-  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                 panel.grid.minor = ggplot2::element_blank(),
-                 legend.position = "none",
-                 axis.title.x = ggplot2::element_blank(),
-                 axis.title.y = ggplot2::element_blank())
-```
-
-
-```{r}
-km1Unknown1CCF_Residuals <- cellCCF_bothDirections(x3p1 = km1_Residuals$x3p,
-                                                   x3p2 = unknown1_Residuals$x3p,
-                                                   thetas = seq(-30,30,by = 3),
-                                                   cellNumHoriz = 8,
-                                                   cellNumVert = 8,
-                                                   centerCell = "wholeMatrix",
-                                                   scaleCell = "wholeMatrix")
-
-km1Unknown2CCF_Residuals <- cellCCF_bothDirections(x3p1 = km1_Residuals$x3p,
-                                                   x3p2 = unknown2_Residuals$x3p,
-                                                   thetas = seq(-30,30,by = 3),
-                                                   cellNumHoriz = 8,
-                                                   cellNumVert = 8,
-                                                   centerCell = "wholeMatrix")
-
-km2Unknown1CCF_Residuals <- cellCCF_bothDirections(x3p1 = km2_Residuals$x3p,
-                                                   x3p2 = unknown1_Residuals$x3p,
-                                                   thetas = seq(-30,30,by = 3),
-                                                   cellNumHoriz = 8,
-                                                   cellNumVert = 8,
-                                                   centerCell = "wholeMatrix")
-
-km2Unknown2CCF_Residuals <- cellCCF_bothDirections(x3p1 = km2_Residuals$x3p,
-                                                   x3p2 = unknown2_Residuals$x3p,
-                                                   thetas = seq(-30,30,by = 3),
-                                                   cellNumHoriz = 8,
-                                                   cellNumVert = 8,
-                                                   centerCell = "wholeMatrix")
-```
-
-```{r}
-km1Unknown1CMCs_Residuals <- cmcFilter_improved(km1Unknown1CCF_Residuals,
-                                                consensus_function = median,
-                                                ccf_thresh = .4,
-                                                dx_thresh = 30,
-                                                theta_thresh = 3,
-                                                consensus_function_theta = median)
-
-km1Unknown2CMCs_Residuals <- cmcFilter_improved(km1Unknown2CCF_Residuals,
-                                                consensus_function = median,
-                                                ccf_thresh = .4,
-                                                dx_thresh = 30,
-                                                theta_thresh = 3,
-                                                consensus_function_theta = median)
-
-km2Unknown1CMCs_Residuals <- cmcFilter_improved(km2Unknown1CCF_Residuals,
-                                                consensus_function = median,
-                                                ccf_thresh = .4,
-                                                dx_thresh = 30,
-                                                theta_thresh = 3,
-                                                consensus_function_theta = median)
-
-km2Unknown2CMCs_Residuals <- cmcFilter_improved(km2Unknown2CCF_Residuals,
-                                                consensus_function = median,
-                                                ccf_thresh = .4,
-                                                dx_thresh = 30,
-                                                theta_thresh = 3,
-                                                consensus_function_theta = median)
-
-km1Unknown1CMCs_Residuals$finalCMCs
-km1Unknown2CMCs_Residuals$finalCMCs
-km2Unknown1CMCs_Residuals$finalCMCs
-km2Unknown2CMCs_Residuals$finalCMCs
-```
-
-Exploration of how the method holds up to comparing two copies of the same cartridge case scan (at least up to what is returned by selectBFImpression)
-
-Just take the residuals (no filtering)
-
-```{r}
-dat1 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = TRUE)
-
-dat2 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = TRUE)
-
-dat1$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat2$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat3 <- cellCCF_bothDirections(x3p1 = dat1$x3p,
-                               x3p2 = dat2$x3p,
-                               thetas = seq(-30,30,by = 3),
-                               cellNumHoriz = 8,
-                               cellNumVert = 8,
-                               centerCell = "wholeMatrix")
-
-dat3 %>%
-  cmcFilter_improved(dx_thresh = 35)
-```
-
-Just take the raw values (no filtering):
-
-```{r}
-dat1 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = FALSE)
-
-dat2 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = FALSE)
-
-dat1$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat2$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat3 <- cellCCF_bothDirections(x3p1 = dat1$x3p,
-                               x3p2 = dat2$x3p,
-                               thetas = seq(-30,30,by = 3),
-                               cellNumHoriz = 8,
-                               cellNumVert = 8,
-                               centerCell = "wholeMatrix")
-
-dat3 %>%
-  cmcFilter_improved(dx_thresh = 35)
-```
-
-Take residuals and perform high-pass filter:
-
-```{r}
-dat1 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = TRUE)
-
-dat1_filtered <- cmcR::gaussianFilterBF(selectBFImpression_output = dat1,wavelength = 200,filtertype = "hp")
-
-dat2 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
-                                            ransacIters = 300,
-                                            useResiduals = TRUE)
-
-dat2_filtered <- cmcR::gaussianFilterBF(selectBFImpression_output = dat2,wavelength = 200,filtertype = "hp")
-
-dat1_filtered$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat2_filtered$x3p$surface.matrix %>%
-  imager::as.cimg() %>%
-  plot()
-
-dat3 <- cellCCF_bothDirections(x3p1 = dat1_filtered$x3p,
-                               x3p2 = dat2_filtered$x3p,
-                               thetas = seq(-30,30,by = 3),
-                               cellNumHoriz = 8,
-                               cellNumVert = 8)
-
-dat3 %>%
-  cmcFilter_improved(dx_thresh = 20)
-```
-
-I need to fix comparison/filterViaFFT so that we subtract off the correct values for the image edges - the plots below show that the edge images have incorrectly calculated dx/dy values that appear to be far from zero, but that is likely because the number that is being subtracted off to calculate the dx/dy values doesn't take into account the additional padding.
-
-```{r}
-cmcR:::getHighCCFPairs(dat1_filtered$x3p,
-                       dat1_filtered$x3p,
-                       cellCCF_output = dat3$comparison_1to2) %>%
-  .$highCCFPairs %>%
-  purrr::map(~ cmcR::ccfMapPlot(.[[1]],.[[2]]))
-
-dat3$comparison_1to2$ccfResults %>% topResultsPerCell()
-
-```
+  Continue running things on the server to get more final results
+  Conclusion/Future Work chapter?

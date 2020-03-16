@@ -7,7 +7,7 @@ particular cut-off wavelength.}
 \usage{
 preProcess_gaussFilter(
   surfaceMat,
-  res = selectedBF_x3p$header.info$incrementY,
+  res = 6.25e-06,
   wavelength,
   filtertype = "bp"
 )

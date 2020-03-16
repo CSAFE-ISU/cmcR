@@ -2,8 +2,8 @@
 % Please edit documentation in R/preProcessFunctions_modularized.R
 \name{preProcess_removeFPCircle}
 \alias{preProcess_removeFPCircle}
-\title{Given a surface matrix and the output of preProcess_detectFPCircle, filters
-any pixels within the estimated firing pin impression circle}
+\title{Given a surface matrix, estimates and filters any pixels within the estimated
+firing pin impression circle}
 \usage{
 preProcess_removeFPCircle(
   surfaceMat,
@@ -16,13 +16,20 @@ preProcess_removeFPCircle(
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
-\item{fpImpressionCircle}{data frame containing 3 columns: "x" and "y"
-containing the estimated center of the firing pin impression circle and "r"
-containing the estimated radius}
+\item{aggregation_function}{function to select initial radius estimate from
+those calculated using fpRadiusGridSearch}
+
+\item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
+
+\item{meshSize}{size of radius mesh to be used for further refinement of the
+radius estimate obtained from fpRadiusGridSearch}
+
+\item{houghScoreQuant}{quantile cut-off to be used when determining a final
+radius estimate using the score values returned by the imager::hough_circle}
 }
 \description{
-Given a surface matrix and the output of preProcess_detectFPCircle, filters
-any pixels within the estimated firing pin impression circle
+Given a surface matrix, estimates and filters any pixels within the estimated
+firing pin impression circle
 }
 \note{
 imager treats a matrix as its transpose (i.e., x and y axes are

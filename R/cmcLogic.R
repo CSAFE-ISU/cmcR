@@ -12,7 +12,7 @@ topResultsPerCell <- function(ccfResults){
                     ~ .x %>%
                       dplyr::mutate(theta = as.numeric(rep(.y,times = nrow(.))))) %>%
     dplyr::group_by(cellID) %>%
-    dplyr::filter(ccf == max(ccf)) %>%
+    dplyr::filter(rawCorr == max(rawCorr)) %>%
     dplyr::arrange(cellID)
 }
 
@@ -27,14 +27,14 @@ topResultsPerCell <- function(ccfResults){
 
 cmcFilter <- function(ccfResults,
                       consensus_function = median,
-                      ccf_thresh = .4,
+                      corr_thresh = .4,
                       dx_thresh = 20,
                       dy_thresh = dx_thresh,
                       theta_thresh = 3,
                       consensus_function_theta = consensus_function,...){
   #Required tests:
   # ccfResults needs to be a dataframe containing columns: ccf,theta,dx,dy
-  # ccf_thresh should be between 0 and 1
+  # corr_thresh should be between 0 and 1
   # dx_thresh should positive
   # consensus_function and consensus_function_theta should be a function name that exists
 
@@ -43,7 +43,7 @@ cmcFilter <- function(ccfResults,
   consensus_theta <- consensus_function_theta(ccfResults$theta,...)
 
   ccfResults %>%
-    dplyr::filter(ccf >= ccf_thresh &
+    dplyr::filter(rawCorr >= corr_thresh &
                     dx >= consensus_dx - dx_thresh & dx <= consensus_dx + dx_thresh &
                     dy >= consensus_dy - dy_thresh & dy <= consensus_dy + dy_thresh &
                     theta >= consensus_theta - theta_thresh & theta <= consensus_theta + theta_thresh)
@@ -57,7 +57,7 @@ cmcFilter <- function(ccfResults,
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
-                              ccf_thresh = .4,
+                              corr_thresh = .4,
                               dx_thresh = 20,
                               dy_thresh = dx_thresh,
                               theta_thresh = 3,
@@ -75,7 +75,7 @@ cmcFilterPerTheta <- function(ccfResults,
   ccfResults %>%
     purrr::map(~ cmcFilter(ccfResults = .,
                            consensus_function = consensus_function,
-                           ccf_thresh = ccf_thresh,
+                           corr_thresh = corr_thresh,
                            dx_thresh = dx_thresh,
                            dy_thresh = dy_thresh,
                            theta_thresh = theta_thresh,
@@ -157,7 +157,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 
 cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                consensus_function = median,
-                               ccf_thresh = .4,
+                               corr_thresh = .4,
                                dx_thresh = 20,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
@@ -166,7 +166,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   initialCMCs <- cellCCF_bothDirections_output %>%
     purrr::map(~ cmcR::topResultsPerCell(.$ccfResults) %>%
                  cmcR:::cmcFilter(consensus_function = consensus_function,
-                                  ccf_thresh = ccf_thresh,
+                                  corr_thresh = corr_thresh,
                                   dx_thresh = dx_thresh,
                                   dy_thresh = dy_thresh,
                                   theta_thresh = theta_thresh,
@@ -175,7 +175,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   cmcPerTheta <-  cellCCF_bothDirections_output %>%
     purrr::map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
                                           consensus_function = consensus_function,
-                                          ccf_thresh = ccf_thresh,
+                                          corr_thresh = corr_thresh,
                                           dx_thresh = dx_thresh,
                                           dy_thresh = dy_thresh,
                                           theta_thresh = theta_thresh,
@@ -202,7 +202,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
     # print("Note: neither comparison produces a valid max CMC theta value. The
     # initial CMCs based on the top results per cell will be returned.")
     return(list("params" = list(consensus_function = consensus_function,
-                                ccf_thresh = ccf_thresh,
+                                corr_thresh = corr_thresh,
                                 dx_thresh = dx_thresh,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
@@ -220,11 +220,11 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
     dplyr::bind_rows() %>%
     dplyr::distinct() %>%
     dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
-    dplyr::filter(ccf == max(ccf)) %>%
+    dplyr::filter(rawCorr == max(rawCorr)) %>%
     dplyr::ungroup()
 
   return(list("params" = list(consensus_function = consensus_function,
-                              ccf_thresh = ccf_thresh,
+                              corr_thresh = corr_thresh,
                               dx_thresh = dx_thresh,
                               dy_thresh = dy_thresh,
                               theta_thresh = theta_thresh,

@@ -11,6 +11,7 @@ cellCCF(
   thetas = seq(-30, 30, by = 3),
   cellNumHoriz = 7,
   cellNumVert = cellNumHoriz,
+  regionToCellProp = 9,
   minObservedProp = 0.15,
   centerCell,
   scaleCell,
@@ -33,6 +34,10 @@ divide x3p1$surface.matrix into}
 
 \item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
 vertical axis to divide x3p1$surface.matrix into}
+
+\item{regionToCellProp}{determines how much larger the x3p2 regions will be
+relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
+the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)}
 
 \item{minObservedProp}{(default 15) the minimum proportion of a cell that
 needs to contain observed (i.e., non-NA) values for it to be included in

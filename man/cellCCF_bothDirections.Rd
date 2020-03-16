@@ -10,6 +10,7 @@ cellCCF_bothDirections(
   x3p2,
   thetas = seq(-30, 30, by = 3),
   cellNumHoriz = 7,
+  regionToCellProp = 9,
   cellNumVert = cellNumHoriz,
   centerCell,
   scaleCell,

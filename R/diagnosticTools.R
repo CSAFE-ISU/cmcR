@@ -164,3 +164,67 @@ ccfMapPlot <- function(mat1,
     return(gridPlot)
   }
 }
+
+#' @name cmcPlot
+#'
+#'   Plots the selected congruent matching cells of a questioned x3p
+#'
+#' @param x3p The "questioned" x3p object for which CMCs were determined (this
+#'   would be x3p1 in a call to cellCCF)
+#' @param cmcDF data frame containing the congruent matching cells of the
+#'   questioned x3p object
+#' @param method dictates whether a cimg plot is returned, or a ggplot2 plot. The
+#'   ggplot2 plot looks nicer, but takes much longer to construct than the cimg
+#'   plot.
+#'
+#' @export
+
+cmcPlot <- function(x3p,cmcDF,method = "cimg"){
+  blankImage <- matrix(NA,
+                       nrow = nrow(x3p$surface.matrix),
+                       ncol = ncol(x3p$surface.matrix))
+
+  #these will be the corners of the CMCs in the matrix
+  cmcLocs <- cmcDF$cellID %>%
+    stringr::str_extract_all(pattern = "[0-9]{1,}") %>%
+    purrr::map(as.numeric)
+
+  #add CMCs into the blank image at the same location as they are in the original matrix
+  for(ind in 1:length(cmcLocs)){
+    cellRowInd <- cmcLocs[[ind]][1]:min(nrow(x3p$surface.matrix),cmcLocs[[ind]][2])
+    cellColInd <- cmcLocs[[ind]][3]:min(ncol(x3p$surface.matrix),cmcLocs[[ind]][4])
+
+    blankImage[cellRowInd,cellColInd] <-
+      as.matrix(x3p$surface.matrix[cellRowInd,cellColInd],
+                nrow = max(cellRowInd),ncol = max(cellColInd))
+  }
+
+
+  #cimg plot is much faster, but I tend to prefer the look of ggplot2
+  if(method == "cimg"){
+    blankImage %>%
+      t() %>%
+      imager::as.cimg() %>%
+      imager::mirror("y") %>%
+      plot()
+  }
+  if(method == "ggplot2"){
+    blankImage %>%
+      t() %>%
+      imager::as.cimg() %>%
+      as.data.frame() %>%
+      ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+      ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+      ggplot2::scale_fill_gradient2(low = "grey0",
+                                    mid = "grey50",
+                                    high = "grey100",
+                                    na.value = "white") +
+      ggplot2::coord_fixed(expand = FALSE) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank(),
+                     legend.position = "none",
+                     axis.title.x = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_blank())
+  }
+}
