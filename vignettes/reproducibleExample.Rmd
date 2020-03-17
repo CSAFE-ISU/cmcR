@@ -372,14 +372,14 @@ km1_unknown1_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
 dplyr::bind_rows(
   km1_unknown1_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .4,
+                             corr_thresh = .4,
                              dx_thresh = 15,
                              dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "A vs. B"),
   km1_unknown1_comparison$comparison_2to1$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .4,
+                             corr_thresh = .4,
                              dx_thresh = 15,
                              dy_thresh = 15,
                              theta_thresh = 3) %>%
@@ -420,14 +420,14 @@ km1_unknown2_comparison <- cellCCF_bothDirections(km1_Residuals$x3p,
 dplyr::bind_rows(
   km1_unknown2_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .4,
+                             corr_thresh = .4,
                              dx_thresh = 15,
                              dy_thresh = 15,
                              theta_thresh = 3) %>%
     dplyr::mutate(comparison = "A vs. B"),
   km1_unknown2_comparison$comparison_2to1$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
-                             ccf_thresh = .4,
+                             corr_thresh = .4,
                              dx_thresh = 15,
                              dy_thresh = 15,
                              theta_thresh = 3) %>%
@@ -457,21 +457,25 @@ dplyr::bind_rows(
 ```{r}
 km1_unknown1_cmcs <- cmcR::cmcFilter_improved(km1_unknown1_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .4,
+                                              corr_thresh = .55,
                                               dx_thresh = 15)
 
 km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .4,
+                                              corr_thresh = .55,
                                               dx_thresh = 15)
 ```
+
+```{r}
+km1_unknown1_cmcs$finalCMCs
+```
+
 
 ```{r}
 km2_unknown1_comparison <- cellCCF_bothDirections(km2_Residuals$x3p,
                                                   unknown1_Residuals$x3p,
                                                   thetas = seq(-30,30,by = 3),
                                                   cellNumHoriz = 8,
-                                                  cellNumVert = 8,
                                                   regionToCellProp = 4,
                                                   minObservedProp = .15,
                                                   centerCell = "individualCell",
@@ -481,7 +485,6 @@ km2_unknown2_comparison <- cellCCF_bothDirections(km2_Residuals$x3p,
                                                   unknown2_Residuals$x3p,
                                                   thetas = seq(-30,30,by = 3),
                                                   cellNumHoriz = 8,
-                                                  cellNumVert = 8,
                                                   regionToCellProp = 4,
                                                   minObservedProp = .15,
                                                   centerCell = "individualCell",
@@ -489,14 +492,19 @@ km2_unknown2_comparison <- cellCCF_bothDirections(km2_Residuals$x3p,
 
 km2_unknown1_cmcs <- cmcR::cmcFilter_improved(km2_unknown1_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .4,
+                                              corr_thresh = .55,
                                               dx_thresh = 15)
 
 km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
                                               consensus_function = median,
-                                              ccf_thresh = .4,
+                                              corr_thresh = .55,
                                               dx_thresh = 15)
 ```
+
+```{r}
+km2_unknown2_cmcs$finalCMCs
+```
+
 
 ```{r eval=FALSE}
 cmcR::cmcPlot(unknown1_Residuals$x3p,
@@ -531,10 +539,11 @@ cmcR::cmcPlot(unknown1_Residuals$x3p,
 ```
 
 TODO:
-  Get calcRawCorr working
+  Get calcRawCorr working (I think this is done)
   Function tests
   Better documentation
   Add an official "cmc" function that just calls cellCCF_bothDirections and cmcFilter_improved
   
   Continue running things on the server to get more final results
   Conclusion/Future Work chapter?
+  Hough transform circle accumulator image still needed

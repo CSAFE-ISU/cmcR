@@ -107,7 +107,7 @@ fpRadiusGridSearch <- function(surfaceMat,
                               function(theta){
                                 if(theta != 0){
                                   surfaceMatRotated <- rotateSurfaceMatrix(surfaceMat,
-                                                                   theta)
+                                                                           theta)
                                 }
                                 else{
                                   surfaceMatRotated <- surfaceMat

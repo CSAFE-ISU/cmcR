@@ -193,7 +193,7 @@ preProcess_detectFPCircle <- function(surfaceMat,
                                       meshSize = 1,
                                       houghScoreQuant = .9){
 
-  firingPinRadiusEstimate <- fpRadiusGridSearch(surfaceMat,smootherSize = smootherSize,
+  firingPinRadiusEstimate <- fpRadiusGridSearch(surfaceMat = surfaceMat,smootherSize = smootherSize,
                                                 aggregation_function = aggregation_function) %>%
     .$radiusEstim
 
