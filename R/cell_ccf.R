@@ -304,7 +304,7 @@ calcRawCorr <- function(cell,region,dx,dy){
     }
 
     #2 copies if cols are off
-    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
+    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
       colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
 
       regionCroppedColPre <- regionCroppedInitial[,-colsToCrop]
@@ -315,7 +315,7 @@ calcRawCorr <- function(cell,region,dx,dy){
     }
 
     #2 copies if cols are off
-    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
+    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
       colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
 
       regionCroppedColPre <- cbind(matrix(NA,
