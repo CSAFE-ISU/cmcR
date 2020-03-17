@@ -273,6 +273,32 @@ calcRawCorr <- function(cell,region,dx,dy){
   regionCroppedList <- list("initial" = regionCroppedInitial)
 
   if(any(dim(regionCroppedInitial) != dim(cell))){
+    #these make sure that the indices that we've cropped the region by aren't
+    #less than 1 or larger than the dimension of the region
+    if(alignedRows[1] < 1){
+      rowsToPad <- -1*alignedRows[1] + 1
+
+      regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
+                                    regionCroppedInitial)
+    }
+    if(alignedRows[2] > nrow(region)){
+      rowsToPad <- alignedRows[2] - nrow(region)
+
+      regionCroppedInitial <- rbind(regionCroppedInitial,
+                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
+    }
+    if(alignedCols[1] < 1){
+      colsToPad <- -1*alignedCols[1] + 1
+
+      regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
+                                    regionCroppedInitial)
+    }
+    if(alignedCols[2] > ncol(region)){
+      colsToPad <- alignedCols[2] - ncol(region)
+
+      regionCroppedInitial <- cbind(regionCroppedInitial,
+                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
+    }
 
     #two copies if rows are off
     if(nrow(regionCroppedInitial) > nrow(cell) & ncol(regionCroppedInitial) == ncol(cell)){
@@ -407,33 +433,6 @@ calcRawCorr <- function(cell,region,dx,dy){
       regionCroppedList$colPost <- regionCroppedColPost
       regionCroppedList$BothPost <- regionCroppedBothPost
     }
-
-    #these make sure that the indices that we've cropped the region by aren't
-    #less than 1 or larger than the dimension of the region
-    if(alignedRows[1] < 1){
-      rowsToPad <- -1*alignedRows[1] + 1
-
-      regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
-                                    regionCroppedInitial)
-    }
-    if(alignedRows[2] > nrow(region)){
-      rowsToPad <- alignedRows[2] - nrow(region)
-
-      regionCroppedInitial <- rbind(regionCroppedInitial,
-                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
-    }
-    if(alignedCols[1] < 1){
-      colsToPad <- -1*alignedCols[1] + 1
-
-      regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
-                                    regionCroppedInitial)
-    }
-    if(alignedCols[2] > ncol(region)){
-      colsToPad <- alignedCols[2] - ncol(region)
-
-      regionCroppedInitial <- cbind(regionCroppedInitial,
-                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
-    }
   }
 
   #return NA if cor fails.
@@ -448,7 +447,11 @@ calcRawCorr <- function(cell,region,dx,dy){
     as.numeric(corVal[1])
   })
 
-  as.numeric(corrVals[which.max(corrVals)])
+  maxCorr <- as.numeric(corrVals[which.max(corrVals)])
+  if(length(maxCorr) == 0){
+    return(NA)
+  }
+  else(return(maxCorr))
 }
 
 #' Calculate the maximum correlation between two breech face impressions split
