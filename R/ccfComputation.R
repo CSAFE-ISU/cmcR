@@ -1,4 +1,6 @@
 #' @name filterViaFFT
+#'
+#' @keywords internal
 
 filterViaFFT <- function(A, B) {
   # size of full filter
@@ -30,6 +32,9 @@ filterViaFFT <- function(A, B) {
 #' @name round2
 #' to copy behavior of round() in matlab
 #' http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
+#'
+#' @keywords internal
+
 round2 = function(x, n) {
   posneg = sign(x)
   z = abs(x)*10^n
@@ -41,6 +46,9 @@ round2 = function(x, n) {
 
 #' @name fftshift
 #' http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
+#'
+#' @keywords internal
+
 fftshift <- function(input_matrix) {
 
   input_matrix <- as.matrix(input_matrix)
@@ -65,6 +73,8 @@ fftshift <- function(input_matrix) {
 
 #' @name circsift
 #' http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+#' @keywords internal
+
 circshift <- function(x, vec) {
   dimx <- dim(x)
   # row first
@@ -82,6 +92,7 @@ circshift <- function(x, vec) {
 }
 
 #' @name comparison
+#' @keywords internal
 comparison <- function(im1, im2) {
   resp <- filterViaFFT(im1, im2) / (sqrt(sum(im1^2)) * sqrt(sum(im2^2)))
   corr <- max(resp)

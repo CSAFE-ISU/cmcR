@@ -33,14 +33,20 @@ inliers close to fitted plane).
 \description{
 Given input depths (in microns), find best-fitting plane using RANSAC. This
 should be the plane that the breechface marks are on. Adapted from
-cartridges3D::findPlaneRansac function
+cartridges3D::findPlaneRansac function.
 }
 \examples{
 \dontrun{
-    testImage <- preProcess_ransac(surfaceMat)
+raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
+  x3ptools::sample_x3p(m = 2)
+
+fittedPlane <- raw_x3p$surface.matrix \%>\%
+  preProcess_ransac(inlierTreshold = 10^(-5),
+                    finalSelectionThreshold = 2*10^(-5),
+                    iters = 150)
 }
 
 }
 \seealso{
-cartridges3D package (LINK)
+cartridges3D package
 }

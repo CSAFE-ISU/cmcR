@@ -35,9 +35,19 @@ breech face is simply shifted down by its mean value}
 \item{croppingThresh}{treshold for cropping exterior whitespace from the
 breech face impression}
 
-\item{interpolation_type}{= 1,}
+\item{size_x}{Number of columns (new size along the X-axis). Note: the
+"X"-axis according to imager is actually the rows of the matrix}
 
-\item{boundary_conditions}{= 0}
+\item{size_y}{Number of rows (new size along the Y-axis). Note: the "Y"-axis
+according to imager is actually the number of cols of the matrix}
+
+\item{interpolation_type}{Method of interpolation: -1 = no interpolation: raw
+memory resizing. 0 = no interpolation: additional space is filled according
+to boundary_conditions. 1 = nearest-neighbor interpolation. 2 = moving
+average interpolation. 3 = linear interpolation. 4 = grid interpolation. 5
+= cubic interpolation. 6 = lanczos interpolation.}
+
+\item{boundary_conditions}{Border condition type.}
 
 \item{standardizedBF}{subtract mean and divide by standard deviation of
 processed surface matrix}
@@ -61,4 +71,6 @@ rows in the original matrix and size_y the number of columns.
 }
 \seealso{
 cartridges3D package (LINK)
+
+imager package (LINK)
 }

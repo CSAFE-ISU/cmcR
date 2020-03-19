@@ -2,7 +2,7 @@
 #'
 #' Given input depths (in microns), find best-fitting plane using RANSAC. This
 #' should be the plane that the breechface marks are on. Adapted from
-#' cartridges3D::findPlaneRansac function
+#' cartridges3D::findPlaneRansac function.
 #'
 #' @name preProcess_ransac
 #'
@@ -21,16 +21,22 @@
 #'   inliers close to fitted plane).
 #' @examples
 #' \dontrun{
-#'     testImage <- preProcess_ransac(surfaceMat)
+#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#'   x3ptools::sample_x3p(m = 2)
+#'
+#' fittedPlane <- raw_x3p$surface.matrix %>%
+#'   preProcess_ransac(inlierTreshold = 10^(-5),
+#'                     finalSelectionThreshold = 2*10^(-5),
+#'                     iters = 150)
 #' }
 #'
-#' @seealso cartridges3D package (LINK)
+#' @seealso cartridges3D package
 #' @export
 
 preProcess_ransac <- function(surfaceMat,
-                                   inlierTreshold = (10^(-5)), # 1 micron
-                                   finalSelectionThreshold = 2*(10^(-5)), # 2 micron
-                                   iters = 150) {
+                              inlierTreshold = (10^(-5)), # 1 micron
+                              finalSelectionThreshold = 2*(10^(-5)), # 2 micron
+                              iters = 150) {
   inlierCount <- 0
 
   # sample from this
@@ -76,15 +82,32 @@ preProcess_ransac <- function(surfaceMat,
   return(list(ransacPlane = finalRansacPlane,
               estimatedBreechFace = estimatedBreechFace))
 }
-
-#' Given the output of preProcess_ransac, extracts values (either raw or residual) from the surface matrix to which the RANSAC plane was fit.
-#'
 #' @name preProcess_levelBF
 #'
+#'   Given the output of preProcess_ransac, extracts values (either raw or
+#'   residual) from the surface matrix to which the RANSAC plane was fit.
+#'   Adapted from the cartridges3D::levelBF3D function.
+#'
+#' @param ransacFit output from the cmcR::preProcess_ransac function.
 #' @param useResiduals dictates whether the difference between the estimated
 #'   breech face and fitted plane are returned (residuals) or if the estimates
 #'   breech face is simply shifted down by its mean value
 #'
+#' @return a surface matrix of either "raw" breech face values that are inliers
+#'   to the RANSAC-fitted plane or residuals between the fitted plane and
+#'   observed values.
+#'
+#' @examples
+#' \dontrun{
+#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#'   x3ptools::sample_x3p(m = 2)
+#'
+#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#'  cmcR::preProcess_ransac() %>%
+#'  cmcR::preProcess_levelBF(useResiduals = TRUE)
+#' }
+#'
+#' @seealso cartridges3D package
 #' @export
 
 preProcess_levelBF <- function(ransacFit,
@@ -124,6 +147,19 @@ preProcess_levelBF <- function(ransacFit,
 #' @param croppingThresh minimum number of non-NA pixels that need to be in a
 #'   row/column for it to not be cropped out of the surface matrix
 #'
+#' @return a surface matrix with outer rows/columns removed depending on
+#'   croppingThresh
+#'
+#' @examples
+#' \dontrun{
+#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#'   x3ptools::sample_x3p(m = 2)
+#'
+#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#'   cmcR::preProcess_ransac() %>%
+#'   cmcR::preProcess_levelBF() %>%
+#'   cmcR::preProcess_cropWS(croppingThresh = 2)
+#' }
 #' @export
 
 preProcess_cropWS <- function(surfaceMat,
@@ -262,6 +298,21 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'   and column indices at which the center of the firing pin impression circle
 #'   is estiamted to be.
 #'
+#' @examples
+#' \dontrun{
+#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#' x3ptools::sample_x3p(m = 2)
+#'
+#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#'   cmcR::preProcess_ransac() %>%
+#'   cmcR::preProcess_levelBF() %>%
+#'   cmcR::preProcess_cropWS() %>%
+#'   cmcR::preProcess_removeFPCircle(aggregation_function = mean,
+#'                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
+#'                                   meshSize = 1,
+#'                                   houghScoreQuant = .9)
+#' }
+#'
 #' @export
 
 preProcess_removeFPCircle <- function(surfaceMat,
@@ -272,10 +323,10 @@ preProcess_removeFPCircle <- function(surfaceMat,
 
 
   fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = surfaceMat,
-                                                aggregation_function = aggregation_function,
-                                                smootherSize = smootherSize,
-                                                meshSize = meshSize,
-                                                houghScoreQuant = houghScoreQuant)
+                                                  aggregation_function = aggregation_function,
+                                                  smootherSize = smootherSize,
+                                                  meshSize = meshSize,
+                                                  houghScoreQuant = houghScoreQuant)
 
   breechFace_firingPinFiltered <- surfaceMat %>%
     imager::as.cimg() %>%
@@ -296,18 +347,35 @@ preProcess_removeFPCircle <- function(surfaceMat,
 #' @param surfaceMat a surface matrix representing a breech face impression scan
 #' @param res sampling resolution of the surface matrix
 #' @param wavelength cut-off wavelength
-#' @filtertype specifies whether a low pass, "lp", high pass, "hp", or bandpass,
+#' @param filtertype specifies whether a low pass, "lp", high pass, "hp", or bandpass,
 #'   "bp" filter is to be used. Note that setting filterype = "bp" means that
 #'   wavelength should be a vector of two numbers. In this case, the max of
 #'   these two number will be used for the high pass filter and the min for the
 #'   low pass filter.
 #'
-#' @seealso https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
+#' @examples
+#' \dontrun{
+#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#' x3ptools::sample_x3p(m = 2)
+#'
+#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#'   cmcR::preProcess_ransac() %>%
+#'   cmcR::preProcess_levelBF() %>%
+#'   cmcR::preProcess_cropWS() %>%
+#'   cmcR::preProcess_removeFPCircle() %>%
+#'   cmcR::preProcess_gaussFilter(res = raw_x3p$header.info$incrementY,
+#'                                wavelength = c(16,250),
+#'                                filtertype = "bp")
+#' }
+#'
+#' @seealso
+#' https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
+#'
 #' @export
 
 preProcess_gaussFilter <- function(surfaceMat,
                                    res = 6.25e-06, #resolution of "raw" Fadul scans
-                                   wavelength,
+                                   wavelength = c(16,250),
                                    filtertype = "bp"){
 
   if(res < .00001){ #if resolution measured in meters:

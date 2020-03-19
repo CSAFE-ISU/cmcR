@@ -71,4 +71,6 @@ degrees clockwise.
 }
 \seealso{
 cartridges3D package (LINK)
+
+x3ptools package (LINK)
 }

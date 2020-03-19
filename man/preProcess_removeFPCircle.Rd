@@ -38,3 +38,19 @@ columns in the data frame fpImpressionCircle actually correspond to the row
 and column indices at which the center of the firing pin impression circle
 is estiamted to be.
 }
+\examples{
+\dontrun{
+raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
+x3ptools::sample_x3p(m = 2)
+
+raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
+  cmcR::preProcess_ransac() \%>\%
+  cmcR::preProcess_levelBF() \%>\%
+  cmcR::preProcess_cropWS() \%>\%
+  cmcR::preProcess_removeFPCircle(aggregation_function = mean,
+                                  smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
+                                  meshSize = 1,
+                                  houghScoreQuant = .9)
+}
+
+}

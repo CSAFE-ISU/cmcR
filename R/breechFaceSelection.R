@@ -123,8 +123,9 @@ levelBFImpression <- function(ransacFit,
 #' case scan. Helper for selectBFImpression
 #' @name cropScanWhitespace
 #'
-#' @param surfaceMat
-#' @param croppingThresh
+#' @param surfaceMat matrix of input depths in microns.
+#' @param croppingThresh number of pixels that need to be observed in rows/cols
+#'   before cropping from the exterior stops
 #'
 #' @keywords internal
 
@@ -304,7 +305,7 @@ selectBFImpression <- function(x3p_path,
 #' @export
 #'
 #' @seealso cartridges3D package (LINK)
-#' @seelalso x3ptools package (LINK)
+#' @seealso x3ptools package (LINK)
 
 selectBFImpression_sample_x3p <- function(x3p_path,
                                           ransacInlierThresh = (10^(-5)),
@@ -402,10 +403,16 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #'   breech face impression
 #' @param standardizedBF subtract mean and divide by standard deviation of
 #'   processed surface matrix
-#' @param size_x,
-#' @param size_y,
-#' @param interpolation_type = 1,
-#' @param boundary_conditions = 0
+#' @param size_x Number of columns (new size along the X-axis). Note: the
+#'   "X"-axis according to imager is actually the rows of the matrix
+#' @param size_y Number of rows (new size along the Y-axis). Note: the "Y"-axis
+#'   according to imager is actually the number of cols of the matrix
+#' @param interpolation_type Method of interpolation: -1 = no interpolation: raw
+#'   memory resizing. 0 = no interpolation: additional space is filled according
+#'   to boundary_conditions. 1 = nearest-neighbor interpolation. 2 = moving
+#'   average interpolation. 3 = linear interpolation. 4 = grid interpolation. 5
+#'   = cubic interpolation. 6 = lanczos interpolation.
+#' @param boundary_conditions Border condition type.
 #'
 #' @note imager treats a matrix as its transpose (i.e., x and y axes are
 #'   swapped). As such the size_x argument corresponds to changing the number of
@@ -418,7 +425,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @export
 #'
 #' @seealso cartridges3D package (LINK)
-#' @seelalso imager package (LINK)
+#' @seealso imager package (LINK)
 
 selectBFImpression_resize <- function(x3p_path,
                                       ransacInlierThresh = (10^(-5)),

@@ -1,7 +1,23 @@
-#' Compiles a data frame
-#'
 #' @name topResultsPerCell
 #'
+#'   Given a list of data frames like the one returned in the `ccfResults`
+#'   element of the list returned from cmcR::cellCCF, returns a data frame of
+#'   the theta, dx, dy, ccf, and rawCorr values at which each cell pair attains
+#'   maximum rawCorr
+#'
+#' @param ccfResults list of data frames, like the one returned by
+#'   cmcR::cellCCF, containing breech face cell comparison results
+#'
+#' @examples
+#' \dontrun{
+#' #x3p1 and x3p2 are two x3p objects containing processed surface matrices
+#' comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
+#'
+#' comparison1$ccfResults %>%
+#'   cmcR::topResultsPerCell()
+#' }
+#'
+#' @seealso cmcR::cellCCF
 #' @export
 
 topResultsPerCell <- function(ccfResults){
@@ -16,16 +32,52 @@ topResultsPerCell <- function(ccfResults){
     dplyr::arrange(cellID)
 }
 
-#' Applies Congruent Matching Cells method logic to the CCF results of a
-#' comparison between two cartridge case scans.
-#'
 #' @name cmcFilter
 #'
+#'   Applies initially proposed Congruent Matching Cells method logic to the CCF
+#'   results of a comparison between two cartridge case scans.
+#'
+#' @param ccfDF data frame containing ccf results from a comparison between two
+#'   cartridge case scans
+#' @param consensus_function function to aggregate the translation (dx and dy)
+#'   and rotation (theta) values in the ccfDF data frame to determine
+#'   "consensus" values
+#' @param corr_thresh minimum correlation threshold to call a cell pair
+#'   "congruent matching"
+#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param theta_thresh maximum distance from the consensus theta value that a
+#'   cell pair can be to be called "congruent matching"
+#' @param consensus_function_theta *(OPTIONAL)* function (separate from
+#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
+#'   data frame to determine "consensus" values
 #' @param ... arguments to be passed to consensus_function or
-#'   consensus_function_theta if necessary
+#'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
+#'
+#' @examples
+#' \dontrun{
+#' #x3p1 and x3p2 are two x3p objects containing processed surface matrices
+#' comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
+#'
+#' #calculate "initial" cmcs
+#' comparison1$ccfResults %>%
+#'   cmcR::topResultsPerCell() %>%
+#'   cmcR::cmcFilter(consensus_function = median,
+#'                   corr_thresh = .4,
+#'                   dx_thresh = 20,
+#'                   dy_thresh = dx_thresh,
+#'                   theta_thresh = 3,
+#'                   consensus_function_theta = consensus_function)
+#' }
+#'
+#' @seealso
+#' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
+#'
 #' @export
 
-cmcFilter <- function(ccfResults,
+cmcFilter <- function(ccfDF,
                       consensus_function = median,
                       corr_thresh = .4,
                       dx_thresh = 20,
@@ -50,12 +102,29 @@ cmcFilter <- function(ccfResults,
 }
 
 #' @name cmcFilterPerTheta
+#'
+#' @param ccfDF data frame containing ccf results from a comparison between two
+#'   cartridge case scans
+#' @param consensus_function function to aggregate the translation (dx and dy)
+#'   and rotation (theta) values in the ccfDF data frame to determine
+#'   "consensus" values
+#' @param corr_thresh minimum correlation threshold to call a cell pair
+#'   "congruent matching"
+#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param theta_thresh maximum distance from the consensus theta value that a
+#'   cell pair can be to be called "congruent matching"
+#' @param consensus_function_theta *(OPTIONAL)* function (separate from
+#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
+#'   data frame to determine "consensus" values
 #' @param ... arguments to be passed to consensus_function or
-#'   consensus_function_theta if necessary
+#'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
 #' @keywords internal
 
-cmcFilterPerTheta <- function(ccfResults,
+cmcFilterPerTheta <- function(ccfDF,
                               consensus_function = median,
                               corr_thresh = .4,
                               dx_thresh = 20,
@@ -86,7 +155,7 @@ cmcFilterPerTheta <- function(ccfResults,
 #' @name getMode
 #'
 #' @description Calculates the mode of a vector. Can be used as a consensus
-#'   function in cmcR::cmcFilter.
+#'   function in cmcR::cmcFilter or cmcR::cmcFilter_improved.
 #'
 #' @export
 
@@ -146,12 +215,34 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   }
 }
 
-#'
-#'
 #' @name cmcFilter_improved
+#'
+#'   Implements "improved' Congruent Matching Cells logic, as proposed by Tong
+#'   et al. (2015), to the CCF results of a comparison between two cartridge
+#'   case scans.
 #'
 #' @param cellCCF_bothDirections_output list returned by the function
 #'   cmcR::cellCCF_bothdirections
+#' @param consensus_function function to aggregate the translation (dx and dy)
+#'   and rotation (theta) values in the ccfDF data frame to determine
+#'   "consensus" values
+#' @param corr_thresh minimum correlation threshold to call a cell pair
+#'   "congruent matching"
+#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param theta_thresh maximum distance from the consensus theta value that a
+#'   cell pair can be to be called "congruent matching"
+#' @param consensus_function_theta *(OPTIONAL)* function (separate from
+#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
+#'   data frame to determine "consensus" values
+#' @param ... arguments to be passed to consensus_function or
+#'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
+#'
+#'
+#' @seealso
+#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
 #' @export
 
@@ -184,7 +275,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   thetaMax <- purrr::map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
 
   # if(is.na(thetaMax$comparison_1to2 != -thetaMax$comparison_2to1) | thetaMax$comparison_1to2 != -thetaMax$comparison_2to1){
-    # print(paste0("Note: max CMC thetas disagree. Comparison of x3p1 to x3p2: ",thetaMax$comparison_1to2," degrees vs. Comparison of x3p2 to x3p1: ",thetaMax$comparison_2to1," degrees. If one is NA, then it will be replaced with the opposite of the other for final CMC calculation."))
+  # print(paste0("Note: max CMC thetas disagree. Comparison of x3p1 to x3p2: ",thetaMax$comparison_1to2," degrees vs. Comparison of x3p2 to x3p1: ",thetaMax$comparison_2to1," degrees. If one is NA, then it will be replaced with the opposite of the other for final CMC calculation."))
   # }
 
   if(purrr::is_empty(thetaMax$comparison_1to2) & !purrr::is_empty(thetaMax$comparison_2to1)){

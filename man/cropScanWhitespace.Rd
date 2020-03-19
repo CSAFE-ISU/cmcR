@@ -8,7 +8,10 @@ case scan. Helper for selectBFImpression}
 cropScanWhitespace(surfaceMat, croppingThresh = 1, ...)
 }
 \arguments{
-\item{croppingThresh}{}
+\item{surfaceMat}{matrix of input depths in microns.}
+
+\item{croppingThresh}{number of pixels that need to be observed in rows/cols
+before cropping from the exterior stops}
 }
 \description{
 Crop out rows/columns outside of the breech face impression in a cartridge

@@ -8,7 +8,7 @@ particular cut-off wavelength.}
 preProcess_gaussFilter(
   surfaceMat,
   res = 6.25e-06,
-  wavelength,
+  wavelength = c(16, 250),
   filtertype = "bp"
 )
 }
@@ -18,10 +18,32 @@ preProcess_gaussFilter(
 \item{res}{sampling resolution of the surface matrix}
 
 \item{wavelength}{cut-off wavelength}
+
+\item{filtertype}{specifies whether a low pass, "lp", high pass, "hp", or bandpass,
+"bp" filter is to be used. Note that setting filterype = "bp" means that
+wavelength should be a vector of two numbers. In this case, the max of
+these two number will be used for the high pass filter and the min for the
+low pass filter.}
 }
 \description{
 Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
 particular cut-off wavelength.
+}
+\examples{
+\dontrun{
+raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
+x3ptools::sample_x3p(m = 2)
+
+raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
+  cmcR::preProcess_ransac() \%>\%
+  cmcR::preProcess_levelBF() \%>\%
+  cmcR::preProcess_cropWS() \%>\%
+  cmcR::preProcess_removeFPCircle() \%>\%
+  cmcR::preProcess_gaussFilter(res = raw_x3p$header.info$incrementY,
+                               wavelength = c(16,250),
+                               filtertype = "bp")
+}
+
 }
 \seealso{
 https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
