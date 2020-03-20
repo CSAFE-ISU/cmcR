@@ -1,8 +1,8 @@
-#' Finds plane of breechface marks using RANSAC
+#' Finds plane of breechface marks using the RANSAC method
 #'
-#' Given input depths (in microns), find best-fitting plane using RANSAC. This
-#' should be the plane that the breechface marks are on. Adapted from
-#' cartridges3D::findPlaneRansac function.
+#' @description Given input depths (in microns), find best-fitting plane using
+#'   RANSAC. This should be the plane that the breechface marks are on. Adapted
+#'   from cartridges3D::findPlaneRansac function.
 #'
 #' @name preProcess_ransac
 #'
@@ -82,10 +82,12 @@ preProcess_ransac <- function(surfaceMat,
   return(list(ransacPlane = finalRansacPlane,
               estimatedBreechFace = estimatedBreechFace))
 }
+#' Levels a breech face impression matrix basedo on a RANSAC-fitted plane
+#'
 #' @name preProcess_levelBF
 #'
-#'   Given the output of preProcess_ransac, extracts values (either raw or
-#'   residual) from the surface matrix to which the RANSAC plane was fit.
+#' @description Given the output of preProcess_ransac, extracts values (either
+#'   raw or residual) from the surface matrix to which the RANSAC plane was fit.
 #'   Adapted from the cartridges3D::levelBF3D function.
 #'
 #' @param ransacFit output from the cmcR::preProcess_ransac function.
@@ -221,7 +223,7 @@ preProcess_cropWS <- function(surfaceMat,
 #'   found, the average of these radii values is used as the final radius
 #'   estimate.
 #'
-#'   @keywords internal
+#' @keywords internal
 
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregation_function = mean,

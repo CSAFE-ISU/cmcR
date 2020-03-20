@@ -420,9 +420,9 @@ calcRawCorr <- function(cell,region,dx,dy){
 
       #rows and cols both post-padded
       regionCroppedBothPost <- cbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad))
+                                     matrix(NA,
+                                            nrow = nrow(regionCroppedInitial),
+                                            ncol = colsToPad))
       regionCroppedBothPost <- rbind(regionCroppedBothPost,
                                      matrix(NA,
                                             nrow = rowsToPad,
@@ -454,10 +454,10 @@ calcRawCorr <- function(cell,region,dx,dy){
   else(return(maxCorr))
 }
 
-#' @name cellCCF
+#' Calculates the cross-correlation function between cells in one matrix to
+#' regions in another.
 #'
-#'   Calculate the maximum correlation between two breech face impressions split
-#'   into cells for range of rotation values
+#' @name cellCCF
 #'
 #' @export
 #'
@@ -728,9 +728,11 @@ cellCCF <- function(x3p1,
   ))
 }
 
+#' Applies cellCCF function twice for a pair of cartridge case scans.
+#'
 #' @name cellCCF_bothDirections
 #'
-#' Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
+#' @description Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
 #' for x3p2 vs. x3p1. See cellCCF function documentation for more details.
 #'
 #' @param x3p1 (no default) an x3p object containing the surface matrix of a
@@ -760,6 +762,21 @@ cellCCF <- function(x3p1,
 #'   If set to "wholeMatrix", then each cell is divided by the standard
 #'   deviation of the whole matrix. If set to "individualCell", then each cell
 #'   is divided by its particular standard deviation.
+#'
+#' @examples
+#' \dontrun{
+#'  #x3p1 and x3p2 are assumed to be 2 processed scans
+#' comparison1 <- cellCCF_bothDirections(x3p1 = x3p1,
+#'                                       x3p2 = x3p2,
+#'                                       thetas = seq(-30,30,by = 30),
+#'                                       cellNumHoriz = 8,
+#'                                       regionToCellProp = 4,
+#'                                       centerCell = "individualCell",
+#'                                       scaleCell = "individualCell")
+#'
+#' comparison1$comparison_1to2 #comparison of x3p1 vs x3p2
+#' comparison1$comparison_2to1 #comparison of x3p2 vs x3p1
+#' }
 #'
 #' @seealso cmcR::cellCCF_improved
 #' @export

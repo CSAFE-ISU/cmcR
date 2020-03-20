@@ -2,7 +2,7 @@
 % Please edit documentation in R/preProcessFunctions_modularized.R
 \name{preProcess_ransac}
 \alias{preProcess_ransac}
-\title{Finds plane of breechface marks using RANSAC}
+\title{Finds plane of breechface marks using the RANSAC method}
 \usage{
 preProcess_ransac(
   surfaceMat,
@@ -31,9 +31,9 @@ breechface marks (matrix of same size as original matrix containing all
 inliers close to fitted plane).
 }
 \description{
-Given input depths (in microns), find best-fitting plane using RANSAC. This
-should be the plane that the breechface marks are on. Adapted from
-cartridges3D::findPlaneRansac function.
+Given input depths (in microns), find best-fitting plane using
+RANSAC. This should be the plane that the breechface marks are on. Adapted
+from cartridges3D::findPlaneRansac function.
 }
 \examples{
 \dontrun{

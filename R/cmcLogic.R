@@ -1,3 +1,7 @@
+#' Calculates the dx, dy, and theta values at which the maximum
+#' cross-correlation value was attained for each cell pair in a cartridge case
+#' comparison.
+#'
 #' @name topResultsPerCell
 #'
 #'   Given a list of data frames like the one returned in the `ccfResults`
@@ -32,6 +36,8 @@ topResultsPerCell <- function(ccfResults){
     dplyr::arrange(cellID)
 }
 
+#' Implements CMC logic on a single data frame as proposed by Song (2013).
+#'
 #' @name cmcFilter
 #'
 #'   Applies initially proposed Congruent Matching Cells method logic to the CCF
@@ -90,11 +96,11 @@ cmcFilter <- function(ccfDF,
   # dx_thresh should positive
   # consensus_function and consensus_function_theta should be a function name that exists
 
-  consensus_dx <- consensus_function(ccfResults$dx,...)
-  consensus_dy <- consensus_function(ccfResults$dy,...)
-  consensus_theta <- consensus_function_theta(ccfResults$theta,...)
+  consensus_dx <- consensus_function(ccfDF$dx,...)
+  consensus_dy <- consensus_function(ccfDF$dy,...)
+  consensus_theta <- consensus_function_theta(ccfDF$theta,...)
 
-  ccfResults %>%
+  ccfDF %>%
     dplyr::filter(rawCorr >= corr_thresh &
                     dx >= consensus_dx - dx_thresh & dx <= consensus_dx + dx_thresh &
                     dy >= consensus_dy - dy_thresh & dy <= consensus_dy + dy_thresh &
@@ -103,8 +109,8 @@ cmcFilter <- function(ccfDF,
 
 #' @name cmcFilterPerTheta
 #'
-#' @param ccfDF data frame containing ccf results from a comparison between two
-#'   cartridge case scans
+#' @param ccfResults list of data frames, like the one returned by
+#'   cmcR::cellCCF, containing breech face cell comparison results
 #' @param consensus_function function to aggregate the translation (dx and dy)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
@@ -124,7 +130,7 @@ cmcFilter <- function(ccfDF,
 #'
 #' @keywords internal
 
-cmcFilterPerTheta <- function(ccfDF,
+cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
                               corr_thresh = .4,
                               dx_thresh = 20,
@@ -142,7 +148,7 @@ cmcFilterPerTheta <- function(ccfDF,
     setNames(names(ccfResults))
 
   ccfResults %>%
-    purrr::map(~ cmcFilter(ccfResults = .,
+    purrr::map(~ cmcFilter(ccfDF = .,
                            consensus_function = consensus_function,
                            corr_thresh = corr_thresh,
                            dx_thresh = dx_thresh,
@@ -152,6 +158,8 @@ cmcFilterPerTheta <- function(ccfDF,
     dplyr::bind_rows()
 }
 
+#' Calculates the mode of a vector of numbers
+#'
 #' @name getMode
 #'
 #' @description Calculates the mode of a vector. Can be used as a consensus
@@ -215,11 +223,14 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   }
 }
 
+#' Implements "improved" CMC logic on a list of CCF results for a comparison
+#' between two cartridge case scans as proposed by Tong et al. (2015)
+#'
 #' @name cmcFilter_improved
 #'
-#'   Implements "improved' Congruent Matching Cells logic, as proposed by Tong
-#'   et al. (2015), to the CCF results of a comparison between two cartridge
-#'   case scans.
+#' @description Implements "improved' Congruent Matching Cells logic, as
+#'   proposed by Tong et al. (2015), to the CCF results of a comparison between
+#'   two cartridge case scans.
 #'
 #' @param cellCCF_bothDirections_output list returned by the function
 #'   cmcR::cellCCF_bothdirections
@@ -274,10 +285,6 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
   thetaMax <- purrr::map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
 
-  # if(is.na(thetaMax$comparison_1to2 != -thetaMax$comparison_2to1) | thetaMax$comparison_1to2 != -thetaMax$comparison_2to1){
-  # print(paste0("Note: max CMC thetas disagree. Comparison of x3p1 to x3p2: ",thetaMax$comparison_1to2," degrees vs. Comparison of x3p2 to x3p1: ",thetaMax$comparison_2to1," degrees. If one is NA, then it will be replaced with the opposite of the other for final CMC calculation."))
-  # }
-
   if(purrr::is_empty(thetaMax$comparison_1to2) & !purrr::is_empty(thetaMax$comparison_2to1)){
     thetaMax$comparison_1to2 <- -thetaMax$comparison_2to1
   }
@@ -290,8 +297,6 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   }
 
   if(all(is.na(thetaMax))){
-    # print("Note: neither comparison produces a valid max CMC theta value. The
-    # initial CMCs based on the top results per cell will be returned.")
     return(list("params" = list(consensus_function = consensus_function,
                                 corr_thresh = corr_thresh,
                                 dx_thresh = dx_thresh,

@@ -53,7 +53,17 @@ ccfMap <- function(mat1,mat2){
   # ccfMat <- ccfMat_validRegion / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
 }
 
+#' Plots the CCF map between two matrices
+#'
 #' @name ccfMapPlot
+#'
+#' @description Uses the gridExtra::arrangeGrob function to put 3 plots and a
+#'   table on the same grob object.
+#'
+#' @param mat1 a matrix
+#' @param mat2 another matrix
+#' @param returnGrob if TRUE, then function will return the gridExtra grob
+#'   object
 #'
 #' @export
 
@@ -61,7 +71,6 @@ ccfMap <- function(mat1,mat2){
 
 ccfMapPlot <- function(mat1,
                        mat2,
-                       params,
                        returnGrob = FALSE){
 
   ccfMat <- cmcR:::ccfMap(mat1,mat2)
@@ -165,17 +174,23 @@ ccfMapPlot <- function(mat1,
   }
 }
 
+#' Plots the Congruent Matching Cells identified in a cartridge case scan
+#'
 #' @name cmcPlot
 #'
-#'   Plots the selected congruent matching cells of a questioned x3p
+#' @description Plots the selected congruent matching cells of a questioned x3p by either
+#'   converting the surface matrix contained in the x3p to a cimg object and
+#'   using base plot (fast, but doesn't look particularly great) or by plotting
+#'   surface matrix using ggplot2::geom_tile (slow, but nice looking).
 #'
-#' @param x3p The "questioned" x3p object for which CMCs were determined (this
-#'   would be x3p1 in a call to cellCCF)
+#' @param x3p The "questioned" cartridge case scan, in the form of an x3p
+#'   object, for which CMCs were determined (this would be x3p1 in a call to
+#'   cellCCF)
 #' @param cmcDF data frame containing the congruent matching cells of the
 #'   questioned x3p object
-#' @param method dictates whether a cimg plot is returned, or a ggplot2 plot. The
-#'   ggplot2 plot looks nicer, but takes much longer to construct than the cimg
-#'   plot.
+#' @param method dictates whether a cimg plot is returned, or a ggplot2 plot.
+#'   The ggplot2 plot looks nicer, but takes much longer to construct than the
+#'   cimg plot.
 #'
 #' @export
 

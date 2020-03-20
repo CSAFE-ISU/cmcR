@@ -1,36 +1,35 @@
-#plot the CCF distribution
+#Maybe we don't need this getCMCList? Do we even need the ccfMapPlot if that's
+#the case? I feel like the only use of the function below would be to get a list
+#that could be fed into ccfMapPlot. Unless we want to try to modularize the
+#cellCCF function...
 
-#plot the selected regions in each cell indicated by the CCF
 
-
-#' @name getHighCCFPairs
+#' @name getCMCList
 #'
-#' Must provide the parameters under which the comparison was made in the form
-#' of a list containing, in this order, (1) the grid of theta values, (2) the
-#' number of horizontal splits, and (3) the number of vertical splits. For
-#' example, list(theta = seq(-30,30,by = 3), cellNumHoriz = 7,cellNumVert = 7)
+#' @description Returns a list of matricies representing the CMCs ("initial" or
+#'   "final") for a cartridge case particular pair
 #'
-#' @param ... arguments to be passed to applyCMCLogic function
-#'
-#' @export
+#' @param x3p1 lorem
+#' @param x3p2 ipsum
+#' @param ccfDF dolor
 
-getHighCCFPairs <- function(x3p1,
-                            x3p2,
-                            cellCCF_output,
-                            initialCMCsOnly = FALSE,...){
+getCMCList <- function(x3p1,
+                       x3p2,
+                       cellCCF_output,
+                       cmcType = "initial"){
 
   cellCCF_results <- cellCCF_output$ccfResults
   params <- cellCCF_output$params
 
   #Get the initial "CMC candidate" cells from the CCF results
-  if(initialCMCsOnly){
-    topResults <- cellCCF_results %>%
-      cmcR:::applyCMCLogic(...)
-  }
-  else{
-    topResults <- cellCCF_results %>%
-      cmcR:::topResultsPerCell()
-  }
+  # if(initialCMCsOnly){
+  #   topResults <- cellCCF_results %>%
+  #     cmcR:::applyCMCLogic(...)
+  # }
+  # else{
+  #   topResults <- cellCCF_results %>%
+  #     cmcR:::topResultsPerCell()
+  # }
 
   if(nrow(topResults) == 0){
     return(list("topResults" = topResults,
@@ -135,7 +134,9 @@ stampOutMat1ShapeFromMat2 <- function(pair,
     alignedCell_bottomRight[2] <- alignedCell_bottomRight[2] + 1
   }
 
-  #The alignment location may cause parts of im1 to fall outside of im2, so we need to pad im2 with NAs so that the correlation between im2 and the aligned im1 can be succesfully calculated:
+  #The alignment location may cause parts of im1 to fall outside of im2, so we
+  #need to pad im2 with NAs so that the correlation between im2 and the aligned
+  #im1 can be succesfully calculated:
   if(alignedCell_topLeft[1] <= 0){
     topRowsToPad <- 1 - alignedCell_topLeft[1]
 
@@ -199,7 +200,7 @@ stampOutMat1ShapeFromMat2 <- function(pair,
 extractMatchedCells <- function(x3p1,
                                 x3p2,
                                 cellCCF_results,
-                                initialCMCsOnly = FALSE,...){
+                                initialCMCsOnly = FALSE){
 
   highCCFPairs_results <- cmcR:::getHighCCFPairs(x3p1,
                                                  x3p2,
@@ -216,40 +217,3 @@ extractMatchedCells <- function(x3p1,
 
   return(alignedCells)
 }
-
-##' @name calcRawCorr
-##'
-##' Export this?
-##'
-##' @keywords internal
-
-# calcRawCorr <- function(x3p1,
-#                         x3p2,
-#                         cellCCF_results,
-#                         initialCMCsOnly = FALSE,
-#                         use = "pairwise.complete.obs",...){
-#
-#   highCCFCel
-#
-#   ls <- cmcR:::extractMatchedCells(x3p1,
-#                                    x3p2,
-#                                    cellCCF_results,
-#                                    initialCMCsOnly = FALSE,...)
-#
-#   rawCorr <- purrr::map_dbl(highCCFCells,
-#                             function(pair){
-#                               if(any(
-#                                 all(is.na(as.vector(pair[[1]]))) | all(is.na(as.vector(pair[[2]])))
-#                               )){
-#                                 return(NA)
-#                               }
-#                               else{
-#                                 cor(as.vector(pair[[1]]),
-#                                     as.vector(pair[[2]]),
-#                                     use = use)
-#                               }
-#                             })
-#
-#   return(rawCorr)
-# }
-

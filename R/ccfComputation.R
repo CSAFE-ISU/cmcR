@@ -1,3 +1,5 @@
+#' Calculates cross-correlation between two matrices using FFTs
+#'
 #' @name filterViaFFT
 #'
 #' @keywords internal
@@ -15,7 +17,7 @@ filterViaFFT <- function(A, B) {
   padB[1:n[1], 1:n[2]] <- B
 
   # Filter in frequency domain
-  C <- fftw::FFT(fftw::FFT(padA)*Conj(fftw::FFT(padB)), inverse = TRUE)/(prod(x))
+  C <- fft(fft(padA)*Conj(fft(padB)), inverse = TRUE)/(prod(x))
 
   C <- matrix(C,nrow = x[1],ncol = x[2])
 
@@ -29,9 +31,10 @@ filterViaFFT <- function(A, B) {
   return(Re(C))
 }
 
+#' Copies behavior of round() function in MATLAB
+#'
 #' @name round2
-#' to copy behavior of round() in matlab
-#' http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
+#' @seealso http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
 #'
 #' @keywords internal
 
@@ -44,8 +47,10 @@ round2 = function(x, n) {
   z*posneg
 }
 
+#' Shifts CCF matrix output so that Nyquist frequency is in middle of matrix
+#'
 #' @name fftshift
-#' http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
+#' @seealso http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
 #'
 #' @keywords internal
 
@@ -71,8 +76,10 @@ fftshift <- function(input_matrix) {
 
 }
 
-#' @name circsift
-#' http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+#' Performs a circular shift based on periodic boundary conditions in a vector
+#'
+#' @name circshift
+#' @seealso http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
 #' @keywords internal
 
 circshift <- function(x, vec) {
@@ -91,6 +98,9 @@ circshift <- function(x, vec) {
   return(x)
 }
 
+#' Computes the location of the maximum CCF value in a CCF map between two
+#' matrices
+#'
 #' @name comparison
 #' @keywords internal
 comparison <- function(im1, im2) {

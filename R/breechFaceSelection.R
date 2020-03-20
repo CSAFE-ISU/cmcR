@@ -170,6 +170,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
     as.matrix()
 }
 
+#' Selected breech face impression from a cartridge case scan
+#'
 #' @name selectBFImpression
 #'
 #' @description Given a string representing a path to a cartridge case scan .x3p file, this function will read and process the scan including (1) use the RANSAC iterative plane fitting method to detect the height value at which the breech face impressions are in the scan, (2) crop out extra whitespace, NA values from the exterior of the resulting breech face impression surface matrix, and (3) detect and filter the inner firing pin impression circle using a circular Hough transform. Note that the RANSAC method is applied twice to the scan: once to get a rough estimate of the breech face impression height values (controlled with the ransacInlierThresh and ransacIters arguments) and again using .1*ransacInlierThresh and 2*ransacIters to get a more precise estimate.
@@ -197,10 +199,11 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' \dontrun{
 #'  processedBF1 <- cmcR::selectBFImpression(x3p_path = "path/to/file.x3p")
 #' }
-#' @export
 #'
 #' @seealso cartridges3D package (LINK)
 #' @seealso x3ptools (LINK)
+#'
+#' @export
 
 selectBFImpression <- function(x3p_path,
                                ransacInlierThresh = (10^(-5)),
@@ -267,7 +270,8 @@ selectBFImpression <- function(x3p_path,
               "x3p" = x3p))
 }
 
-#' Implements x3ptools::sample_x3p to downsample an x3p object's surface matrix.
+#' Selected breech face impression from a cartridge case scan after using
+#' x3ptools::sample_x3p to downsample the scan
 #'
 #' @name selectBFImpression_sample_x3p
 #' @param x3p_path path to a .x3p file
@@ -388,8 +392,9 @@ selectBFImpression_sample_x3p <- function(x3p_path,
               "x3p" = x3p))
 }
 
-#' Implements imager::resize to resize an x3p object's surface matrix to an
-#' arbitrary size.
+#' Selected breech face impression from a cartridge case scan after using
+#' imager::resize to resize the scan
+#'
 #' @name selectBFImpression_resize
 #' @param x3p_path path to a .x3p file
 #' @param ransacInlierThresh threshold to declare an observed value close to the

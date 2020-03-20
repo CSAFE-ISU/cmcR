@@ -2,7 +2,8 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{selectBFImpression_sample_x3p}
 \alias{selectBFImpression_sample_x3p}
-\title{Implements x3ptools::sample_x3p to downsample an x3p object's surface matrix.}
+\title{Selected breech face impression from a cartridge case scan after using
+x3ptools::sample_x3p to downsample the scan}
 \usage{
 selectBFImpression_sample_x3p(
   x3p_path,
@@ -55,7 +56,8 @@ processed surface matrix}
 
 }
 \description{
-Implements x3ptools::sample_x3p to downsample an x3p object's surface matrix.
+Selected breech face impression from a cartridge case scan after using
+x3ptools::sample_x3p to downsample the scan
 }
 \note{
 Given a matrix, x3ptools populates an x3p object's surface matrix

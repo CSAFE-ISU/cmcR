@@ -2,8 +2,8 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{selectBFImpression_resize}
 \alias{selectBFImpression_resize}
-\title{Implements imager::resize to resize an x3p object's surface matrix to an
-arbitrary size.}
+\title{Selected breech face impression from a cartridge case scan after using
+imager::resize to resize the scan}
 \usage{
 selectBFImpression_resize(
   x3p_path,
@@ -56,8 +56,8 @@ processed surface matrix}
 
 }
 \description{
-Implements imager::resize to resize an x3p object's surface matrix to an
-arbitrary size.
+Selected breech face impression from a cartridge case scan after using
+imager::resize to resize the scan
 }
 \note{
 imager treats a matrix as its transpose (i.e., x and y axes are
