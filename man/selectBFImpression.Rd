@@ -2,7 +2,7 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{selectBFImpression}
 \alias{selectBFImpression}
-\title{Selected breech face impression from a cartridge case scan}
+\title{Select breech face impression from a cartridge case scan}
 \usage{
 selectBFImpression(
   x3p_path,

@@ -6,8 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p • cmcR</title>
+<title>Calculates the dx, dy, and theta values at which the maximum
+cross-correlation value was attained for each cell pair in a cartridge case
+comparison. — topResultsPerCell • cmcR</title>
 
 
 <!-- jquery -->
@@ -36,10 +37,13 @@ x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p �
 
 
 
-<meta property="og:title" content="Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p" />
-<meta property="og:description" content="Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan" />
+<meta property="og:title" content="Calculates the dx, dy, and theta values at which the maximum
+cross-correlation value was attained for each cell pair in a cartridge case
+comparison. — topResultsPerCell" />
+<meta property="og:description" content="Given a list of data frames like the one returned in the ccfResults
+element of the list returned from cmcR::cellCCF, returns a data frame of
+the theta, dx, dy, ccf, and rawCorr values at which each cell pair attains
+maximum rawCorr" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -115,118 +119,49 @@ x3ptools::sample_x3p to downsample the scan" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan</h1>
+    <h1>Calculates the dx, dy, and theta values at which the maximum
+cross-correlation value was attained for each cell pair in a cartridge case
+comparison.</h1>
     
-    <div class="hidden name"><code>selectBFImpression_sample_x3p.Rd</code></div>
+    <div class="hidden name"><code>topResultsPerCell.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan</p>
+    <p>Given a list of data frames like the one returned in the <code>ccfResults</code>
+element of the list returned from cmcR::cellCCF, returns a data frame of
+the theta, dx, dy, ccf, and rawCorr values at which each cell pair attains
+maximum rawCorr</p>
     </div>
 
-    <pre class="usage"><span class='fu'>selectBFImpression_sample_x3p</span>(
-  <span class='no'>x3p_path</span>,
-  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
-  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>standardizeBF</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>mY</span> <span class='kw'>=</span> <span class='no'>m</span>,
-  <span class='kw'>offset</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>offsetY</span> <span class='kw'>=</span> <span class='no'>offset</span>
-)</pre>
+    <pre class="usage"><span class='fu'>topResultsPerCell</span>(<span class='no'>ccfResults</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x3p_path</th>
-      <td><p>path to a .x3p file</p></td>
-    </tr>
-    <tr>
-      <th>ransacInlierThresh</th>
-      <td><p>threshold to declare an observed value close to the
-fitted plane an "inlier" for the RANSAC method</p></td>
-    </tr>
-    <tr>
-      <th>ransacIters</th>
-      <td><p>number of candidate planes to fit for the RANSAC method
-(higher value yields more stable breech face estimate)</p></td>
-    </tr>
-    <tr>
-      <th>useResiduals</th>
-      <td><p>dictates whether the difference between the estimated
-breech face and fitted plane are returned (residuals) or if the estimates
-breech face is simply shifted down by its mean value</p></td>
-    </tr>
-    <tr>
-      <th>croppingThresh</th>
-      <td><p>treshold for cropping exterior whitespace from the
-breech face impression</p></td>
-    </tr>
-    <tr>
-      <th>m</th>
-      <td><p>integer value - every mth value is included in the sample</p></td>
-    </tr>
-    <tr>
-      <th>mY</th>
-      <td><p>integer value - every mth value is included in the sample in the x
-direction and every mYth value is included in y direction</p></td>
-    </tr>
-    <tr>
-      <th>offset</th>
-      <td><p>integer value between 0 and m-1 to specify offset of the sample</p></td>
-    </tr>
-    <tr>
-      <th>offsetY</th>
-      <td><p>integer value between 0 and mY-1 to specify different offsets
-for x and y direction.</p></td>
-    </tr>
-    <tr>
-      <th>finalSelectionThreshold</th>
-      <td><p>once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
-the final breech face estimate.</p></td>
-    </tr>
-    <tr>
-      <th>standardizedBF</th>
-      <td><p>subtract mean and divide by standard deviation of
-processed surface matrix</p></td>
+      <th>ccfResults</th>
+      <td><p>list of data frames, like the one returned by
+cmcR::cellCCF, containing breech face cell comparison results</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    
-
-
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
-
-    <p>Given a matrix, x3ptools populates an x3p object's surface matrix
-starting in the top left corner moving right by reading the the matrix from
-the bottom left corner and moving up. Effectively rotating the matrix by 90
-degrees clockwise.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>cartridges3D package (LINK)</p>
-<p>x3ptools package (LINK)</p></div>
+    <div class='dont-index'><p>cmcR::cellCCF</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-    <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>0</span>)
-    <span class='no'>testImage</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='findPlaneRansac.html'>findPlaneRansac</a></span>(<span class='no'>surfaceMat</span>)
+<span class='co'>#x3p1 and x3p2 are two x3p objects containing processed surface matrices</span>
+<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>) <span class='co'>#defaults assumed</span>
+
+<span class='no'>comparison1</span>$<span class='no'>ccfResults</span> <span class='kw'>%&gt;%</span>
+  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/topResultsPerCell.html'>topResultsPerCell</a></span>()
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#note">Note</a></li>
       <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>

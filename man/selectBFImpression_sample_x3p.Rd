@@ -2,7 +2,7 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{selectBFImpression_sample_x3p}
 \alias{selectBFImpression_sample_x3p}
-\title{Selected breech face impression from a cartridge case scan after using
+\title{Select breech face impression from a cartridge case scan after using
 x3ptools::sample_x3p to downsample the scan}
 \usage{
 selectBFImpression_sample_x3p(
@@ -56,7 +56,7 @@ processed surface matrix}
 
 }
 \description{
-Selected breech face impression from a cartridge case scan after using
+Select breech face impression from a cartridge case scan after using
 x3ptools::sample_x3p to downsample the scan
 }
 \note{

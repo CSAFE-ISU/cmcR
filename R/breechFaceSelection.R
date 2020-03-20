@@ -30,17 +30,26 @@ findPlaneRansac <- function(surfaceMat,
                             inlierTreshold = (10^(-5)), # 1 micron
                             finalSelectionThreshold = 2*(10^(-5)), # 2 micron
                             iters = 150,...) {
+  assertthat::not_empty(surfaceMat)
+  testthat::expect_true(is.matrix(surfaceMat))
+  assertthat::is.number(inlierTreshold)
+  testthat::expect_gt(inlierTreshold,0)
+  assertthat::is.number(finalSelectionThreshold)
+  testthat::expect_gt(finalSelectionThreshold,0)
+  assertthat::is.number(iters)
+  testthat::expect_gt(iters,0)
+
   inlierCount <- 0
 
   # sample from this
   observedPixelLocations <- data.frame(which(!is.na(surfaceMat),
                                              arr.ind = TRUE)) %>%
     dplyr::mutate(depth = surfaceMat[!is.na(surfaceMat)])
-  # observedPixelLocations$value <- surfaceMat[!is.na(surfaceMat)]
+
+  assertthat::not_empty(observedPixelLocations)
 
   for (iter in 1:iters) {
-    rowsToSample <- sample(nrow(observedPixelLocations),
-                           3)
+    rowsToSample <- sample(nrow(observedPixelLocations),3)
 
     candidatePlane <- lm(depth ~ row + col,
                          data = observedPixelLocations[rowsToSample, ])
@@ -76,6 +85,9 @@ findPlaneRansac <- function(surfaceMat,
   estimatedBreechFace <- matrix(NA, nrow = nrow(surfaceMat), ncol = ncol(surfaceMat))
 
   estimatedBreechFace[inlierLocations] <- observedPixelLocations$depth[finalInliers]
+
+  testthat::expect_s3_class(finalRansacPlane,class = "lm")
+  testthat::expect_true(is.matrix(estimatedBreechFace))
 
   return(list(ransacPlane = finalRansacPlane,
               estimatedBreechFace = estimatedBreechFace))
@@ -170,7 +182,7 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
     as.matrix()
 }
 
-#' Selected breech face impression from a cartridge case scan
+#' Select breech face impression from a cartridge case scan
 #'
 #' @name selectBFImpression
 #'
@@ -270,7 +282,7 @@ selectBFImpression <- function(x3p_path,
               "x3p" = x3p))
 }
 
-#' Selected breech face impression from a cartridge case scan after using
+#' Select breech face impression from a cartridge case scan after using
 #' x3ptools::sample_x3p to downsample the scan
 #'
 #' @name selectBFImpression_sample_x3p
@@ -392,7 +404,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
               "x3p" = x3p))
 }
 
-#' Selected breech face impression from a cartridge case scan after using
+#' Select breech face impression from a cartridge case scan after using
 #' imager::resize to resize the scan
 #'
 #' @name selectBFImpression_resize

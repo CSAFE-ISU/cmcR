@@ -2,7 +2,7 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{selectBFImpression_resize}
 \alias{selectBFImpression_resize}
-\title{Selected breech face impression from a cartridge case scan after using
+\title{Select breech face impression from a cartridge case scan after using
 imager::resize to resize the scan}
 \usage{
 selectBFImpression_resize(
@@ -56,7 +56,7 @@ processed surface matrix}
 
 }
 \description{
-Selected breech face impression from a cartridge case scan after using
+Select breech face impression from a cartridge case scan after using
 imager::resize to resize the scan
 }
 \note{

@@ -1,13 +1,12 @@
-#' Calculates the dx, dy, and theta values at which the maximum
-#' cross-correlation value was attained for each cell pair in a cartridge case
-#' comparison.
+#' Calculate dx, dy, theta values at which top similarity is achieved in a cell
+#' pair.
 #'
 #' @name topResultsPerCell
 #'
-#'   Given a list of data frames like the one returned in the `ccfResults`
-#'   element of the list returned from cmcR::cellCCF, returns a data frame of
-#'   the theta, dx, dy, ccf, and rawCorr values at which each cell pair attains
-#'   maximum rawCorr
+#' @description Given a list of data frames like the one returned in the
+#'   `ccfResults` element of the list returned from cmcR::cellCCF, returns a
+#'   data frame of the theta, dx, dy, ccf, and rawCorr values at which each cell
+#'   pair attains maximum rawCorr.
 #'
 #' @param ccfResults list of data frames, like the one returned by
 #'   cmcR::cellCCF, containing breech face cell comparison results
@@ -40,7 +39,7 @@ topResultsPerCell <- function(ccfResults){
 #'
 #' @name cmcFilter
 #'
-#'   Applies initially proposed Congruent Matching Cells method logic to the CCF
+#' @description Applies initially proposed Congruent Matching Cells method logic to the CCF
 #'   results of a comparison between two cartridge case scans.
 #'
 #' @param ccfDF data frame containing ccf results from a comparison between two

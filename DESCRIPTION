@@ -24,8 +24,11 @@ Imports:
     cartridges3D,
     purrr,
     zoo,
-    stringr
+    stringr,
+    assertthat
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
+Remotes: github::xhtai/cartridges3D
 VignetteBuilder: knitr

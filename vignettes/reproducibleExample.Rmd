@@ -25,7 +25,7 @@ devtools::install_github("https://github.com/jzemmels/cmcR")
 ```
 
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE,warning=FALSE}
 library(cmcR)
 library(magrittr)
 library(ggplot2)
@@ -48,7 +48,7 @@ There are a number of ways to visualize a cartridge case scans, each with their 
 ### Imager w/ Base Plot
 A quick yet inflexible way is to turn the surface matrix into a `cimg` object and use base plot.
 
-```{r out.width="\\textwidth"}
+```{r}
 par(mar = c(1,1,1,1))
 
 imager::imlist(
@@ -66,7 +66,7 @@ unknown2_raw$surface.matrix %>%
 
 ### ggplot2
 
-ggplots are more flexible, but geom_tile takes a considerably amount of time to plot relative to base plotting a cimg object.
+ggplots are more flexible, but geom_tile takes a considerable amount of time to plot relative to base plotting a cimg object.
 
 ```{r}
 km1_raw$surface.matrix %>%
@@ -173,7 +173,7 @@ unknown2_residuals$x3p$surface.matrix <-
                                filtertype = "lp")
 ```
 
-```{r out.width="\\textwidth"}
+```{r}
 par(mar = c(1,1,1,1))
 
 imager::imlist(
@@ -186,7 +186,6 @@ unknown1_residuals$x3p$surface.matrix %>%
 unknown2_residuals$x3p$surface.matrix %>%
   imager::as.cimg()
 ) %>%
-  setNames() %>%
   plot()
 ```
 
@@ -267,7 +266,7 @@ km1_unknown2_comparison$comparison_1to2$ccfResults %>%
 
 Having chosen correlation and translation thresholds by which we can classify cell pairs as "congruent matching cells," a useful way to determine an estimate for the rotation values by which two cartridge cases will align is to plot the number of CMCs per rotation value. The plots below show the "forward" and "backward" distribution of CMCs per theta value for the comparisons between km1 and unknown1 as well as km1 and unknown2. We can clearly see that there are very few 
 
-```{r out.width="\\textwidth"}
+```{r}
 bind_rows(
   km1_unknown1_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
@@ -307,7 +306,7 @@ bind_rows(
 
 The same plot for the comparison betwen km1 and unknown2 is shown below.
 
-```{r echo=FALSE,out.width="\\textwidth"}
+```{r echo=FALSE}
 bind_rows(
   km1_unknown2_comparison$comparison_1to2$ccfResults %>%
     cmcR:::cmcFilterPerTheta(consensus_function = median,
@@ -379,7 +378,7 @@ km2_unknown1_comparison <- cellCCF_bothDirections(km2_residuals$x3p,
                                                   scaleCell = "individualCell")
 
 km2_unknown2_comparison <- cellCCF_bothDirections(km2_residuals$x3p,
-                                                  unknown1_residuals$x3p,
+                                                  unknown2_residuals$x3p,
                                                   thetas = seq(-30,30,by = 3),
                                                   cellNumHoriz = 8,
                                                   regionToCellProp = 4,
@@ -389,50 +388,46 @@ km2_unknown2_comparison <- cellCCF_bothDirections(km2_residuals$x3p,
 
 km2_unknown1_cmcs <- cmcR::cmcFilter_improved(km2_unknown1_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .55,
+                                              corr_thresh = .8,
                                               dx_thresh = 15)
 
 km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .55,
+                                              corr_thresh = .8,
                                               dx_thresh = 15)
 ```
 
 ```{r}
-km2_unknown2_cmcs$finalCMCs
+km2_unknown2_cmcs$finalCMCs %>%
+  DT::datatable(options = list(pageLength = 5))
 ```
 
 
-```{r eval=FALSE}
+```{r}
 cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km1_unknown1_cmcs$initialCMCs[[1]][[2]],
-              method = "ggplot2")
+              cmcDF = km1_unknown1_cmcs$initialCMCs[[1]][[2]])
 ```
 
 
 
-```{r eval=FALSE}
-cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km1_unknown2_cmcs$initialCMCs[[1]][[2]],
-              method = "ggplot2")
-```
-
-```{r eval=FALSE}
-cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km2_unknown1_cmcs$initialCMCs[[1]][[1]],
-              method = "ggplot2")
+```{r}
+cmcR::cmcPlot(unknown2_residuals$x3p,
+              cmcDF = km1_unknown2_cmcs$initialCMCs[[1]][[2]])
 ```
 
 ```{r eval=FALSE}
 cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km2_unknown2_cmcs$initialCMCs[[1]][[2]],
-              method = "ggplot2")
+              cmcDF = km2_unknown1_cmcs$initialCMCs[[1]][[1]])
 ```
 
-```{r eval=FALSE}
+```{r}
 cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km2_unknown1_cmcs$finalCMCs,
-              method = "ggplot2")
+              cmcDF = km2_unknown2_cmcs$initialCMCs[[1]][[2]])
+```
+
+```{r}
+cmcR::cmcPlot(unknown2_residuals$x3p,
+              cmcDF = km2_unknown2_cmcs$finalCMCs)
 ```
 
 ## References

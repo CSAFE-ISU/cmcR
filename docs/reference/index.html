@@ -131,6 +131,12 @@
       <tr>
         
         <td>
+          <p><code><a href="ccfMapPlot.html">ccfMapPlot()</a></code> </p>
+        </td>
+        <td><p>Plots the CCF map between two matrices</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="cellCCF.html">cellCCF()</a></code> </p>
         </td>
         <td><p>Calculates the cross-correlation function between cells in one matrix to
@@ -141,6 +147,31 @@ regions in another.</p></td>
           <p><code><a href="cellCCF_bothDirections.html">cellCCF_bothDirections()</a></code> </p>
         </td>
         <td><p>Applies cellCCF function twice for a pair of cartridge case scans.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cmcFilter.html">cmcFilter()</a></code> </p>
+        </td>
+        <td><p>Implements CMC logic on a single data frame as proposed by Song (2013).</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cmcFilter_improved.html">cmcFilter_improved()</a></code> </p>
+        </td>
+        <td><p>Implements "improved" CMC logic on a list of CCF results for a comparison
+between two cartridge case scans as proposed by Tong et al. (2015)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cmcPlot.html">cmcPlot()</a></code> </p>
+        </td>
+        <td><p>Plots the Congruent Matching Cells identified in a cartridge case scan</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="getMode.html">getMode()</a></code> </p>
+        </td>
+        <td><p>Calculates the mode of a vector of numbers</p></td>
       </tr><tr>
         
         <td>
@@ -179,21 +210,29 @@ firing pin impression circle</p></td>
         <td>
           <p><code><a href="selectBFImpression.html">selectBFImpression()</a></code> </p>
         </td>
-        <td><p>Selected breech face impression from a cartridge case scan</p></td>
+        <td><p>Select breech face impression from a cartridge case scan</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="selectBFImpression_resize.html">selectBFImpression_resize()</a></code> </p>
         </td>
-        <td><p>Selected breech face impression from a cartridge case scan after using
+        <td><p>Select breech face impression from a cartridge case scan after using
 imager::resize to resize the scan</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p()</a></code> </p>
         </td>
-        <td><p>Selected breech face impression from a cartridge case scan after using
+        <td><p>Select breech face impression from a cartridge case scan after using
 x3ptools::sample_x3p to downsample the scan</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="topResultsPerCell.html">topResultsPerCell()</a></code> </p>
+        </td>
+        <td><p>Calculates the dx, dy, and theta values at which the maximum
+cross-correlation value was attained for each cell pair in a cartridge case
+comparison.</p></td>
       </tr>
     </tbody>
     </table>
