@@ -95,7 +95,7 @@ x3ptools::sample_x3p to downsample the scan" />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/reproducibleExample.html">Cartridge Case Reproducible Example</a>
+      <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
 </li>
@@ -217,8 +217,8 @@ degrees clockwise.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-    <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>0</span>)
-    <span class='no'>testImage</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='findPlaneRansac.html'>findPlaneRansac</a></span>(<span class='no'>surfaceMat</span>)
+ <span class='co'>#downsample x3p to a quarter the original size (every other row/col selected)</span>
+ <span class='no'>processedBF1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/selectBFImpression_sample_x3p.html'>selectBFImpression_sample_x3p</a></span>(<span class='kw'>x3p_path</span> <span class='kw'>=</span> <span class='st'>"path/to/file.x3p"</span>,<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

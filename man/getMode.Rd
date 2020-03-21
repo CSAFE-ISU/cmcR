@@ -6,7 +6,27 @@
 \usage{
 getMode(x)
 }
+\arguments{
+\item{x}{a numeric vector}
+}
 \description{
 Calculates the mode of a vector. Can be used as a consensus
 function in cmcR::cmcFilter or cmcR::cmcFilter_improved.
+}
+\examples{
+\dontrun{
+#x3p1 and x3p2 are two x3p objects containing processed surface matrices
+comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
+
+#calculate "initial" cmcs
+comparison1$ccfResults \%>\%
+  cmcR::topResultsPerCell() \%>\%
+  cmcR::cmcFilter(consensus_function = median,
+                  corr_thresh = .4,
+                  dx_thresh = 20,
+                  dy_thresh = dx_thresh,
+                  theta_thresh = 3,
+                  consensus_function_theta = getMode)
+}
+
 }

@@ -74,7 +74,7 @@ topResultsPerCell <- function(ccfResults){
 #'                   dx_thresh = 20,
 #'                   dy_thresh = dx_thresh,
 #'                   theta_thresh = 3,
-#'                   consensus_function_theta = consensus_function)
+#'                   consensus_function_theta = median)
 #' }
 #'
 #' @seealso
@@ -164,6 +164,24 @@ cmcFilterPerTheta <- function(ccfResults,
 #' @description Calculates the mode of a vector. Can be used as a consensus
 #'   function in cmcR::cmcFilter or cmcR::cmcFilter_improved.
 #'
+#' @param x a numeric vector
+#'
+#' @examples
+#' \dontrun{
+#' #x3p1 and x3p2 are two x3p objects containing processed surface matrices
+#' comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
+#'
+#' #calculate "initial" cmcs
+#' comparison1$ccfResults %>%
+#'   cmcR::topResultsPerCell() %>%
+#'   cmcR::cmcFilter(consensus_function = median,
+#'                   corr_thresh = .4,
+#'                   dx_thresh = 20,
+#'                   dy_thresh = dx_thresh,
+#'                   theta_thresh = 3,
+#'                   consensus_function_theta = getMode)
+#' }
+#'
 #' @export
 
 getMode <- function(x){
@@ -250,7 +268,18 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #' @param ... arguments to be passed to consensus_function or
 #'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
+#' @examples
+#' \dontrun{
+#' comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
 #'
+#' cmcs <- cmcFilter_improved(comparison1,
+#'                            consensus_function = median,
+#'                            corr_thresh = .4,
+#'                            dx_thresh = 20,
+#'                            dy_thresh = dx_thresh,
+#'                            theta_thresh = 3,
+#'                            consensus_function_theta = getMode)
+#' }
 #' @seealso
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'

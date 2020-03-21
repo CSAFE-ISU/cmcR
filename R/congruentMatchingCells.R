@@ -1,7 +1,10 @@
+#' Identifies the congruent matching cells between two processed cartridge case
+#' scans
+#'
 #' @name congruentMatchingCells
 #'
-#'   Wrapper for calling the cellCCF_bothDirections and cmcFilter_improved
-#'   functions together
+#' @description Wrapper for calling the cellCCF_bothDirections and
+#'   cmcFilter_improved functions together
 #'
 #' @param x3p1 (no default) an x3p object containing the surface matrix of a
 #'   breech face impression
@@ -49,11 +52,17 @@
 #' @param ... arguments to be passed to consensus_function or
 #'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
+#' @examples
+#' \dontrun{
+#' #x3p1 and x3p2 are two processed cartridge case scans
+#' cmc <- congruentMatchingCells(x3p1,x3p2)
+#' }
+#'
 #' @seealso cmcR::cellCCF_bothDirections and cmcR::cmcFilter_improved
 #' @seealso
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #' @seealso
-#'   \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
+#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
 
 congruentMatchingCells <- function(x3p1,

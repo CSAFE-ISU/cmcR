@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shifts CCF matrix output so that Nyquist frequency is in middle of matrix — fftshift • cmcR</title>
+<title>Create a bar plot of congruent matching cells per rotation value — cmcPerThetaBarPlot • cmcR</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Shifts CCF matrix output so that Nyquist frequency is in middle of matrix — fftshift" />
-<meta property="og:description" content="Shifts CCF matrix output so that Nyquist frequency is in middle of matrix" />
+<meta property="og:title" content="Create a bar plot of congruent matching cells per rotation value — cmcPerThetaBarPlot" />
+<meta property="og:description" content="Create a bar plot of congruent matching cells per rotation value" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -112,27 +112,58 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Shifts CCF matrix output so that Nyquist frequency is in middle of matrix</h1>
+    <h1>Create a bar plot of congruent matching cells per rotation value</h1>
     
-    <div class="hidden name"><code>fftshift.Rd</code></div>
+    <div class="hidden name"><code>cmcPerThetaBarPlot.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Shifts CCF matrix output so that Nyquist frequency is in middle of matrix</p>
+    <p>Create a bar plot of congruent matching cells per rotation value</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fftshift</span>(<span class='no'>input_matrix</span>)</pre>
+    <pre class="usage"><span class='fu'>cmcPerThetaBarPlot</span>(
+  <span class='no'>cellCCF_output</span>,
+  <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
+  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>15</span>,
+  <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
+  <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>consensus_function</span>,
+  <span class='kw'>highCMCThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>
+)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>cellCCF_output</th>
+      <td><p>list returned by the cellCCF or cellCCF_bothDirections
+function. If from the cellCCF_bothDirections, then the ggplot will be
+faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
+played the role as the "questioned" cartridge case scan)</p></td>
+    </tr>
+    </table>
 
 
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+ <span class='co'>#x3p1 and x3p2 are two x3p objects containing processed cartridge case scans</span>
+ <span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
 
-    <div class='dont-index'><p>http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r</p></div>
+ <span class='co'>#creates a single bar plot of the CMCs per theta</span>
+ <span class='fu'>cmcPerThetaBarPlot</span>(<span class='no'>comparison1</span>)
 
+ <span class='no'>comparison2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
+
+ <span class='co'>#creates a faceted bar plot of the CMCs per theta in both comparison directions</span>
+ <span class='fu'>cmcPerThetaBarPlot</span>(<span class='no'>comparison2</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#see-also">See also</a></li>
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

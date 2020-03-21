@@ -93,7 +93,7 @@ function in cmcR::cmcFilter or cmcR::cmcFilter_improved." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/reproducibleExample.html">Cartridge Case Reproducible Example</a>
+      <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
 </li>
@@ -125,12 +125,37 @@ function in cmcR::cmcFilter or cmcR::cmcFilter_improved.</p>
 
     <pre class="usage"><span class='fu'>getMode</span>(<span class='no'>x</span>)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>a numeric vector</p></td>
+    </tr>
+    </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='co'>#x3p1 and x3p2 are two x3p objects containing processed surface matrices</span>
+<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>) <span class='co'>#defaults assumed</span>
+
+<span class='co'>#calculate "initial" cmcs</span>
+<span class='no'>comparison1</span>$<span class='no'>ccfResults</span> <span class='kw'>%&gt;%</span>
+  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/topResultsPerCell.html'>topResultsPerCell</a></span>() <span class='kw'>%&gt;%</span>
+  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/cmcFilter.html'>cmcFilter</a></span>(<span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
+                  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>.4</span>,
+                  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
+                  <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
+                  <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+                  <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>getMode</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

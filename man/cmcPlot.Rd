@@ -24,3 +24,23 @@ converting the surface matrix contained in the x3p to a cimg object and
 using base plot (fast, but doesn't look particularly great) or by plotting
 surface matrix using ggplot2::geom_tile (slow, but nice looking).
 }
+\examples{
+\dontrun{
+comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
+
+cmcs <- cmcFilter_improved(comparison1)
+
+#initially selected CMCs based on x3p1 vs x3p2 comparison
+cmcPlot(x3p1,cmcs$initialCMCs[[1]][[1]])
+
+#initialy selected CMCs based on x3p2 vs x3p1
+cmcPlot(x3p2,cmcs$initialCMCs[[1]][[2]])
+
+#final selected CMCs (may be empty) based on both x3p1 vs x3p2 and x3p2 vs x3p1
+cmcPlot(x3p1,cmcs$finalCMCs)
+
+#make plot using ggplot2::geom_tile
+cmcPlot(x3p1,cmcs$finalCMCs,method = "ggplot2")
+}
+
+}

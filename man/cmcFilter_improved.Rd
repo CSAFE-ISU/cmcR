@@ -48,6 +48,19 @@ Implements "improved' Congruent Matching Cells logic, as
 proposed by Tong et al. (2015), to the CCF results of a comparison between
 two cartridge case scans.
 }
+\examples{
+\dontrun{
+comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
+
+cmcs <- cmcFilter_improved(comparison1,
+                           consensus_function = median,
+                           corr_thresh = .4,
+                           dx_thresh = 20,
+                           dy_thresh = dx_thresh,
+                           theta_thresh = 3,
+                           consensus_function_theta = getMode)
+}
+}
 \seealso{
 \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 }

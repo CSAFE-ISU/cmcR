@@ -95,7 +95,7 @@ imager::resize to resize the scan" />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/reproducibleExample.html">Cartridge Case Reproducible Example</a>
+      <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
 </li>
@@ -214,7 +214,8 @@ rows in the original matrix and size_y the number of columns.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-
+ <span class='co'>#use moving average interpolation to resize matrix to be 560x560</span>
+ <span class='no'>processedBF1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/selectBFImpression_resize.html'>selectBFImpression_resize</a></span>(<span class='kw'>x3p_path</span> <span class='kw'>=</span> <span class='st'>"path/to/file.x3p"</span>,<span class='kw'>size_x</span> <span class='kw'>=</span> <span class='fl'>560</span>,<span class='kw'>size_y</span> <span class='kw'>=</span> <span class='fl'>560</span>,<span class='kw'>interpolation_type</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

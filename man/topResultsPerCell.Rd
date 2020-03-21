@@ -2,9 +2,8 @@
 % Please edit documentation in R/cmcLogic.R
 \name{topResultsPerCell}
 \alias{topResultsPerCell}
-\title{Calculates the dx, dy, and theta values at which the maximum
-cross-correlation value was attained for each cell pair in a cartridge case
-comparison.}
+\title{Calculate dx, dy, theta values at which top similarity is achieved in a cell
+pair.}
 \usage{
 topResultsPerCell(ccfResults)
 }
@@ -13,10 +12,10 @@ topResultsPerCell(ccfResults)
 cmcR::cellCCF, containing breech face cell comparison results}
 }
 \description{
-Given a list of data frames like the one returned in the \code{ccfResults}
-element of the list returned from cmcR::cellCCF, returns a data frame of
-the theta, dx, dy, ccf, and rawCorr values at which each cell pair attains
-maximum rawCorr
+Given a list of data frames like the one returned in the
+\code{ccfResults} element of the list returned from cmcR::cellCCF, returns a
+data frame of the theta, dx, dy, ccf, and rawCorr values at which each cell
+pair attains maximum rawCorr.
 }
 \examples{
 \dontrun{

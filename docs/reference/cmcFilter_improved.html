@@ -96,7 +96,7 @@ two cartridge case scans." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/reproducibleExample.html">Cartridge Case Reproducible Example</a>
+      <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
 </li>
@@ -190,12 +190,25 @@ consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
 
     <div class='dont-index'><p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf</a></p></div>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
+
+<span class='no'>cmcs</span> <span class='kw'>&lt;-</span> <span class='fu'>cmcFilter_improved</span>(<span class='no'>comparison1</span>,
+                           <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
+                           <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>.4</span>,
+                           <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
+                           <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
+                           <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+                           <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>getMode</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#see-also">See also</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

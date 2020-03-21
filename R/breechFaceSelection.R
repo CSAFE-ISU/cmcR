@@ -315,8 +315,8 @@ selectBFImpression <- function(x3p_path,
 #' @return
 #' @examples
 #' \dontrun{
-#'     set.seed(0)
-#'     testImage <- findPlaneRansac(surfaceMat)
+#'  #downsample x3p to a quarter the original size (every other row/col selected)
+#'  processedBF1 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "path/to/file.x3p",m = 2)
 #' }
 #' @export
 #'
@@ -437,7 +437,8 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @return
 #' @examples
 #' \dontrun{
-#'
+#'  #use moving average interpolation to resize matrix to be 560x560
+#'  processedBF1 <- cmcR::selectBFImpression_resize(x3p_path = "path/to/file.x3p",size_x = 560,size_y = 560,interpolation_type = 2)
 #' }
 #' @export
 #'

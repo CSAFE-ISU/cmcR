@@ -66,7 +66,8 @@ rows in the original matrix and size_y the number of columns.
 }
 \examples{
 \dontrun{
-
+ #use moving average interpolation to resize matrix to be 560x560
+ processedBF1 <- cmcR::selectBFImpression_resize(x3p_path = "path/to/file.x3p",size_x = 560,size_y = 560,interpolation_type = 2)
 }
 }
 \seealso{

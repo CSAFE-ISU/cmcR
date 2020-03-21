@@ -67,8 +67,8 @@ degrees clockwise.
 }
 \examples{
 \dontrun{
-    set.seed(0)
-    testImage <- findPlaneRansac(surfaceMat)
+ #downsample x3p to a quarter the original size (every other row/col selected)
+ processedBF1 <- cmcR::selectBFImpression_sample_x3p(x3p_path = "path/to/file.x3p",m = 2)
 }
 }
 \seealso{

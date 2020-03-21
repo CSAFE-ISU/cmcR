@@ -95,7 +95,7 @@ surface matrix using ggplot2::geom_tile (slow, but nice looking)." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/reproducibleExample.html">Cartridge Case Reproducible Example</a>
+      <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
 </li>
@@ -152,11 +152,30 @@ cimg plot.</p></td>
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
+
+<span class='no'>cmcs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cmcFilter_improved.html'>cmcFilter_improved</a></span>(<span class='no'>comparison1</span>)
+
+<span class='co'>#initially selected CMCs based on x3p1 vs x3p2 comparison</span>
+<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>initialCMCs</span><span class='kw'>[[</span><span class='fl'>1</span>]]<span class='kw'>[[</span><span class='fl'>1</span>]])
+
+<span class='co'>#initialy selected CMCs based on x3p2 vs x3p1</span>
+<span class='fu'>cmcPlot</span>(<span class='no'>x3p2</span>,<span class='no'>cmcs</span>$<span class='no'>initialCMCs</span><span class='kw'>[[</span><span class='fl'>1</span>]]<span class='kw'>[[</span><span class='fl'>2</span>]])
+
+<span class='co'>#final selected CMCs (may be empty) based on both x3p1 vs x3p2 and x3p2 vs x3p1</span>
+<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>finalCMCs</span>)
+
+<span class='co'>#make plot using ggplot2::geom_tile</span>
+<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>finalCMCs</span>,<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"ggplot2"</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

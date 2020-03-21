@@ -18,3 +18,15 @@ object}
 Uses the gridExtra::arrangeGrob function to put 3 plots and a
 table on the same grob object.
 }
+\examples{
+ mat1 <- imager::imfill(x = 100,y = 100) \%>\%
+ imager::draw_rect(x0 = 40,y0 = 40,x1 = 60,y1 = 60,color = 255) \%>\%
+ as.matrix()
+
+ mat2 <- imager::imfill(x = 100,y = 100) \%>\%
+ imager::draw_rect(x0 = 15,y0 = 30,x1 = 35,y1 = 50,color = 255) \%>\%
+ as.matrix()
+
+ ccfMapPlot(mat1,mat2)
+
+}

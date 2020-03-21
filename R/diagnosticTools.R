@@ -12,45 +12,6 @@ ccfMap <- function(mat1,mat2){
   ccfMat <- filterViaFFT(mat1,mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
 
   return(Re(ccfMat))
-
-  #this function should only be used on matrices that have been pre-processed - at the very least, had NAs replaced by another value prior to use.
-
-  #Call "mat1" whichever the the smaller mat is and "mat2" the larger
-  # matSmall <- list(mat1,mat2)[[all(dim(mat1) > dim(mat2)) + 1]] #will assign smaller of two matrices to mat1
-  # matBig <- list(mat1,mat2)[[all(dim(mat1) < dim(mat2)) + 1]] #will assign larger of two matrices to mat2
-  #
-  # # size of full filter
-  # dim(matSmall) <- dim(matSmall)
-  # dim(matBig) <- dim(matBig)
-  #
-  # dimPadded <- dim(matSmall) + dim(matBig) - 1
-  #
-  # # pad images with 0 so that we do not have circular issues with FFT
-  # padMatSmall <- matrix(0, nrow = dimPadded[1], ncol = dimPadded[2])
-  # padMatBig <- matrix(0, nrow = dimPadded[1], ncol = dimPadded[2])
-  #
-  # padMatSmall[1:dim(matSmall)[1], 1:dim(matSmall)[2]] <- matSmall
-  # padMatBig[1:dim(matBig)[1], 1:dim(matBig)[2]] <- matBig
-  #
-  # # Filter in frequency domain
-  # ccfMat <- fftw::FFT(fftw::FFT(padMatSmall)*Conj(fftw::FFT(padMatBig)), inverse = TRUE)/(prod(dimPadded))
-  #
-  # ccfMat <- matrix(ccfMat,nrow = dimPadded[1],ncol = dimPadded[2])
-  #
-  # ccfMat <- circshift(fftshift(ccfMat), round2((dim(matBig) - dim(matSmall))/2, 0))
-  #
-  # # halfDimSmall <- cmcR:::round2((dim(matBig) - dim(matSmall))/2, 0)
-  #
-  # ccfMat_validRegion <- ccfMat
-  #
-  # # ccfMat_validRegion <- ccfMat[halfDimSmall[1]:(halfDimSmall[1] + dim(matBig)[1] - 1),
-  # #                              halfDimSmall[2]:(halfDimSmall[2] + dim(matBig)[2] - 1)]
-  #
-  # if (all.equal(c(Im(ccfMat_validRegion)), rep(0, prod(dim(ccfMat_validRegion)))) == FALSE) {
-  #   stop("Non-zero imaginary part")
-  # }
-
-  # ccfMat <- ccfMat_validRegion / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
 }
 
 #' Plots the CCF map between two matrices
@@ -64,6 +25,17 @@ ccfMap <- function(mat1,mat2){
 #' @param mat2 another matrix
 #' @param returnGrob if TRUE, then function will return the gridExtra grob
 #'   object
+#'
+#' @examples
+#'  mat1 <- imager::imfill(x = 100,y = 100) %>%
+#'  imager::draw_rect(x0 = 40,y0 = 40,x1 = 60,y1 = 60,color = 255) %>%
+#'  as.matrix()
+#'
+#'  mat2 <- imager::imfill(x = 100,y = 100) %>%
+#'  imager::draw_rect(x0 = 15,y0 = 30,x1 = 35,y1 = 50,color = 255) %>%
+#'  as.matrix()
+#'
+#'  ccfMapPlot(mat1,mat2)
 #'
 #' @export
 
@@ -192,9 +164,30 @@ ccfMapPlot <- function(mat1,
 #'   The ggplot2 plot looks nicer, but takes much longer to construct than the
 #'   cimg plot.
 #'
+#' @examples
+#' \dontrun{
+#' comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
+#'
+#' cmcs <- cmcFilter_improved(comparison1)
+#'
+#' #initially selected CMCs based on x3p1 vs x3p2 comparison
+#' cmcPlot(x3p1,cmcs$initialCMCs[[1]][[1]])
+#'
+#' #initialy selected CMCs based on x3p2 vs x3p1
+#' cmcPlot(x3p2,cmcs$initialCMCs[[1]][[2]])
+#'
+#' #final selected CMCs (may be empty) based on both x3p1 vs x3p2 and x3p2 vs x3p1
+#' cmcPlot(x3p1,cmcs$finalCMCs)
+#'
+#' #make plot using ggplot2::geom_tile
+#' cmcPlot(x3p1,cmcs$finalCMCs,method = "ggplot2")
+#' }
+#'
 #' @export
 
-cmcPlot <- function(x3p,cmcDF,method = "cimg"){
+cmcPlot <- function(x3p,
+                    cmcDF,
+                    method = "cimg"){
   blankImage <- matrix(NA,
                        nrow = nrow(x3p$surface.matrix),
                        ncol = ncol(x3p$surface.matrix))
@@ -242,4 +235,110 @@ cmcPlot <- function(x3p,cmcDF,method = "cimg"){
                      axis.title.x = ggplot2::element_blank(),
                      axis.title.y = ggplot2::element_blank())
   }
+}
+
+#' Create a bar plot of congruent matching cells per rotation value
+#'
+#' @name cmcPerThetaBarPlot
+#'
+#' @param cellCCF_output list returned by the cellCCF or cellCCF_bothDirections
+#'   function. If from the cellCCF_bothDirections, then the ggplot will be
+#'   faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
+#'   played the role as the "questioned" cartridge case scan)
+#'
+#' @examples
+#' \dontrun{
+#'  #x3p1 and x3p2 are two x3p objects containing processed cartridge case scans
+#'  comparison1 <- cellCCF(x3p1,x3p2)
+#'
+#'  #creates a single bar plot of the CMCs per theta
+#'  cmcPerThetaBarPlot(comparison1)
+#'
+#'  comparison2 <- cellCCF_bothDirections(x3p1,x3p2)
+#'
+#'  #creates a faceted bar plot of the CMCs per theta in both comparison directions
+#'  cmcPerThetaBarPlot(comparison2)
+#' }
+#'
+#' @export
+
+cmcPerThetaBarPlot <- function(cellCCF_output,
+                               consensus_function = median,
+                               corr_thresh = .5,
+                               dx_thresh = 15,
+                               dy_thresh = dx_thresh,
+                               theta_thresh = 3,
+                               consensus_function_theta = consensus_function,
+                               highCMCThresh = 1){
+  #make sure that cellCCF_output is either the output of the cellCCF function or
+  #cellCCF_bothDirections
+  testthat::expect_true(is.list(cellCCF_output))
+  testthat::expect_true(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1")) | identical(names(cellCCF_output),c("params","ccfResults")),
+                        label = "cellCCF_output argument is a list returned by cellCCF or cellCCF_bothDirections")
+
+  #if cellCCF_output is from cellCCF_bothDirections:
+  if(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1"))){
+    dplyr::bind_rows(
+      cellCCF_output$comparison_1to2$ccfResults %>%
+        cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+                                 corr_thresh = corr_thresh,
+                                 dx_thresh = dx_thresh,
+                                 dy_thresh = dy_thresh,
+                                 theta_thresh = theta_thresh) %>%
+        dplyr::mutate(comparison = "x3p1 vs. x3p2"),
+      cellCCF_output$comparison_2to1$ccfResults %>%
+        cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+                                 corr_thresh = corr_thresh,
+                                 dx_thresh = dx_thresh,
+                                 dy_thresh = dy_thresh,
+                                 theta_thresh = theta_thresh) %>%
+        dplyr::mutate(comparison = "x3p2 vs. x3p1")
+    ) %>%
+      dplyr::group_by(comparison,theta) %>%
+      dplyr::tally() %>%
+      dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%
+      ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
+      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::theme_bw()  +
+      ggplot2::xlab(expression(theta*" (degree)")) +
+      ggplot2::ylab("CMC number") +
+      ggplot2::facet_wrap(~ comparison,ncol = 1)  +
+      ggplot2::ylim(c(NA,25)) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
+                          colour = "black",
+                          linetype = "dashed") +
+      ggplot2::geom_text(ggplot2::aes(x = min(theta) + 3,
+                                      y = cmcHigh,
+                                      label = paste0("High CMC = ",cmcHigh)),
+                         nudge_y = 1,
+                         fontface = "plain",
+                         family = "sans")
+  }
+  else{
+    cellCCF_output$ccfResults  %>%
+      cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+                               corr_thresh = corr_thresh,
+                               dx_thresh = dx_thresh,
+                               dy_thresh = dy_thresh,
+                               theta_thresh = theta_thresh) %>%
+      dplyr::group_by(theta) %>%
+      dplyr::tally() %>%
+      dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%
+      ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
+      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::theme_bw()  +
+      ggplot2::xlab(expression(theta*" (degree)")) +
+      ggplot2::ylab("CMC number") +
+      ggplot2::ylim(c(NA,25)) +
+      ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
+                          colour = "black",
+                          linetype = "dashed") +
+      ggplot2::geom_text(ggplot2::aes(x = min(theta) + 3,
+                                      y = cmcHigh,
+                                      label = paste0("High CMC = ",cmcHigh)),
+                         nudge_y = 1,
+                         fontface = "plain",
+                         family = "sans")
+  }
+
 }

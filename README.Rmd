@@ -37,10 +37,5 @@ devtools::install_github("jzemmels/cmcR")
 Cartridge case scan data can be accessed at the [NIST Ballisitics and Toolmarks Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
 TODO:
-  Write a cmcPerThetaPlot function that plots the CMCs per rotation value given ccfResults list?
-  Function tests
-  Package documentation (some exported functions still not showing up on pkgdown site)
-  Vignette needs improvement
-  
-  Continue running things on the server to get more final results
-  Conclusion/Future Work chapter?
+  - Function tests
+  - Package documentation (some exported functions still not showing up on pkgdown site)

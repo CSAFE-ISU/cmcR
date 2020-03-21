@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Applies cellCCF function twice for a pair of cartridge case scans. — cellCCF_bothDirections • cmcR</title>
+<title>Identifies the congruent matching cells between two processed cartridge case
+scans — congruentMatchingCells • cmcR</title>
 
 
 <!-- jquery -->
@@ -35,9 +36,10 @@
 
 
 
-<meta property="og:title" content="Applies cellCCF function twice for a pair of cartridge case scans. — cellCCF_bothDirections" />
-<meta property="og:description" content="Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
-for x3p2 vs. x3p1. See cellCCF function documentation for more details." />
+<meta property="og:title" content="Identifies the congruent matching cells between two processed cartridge case
+scans — congruentMatchingCells" />
+<meta property="og:description" content="Wrapper for calling the cellCCF_bothDirections and
+cmcFilter_improved functions together" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,17 +115,18 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Applies cellCCF function twice for a pair of cartridge case scans.</h1>
+    <h1>Identifies the congruent matching cells between two processed cartridge case
+scans</h1>
     
-    <div class="hidden name"><code>cellCCF_bothDirections.Rd</code></div>
+    <div class="hidden name"><code>congruentMatchingCells.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
-for x3p2 vs. x3p1. See cellCCF function documentation for more details.</p>
+    <p>Wrapper for calling the cellCCF_bothDirections and
+cmcFilter_improved functions together</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cellCCF_bothDirections</span>(
+    <pre class="usage"><span class='fu'>congruentMatchingCells</span>(
   <span class='no'>x3p1</span>,
   <span class='no'>x3p2</span>,
   <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
@@ -132,6 +135,12 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details.</p>
   <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
   <span class='no'>centerCell</span>,
   <span class='no'>scaleCell</span>,
+  <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
+  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>0.4</span>,
+  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
+  <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
+  <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>consensus_function</span>,
   <span class='no'>...</span>
 )</pre>
 
@@ -187,30 +196,65 @@ deviation of the whole matrix. If set to "individualCell", then each cell
 is divided by its particular standard deviation.</p></td>
     </tr>
     <tr>
+      <th>consensus_function</th>
+      <td><p>function to aggregate the translation (dx and dy)
+and rotation (theta) values in the ccfDF data frame to determine
+"consensus" values</p></td>
+    </tr>
+    <tr>
+      <th>corr_thresh</th>
+      <td><p>minimum correlation threshold to call a cell pair
+"congruent matching"</p></td>
+    </tr>
+    <tr>
+      <th>dx_thresh</th>
+      <td><p>maximum distance from the consensus dx value that a cell
+pair can be to be called "congruent matching"</p></td>
+    </tr>
+    <tr>
+      <th>dy_thresh</th>
+      <td><p>maximum distance from the consensus dy value that a cell
+pair can be to be called "congruent matching"</p></td>
+    </tr>
+    <tr>
+      <th>theta_thresh</th>
+      <td><p>maximum distance from the consensus theta value that a
+cell pair can be to be called "congruent matching"</p></td>
+    </tr>
+    <tr>
+      <th>consensus_function_theta</th>
+      <td><p><em>(OPTIONAL)</em> function (separate from
+consensus_function) to aggregate the rotation (theta) values in the ccfDF
+data frame to determine "consensus" values</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>arguments to be passed to consensus_function or
+consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
+    </tr>
+    <tr>
       <th>minObservedProp</th>
       <td><p>(default 15) the minimum proportion of a cell that
 needs to contain observed (i.e., non-NA) values for it to be included in
 the CCF calculation procedure</p></td>
     </tr>
+    <tr>
+      <th>cellCCF_bothDirections_output</th>
+      <td><p>list returned by the function
+cmcR::cellCCF_bothdirections</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>cmcR::cellCCF_improved</p></div>
+    <div class='dont-index'><p>cmcR::cellCCF_bothDirections and cmcR::cmcFilter_improved</p>
+<p><a href='https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf'>https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf</a></p>
+<p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf</a></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
- <span class='co'>#x3p1 and x3p2 are assumed to be 2 processed scans</span>
-<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'>cellCCF_bothDirections</span>(<span class='kw'>x3p1</span> <span class='kw'>=</span> <span class='no'>x3p1</span>,
-                                      <span class='kw'>x3p2</span> <span class='kw'>=</span> <span class='no'>x3p2</span>,
-                                      <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>,<span class='fl'>30</span>,<span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>30</span>),
-                                      <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-                                      <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-                                      <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-                                      <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>)
-
-<span class='no'>comparison1</span>$<span class='no'>comparison_1to2</span> <span class='co'>#comparison of x3p1 vs x3p2</span>
-<span class='no'>comparison1</span>$<span class='no'>comparison_2to1</span> <span class='co'>#comparison of x3p2 vs x3p1</span>
+<span class='co'>#x3p1 and x3p2 are two processed cartridge case scans</span>
+<span class='no'>cmc</span> <span class='kw'>&lt;-</span> <span class='fu'>congruentMatchingCells</span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
