@@ -24,7 +24,8 @@ al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.0
 
 <!-- ``` -->
 
-The development version from [GitHub](https://github.com/) with:
+Install the development version from
+[GitHub](https://github.com/jzemmels/cmcR) with:
 
 ``` r
 # install.packages("devtools")
@@ -35,5 +36,6 @@ Cartridge case scan data can be accessed at the [NIST Ballisitics and
 Toolmarks Research
 Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
-TODO: - Function tests - Package documentation (some exported functions
-still not showing up on pkgdown site)
+TODO: - Function tests - Put gaussian filter arguments into
+selectBFImpression\_ functions that is default missing, but that
+implements gaussian filter if supplied

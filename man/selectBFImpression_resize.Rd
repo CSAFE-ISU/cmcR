@@ -3,7 +3,7 @@
 \name{selectBFImpression_resize}
 \alias{selectBFImpression_resize}
 \title{Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan}
+imager::resize to resize the scan.}
 \usage{
 selectBFImpression_resize(
   x3p_path,
@@ -16,13 +16,16 @@ selectBFImpression_resize(
   size_x,
   size_y = size_x,
   interpolation_type = 1,
-  boundary_conditions = 0
+  boundary_conditions = 0,
+  gaussFilterRes,
+  gaussFilterWavelength,
+  gaussFilterType
 )
 }
 \arguments{
-\item{x3p_path}{path to a .x3p file}
+\item{x3p_path}{path to an .x3p file}
 
-\item{ransacInlierThresh}{threshold to declare an observed value close to the
+\item{ransacFinalSelectThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method}
 
 \item{ransacIters}{number of candidate planes to fit for the RANSAC method
@@ -34,6 +37,9 @@ breech face is simply shifted down by its mean value}
 
 \item{croppingThresh}{treshold for cropping exterior whitespace from the
 breech face impression}
+
+\item{standardizeBF}{subtract mean and divide by standard deviation of
+processed surface matrix}
 
 \item{size_x}{Number of columns (new size along the X-axis). Note: the
 "X"-axis according to imager is actually the rows of the matrix}
@@ -49,15 +55,24 @@ average interpolation. 3 = linear interpolation. 4 = grid interpolation. 5
 
 \item{boundary_conditions}{Border condition type.}
 
-\item{standardizedBF}{subtract mean and divide by standard deviation of
-processed surface matrix}
+\item{gaussFilterRes}{\strong{Optional} sampling resolution of the surface matrix
+(given by incrementX or incrementY of the header.info element of an x3p
+object)}
+
+\item{gaussFilterWavelength}{\strong{Optional} cut-off wavelength to be attenuated}
+
+\item{gaussFilterType}{\strong{Optional} specifies whether a low pass, "lp", high
+pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
+filterype = "bp" means that wavelength should be a vector of two numbers.
+In this case, the max of these two number will be used for the high pass
+filter and the min for the low pass filter.}
 }
 \value{
 
 }
 \description{
 Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan
+imager::resize to resize the scan.
 }
 \note{
 imager treats a matrix as its transpose (i.e., x and y axes are

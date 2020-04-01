@@ -118,6 +118,6 @@ comparison <- function(im1, im2) {
   dx <- tmp[["col"]] - d_offset[2] - 1
   dy <- tmp[["row"]] - d_offset[1] - 1
 
-  ret <- list("ccf" = corr, "dx" = dx, "dy" = dy)
+  ret <- list("fft.ccf" = corr, "dx" = dx, "dy" = dy)
   return(ret)
 }

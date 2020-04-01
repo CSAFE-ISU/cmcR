@@ -13,9 +13,10 @@ cellCCF(
   cellNumVert = cellNumHoriz,
   regionToCellProp = 4,
   minObservedProp = 0.15,
+  rawCorrTieBreaker = which.max,
+  use = "pairwise.complete.obs",
   centerCell,
-  scaleCell,
-  ...
+  scaleCell
 )
 }
 \arguments{
@@ -29,19 +30,33 @@ breech face impression to be compared to that in x3p1}
 degrees) for which x3p2$surface.matrix will be rotated, split into cells,
 and compared to x3p1$surface.matrix}
 
-\item{cellNumHoriz}{(default 7) number of cells along horizontal axis to
-divide x3p1$surface.matrix into}
+\item{cellNumHoriz}{number of cells along horizontal axis to divide
+x3p1$surface.matrix into}
 
-\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into}
+\item{cellNumVert}{number of cells along vertical axis to divide
+x3p1$surface.matrix into}
 
 \item{regionToCellProp}{determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
-the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)}
+the x3p2 regions will be 4 times times larger (sidelengths multiplied by
+2).}
 
-\item{minObservedProp}{(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure}
+\item{minObservedProp}{the minimum proportion of a cell that needs to contain
+observed (i.e., non-NA) values for it to be included in the CCF calculation
+procedure.}
+
+\item{rawCorrTieBreaker}{the way in which the "raw" correlation (see
+description) is calculated may require slight padding/cropping of the
+mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+padding/cropping can occur to the initial or final rows/cols in the matrix,
+without a clear way to determine which is "correct." As such, all possible
+combinations of pre/post padding/cropping are considered (only if
+necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+be used to determine which yields the lowest/highest correlation with matt1
+(using rawCorrTieBreaker = which.min or which.max, respectively).}
+
+\item{use}{argument to be passed to the cor function. Dictates how NAs are
+dealt with in computing the correlation.}
 
 \item{centerCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
 shifted prior to CCF calculation. Default is that no shifting is performed.
@@ -72,14 +87,25 @@ into pairwise disjoint cells. mat2, the surface matrix of a breech face
 impression scan to be compared to mat1, is also broken up into cells
 centered at the same location as those in mat1. However, the cells in mat2
 are larger than those in mat1 (typically 4 times the size except on the
-border of mat2). The cross-correlation function (CCF) is then calculated
-between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-well as the necessary horizontal and vertical translations to align the
-mat1 cell with the mat2 cell to achieve this max CCF are recorded. mat2 is
-then rotated by some amount (say, 2.5 degrees) and the process of dividing
-mat2 into cells and calculating the max CCF for each cell in mat1 is
-repeated. The rotations performed on mat2 are dictated by the value(s)
+border of mat2).
+
+The cross-correlation function (CCF) is then calculated between each cell
+in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
+For each mat1, mat2 cell pair, the maximum CCF value as well as the
+necessary horizontal and vertical translations to align the mat1 cell with
+the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
+max CCF values aren't necessarily reliable estimates of the true similarity
+between mat1 and mat2 (since NAs need to be replaced prior to calculation).
+As such, a "raw" correlation is calculated by extracting from mat2 a
+mat1-sized matrix based on the dx, dy translation values obtained from the
+FFT-based CCF method. Rather than replacing NA values, these two matrices
+of equivalent dimension are turned into vectors and the pairwise-complete
+observation correlation (in which only non-NA pairs are considered) is
+calculated.
+
+mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+dividing mat2 into cells and calculating the max CCF for each cell in mat1
+is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument.
 }
 \seealso{

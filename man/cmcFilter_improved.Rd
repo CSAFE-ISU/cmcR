@@ -8,7 +8,7 @@ between two cartridge case scans as proposed by Tong et al. (2015)}
 cmcFilter_improved(
   cellCCF_bothDirections_output,
   consensus_function = median,
-  corr_thresh = 0.4,
+  ccf_thresh = 0.4,
   dx_thresh = 20,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
@@ -24,7 +24,7 @@ cmcR::cellCCF_bothdirections}
 and rotation (theta) values in the ccfDF data frame to determine
 "consensus" values}
 
-\item{corr_thresh}{minimum correlation threshold to call a cell pair
+\item{ccf_thresh}{minimum correlation threshold to call a cell pair
 "congruent matching"}
 
 \item{dx_thresh}{maximum distance from the consensus dx value that a cell
@@ -54,7 +54,7 @@ comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
 
 cmcs <- cmcFilter_improved(comparison1,
                            consensus_function = median,
-                           corr_thresh = .4,
+                           ccf_thresh = .4,
                            dx_thresh = 20,
                            dy_thresh = dx_thresh,
                            theta_thresh = 3,

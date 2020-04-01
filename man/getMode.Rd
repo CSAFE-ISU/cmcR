@@ -22,7 +22,7 @@ comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
 comparison1$ccfResults \%>\%
   cmcR::topResultsPerCell() \%>\%
   cmcR::cmcFilter(consensus_function = median,
-                  corr_thresh = .4,
+                  ccf_thresh = .4,
                   dx_thresh = 20,
                   dy_thresh = dx_thresh,
                   theta_thresh = 3,

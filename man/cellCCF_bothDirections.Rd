@@ -9,11 +9,13 @@ cellCCF_bothDirections(
   x3p2,
   thetas = seq(-30, 30, by = 3),
   cellNumHoriz = 7,
-  regionToCellProp = 4,
   cellNumVert = cellNumHoriz,
+  regionToCellProp = 4,
+  minObservedProp = 0.15,
+  rawCorrTieBreaker = which.max,
+  use = "pairwise.complete.obs",
   centerCell,
-  scaleCell,
-  ...
+  scaleCell
 )
 }
 \arguments{
@@ -30,12 +32,29 @@ and compared to x3p1$surface.matrix}
 \item{cellNumHoriz}{(default 7) number of cells along horizontal axis to
 divide x3p1$surface.matrix into}
 
+\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
+vertical axis to divide x3p1$surface.matrix into}
+
 \item{regionToCellProp}{determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
 the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)}
 
-\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into}
+\item{minObservedProp}{(default 15) the minimum proportion of a cell that
+needs to contain observed (i.e., non-NA) values for it to be included in
+the CCF calculation procedure}
+
+\item{rawCorrTieBreaker}{the way in which the "raw" correlation (see
+description) is calculated may require slight padding/cropping of the
+mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+padding/cropping can occur to the initial or final rows/cols in the matrix,
+without a clear way to determine which is "correct." As such, all possible
+combinations of pre/post padding/cropping are considered (only if
+necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+be used to determine which yields the lowest/highest correlation with matt1
+(using rawCorrTieBreaker = which.min or which.max, respectively).}
+
+\item{use}{argument to be passed to the cor function. Dictates how NAs are
+dealt with in computing the correlation.}
 
 \item{centerCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
 shifted prior to CCF calculation. Default is that no shifting is performed.
@@ -48,10 +67,6 @@ scaled prior to CCF calculation. Default is that no scaling is performed.
 If set to "wholeMatrix", then each cell is divided by the standard
 deviation of the whole matrix. If set to "individualCell", then each cell
 is divided by its particular standard deviation.}
-
-\item{minObservedProp}{(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure}
 }
 \description{
 Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again

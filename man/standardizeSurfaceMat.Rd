@@ -4,7 +4,7 @@
 \alias{standardizeSurfaceMat}
 \title{Subtract the average pixel value from an image and replace NAs with 0}
 \usage{
-standardizeSurfaceMat(surfaceMat, m, s, ...)
+standardizeSurfaceMat(surfaceMat, m, s)
 }
 \arguments{
 \item{surfaceMat}{surface matrix}

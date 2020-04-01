@@ -11,7 +11,7 @@
 
 cellDivision <- function(surfaceMat,
                          cellNumHoriz = 8,
-                         cellNumVert = 8,...){
+                         cellNumVert = 8){
 
   splitSurfaceMat <- surfaceMat %>%
     imager::as.cimg() %>%
@@ -96,7 +96,7 @@ extractCellbyCornerLocs <- function(cornerLocs,
 
 rotateSurfaceMatrix <- function(surfaceMat,
                                 theta = 0,
-                                interpolation = 0,...){
+                                interpolation = 0){
   surfaceMatFake <- (surfaceMat*10^5) + 1 #scale and shift all non-NA pixels up 1 (meter)
   # imFakeRotated <- :bilinearInterpolation(imFake,theta)
   surfaceMatFakeRotated <- surfaceMatFake %>%
@@ -126,7 +126,7 @@ rotateSurfaceMatrix <- function(surfaceMat,
 #' @keywords internal
 
 checkForBreechface <- function(cell,
-                               minObservedProp = .15,...){
+                               minObservedProp = .15){
   containsBreechfaceBool <- (sum(!is.na(cell)) > minObservedProp*length(as.vector(cell)))
   return(containsBreechfaceBool)
 }
@@ -143,7 +143,7 @@ checkForBreechface <- function(cell,
 
 standardizeSurfaceMat <- function(surfaceMat,
                                   m,
-                                  s,...){
+                                  s){
   surfaceMat <- (surfaceMat - m)/s
   surfaceMat[is.na(surfaceMat)] <- 0
   return(surfaceMat)
@@ -153,7 +153,7 @@ standardizeSurfaceMat <- function(surfaceMat,
 #'
 #' @keywords internal
 
-splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp,...){
+splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp){
 
   surfaceMat_split <- cellDivision(surfaceMat,
                                    cellNumHoriz = cellNumHoriz,
@@ -215,7 +215,7 @@ getMat2SplitLocations <- function(cellIDs,
                       ceiling(xyLoc["x"] + sidelengthMultiplier*sideLength["row"]/2)) %>%
                     setNames(c("left","right","top","bottom"))
 
-                  #replace negative indices with 0 (left/upper-most cells):
+                  #replace negative indices with 1 (left/upper-most cells):
                   expandedCellCorners[expandedCellCorners <= 0] <- 1
                   #replace indices greater than the maximum index with the
                   #maximum index (right/bottom-most cells): Note that imager
@@ -252,9 +252,43 @@ swapCellIDAxes <- function(cellID){
 
 #' @name calcRawCorr
 #'
+#' @description Given the dy,dx values at which CCF_max occurs, this function
+#'   extract from the larger "region" matrix a matrix of the same dimension as
+#'   "cell" with appropriate shifting/scaling relative to the center based on
+#'   the dx,dy arguments. It is possible that the "cell" shaped matrix, after
+#'   shifting by dx,dy, lies outside of the bounds of the region matrix (this is
+#'   because both "cell" and "region" are padded with 0s when calculating the
+#'   CCF). If this occurs, the "cell"-sized matrix that would be extracted from
+#'   "region" is padded with NAs to appropriately reflect the conditions under
+#'   which the CCF_max value was determined. Even with this padding, however,
+#'   there may be a slight mis-match (like one row/col) between the dimensions
+#'   of "cell" and of the matrix extracted from "region," typically because
+#'   "region" has an odd dimension while "cell" has an even dimension or vice
+#'   versa. Thus, additional padding/cropping needs to be performed in the
+#'   "cell"-sized matrix extracted from "region." However, we don't know whether
+#'   these rows/cols should pre/post padded/cropped, so all possible
+#'   combinations of padding/cropping are considered. To determine which of
+#'   these these combinations should be ultimately chosen as the final
+#'   "cell"-sized matrix, the tieBreaker argument can be used to determine, for
+#'   example, which "cell"-sized matrix has the highest correlation with "cell"
+#'   (tieBreaker = which.max).
+#'
+#'
 #' @keywords internal
 
-calcRawCorr <- function(cell,region,dx,dy){
+calcRawCorr <- function(cell,
+                        region,
+                        dx,
+                        dy,
+                        m1,
+                        m2,
+                        sd1,
+                        sd2,
+                        tieBreaker = which.max,
+                        use = "pairwise.complete.obs"){
+  cell <- (cell - m1)/sd1
+  region <- (region - m2)/sd2
+
   regionCenter <- floor(dim(region)/2)
 
   alignedCenter <- regionCenter - c(dy,dx)
@@ -442,12 +476,12 @@ calcRawCorr <- function(cell,region,dx,dy){
 
     corVal <- corSafe(as.vector(cell),
                       as.vector(croppedRegion),
-                      use = "pairwise.complete.obs")
+                      use = use)
 
     as.numeric(corVal[1])
   })
 
-  maxCorr <- as.numeric(corrVals[which.max(corrVals)])
+  maxCorr <- as.numeric(corrVals[tieBreaker(corrVals)])
   if(length(maxCorr) == 0){
     return(NA)
   }
@@ -468,16 +502,28 @@ calcRawCorr <- function(cell,region,dx,dy){
 #' @param thetas (default seq(from = -30,to = 30,by = 3)) rotation values (in
 #'   degrees) for which x3p2$surface.matrix will be rotated, split into cells,
 #'   and compared to x3p1$surface.matrix
-#' @param cellNumHoriz (default 7) number of cells along horizontal axis to
-#'   divide x3p1$surface.matrix into
-#' @param cellNumVert (default equal to cellNumHoriz) number of cells along
-#'   vertical axis to divide x3p1$surface.matrix into
+#' @param cellNumHoriz number of cells along horizontal axis to divide
+#'   x3p1$surface.matrix into
+#' @param cellNumVert number of cells along vertical axis to divide
+#'   x3p1$surface.matrix into
 #' @param regionToCellProp determines how much larger the x3p2 regions will be
 #'   relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
-#'   the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)
-#' @param minObservedProp (default 15) the minimum proportion of a cell that
-#'   needs to contain observed (i.e., non-NA) values for it to be included in
-#'   the CCF calculation procedure
+#'   the x3p2 regions will be 4 times times larger (sidelengths multiplied by
+#'   2).
+#' @param minObservedProp the minimum proportion of a cell that needs to contain
+#'   observed (i.e., non-NA) values for it to be included in the CCF calculation
+#'   procedure.
+#' @param rawCorrTieBreaker the way in which the "raw" correlation (see
+#'   description) is calculated may require slight padding/cropping of the
+#'   mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+#'   padding/cropping can occur to the initial or final rows/cols in the matrix,
+#'   without a clear way to determine which is "correct." As such, all possible
+#'   combinations of pre/post padding/cropping are considered (only if
+#'   necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+#'   be used to determine which yields the lowest/highest correlation with matt1
+#'   (using rawCorrTieBreaker = which.min or which.max, respectively).
+#' @param use argument to be passed to the cor function. Dictates how NAs are
+#'   dealt with in computing the correlation.
 #' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
 #'   shifted prior to CCF calculation. Default is that no shifting is performed.
 #'   If set to "wholeMatrix", then each cell is subracted by the mean of the
@@ -504,14 +550,25 @@ calcRawCorr <- function(cell,region,dx,dy){
 #'   impression scan to be compared to mat1, is also broken up into cells
 #'   centered at the same location as those in mat1. However, the cells in mat2
 #'   are larger than those in mat1 (typically 4 times the size except on the
-#'   border of mat2). The cross-correlation function (CCF) is then calculated
-#'   between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-#'   Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-#'   well as the necessary horizontal and vertical translations to align the
-#'   mat1 cell with the mat2 cell to achieve this max CCF are recorded. mat2 is
-#'   then rotated by some amount (say, 2.5 degrees) and the process of dividing
-#'   mat2 into cells and calculating the max CCF for each cell in mat1 is
-#'   repeated. The rotations performed on mat2 are dictated by the value(s)
+#'   border of mat2).
+#'
+#'   The cross-correlation function (CCF) is then calculated between each cell
+#'   in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
+#'   For each mat1, mat2 cell pair, the maximum CCF value as well as the
+#'   necessary horizontal and vertical translations to align the mat1 cell with
+#'   the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
+#'   max CCF values aren't necessarily reliable estimates of the true similarity
+#'   between mat1 and mat2 (since NAs need to be replaced prior to calculation).
+#'   As such, a "raw" correlation is calculated by extracting from mat2 a
+#'   mat1-sized matrix based on the dx, dy translation values obtained from the
+#'   FFT-based CCF method. Rather than replacing NA values, these two matrices
+#'   of equivalent dimension are turned into vectors and the pairwise-complete
+#'   observation correlation (in which only non-NA pairs are considered) is
+#'   calculated.
+#'
+#'   mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+#'   dividing mat2 into cells and calculating the max CCF for each cell in mat1
+#'   is repeated. The rotations performed on mat2 are dictated by the value(s)
 #'   passed to the theta argument.
 #'
 #' @seealso
@@ -522,12 +579,14 @@ calcRawCorr <- function(cell,region,dx,dy){
 cellCCF <- function(x3p1,
                     x3p2,
                     thetas = seq(-30,30,by = 3),
-                    cellNumHoriz = 7,
+                    cellNumHoriz = 8,
                     cellNumVert = cellNumHoriz,
                     regionToCellProp = 4,
                     minObservedProp = .15,
+                    rawCorrTieBreaker = which.max,
+                    use = "pairwise.complete.obs",
                     centerCell,
-                    scaleCell,...){
+                    scaleCell){
   #Needed tests: mat1 and mat2 must be matrices thetas, cellNumHoriz, and
   #cellNumVert should be integers (cellNumHoriz and cellNumVert would optimally be
   #equal - maybe print a warning if not?)
@@ -693,17 +752,30 @@ cellCCF <- function(x3p1,
                                  .y = mat2_splitShifted,
                                  .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
       dplyr::bind_cols(cellIDdf_filtered,.) %>%
-      dplyr::mutate(rawCorr = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
-                                                        mat2_splitFiltered,
-                                                        .$dx,
-                                                        .$dy),
-                                              .f = calcRawCorr))
+      dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
+                                                    mat2_splitFiltered,
+                                                    .$dx,
+                                                    .$dy,
+                                                    m1,
+                                                    m2,
+                                                    sd1,
+                                                    sd2),
+                                          .f = ~ calcRawCorr(cell = ..1,
+                                                             region = ..2,
+                                                             dx = ..3,
+                                                             dy = ..4,
+                                                             m1 = ..5,
+                                                             m2 = ..6,
+                                                             sd1 = ..7,
+                                                             sd2 = ..8,
+                                                             tieBreaker = rawCorrTieBreaker,
+                                                             use = use)))
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,rawCorr,ccf,dx,dy)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy)) #rearrange columns in allResults
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -722,6 +794,8 @@ cellCCF <- function(x3p1,
                     "mat1Shift" = m1,
                     "mat2Shift" = m2,
                     "scaleCell" = scaleCell,
+                    "rawCorrTieBreaker" = rawCorrTieBreaker,
+                    "use" = use,
                     "mat1ScaleFactor" = sd1,
                     "mat2ScaleFactor" = sd2),
     "ccfResults" = allResults
@@ -752,6 +826,17 @@ cellCCF <- function(x3p1,
 #' @param minObservedProp (default 15) the minimum proportion of a cell that
 #'   needs to contain observed (i.e., non-NA) values for it to be included in
 #'   the CCF calculation procedure
+#' @param rawCorrTieBreaker the way in which the "raw" correlation (see
+#'   description) is calculated may require slight padding/cropping of the
+#'   mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+#'   padding/cropping can occur to the initial or final rows/cols in the matrix,
+#'   without a clear way to determine which is "correct." As such, all possible
+#'   combinations of pre/post padding/cropping are considered (only if
+#'   necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+#'   be used to determine which yields the lowest/highest correlation with matt1
+#'   (using rawCorrTieBreaker = which.min or which.max, respectively).
+#' @param use argument to be passed to the cor function. Dictates how NAs are
+#'   dealt with in computing the correlation.
 #' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
 #'   shifted prior to CCF calculation. Default is that no shifting is performed.
 #'   If set to "wholeMatrix", then each cell is subracted by the mean of the
@@ -784,11 +869,14 @@ cellCCF <- function(x3p1,
 cellCCF_bothDirections <- function(x3p1,
                                    x3p2,
                                    thetas = seq(-30,30,by = 3),
-                                   cellNumHoriz = 7,
-                                   regionToCellProp = 4,
+                                   cellNumHoriz = 8,
                                    cellNumVert = cellNumHoriz,
+                                   regionToCellProp = 4,
+                                   minObservedProp = .15,
+                                   rawCorrTieBreaker = which.max,
+                                   use = "pairwise.complete.obs",
                                    centerCell,
-                                   scaleCell,...){
+                                   scaleCell){
 
 
 
@@ -798,6 +886,9 @@ cellCCF_bothDirections <- function(x3p1,
                                    cellNumHoriz = cellNumHoriz,
                                    cellNumVert = cellNumVert,
                                    regionToCellProp = regionToCellProp,
+                                   minObservedProp = minObservedProp,
+                                   rawCorrTieBreaker = rawCorrTieBreaker,
+                                   use = use,
                                    centerCell = centerCell,
                                    scaleCell = scaleCell)
 
@@ -807,6 +898,9 @@ cellCCF_bothDirections <- function(x3p1,
                                    cellNumHoriz = cellNumHoriz,
                                    cellNumVert = cellNumVert,
                                    regionToCellProp = regionToCellProp,
+                                   minObservedProp = minObservedProp,
+                                   rawCorrTieBreaker = rawCorrTieBreaker,
+                                   use = use,
                                    centerCell = centerCell,
                                    scaleCell = scaleCell)
 

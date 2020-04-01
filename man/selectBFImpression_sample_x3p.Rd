@@ -3,7 +3,7 @@
 \name{selectBFImpression_sample_x3p}
 \alias{selectBFImpression_sample_x3p}
 \title{Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan}
+x3ptools::sample_x3p to downsample the scan.}
 \usage{
 selectBFImpression_sample_x3p(
   x3p_path,
@@ -16,14 +16,21 @@ selectBFImpression_sample_x3p(
   m = 2,
   mY = m,
   offset = 0,
-  offsetY = offset
+  offsetY = offset,
+  gaussFilterRes,
+  gaussFilterWavelength,
+  gaussFilterType
 )
 }
 \arguments{
-\item{x3p_path}{path to a .x3p file}
+\item{x3p_path}{path to an .x3p file}
 
 \item{ransacInlierThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method}
+
+\item{ransacFinalSelectThresh}{once the RANSAC plane is fitted based on the
+inlierThreshold, this argument dictates which observations are selected as
+the final breech face estimate.}
 
 \item{ransacIters}{number of candidate planes to fit for the RANSAC method
 (higher value yields more stable breech face estimate)}
@@ -35,6 +42,9 @@ breech face is simply shifted down by its mean value}
 \item{croppingThresh}{treshold for cropping exterior whitespace from the
 breech face impression}
 
+\item{standardizeBF}{subtract mean and divide by standard deviation of
+processed surface matrix}
+
 \item{m}{integer value - every mth value is included in the sample}
 
 \item{mY}{integer value - every mth value is included in the sample in the x
@@ -45,19 +55,24 @@ direction and every mYth value is included in y direction}
 \item{offsetY}{integer value between 0 and mY-1 to specify different offsets
 for x and y direction.}
 
-\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
-the final breech face estimate.}
+\item{gaussFilterRes}{\strong{Optional} sampling resolution of the surface matrix
+(given by incrementX or incrementY of the header.info element of an x3p
+object)}
 
-\item{standardizedBF}{subtract mean and divide by standard deviation of
-processed surface matrix}
+\item{gaussFilterWavelength}{\strong{Optional} cut-off wavelength to be attenuated}
+
+\item{gaussFilterType}{\strong{Optional} specifies whether a low pass, "lp", high
+pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
+filterype = "bp" means that wavelength should be a vector of two numbers.
+In this case, the max of these two number will be used for the high pass
+filter and the min for the low pass filter.}
 }
 \value{
 
 }
 \description{
 Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan
+x3ptools::sample_x3p to downsample the scan.
 }
 \note{
 Given a matrix, x3ptools populates an x3p object's surface matrix

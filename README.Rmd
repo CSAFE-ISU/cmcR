@@ -28,7 +28,7 @@ The cmcR package provides an open-source implementation of the Congruent Matchin
 <!-- install.packages("cmcR") -->
 <!-- ``` -->
 
-The development version from [GitHub](https://github.com/) with:
+Install the development version from [GitHub](https://github.com/jzemmels/cmcR) with:
 
 ``` r
 # install.packages("devtools")
@@ -38,4 +38,4 @@ Cartridge case scan data can be accessed at the [NIST Ballisitics and Toolmarks 
 
 TODO:
   - Function tests
-  - Package documentation (some exported functions still not showing up on pkgdown site)
+  - Put gaussian filter arguments into selectBFImpression_ functions that is default missing, but that implements gaussian filter if supplied

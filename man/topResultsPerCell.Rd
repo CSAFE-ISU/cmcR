@@ -14,8 +14,8 @@ cmcR::cellCCF, containing breech face cell comparison results}
 \description{
 Given a list of data frames like the one returned in the
 \code{ccfResults} element of the list returned from cmcR::cellCCF, returns a
-data frame of the theta, dx, dy, ccf, and rawCorr values at which each cell
-pair attains maximum rawCorr.
+data frame of the theta, dx, dy, ccf, and ccf values at which each cell
+pair attains maximum ccf.
 }
 \examples{
 \dontrun{

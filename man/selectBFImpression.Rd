@@ -12,14 +12,20 @@ selectBFImpression(
   useResiduals = FALSE,
   croppingThresh = 1,
   standardizeBF = FALSE,
-  preProcess = TRUE
+  gaussFilterRes,
+  gaussFilterWavelength = c(16, 250),
+  gaussFilterType = "bp"
 )
 }
 \arguments{
-\item{x3p_path}{path to a .x3p file}
+\item{x3p_path}{path to an .x3p file}
 
 \item{ransacInlierThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method}
+
+\item{ransacFinalSelectThresh}{once the RANSAC plane is fitted based on the
+inlierThreshold, this argument dictates which observations are selected as
+the final breech face estimate.}
 
 \item{ransacIters}{number of candidate planes to fit for the RANSAC method
 (higher value yields more stable breech face estimate)}
@@ -31,21 +37,39 @@ breech face is simply shifted down by its mean value}
 \item{croppingThresh}{treshold for cropping exterior whitespace from the
 breech face impression}
 
-\item{preProcess}{if FALSE, then no pre-processing is performed. Equivalent
-to calling x3ptools::read_x3p(x3p_path)}
-
-\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
-the final breech face estimate.}
-
-\item{standardizedBF}{subtract mean and divide by standard deviation of
+\item{standardizeBF}{subtract mean and divide by standard deviation of
 processed surface matrix}
+
+\item{gaussFilterRes}{\strong{Optional} sampling resolution of the surface matrix
+(given by incrementX or incrementY of the header.info element of an x3p
+object)}
+
+\item{gaussFilterWavelength}{\strong{Optional} cut-off wavelength to be attenuated}
+
+\item{gaussFilterType}{\strong{Optional} specifies whether a low pass, "lp", high
+pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
+filterype = "bp" means that wavelength should be a vector of two numbers.
+In this case, the max of these two number will be used for the high pass
+filter and the min for the low pass filter.}
 }
 \value{
 x3p object containing the processed breech face
 }
 \description{
-Given a string representing a path to a cartridge case scan .x3p file, this function will read and process the scan including (1) use the RANSAC iterative plane fitting method to detect the height value at which the breech face impressions are in the scan, (2) crop out extra whitespace, NA values from the exterior of the resulting breech face impression surface matrix, and (3) detect and filter the inner firing pin impression circle using a circular Hough transform. Note that the RANSAC method is applied twice to the scan: once to get a rough estimate of the breech face impression height values (controlled with the ransacInlierThresh and ransacIters arguments) and again using .1\emph{ransacInlierThresh and 2}ransacIters to get a more precise estimate.
+Given a string representing a path to a cartridge case scan .x3p
+file, this function will read and process the scan including (1) use the
+RANSAC iterative plane fitting method to detect the height value at which
+the breech face impressions are in the scan, (2) crop out extra whitespace,
+NA values from the exterior of the resulting breech face impression surface
+matrix, and (3) detect and filter the inner firing pin impression circle
+using a circular Hough transform. Optionally, a Gaussian filter can be
+applied. See the cmcR::preProcess_gaussFilter function for more
+information.
+
+Note that the RANSAC method is applied twice to the scan: once to get a
+rough estimate of the breech face impression height values (controlled with
+the ransacInlierThresh and ransacIters arguments) and again using
+.1\emph{ransacInlierThresh and 2}ransacIters to get a more precise estimate.
 }
 \examples{
 \dontrun{
