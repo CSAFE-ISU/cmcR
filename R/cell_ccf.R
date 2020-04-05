@@ -524,16 +524,16 @@ calcRawCorr <- function(cell,
 #'   (using rawCorrTieBreaker = which.min or which.max, respectively).
 #' @param use argument to be passed to the cor function. Dictates how NAs are
 #'   dealt with in computing the correlation.
-#' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   shifted prior to CCF calculation. Default is that no shifting is performed.
-#'   If set to "wholeMatrix", then each cell is subracted by the mean of the
-#'   whole matrix. If set to "individualCell", then each cell is subtracted by
-#'   its particular mean.
-#' @param scaleCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   scaled prior to CCF calculation. Default is that no scaling is performed.
-#'   If set to "wholeMatrix", then each cell is divided by the standard
-#'   deviation of the whole matrix. If set to "individualCell", then each cell
-#'   is divided by its particular standard deviation.
+#' @param centerCell  dictates if cell is to be shifted prior to CCF
+#'   calculation. Default is that no shifting is performed. If set to
+#'   "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+#'   If set to "individualCell", then each cell is subtracted by its particular
+#'   mean.
+#' @param scaleCell dictates if cell is to be scaled prior to CCF calculation.
+#'   Default is that no scaling is performed. If set to "wholeMatrix", then each
+#'   cell is divided by the standard deviation of the whole matrix. If set to
+#'   "individualCell", then each cell is divided by its particular standard
+#'   deviation.
 #'
 #' @return The list allResults contains the CCF values, horizontal, and vertical
 #'   translations calculated for each cell, for each rotation value. The data
@@ -585,8 +585,8 @@ cellCCF <- function(x3p1,
                     minObservedProp = .15,
                     rawCorrTieBreaker = which.max,
                     use = "pairwise.complete.obs",
-                    centerCell,
-                    scaleCell){
+                    centerCell = "individualCell",
+                    scaleCell = "individualCell"){
   #Needed tests: mat1 and mat2 must be matrices thetas, cellNumHoriz, and
   #cellNumVert should be integers (cellNumHoriz and cellNumVert would optimally be
   #equal - maybe print a warning if not?)
@@ -875,8 +875,8 @@ cellCCF_bothDirections <- function(x3p1,
                                    minObservedProp = .15,
                                    rawCorrTieBreaker = which.max,
                                    use = "pairwise.complete.obs",
-                                   centerCell,
-                                   scaleCell){
+                                   centerCell = "individualCell",
+                                   scaleCell = "individualCell"){
 
 
 

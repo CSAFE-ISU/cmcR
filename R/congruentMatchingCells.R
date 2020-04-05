@@ -23,16 +23,16 @@
 #' @param minObservedProp (default 15) the minimum proportion of a cell that
 #'   needs to contain observed (i.e., non-NA) values for it to be included in
 #'   the CCF calculation procedure
-#' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   shifted prior to CCF calculation. Default is that no shifting is performed.
-#'   If set to "wholeMatrix", then each cell is subracted by the mean of the
-#'   whole matrix. If set to "individualCell", then each cell is subtracted by
-#'   its particular mean.
-#' @param scaleCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   scaled prior to CCF calculation. Default is that no scaling is performed.
-#'   If set to "wholeMatrix", then each cell is divided by the standard
-#'   deviation of the whole matrix. If set to "individualCell", then each cell
-#'   is divided by its particular standard deviation.
+#' @param centerCell  dictates if cell is to be shifted prior to CCF
+#'   calculation. Default is that no shifting is performed. If set to
+#'   "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+#'   If set to "individualCell", then each cell is subtracted by its particular
+#'   mean.
+#' @param scaleCell dictates if cell is to be scaled prior to CCF calculation.
+#'   Default is that no scaling is performed. If set to "wholeMatrix", then each
+#'   cell is divided by the standard deviation of the whole matrix. If set to
+#'   "individualCell", then each cell is divided by its particular standard
+#'   deviation.
 #' @param cellCCF_bothDirections_output list returned by the function
 #'   cmcR::cellCCF_bothdirections
 #' @param consensus_function function to aggregate the translation (dx and dy)
@@ -71,11 +71,11 @@ congruentMatchingCells <- function(x3p1,
                                    cellNumHoriz = 8,
                                    regionToCellProp = 4,
                                    cellNumVert = cellNumHoriz,
-                                   centerCell,
-                                   scaleCell,
+                                   centerCell = "individualCell",
+                                   scaleCell = "individualCell",
                                    consensus_function = median,
-                                   corr_thresh = .7,
-                                   dx_thresh = 20,
+                                   corr_thresh = .6,
+                                   dx_thresh = 10,
                                    dy_thresh = dx_thresh,
                                    theta_thresh = 3,
                                    consensus_function_theta = consensus_function,...){

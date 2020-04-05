@@ -84,8 +84,8 @@ topResultsPerCell <- function(ccfResults){
 
 cmcFilter <- function(ccfDF,
                       consensus_function = median,
-                      ccf_thresh = .7,
-                      dx_thresh = 20,
+                      ccf_thresh = .6,
+                      dx_thresh = 10,
                       dy_thresh = dx_thresh,
                       theta_thresh = 3,
                       consensus_function_theta = consensus_function,...){
@@ -131,8 +131,8 @@ cmcFilter <- function(ccfDF,
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
-                              ccf_thresh = .4,
-                              dx_thresh = 20,
+                              ccf_thresh = .6,
+                              dx_thresh = 10,
                               dy_thresh = dx_thresh,
                               theta_thresh = 3,
                               consensus_function_theta = consensus_function,...){
@@ -287,8 +287,8 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 
 cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                consensus_function = median,
-                               ccf_thresh = .7,
-                               dx_thresh = 20,
+                               ccf_thresh = .6,
+                               dx_thresh = 10,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
                                consensus_function_theta = consensus_function,...){
