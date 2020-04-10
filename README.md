@@ -35,7 +35,3 @@ devtools::install_github("jzemmels/cmcR")
 Cartridge case scan data can be accessed at the [NIST Ballisitics and
 Toolmarks Research
 Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
-
-TODO: - Function tests - Put gaussian filter arguments into
-selectBFImpression\_ functions that is default missing, but that
-implements gaussian filter if supplied
