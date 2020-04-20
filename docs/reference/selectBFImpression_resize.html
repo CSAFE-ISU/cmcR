@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan — selectBFImpression_resize • cmcR</title>
+imager::resize to resize the scan. — selectBFImpression_resize • cmcR</title>
 
 
 <!-- jquery -->
@@ -37,9 +37,9 @@ imager::resize to resize the scan — selectBFImpression_resize • cmcR</title>
 
 
 <meta property="og:title" content="Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan — selectBFImpression_resize" />
+imager::resize to resize the scan. — selectBFImpression_resize" />
 <meta property="og:description" content="Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan" />
+imager::resize to resize the scan." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -95,6 +95,9 @@ imager::resize to resize the scan" />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
@@ -116,14 +119,14 @@ imager::resize to resize the scan" />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan</h1>
+imager::resize to resize the scan.</h1>
     
     <div class="hidden name"><code>selectBFImpression_resize.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan</p>
+imager::resize to resize the scan.</p>
     </div>
 
     <pre class="usage"><span class='fu'>selectBFImpression_resize</span>(
@@ -131,13 +134,16 @@ imager::resize to resize the scan</p>
   <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
   <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
   <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
-  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>standardizeBF</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='no'>size_x</span>,
   <span class='kw'>size_y</span> <span class='kw'>=</span> <span class='no'>size_x</span>,
   <span class='kw'>interpolation_type</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>boundary_conditions</span> <span class='kw'>=</span> <span class='fl'>0</span>
+  <span class='kw'>boundary_conditions</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='no'>gaussFilterRes</span>,
+  <span class='no'>gaussFilterWavelength</span>,
+  <span class='no'>gaussFilterType</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -145,10 +151,10 @@ imager::resize to resize the scan</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x3p_path</th>
-      <td><p>path to a .x3p file</p></td>
+      <td><p>path to an .x3p file</p></td>
     </tr>
     <tr>
-      <th>ransacInlierThresh</th>
+      <th>ransacFinalSelectThresh</th>
       <td><p>threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method</p></td>
     </tr>
@@ -167,6 +173,11 @@ breech face is simply shifted down by its mean value</p></td>
       <th>croppingThresh</th>
       <td><p>treshold for cropping exterior whitespace from the
 breech face impression</p></td>
+    </tr>
+    <tr>
+      <th>standardizeBF</th>
+      <td><p>subtract mean and divide by standard deviation of
+processed surface matrix</p></td>
     </tr>
     <tr>
       <th>size_x</th>
@@ -191,9 +202,22 @@ average interpolation. 3 = linear interpolation. 4 = grid interpolation. 5
       <td><p>Border condition type.</p></td>
     </tr>
     <tr>
-      <th>standardizedBF</th>
-      <td><p>subtract mean and divide by standard deviation of
-processed surface matrix</p></td>
+      <th>gaussFilterRes</th>
+      <td><p><strong>Optional</strong> sampling resolution of the surface matrix
+(given by incrementX or incrementY of the header.info element of an x3p
+object)</p></td>
+    </tr>
+    <tr>
+      <th>gaussFilterWavelength</th>
+      <td><p><strong>Optional</strong> cut-off wavelength to be attenuated</p></td>
+    </tr>
+    <tr>
+      <th>gaussFilterType</th>
+      <td><p><strong>Optional</strong> specifies whether a low pass, "lp", high
+pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
+filterype = "bp" means that wavelength should be a vector of two numbers.
+In this case, the max of these two number will be used for the high pass
+filter and the min for the low pass filter.</p></td>
     </tr>
     </table>
 

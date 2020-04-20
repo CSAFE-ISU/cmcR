@@ -103,7 +103,7 @@ findPlaneRansac <- function(surfaceMat,
 #' @keywords internal
 
 levelBFImpression <- function(ransacFit,
-                              useResiduals = FALSE,...){
+                              useResiduals = TRUE,...){
 
   if(useResiduals){ #if the residuals from the RANSAC method are desired...
     esimatedBFdf <- data.frame(which(!is.na(ransacFit$estimatedBreechFace),
@@ -241,7 +241,7 @@ selectBFImpression <- function(x3p_path,
                                ransacInlierThresh = (10^(-5)),
                                ransacFinalSelectThresh = 2*(10^(-5)),
                                ransacIters = 150,
-                               useResiduals = FALSE,
+                               useResiduals = TRUE,
                                croppingThresh = 1,
                                standardizeBF = FALSE,
                                gaussFilterRes,
@@ -370,7 +370,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                           ransacInlierThresh = (10^(-5)),
                                           ransacFinalSelectThresh = 2*(10^(-5)),
                                           ransacIters = 150,
-                                          useResiduals = FALSE,
+                                          useResiduals = TRUE,
                                           croppingThresh = 1,
                                           standardizeBF = FALSE,
                                           m = 2,
@@ -378,8 +378,8 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                           offset = 0,
                                           offsetY = offset,
                                           gaussFilterRes,
-                                          gaussFilterWavelength,
-                                          gaussFilterType){
+                                          gaussFilterWavelength = c(16,250),
+                                          gaussFilterType = "bp"){
 
   x3p <- x3p_path %>%
     x3ptools::read_x3p() %>%
@@ -428,7 +428,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & missing(gaussFilterType))){
+  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & !missing(gaussFilterType))){
     gaussFilterRes <- x3p$header.info$incrementY
   }
 
@@ -516,7 +516,7 @@ selectBFImpression_resize <- function(x3p_path,
                                       ransacInlierThresh = (10^(-5)),
                                       ransacFinalSelectThresh = 2*(10^(-5)),
                                       ransacIters = 150,
-                                      useResiduals = FALSE,
+                                      useResiduals = TRUE,
                                       croppingThresh = 1,
                                       standardizeBF = FALSE,
                                       size_x,
@@ -524,8 +524,8 @@ selectBFImpression_resize <- function(x3p_path,
                                       interpolation_type = 1,
                                       boundary_conditions = 0,
                                       gaussFilterRes,
-                                      gaussFilterWavelength,
-                                      gaussFilterType){
+                                      gaussFilterWavelength = c(16,250),
+                                      gaussFilterType = "bp"){
 
   x3p <- x3p_path %>%
     x3ptools::read_x3p()
@@ -575,7 +575,7 @@ selectBFImpression_resize <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & missing(gaussFilterType))){
+  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & !missing(gaussFilterType))){
     gaussFilterRes <- (x3p$header.info$incrementY/nrow(x3p$surface.matrix))*nrow(bfImpressionFinal)
   }
 

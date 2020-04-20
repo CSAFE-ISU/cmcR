@@ -7,8 +7,8 @@
 cmcFilter(
   ccfDF,
   consensus_function = median,
-  ccf_thresh = 0.4,
-  dx_thresh = 20,
+  ccf_thresh = 0.6,
+  dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
   consensus_function_theta = consensus_function,

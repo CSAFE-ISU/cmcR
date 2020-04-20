@@ -262,21 +262,21 @@ km1_unknown1_comparison$comparison_1to2$ccfResults %>%
 
 ### Initially proposed method
 
-Song (2013) initially proposed using this data frame to determine CMCs. In particular, we can take the `dx`, `dy`, and `theta` columns, determine some consensus value among each (by, e.g, taking the median), and then determine how close each cell pair's votes are to that consensus. For true matches, we would expect at least a majority of cells to have votes in the same ballpark. Thus, we can specify thresholds, `dx_thresh`, `dy_thresh`, and `theta_thresh` within which we will say that a cell pair's vote is "close" to the consensual value. We also only want to consider pairs that achieve some minimum correlation threshold. The`corr_thresh` argument sets this threshold.
+Song (2013) initially proposed using this data frame to determine CMCs. In particular, we can take the `dx`, `dy`, and `theta` columns, determine some consensus value among each (by, e.g, taking the median), and then determine how close each cell pair's votes are to that consensus. For true matches, we would expect at least a majority of cells to have votes in the same ballpark. Thus, we can specify thresholds, `dx_thresh`, `dy_thresh`, and `theta_thresh` within which we will say that a cell pair's vote is "close" to the consensual value. We also only want to consider pairs that achieve some minimum correlation threshold. The`ccf_thresh` argument sets this threshold.
 
 Below we can see the CMCs selected using the top results between km1 and unknown1. We'll refer to these as the "initial CMCs" since they were determined under the initially proposed CMC method by Song. There aren't very many initial CMCs between km1 and unknown1.
 
 ```{r eval=FALSE}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
-  cmcFilter(corr_thresh = .8,
+  cmcFilter(ccf_thresh = .8,
             dx_thresh = 15)
 ```
 
 ```{r echo=FALSE}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
-  cmcFilter(corr_thresh = .8,
+  cmcFilter(ccf_thresh = .8,
             dx_thresh = 15) %>%
   DT::datatable()
 ```
@@ -286,14 +286,14 @@ In contrast, there are more initial CMCs between km1 and unknown2. This indicate
 ```{r eval=FALSE}
 km1_unknown2_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
-  cmcFilter(corr_thresh = .8,
+  cmcFilter(ccf_thresh = .8,
             dx_thresh = 15)
 ```
 
 ```{r echo=FALSE}
 km1_unknown2_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
-  cmcFilter(corr_thresh = .8,
+  cmcFilter(ccf_thresh = .8,
             dx_thresh = 15) %>%
   DT::datatable(options = list(pageLength = 5))
 ```
@@ -308,7 +308,7 @@ Tong et al. (2015) propose using these CMC-per-theta distributions to identify w
 
 ```{r}
 cmcPerThetaBarPlot(km1_unknown1_comparison,
-                   corr_thresh = .8,
+                   ccf_thresh = .8,
                    dx_thresh = 15,
                    theta_thresh = 3,
                    highCMCThresh = 1)
@@ -318,7 +318,7 @@ In contrast, we can see a distinct mode in the bar plots below for the compariso
 
 ```{r echo=FALSE}
 cmcPerThetaBarPlot(km1_unknown2_comparison,
-                   corr_thresh = .8,
+                   ccf_thresh = .8,
                    dx_thresh = 15,
                    theta_thresh = 3,
                    highCMCThresh = 1)
@@ -331,13 +331,13 @@ The `cmcFilter_improved` function counts the number of CMCs under this improved 
 ```{r}
 km1_unknown1_cmcs <- cmcR::cmcFilter_improved(km1_unknown1_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .8,
+                                              ccf_thresh = .8,
                                               dx_thresh = 15,
                                               theta_thresh = 3)
 
 km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .8,
+                                              ccf_thresh = .8,
                                               dx_thresh = 15,
                                               theta_thresh = 3)
 ```
@@ -389,16 +389,16 @@ km2_unknown2_comparison <- cellCCF_bothDirections(km2_residuals$x3p,
 
 km2_unknown1_cmcs <- cmcR::cmcFilter_improved(km2_unknown1_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .8,
+                                              ccf_thresh = .8,
                                               dx_thresh = 15)
 
 km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
                                               consensus_function = median,
-                                              corr_thresh = .8,
+                                              ccf_thresh = .8,
                                               dx_thresh = 15)
 ```
 
-Interestingly, we see that the comparison between km2 and unknown1 *does* actually yield final CMCs, although only 5. This illustates an important property of this method - its extreme sensitivity to making the "correct" pre, inter, and post-processing decisions. For example, changing `corr_thresh` from .8 to .81 in the call to `cmcFilter_improved` between km1 and unknown1 above yields 0 initial and final CMCs.  
+Interestingly, we see that the comparison between km2 and unknown1 *does* actually yield final CMCs, although only 5. This illustates an important property of this method - its extreme sensitivity to making the "correct" pre, inter, and post-processing decisions. For example, changing `ccf_thresh` from .8 to .81 in the call to `cmcFilter_improved` between km1 and unknown1 above yields 0 initial and final CMCs.  
 
 ```{r eval=FALSE}
 km2_unknown1_cmcs$finalCMCs

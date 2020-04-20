@@ -93,6 +93,9 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
@@ -127,12 +130,14 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details.</p>
   <span class='no'>x3p1</span>,
   <span class='no'>x3p2</span>,
   <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
-  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>7</span>,
-  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
   <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
-  <span class='no'>centerCell</span>,
-  <span class='no'>scaleCell</span>,
-  <span class='no'>...</span>
+  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.15</span>,
+  <span class='kw'>rawCorrTieBreaker</span> <span class='kw'>=</span> <span class='no'>which.max</span>,
+  <span class='kw'>use</span> <span class='kw'>=</span> <span class='st'>"pairwise.complete.obs"</span>,
+  <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
+  <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -160,15 +165,38 @@ and compared to x3p1$surface.matrix</p></td>
 divide x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
+      <th>cellNumVert</th>
+      <td><p>(default equal to cellNumHoriz) number of cells along
+vertical axis to divide x3p1$surface.matrix into</p></td>
+    </tr>
+    <tr>
       <th>regionToCellProp</th>
       <td><p>determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
 the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)</p></td>
     </tr>
     <tr>
-      <th>cellNumVert</th>
-      <td><p>(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into</p></td>
+      <th>minObservedProp</th>
+      <td><p>(default 15) the minimum proportion of a cell that
+needs to contain observed (i.e., non-NA) values for it to be included in
+the CCF calculation procedure</p></td>
+    </tr>
+    <tr>
+      <th>rawCorrTieBreaker</th>
+      <td><p>the way in which the "raw" correlation (see
+description) is calculated may require slight padding/cropping of the
+mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+padding/cropping can occur to the initial or final rows/cols in the matrix,
+without a clear way to determine which is "correct." As such, all possible
+combinations of pre/post padding/cropping are considered (only if
+necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+be used to determine which yields the lowest/highest correlation with matt1
+(using rawCorrTieBreaker = which.min or which.max, respectively).</p></td>
+    </tr>
+    <tr>
+      <th>use</th>
+      <td><p>argument to be passed to the cor function. Dictates how NAs are
+dealt with in computing the correlation.</p></td>
     </tr>
     <tr>
       <th>centerCell</th>
@@ -185,12 +213,6 @@ scaled prior to CCF calculation. Default is that no scaling is performed.
 If set to "wholeMatrix", then each cell is divided by the standard
 deviation of the whole matrix. If set to "individualCell", then each cell
 is divided by its particular standard deviation.</p></td>
-    </tr>
-    <tr>
-      <th>minObservedProp</th>
-      <td><p>(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure</p></td>
     </tr>
     </table>
 

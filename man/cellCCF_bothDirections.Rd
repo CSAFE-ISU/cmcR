@@ -8,14 +8,14 @@ cellCCF_bothDirections(
   x3p1,
   x3p2,
   thetas = seq(-30, 30, by = 3),
-  cellNumHoriz = 7,
+  cellNumHoriz = 8,
   cellNumVert = cellNumHoriz,
   regionToCellProp = 4,
   minObservedProp = 0.15,
   rawCorrTieBreaker = which.max,
   use = "pairwise.complete.obs",
-  centerCell,
-  scaleCell
+  centerCell = "individualCell",
+  scaleCell = "individualCell"
 )
 }
 \arguments{

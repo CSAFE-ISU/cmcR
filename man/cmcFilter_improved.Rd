@@ -8,8 +8,8 @@ between two cartridge case scans as proposed by Tong et al. (2015)}
 cmcFilter_improved(
   cellCCF_bothDirections_output,
   consensus_function = median,
-  ccf_thresh = 0.4,
-  dx_thresh = 20,
+  ccf_thresh = 0.6,
+  dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
   consensus_function_theta = consensus_function,
@@ -39,9 +39,6 @@ cell pair can be to be called "congruent matching"}
 \item{consensus_function_theta}{\emph{(OPTIONAL)} function (separate from
 consensus_function) to aggregate the rotation (theta) values in the ccfDF
 data frame to determine "consensus" values}
-
-\item{...}{arguments to be passed to consensus_function or
-consensus_function_theta (e.g., na.rm = TRUE) if necessary}
 }
 \description{
 Implements "improved' Congruent Matching Cells logic, as

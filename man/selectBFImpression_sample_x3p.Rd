@@ -10,7 +10,7 @@ selectBFImpression_sample_x3p(
   ransacInlierThresh = (10^(-5)),
   ransacFinalSelectThresh = 2 * (10^(-5)),
   ransacIters = 150,
-  useResiduals = FALSE,
+  useResiduals = TRUE,
   croppingThresh = 1,
   standardizeBF = FALSE,
   m = 2,

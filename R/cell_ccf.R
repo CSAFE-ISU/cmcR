@@ -769,13 +769,14 @@ cellCCF <- function(x3p1,
                                                              sd1 = ..7,
                                                              sd2 = ..8,
                                                              tieBreaker = rawCorrTieBreaker,
-                                                             use = use)))
+                                                             use = use)),
+                    theta = rep(theta,times = nrow(.)))
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy,theta)) #rearrange columns in allResults
 
   if(missing(centerCell)){
     centerCell <- "none"

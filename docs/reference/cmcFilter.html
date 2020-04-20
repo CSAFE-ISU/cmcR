@@ -93,6 +93,9 @@ results of a comparison between two cartridge case scans." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
@@ -126,8 +129,8 @@ results of a comparison between two cartridge case scans.</p>
     <pre class="usage"><span class='fu'>cmcFilter</span>(
   <span class='no'>ccfDF</span>,
   <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
-  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>0.4</span>,
-  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
+  <span class='kw'>ccf_thresh</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
+  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
   <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
   <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>consensus_function</span>,
@@ -149,7 +152,7 @@ and rotation (theta) values in the ccfDF data frame to determine
 "consensus" values</p></td>
     </tr>
     <tr>
-      <th>corr_thresh</th>
+      <th>ccf_thresh</th>
       <td><p>minimum correlation threshold to call a cell pair
 "congruent matching"</p></td>
     </tr>
@@ -194,7 +197,7 @@ consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
 <span class='no'>comparison1</span>$<span class='no'>ccfResults</span> <span class='kw'>%&gt;%</span>
   <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/topResultsPerCell.html'>topResultsPerCell</a></span>() <span class='kw'>%&gt;%</span>
   <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/cmcR/man/cmcFilter.html'>cmcFilter</a></span>(<span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
-                  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>.4</span>,
+                  <span class='kw'>ccf_thresh</span> <span class='kw'>=</span> <span class='fl'>.4</span>,
                   <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
                   <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
                   <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,

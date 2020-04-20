@@ -114,12 +114,12 @@ fpRadiusGridSearch <- function(surfaceMat,
                                 }
 
                                 estimByRow_rotated <-
-                                  fpRadiusEstimation(surfaceMatRotated,
+                                  cmcR:::fpRadiusEstimation(surfaceMatRotated,
                                                      sum_over = "row",
                                                      nonNA_sum_smootherSize = smootherSize)
 
                                 estimByCol_rotated <-
-                                  fpRadiusEstimation(surfaceMatRotated,
+                                  cmcR:::fpRadiusEstimation(surfaceMatRotated,
                                                      sum_over = "col",
                                                      nonNA_sum_smootherSize = smootherSize)
 

@@ -9,14 +9,14 @@ cellCCF(
   x3p1,
   x3p2,
   thetas = seq(-30, 30, by = 3),
-  cellNumHoriz = 7,
+  cellNumHoriz = 8,
   cellNumVert = cellNumHoriz,
   regionToCellProp = 4,
   minObservedProp = 0.15,
   rawCorrTieBreaker = which.max,
   use = "pairwise.complete.obs",
-  centerCell,
-  scaleCell
+  centerCell = "individualCell",
+  scaleCell = "individualCell"
 )
 }
 \arguments{
@@ -58,17 +58,17 @@ be used to determine which yields the lowest/highest correlation with matt1
 \item{use}{argument to be passed to the cor function. Dictates how NAs are
 dealt with in computing the correlation.}
 
-\item{centerCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
-shifted prior to CCF calculation. Default is that no shifting is performed.
-If set to "wholeMatrix", then each cell is subracted by the mean of the
-whole matrix. If set to "individualCell", then each cell is subtracted by
-its particular mean.}
+\item{centerCell}{dictates if cell is to be shifted prior to CCF
+calculation. Default is that no shifting is performed. If set to
+"wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+If set to "individualCell", then each cell is subtracted by its particular
+mean.}
 
-\item{scaleCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
-scaled prior to CCF calculation. Default is that no scaling is performed.
-If set to "wholeMatrix", then each cell is divided by the standard
-deviation of the whole matrix. If set to "individualCell", then each cell
-is divided by its particular standard deviation.}
+\item{scaleCell}{dictates if cell is to be scaled prior to CCF calculation.
+Default is that no scaling is performed. If set to "wholeMatrix", then each
+cell is divided by the standard deviation of the whole matrix. If set to
+"individualCell", then each cell is divided by its particular standard
+deviation.}
 }
 \value{
 The list allResults contains the CCF values, horizontal, and vertical

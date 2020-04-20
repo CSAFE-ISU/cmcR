@@ -142,6 +142,7 @@ cmcFilterPerTheta <- function(ccfResults,
                 .y = names(.),
                 function(thetaSpecificResults,theta){
                   thetaSpecificResults %>%
+                    select(-theta) %>%
                     dplyr::mutate(theta = rep(as.numeric(theta),times = nrow(.)))
                 }) %>%
     setNames(names(ccfResults))
@@ -191,11 +192,44 @@ getMode <- function(x){
 
 #' @name calcMaxCMCTheta
 #'
+#' @param distanceToCMCMaxTieBreaker decides what to do in cases where there are
+#'   consecutive theta values all tied for the max CMC count (no guidance is
+#'   given by Tong et al. (2015) of what to do in this situation). The default
+#'   is to determine the distance between any high CMC theta value and its
+#'   closest CMC max theta value.
+#'
+#'   For example, suppose 3 consecutive theta values each have the max CMC count
+#'   of 17. So the CMC counts around these theta values may look like ...10, 16,
+#'   17, 17, 17, 15, 12... For a highCMC_thresh = 1, note that there is one
+#'   theta value with associated count equal to the high CMC count of 17 - 1 =
+#'   16. The default setting of distanceToCMCMaxTieBreaker = "minDistance" will
+#'   consider the minimum distance between a max CMC theta value and this high
+#'   CMC theta. So in this case, because a theta value with CMC count 17 is
+#'   right next to this high CMC theta value, we would say that this particular
+#'   cartridge case pair "passes" the high CMC criterion, assuming the
+#'   theta_thresh is set to be equal to the grid spacing of the theta values
+#'   considered (3 degrees by default).
+#'
+#'   A slightly more "conservative" option would be to set
+#'   distanceToCMCMaxTieBreaker = "medDistance" take the median of these max CMC
+#'   theta values and apply the high CMC criterion. The example under
+#'   consideration *wouldn't* pass the high CMC criterion due to the particular
+#'   choice of theta grid spacing, theta_thresh, and highCMC_thresh. However,
+#'   different combinations of these arguments may lead to passing the
+#'   criterion.
+#'
+#'   Finally, the most "conservative" option would be to set
+#'   distanceToCMCMaxTieBreaker = "failCriterion" in which we immediately "fail"
+#'   a cartridge case pair if there are any ties for max CMC theta (i.e., "there
+#'   can only be one!" - Highlander).
+#'
 #' @keywords internal
 
 calcMaxCMCTheta <- function(cmcPerTheta,
                             highCMC_thresh = 1,
-                            theta_thresh = 3){
+                            theta_thresh = 3,
+                            distanceToCMCMaxTieBreaker = "minDistance"){
+
   cmcCountPerTheta <- cmcPerTheta %>%
     dplyr::group_by(theta) %>%
     dplyr::tally()
@@ -212,6 +246,15 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     return(NA)
   }
 
+  #if there may be multiple theta values tied for cmcMax that are within
+  #theta_thresh of each other, then we need to somehow "break" the ties. The
+  #distanceToCMCMaxTieBreaker argument (see documentation) determines how to do
+  #so.
+
+  if(distanceToCMCMaxTieBreaker == "failCriterion" & nrow(cmcMax) > 1){
+    return(NA)
+  }
+
   #there may be more than one theta tied with the maximum CMC - in which case
   #we should determine if such thetas are "close" to each other, where
   #proximity is defined based on the theta_tresh set. If not, then we can rule
@@ -220,15 +263,17 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     return(NA)
   }
 
-  #if there may be multiple theta values tied for cmcMax that are within
-  #theta_thresh of each other, then we can't discount any of them as being
-  #the "true" theta value (alternatively, may be we should discount all as
-  #NOT being the true theta value?). Instead we'll consider how far the
-  #"high CMC" theta values are from the closest tied maxCMC theta value.
+  if(distanceToCMCMaxTieBreaker == "medDistance"){
+    tieBreaker <- median
+  }
+  else{
+    tieBreaker <- min
+  }
+
   maxDistancetoCMCMax <- cmcCountPerTheta %>%
     dplyr::filter(n >= unique(cmcMax$n) - highCMC_thresh) %>%
     dplyr::group_by(theta) %>%
-    dplyr::summarise(distanceToCMCMax = min(abs(cmcMax$theta - theta))) %>%
+    dplyr::summarise(distanceToCMCMax = tieBreaker(abs(cmcMax$theta - theta))) %>%
     dplyr::pull(distanceToCMCMax) %>%
     max()
 
@@ -236,6 +281,9 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     return(NA)
   }
   else{
+    if(distanceToCMCMaxTieBreaker == "medDistance"){
+      return(median(cmcMax$theta))
+    }
     return(cmcMax$theta)
   }
 }
@@ -265,8 +313,6 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #' @param consensus_function_theta *(OPTIONAL)* function (separate from
 #'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
 #'   data frame to determine "consensus" values
-#' @param ... arguments to be passed to consensus_function or
-#'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
 #' @examples
 #' \dontrun{
@@ -291,7 +337,14 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                dx_thresh = 10,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
-                               consensus_function_theta = consensus_function,...){
+                               consensus_function_theta = consensus_function){
+
+  #TODO (potentially): Add an argument "thetaDisagreement" that allows for more
+  #conservative decisions if the theta modes are identified in both directions
+  #but they don't agree with each other (aren't within theta_thresh of each
+  #other). Could only take the min of the Final CMCs identified in either
+  #direction or only give that pair its initial CMCs (i.e., it would "fail" the
+  #both direction criterion).
 
   initialCMCs <- cellCCF_bothDirections_output %>%
     purrr::map(~ cmcR::topResultsPerCell(.$ccfResults) %>%
@@ -309,21 +362,26 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                           dx_thresh = dx_thresh,
                                           dy_thresh = dy_thresh,
                                           theta_thresh = theta_thresh,
-                                          consensus_function_theta = consensus_function_theta,...))
+                                          consensus_function_theta = consensus_function_theta))
 
-  thetaMax <- purrr::map(cmcPerTheta,cmcR:::calcMaxCMCTheta)
+  thetaMax <- purrr::map(cmcPerTheta,~ cmcR:::calcMaxCMCTheta(cmcPerTheta = .,
+                                                              highCMC_thresh = 1,
+                                                              theta_thresh = theta_thresh,
+                                                              distanceToCMCMaxTieBreaker = "minDistance"))
 
-  if(purrr::is_empty(thetaMax$comparison_1to2) & !purrr::is_empty(thetaMax$comparison_2to1)){
-    thetaMax$comparison_1to2 <- -thetaMax$comparison_2to1
-  }
-  if(!purrr::is_empty(thetaMax$comparison_1to2) & purrr::is_empty(thetaMax$comparison_2to1)){
-    thetaMax$comparison_2to1 <- -thetaMax$comparison_1to2
-  }
+  #This was the least "conservative" option if one direction didn't yield a
+  #theta mode but the other direction did. I think this was assigning to many "false positive" CMCs for our liking for KNMs.
+  #if(purrr::is_empty(thetaMax$comparison_1to2) &
+  #!purrr::is_empty(thetaMax$comparison_2to1)){ thetaMax$comparison_1to2 <-
+  #-thetaMax$comparison_2to1 } if(!purrr::is_empty(thetaMax$comparison_1to2) &
+  #purrr::is_empty(thetaMax$comparison_2to1)){ thetaMax$comparison_2to1 <-
+  #-thetaMax$comparison_1to2 }
   if(purrr::is_empty(thetaMax$comparison_1to2) & purrr::is_empty(thetaMax$comparison_2to1)){
     thetaMax$comparison_2to1 <- NA
     thetaMax$comparison_1to2 <- NA
   }
 
+  #if neither direction passed the high CMC criterion...
   if(all(is.na(thetaMax))){
     return(list("params" = list(consensus_function = consensus_function,
                                 ccf_thresh = ccf_thresh,
@@ -334,18 +392,44 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                 "initialCMCs" = list(initialCMCs)))
   }
 
-  finalCMCs <- purrr::pmap(.l = list(cmcPerTheta,
-                                     names(cmcPerTheta),
-                                     thetaMax),
-                           function(cmcs,compName,th){
-                             purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
-                               dplyr::mutate(comparison = rep(compName,times = nrow(.)))
-                           }) %>%
-    dplyr::bind_rows() %>%
-    dplyr::distinct() %>%
-    dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
-    dplyr::filter(ccf == max(ccf)) %>%
-    dplyr::ungroup()
+  #if one direction didn't pass the high CMC criterion...
+  if(any(is.na(thetaMax))){
+    #the direction that didn't pass gets assigned initial CMCs:
+    finalCMCs1 <- initialCMCs[[which(is.na(thetaMax))]] %>%
+      ungroup() %>%
+      mutate(comparison = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
+
+
+    finalCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],
+                                            names(cmcPerTheta)[which(!is.na(thetaMax))],
+                                            thetaMax[which(!is.na(thetaMax))]),
+                                  function(cmcs,compName,th){
+                                    purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
+                                      dplyr::mutate(comparison = rep(compName,times = nrow(.)))
+                                  })
+
+    finalCMCs <- finalCMCs2 %>%
+      dplyr::bind_rows() %>%
+      dplyr::bind_rows(finalCMCs1) %>%
+      dplyr::distinct() %>%
+      dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
+      dplyr::filter(ccf == max(ccf)) %>%
+      dplyr::ungroup()
+  } #if both directions pass the high CMC criterion...
+  else{
+    finalCMCs <- purrr::pmap(.l = list(cmcPerTheta,
+                                       names(cmcPerTheta),
+                                       thetaMax),
+                             function(cmcs,compName,th){
+                               purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
+                                 dplyr::mutate(comparison = rep(compName,times = nrow(.)))
+                             }) %>%
+      dplyr::bind_rows() %>%
+      dplyr::distinct() %>%
+      dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
+      dplyr::filter(ccf == max(ccf)) %>%
+      dplyr::ungroup()
+  }
 
   return(list("params" = list(consensus_function = consensus_function,
                               ccf_thresh = ccf_thresh,

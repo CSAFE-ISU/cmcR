@@ -9,14 +9,14 @@ congruentMatchingCells(
   x3p1,
   x3p2,
   thetas = seq(-30, 30, by = 3),
-  cellNumHoriz = 7,
+  cellNumHoriz = 8,
   regionToCellProp = 4,
   cellNumVert = cellNumHoriz,
-  centerCell,
-  scaleCell,
+  centerCell = "individualCell",
+  scaleCell = "individualCell",
   consensus_function = median,
-  corr_thresh = 0.4,
-  dx_thresh = 20,
+  corr_thresh = 0.6,
+  dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
   consensus_function_theta = consensus_function,
@@ -44,17 +44,17 @@ the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)}
 \item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
 vertical axis to divide x3p1$surface.matrix into}
 
-\item{centerCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
-shifted prior to CCF calculation. Default is that no shifting is performed.
-If set to "wholeMatrix", then each cell is subracted by the mean of the
-whole matrix. If set to "individualCell", then each cell is subtracted by
-its particular mean.}
+\item{centerCell}{dictates if cell is to be shifted prior to CCF
+calculation. Default is that no shifting is performed. If set to
+"wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+If set to "individualCell", then each cell is subtracted by its particular
+mean.}
 
-\item{scaleCell}{\strong{OPTIONAL} (default missing) dictates if cell is to be
-scaled prior to CCF calculation. Default is that no scaling is performed.
-If set to "wholeMatrix", then each cell is divided by the standard
-deviation of the whole matrix. If set to "individualCell", then each cell
-is divided by its particular standard deviation.}
+\item{scaleCell}{dictates if cell is to be scaled prior to CCF calculation.
+Default is that no scaling is performed. If set to "wholeMatrix", then each
+cell is divided by the standard deviation of the whole matrix. If set to
+"individualCell", then each cell is divided by its particular standard
+deviation.}
 
 \item{consensus_function}{function to aggregate the translation (dx and dy)
 and rotation (theta) values in the ccfDF data frame to determine

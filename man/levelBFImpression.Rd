@@ -4,7 +4,7 @@
 \alias{levelBFImpression}
 \title{Helper for selectBFImpression}
 \usage{
-levelBFImpression(ransacFit, useResiduals = FALSE, ...)
+levelBFImpression(ransacFit, useResiduals = TRUE, ...)
 }
 \arguments{
 \item{useResiduals}{dictates whether the difference between the estimated

@@ -23,6 +23,10 @@ ccfMap <- function(mat1,mat2){
 #'
 #' @param mat1 a matrix
 #' @param mat2 another matrix
+#' @param theta *(OPTIONAL)* if considering multiple cell/region pairs over
+#'   various rotation values, it may be useful to include the rotation value in
+#'   the fft.ccf summary. If a value of theta is supplied to this argument, it
+#'   will be included in the summary table. Otherwise, theta will be NA
 #' @param returnGrob if TRUE, then function will return the gridExtra grob
 #'   object
 #'
@@ -43,6 +47,7 @@ ccfMap <- function(mat1,mat2){
 
 ccfMapPlot <- function(mat1,
                        mat2,
+                       theta = NA,
                        returnGrob = FALSE){
 
   ccfMat <- cmcR:::ccfMap(mat1,mat2)
@@ -53,14 +58,14 @@ ccfMapPlot <- function(mat1,
     as.data.frame() %>%
     dplyr::mutate(dx = x - max(x)/2,
                   dy = y - max(y)/2) %>%
-    dplyr::rename(CCF = value)
+    dplyr::rename(fft.ccf = value)
 
   ccfMaxInfo <- ccfDF %>%
-    dplyr::filter(CCF == max(CCF)) %>%
-    dplyr::mutate(CCF = round(CCF,3))
+    dplyr::filter(fft.ccf == max(fft.ccf)) %>%
+    dplyr::mutate(fft.ccf = round(fft.ccf,3))
 
-  mat1 <- (mat1 - mean(mat1,na.rm = TRUE))/(sd(mat1,na.rm = TRUE))
-  mat2 <- (mat2 - mean(mat2,na.rm = TRUE))/(sd(mat2,na.rm = TRUE))
+  # mat1 <- (mat1 - mean(mat1,na.rm = TRUE))/(sd(mat1,na.rm = TRUE))
+  # mat2 <- (mat2 - mean(mat2,na.rm = TRUE))/(sd(mat2,na.rm = TRUE))
 
   mat1Plot <- mat1 %>%
     t() %>%
@@ -111,7 +116,7 @@ ccfMapPlot <- function(mat1,
   ccfPlot <- ccfDF %>%
     dplyr::mutate(dx = rev(dx),
                   dy = rev(dy)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = dx,y = dy,fill = CCF)) +
+    ggplot2::ggplot(ggplot2::aes(x = dx,y = dy,fill = fft.ccf)) +
     ggplot2::geom_tile() +
     ggplot2::coord_fixed() +
     ggplot2::theme_bw() +
@@ -126,10 +131,11 @@ ccfMapPlot <- function(mat1,
   ccfMaxSummary <- ccfMaxInfo %>%
     dplyr::select(-c(x,y)) %>%
     dplyr::mutate(dx = -dx,
-                  dy = -dy) %>%
+                  dy = -dy,
+                  theta = theta) %>%
     t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
-    gridExtra::tableGrob(rows = c("CCFmax","dx","dy"),
-                         cols = "CCFmax.Summary")
+    gridExtra::tableGrob(rows = c("fft.ccfMax","dx","dy","theta"),
+                         cols = "fft.ccfMax.Summary")
 
   layoutMat <- matrix(c(1,2,3,4),ncol = 2,byrow = TRUE)
 
@@ -264,8 +270,8 @@ cmcPlot <- function(x3p,
 
 cmcPerThetaBarPlot <- function(cellCCF_output,
                                consensus_function = median,
-                               corr_thresh = .5,
-                               dx_thresh = 15,
+                               ccf_thresh = .6,
+                               dx_thresh = 10,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
                                consensus_function_theta = consensus_function,
@@ -281,14 +287,14 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
     dplyr::bind_rows(
       cellCCF_output$comparison_1to2$ccfResults %>%
         cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
-                                 corr_thresh = corr_thresh,
+                                 ccf_thresh = ccf_thresh,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
                                  theta_thresh = theta_thresh) %>%
         dplyr::mutate(comparison = "x3p1 vs. x3p2"),
       cellCCF_output$comparison_2to1$ccfResults %>%
         cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
-                                 corr_thresh = corr_thresh,
+                                 ccf_thresh = ccf_thresh,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
                                  theta_thresh = theta_thresh) %>%
@@ -317,7 +323,7 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
   else{
     cellCCF_output$ccfResults  %>%
       cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
-                               corr_thresh = corr_thresh,
+                               ccf_thresh = ccf_thresh,
                                dx_thresh = dx_thresh,
                                dy_thresh = dy_thresh,
                                theta_thresh = theta_thresh) %>%
@@ -341,4 +347,124 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                          family = "sans")
   }
 
+}
+
+#' @name getCellRegionPairs
+#'
+#' @description This function is meant as a diagnostic tool to determine what
+#'   the cell region pairs for a particular cartridge case comparison looked
+#'   like right before calculation of the CCF.
+#'
+#' @export
+
+getCellRegionPairs <- function(x3p1,x3p2,ccfDF,params){
+  mat1 <- x3p1$surface.matrix
+  mat2 <- x3p2$surface.matrix
+
+  if(is.null(params$centerCell)){
+    m1 <- 0
+    m2 <- 0
+  }
+  if(is.null(params$scaleCell)){
+    sd1 <- 1
+    sd2 <- 1
+  }
+
+  if(!is.null(params$centerCell)){
+    if(params$centerCell == "wholeMatrix"){
+      m1 <- mean(as.vector(mat1),na.rm = TRUE)
+
+      m2 <- mean(as.vector(mat2),na.rm = TRUE)
+    }
+  }
+
+  if(!is.null(params$scaleCell)){
+    if(params$scaleCell == "wholeMatrix"){
+      sd1 <- sd(as.vector(mat1),na.rm = TRUE)
+
+      sd2 <- sd(as.vector(mat2),na.rm = TRUE)
+    }
+  }
+
+  mat1_split <- splitSurfaceMat1(surfaceMat = mat1,
+                                 cellNumHoriz = params$cellNumHoriz,
+                                 cellNumVert = params$cellNumVert,
+                                 minObservedProp = params$minObservedProp)
+
+  sidelengthMultiplier <- floor(sqrt(params$regionToCellProp))
+
+  mat2_splitCorners <- getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
+                                             cellSideLengths = mat1_split$cellSideLengths,
+                                             mat2Dim = dim(mat2),
+                                             sidelengthMultiplier = sidelengthMultiplier)
+
+  thetas <- unique(ccfDF$theta)
+
+  cellRegionPairs <- list()
+
+  ccfDFSplit <- ccfDF %>%
+    dplyr::group_by(theta) %>%
+    dplyr::group_split()
+
+  for(ind in 1:length(thetas)){
+    mat2_rotated <- mat2 %>%
+      rotateSurfaceMatrix(thetas[ind])
+
+    mat2_splitRotated <-
+      purrr::map(.x = mat2_splitCorners,
+                 ~ extractCellbyCornerLocs(cornerLocs = .x,
+                                           rotatedSurfaceMat = mat2_rotated,
+                                           mat2Dim = dim(mat2)))
+
+    mat1_splitFiltered <- purrr::flatten(mat1_split$surfaceMat_split)[ccfDFSplit[[ind]]$cellNum]
+    mat2_splitFiltered <- mat2_splitRotated[ccfDFSplit[[ind]]$cellNum]
+
+    filteredCellID <- mat1_split$cellIDs[ccfDFSplit[[ind]]$cellNum]
+
+    if(!is.null(params$centerCell)){
+      if(params$centerCell == "individualCell"){
+        m1 <- mat1_splitFiltered %>%
+          purrr::map(~ mean(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+
+
+
+        m2 <-  mat2_splitFiltered %>%
+          purrr::map(~ mean(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+      }
+    }
+
+    if(!is.null(params$scaleCell)){
+      if(params$scaleCell == "individualCell"){
+        sd1 <-  mat1_splitFiltered %>%
+          purrr::map(~ sd(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+
+        sd2 <-  mat2_splitFiltered %>%
+          purrr::map(~ sd(.,na.rm = TRUE)) %>%
+          setNames(filteredCellID)
+      }
+    }
+
+    mat1_splitShifted <- purrr::pmap(list(mat1_splitFiltered,m1,sd1),
+                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
+                                                             m = ..2,
+                                                             s = ..3))
+
+    #shift the pixel values in each image so that they both have 0 mean. Then
+    #replace the NA values with 0 (FFTs can't deal with NAs).
+    mat2_splitShifted <- purrr::pmap(list(mat2_splitFiltered,m2,sd2),
+                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
+                                                             m = ..2,
+                                                             s = ..3))
+
+    cellRegionPairs[[ind]] <- purrr::map2(mat1_splitShifted,
+                                        mat2_splitShifted,
+                                        ~ list(.x,.y)) %>%
+      setNames(filteredCellID)
+  }
+
+  cellRegionPairs %>%
+    setNames(thetas)
 }

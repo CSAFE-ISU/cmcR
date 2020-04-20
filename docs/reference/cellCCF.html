@@ -47,14 +47,23 @@ into pairwise disjoint cells. mat2, the surface matrix of a breech face
 impression scan to be compared to mat1, is also broken up into cells
 centered at the same location as those in mat1. However, the cells in mat2
 are larger than those in mat1 (typically 4 times the size except on the
-border of mat2). The cross-correlation function (CCF) is then calculated
-between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-well as the necessary horizontal and vertical translations to align the
-mat1 cell with the mat2 cell to achieve this max CCF are recorded. mat2 is
-then rotated by some amount (say, 2.5 degrees) and the process of dividing
-mat2 into cells and calculating the max CCF for each cell in mat1 is
-repeated. The rotations performed on mat2 are dictated by the value(s)
+border of mat2).
+The cross-correlation function (CCF) is then calculated between each cell
+in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
+For each mat1, mat2 cell pair, the maximum CCF value as well as the
+necessary horizontal and vertical translations to align the mat1 cell with
+the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
+max CCF values aren't necessarily reliable estimates of the true similarity
+between mat1 and mat2 (since NAs need to be replaced prior to calculation).
+As such, a &quot;raw&quot; correlation is calculated by extracting from mat2 a
+mat1-sized matrix based on the dx, dy translation values obtained from the
+FFT-based CCF method. Rather than replacing NA values, these two matrices
+of equivalent dimension are turned into vectors and the pairwise-complete
+observation correlation (in which only non-NA pairs are considered) is
+calculated.
+mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+dividing mat2 into cells and calculating the max CCF for each cell in mat1
+is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument." />
 <meta name="twitter:card" content="summary" />
 
@@ -111,6 +120,9 @@ passed to the theta argument." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
@@ -147,14 +159,23 @@ into pairwise disjoint cells. mat2, the surface matrix of a breech face
 impression scan to be compared to mat1, is also broken up into cells
 centered at the same location as those in mat1. However, the cells in mat2
 are larger than those in mat1 (typically 4 times the size except on the
-border of mat2). The cross-correlation function (CCF) is then calculated
-between each cell in mat1 and its larger, paired cell in mat2 using a Fast
-Fourier Transform. For each mat1, mat2 cell pair, the maximum CCF value as
-well as the necessary horizontal and vertical translations to align the
-mat1 cell with the mat2 cell to achieve this max CCF are recorded. mat2 is
-then rotated by some amount (say, 2.5 degrees) and the process of dividing
-mat2 into cells and calculating the max CCF for each cell in mat1 is
-repeated. The rotations performed on mat2 are dictated by the value(s)
+border of mat2).</p>
+<p>The cross-correlation function (CCF) is then calculated between each cell
+in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
+For each mat1, mat2 cell pair, the maximum CCF value as well as the
+necessary horizontal and vertical translations to align the mat1 cell with
+the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
+max CCF values aren't necessarily reliable estimates of the true similarity
+between mat1 and mat2 (since NAs need to be replaced prior to calculation).
+As such, a "raw" correlation is calculated by extracting from mat2 a
+mat1-sized matrix based on the dx, dy translation values obtained from the
+FFT-based CCF method. Rather than replacing NA values, these two matrices
+of equivalent dimension are turned into vectors and the pairwise-complete
+observation correlation (in which only non-NA pairs are considered) is
+calculated.</p>
+<p>mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+dividing mat2 into cells and calculating the max CCF for each cell in mat1
+is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument.</p>
     </div>
 
@@ -162,13 +183,14 @@ passed to the theta argument.</p>
   <span class='no'>x3p1</span>,
   <span class='no'>x3p2</span>,
   <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
-  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>7</span>,
+  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
   <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
   <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
   <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.15</span>,
-  <span class='no'>centerCell</span>,
-  <span class='no'>scaleCell</span>,
-  <span class='no'>...</span>
+  <span class='kw'>rawCorrTieBreaker</span> <span class='kw'>=</span> <span class='no'>which.max</span>,
+  <span class='kw'>use</span> <span class='kw'>=</span> <span class='st'>"pairwise.complete.obs"</span>,
+  <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
+  <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -192,41 +214,59 @@ and compared to x3p1$surface.matrix</p></td>
     </tr>
     <tr>
       <th>cellNumHoriz</th>
-      <td><p>(default 7) number of cells along horizontal axis to
-divide x3p1$surface.matrix into</p></td>
+      <td><p>number of cells along horizontal axis to divide
+x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
       <th>cellNumVert</th>
-      <td><p>(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into</p></td>
+      <td><p>number of cells along vertical axis to divide
+x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
       <th>regionToCellProp</th>
       <td><p>determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
-the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)</p></td>
+the x3p2 regions will be 4 times times larger (sidelengths multiplied by
+2).</p></td>
     </tr>
     <tr>
       <th>minObservedProp</th>
-      <td><p>(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure</p></td>
+      <td><p>the minimum proportion of a cell that needs to contain
+observed (i.e., non-NA) values for it to be included in the CCF calculation
+procedure.</p></td>
+    </tr>
+    <tr>
+      <th>rawCorrTieBreaker</th>
+      <td><p>the way in which the "raw" correlation (see
+description) is calculated may require slight padding/cropping of the
+mat1-sized matrix extracted from mat2 to make their dimensions equal. This
+padding/cropping can occur to the initial or final rows/cols in the matrix,
+without a clear way to determine which is "correct." As such, all possible
+combinations of pre/post padding/cropping are considered (only if
+necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
+be used to determine which yields the lowest/highest correlation with matt1
+(using rawCorrTieBreaker = which.min or which.max, respectively).</p></td>
+    </tr>
+    <tr>
+      <th>use</th>
+      <td><p>argument to be passed to the cor function. Dictates how NAs are
+dealt with in computing the correlation.</p></td>
     </tr>
     <tr>
       <th>centerCell</th>
-      <td><p><strong>OPTIONAL</strong> (default missing) dictates if cell is to be
-shifted prior to CCF calculation. Default is that no shifting is performed.
-If set to "wholeMatrix", then each cell is subracted by the mean of the
-whole matrix. If set to "individualCell", then each cell is subtracted by
-its particular mean.</p></td>
+      <td><p>dictates if cell is to be shifted prior to CCF
+calculation. Default is that no shifting is performed. If set to
+"wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+If set to "individualCell", then each cell is subtracted by its particular
+mean.</p></td>
     </tr>
     <tr>
       <th>scaleCell</th>
-      <td><p><strong>OPTIONAL</strong> (default missing) dictates if cell is to be
-scaled prior to CCF calculation. Default is that no scaling is performed.
-If set to "wholeMatrix", then each cell is divided by the standard
-deviation of the whole matrix. If set to "individualCell", then each cell
-is divided by its particular standard deviation.</p></td>
+      <td><p>dictates if cell is to be scaled prior to CCF calculation.
+Default is that no scaling is performed. If set to "wholeMatrix", then each
+cell is divided by the standard deviation of the whole matrix. If set to
+"individualCell", then each cell is divided by its particular standard
+deviation.</p></td>
     </tr>
     </table>
 

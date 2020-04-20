@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p • cmcR</title>
+x3ptools::sample_x3p to downsample the scan. — selectBFImpression_sample_x3p • cmcR</title>
 
 
 <!-- jquery -->
@@ -37,9 +37,9 @@ x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p �
 
 
 <meta property="og:title" content="Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan — selectBFImpression_sample_x3p" />
+x3ptools::sample_x3p to downsample the scan. — selectBFImpression_sample_x3p" />
 <meta property="og:description" content="Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan" />
+x3ptools::sample_x3p to downsample the scan." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -95,6 +95,9 @@ x3ptools::sample_x3p to downsample the scan" />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
     </li>
   </ul>
@@ -116,14 +119,14 @@ x3ptools::sample_x3p to downsample the scan" />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan</h1>
+x3ptools::sample_x3p to downsample the scan.</h1>
     
     <div class="hidden name"><code>selectBFImpression_sample_x3p.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan</p>
+x3ptools::sample_x3p to downsample the scan.</p>
     </div>
 
     <pre class="usage"><span class='fu'>selectBFImpression_sample_x3p</span>(
@@ -131,13 +134,16 @@ x3ptools::sample_x3p to downsample the scan</p>
   <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
   <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
   <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
-  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>standardizeBF</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>,
   <span class='kw'>mY</span> <span class='kw'>=</span> <span class='no'>m</span>,
   <span class='kw'>offset</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>offsetY</span> <span class='kw'>=</span> <span class='no'>offset</span>
+  <span class='kw'>offsetY</span> <span class='kw'>=</span> <span class='no'>offset</span>,
+  <span class='no'>gaussFilterRes</span>,
+  <span class='no'>gaussFilterWavelength</span>,
+  <span class='no'>gaussFilterType</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -145,12 +151,18 @@ x3ptools::sample_x3p to downsample the scan</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x3p_path</th>
-      <td><p>path to a .x3p file</p></td>
+      <td><p>path to an .x3p file</p></td>
     </tr>
     <tr>
       <th>ransacInlierThresh</th>
       <td><p>threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method</p></td>
+    </tr>
+    <tr>
+      <th>ransacFinalSelectThresh</th>
+      <td><p>once the RANSAC plane is fitted based on the
+inlierThreshold, this argument dictates which observations are selected as
+the final breech face estimate.</p></td>
     </tr>
     <tr>
       <th>ransacIters</th>
@@ -167,6 +179,11 @@ breech face is simply shifted down by its mean value</p></td>
       <th>croppingThresh</th>
       <td><p>treshold for cropping exterior whitespace from the
 breech face impression</p></td>
+    </tr>
+    <tr>
+      <th>standardizeBF</th>
+      <td><p>subtract mean and divide by standard deviation of
+processed surface matrix</p></td>
     </tr>
     <tr>
       <th>m</th>
@@ -187,15 +204,22 @@ direction and every mYth value is included in y direction</p></td>
 for x and y direction.</p></td>
     </tr>
     <tr>
-      <th>finalSelectionThreshold</th>
-      <td><p>once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
-the final breech face estimate.</p></td>
+      <th>gaussFilterRes</th>
+      <td><p><strong>Optional</strong> sampling resolution of the surface matrix
+(given by incrementX or incrementY of the header.info element of an x3p
+object)</p></td>
     </tr>
     <tr>
-      <th>standardizedBF</th>
-      <td><p>subtract mean and divide by standard deviation of
-processed surface matrix</p></td>
+      <th>gaussFilterWavelength</th>
+      <td><p><strong>Optional</strong> cut-off wavelength to be attenuated</p></td>
+    </tr>
+    <tr>
+      <th>gaussFilterType</th>
+      <td><p><strong>Optional</strong> specifies whether a low pass, "lp", high
+pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
+filterype = "bp" means that wavelength should be a vector of two numbers.
+In this case, the max of these two number will be used for the high pass
+filter and the min for the low pass filter.</p></td>
     </tr>
     </table>
 
