@@ -4,15 +4,23 @@
 \alias{ccfMapPlot}
 \title{Plots the CCF map between two matrices}
 \usage{
-ccfMapPlot(mat1, mat2, returnGrob = FALSE)
+ccfMapPlot(mat1, mat2, theta = NA, returnGrob = FALSE, type = "raster")
 }
 \arguments{
 \item{mat1}{a matrix}
 
 \item{mat2}{another matrix}
 
+\item{theta}{\emph{(OPTIONAL)} if considering multiple cell/region pairs over
+various rotation values, it may be useful to include the rotation value in
+the fft.ccf summary. If a value of theta is supplied to this argument, it
+will be included in the summary table. Otherwise, theta will be NA}
+
 \item{returnGrob}{if TRUE, then function will return the gridExtra grob
 object}
+
+\item{type}{dictates whether the CCF map is created using geom_raster (type =
+"raster") or geom_contour_filled (type = "contour")}
 }
 \description{
 Uses the gridExtra::arrangeGrob function to put 3 plots and a

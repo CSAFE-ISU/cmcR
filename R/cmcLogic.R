@@ -353,7 +353,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                   dx_thresh = dx_thresh,
                                   dy_thresh = dy_thresh,
                                   theta_thresh = theta_thresh,
-                                  consensus_function_theta = consensus_function_theta))
+                                  consensus_function_theta = consensus_function_theta) %>%
+                 ungroup())
 
   cmcPerTheta <-  cellCCF_bothDirections_output %>%
     purrr::map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
@@ -389,7 +390,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
-                "initialCMCs" = list(initialCMCs)))
+                "initialCMCs" = initialCMCs,
+                "finalCMCs" = NULL))
   }
 
   #if one direction didn't pass the high CMC criterion...
@@ -429,6 +431,24 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
       dplyr::filter(ccf == max(ccf)) %>%
       dplyr::ungroup()
+  }
+
+  thetaMed <- finalCMCs %>%
+    dplyr::group_by(comparison) %>%
+    dplyr::summarise(theta = median(theta)) %>%
+    dplyr::pull(theta)
+
+  #one last check to determine if the median theta in both directions agree with
+  #each other up to a sign within theta_thresh
+  if(sign(thetaMed[1]) == sign(thetaMed[2]) | (abs((abs(thetaMed[1]) - abs(thetaMed[2]))) > theta_thresh)){
+    return(list("params" = list(consensus_function = consensus_function,
+                                ccf_thresh = ccf_thresh,
+                                dx_thresh = dx_thresh,
+                                dy_thresh = dy_thresh,
+                                theta_thresh = theta_thresh,
+                                consensus_function_theta = consensus_function_theta),
+                "initialCMCs" = initialCMCs,
+                "finalCMCs" = NULL))
   }
 
   return(list("params" = list(consensus_function = consensus_function,

@@ -7,7 +7,7 @@
 cmcPerThetaBarPlot(
   cellCCF_output,
   consensus_function = median,
-  corr_thresh = 0.6,
+  ccf_thresh = 0.6,
   dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,

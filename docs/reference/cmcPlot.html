@@ -6,27 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plots the Congruent Matching Cells identified in a cartridge case scan — cmcPlot • cmcR</title>
+<title>Visualize initial and final CMCs for a cartridge case pair comparison — cmcPlot • cmcR</title>
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -35,12 +39,8 @@
 
 
 
-<meta property="og:title" content="Plots the Congruent Matching Cells identified in a cartridge case scan — cmcPlot" />
-<meta property="og:description" content="Plots the selected congruent matching cells of a questioned x3p by either
-converting the surface matrix contained in the x3p to a cimg object and
-using base plot (fast, but doesn't look particularly great) or by plotting
-surface matrix using ggplot2::geom_tile (slow, but nice looking)." />
-<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="Visualize initial and final CMCs for a cartridge case pair comparison — cmcPlot" />
+<meta property="og:description" content="Visualize initial and final CMCs for a cartridge case pair comparison" />
 
 
 
@@ -58,7 +58,7 @@ surface matrix using ggplot2::geom_tile (slow, but nice looking)." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -95,7 +95,7 @@ surface matrix using ggplot2::geom_tile (slow, but nice looking)." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/cmcR_plotReproduction.html">Reproduction of published plots using the cmcR package</a>
+      <a href="../articles/cmcR_plotReproduction.html">Reproduction of Tong et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
       <a href="../articles/reproducibleExample.html">Reproducible Example</a>
@@ -118,69 +118,44 @@ surface matrix using ggplot2::geom_tile (slow, but nice looking)." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plots the Congruent Matching Cells identified in a cartridge case scan</h1>
+    <h1>Visualize initial and final CMCs for a cartridge case pair comparison</h1>
     
     <div class="hidden name"><code>cmcPlot.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Plots the selected congruent matching cells of a questioned x3p by either
-converting the surface matrix contained in the x3p to a cimg object and
-using base plot (fast, but doesn't look particularly great) or by plotting
-surface matrix using ggplot2::geom_tile (slow, but nice looking).</p>
+    <p>Visualize initial and final CMCs for a cartridge case pair comparison</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cmcPlot</span>(<span class='no'>x3p</span>, <span class='no'>cmcDF</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"cimg"</span>)</pre>
+    <pre class="usage"><span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>, <span class='no'>x3p2</span>, <span class='no'>cellCCF_bothDirections_output</span>, <span class='no'>cmcFilter_improved_output</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x3p</th>
-      <td><p>The "questioned" cartridge case scan, in the form of an x3p
-object, for which CMCs were determined (this would be x3p1 in a call to
-cellCCF)</p></td>
+      <th>x3p1</th>
+      <td><p>an x3p object</p></td>
     </tr>
     <tr>
-      <th>cmcDF</th>
-      <td><p>data frame containing the congruent matching cells of the
-questioned x3p object</p></td>
+      <th>x3p2</th>
+      <td><p>a different x3p object</p></td>
     </tr>
     <tr>
-      <th>method</th>
-      <td><p>dictates whether a cimg plot is returned, or a ggplot2 plot.
-The ggplot2 plot looks nicer, but takes much longer to construct than the
-cimg plot.</p></td>
+      <th>cellCCF_bothDirections_output</th>
+      <td><p>output from the function cmcR::cellCCF_bothDirections</p></td>
+    </tr>
+    <tr>
+      <th>cmcFilter_improved_output</th>
+      <td><p>output from the function cmcR::cmcFilter_improved</p></td>
     </tr>
     </table>
 
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
-
-<span class='no'>cmcs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cmcFilter_improved.html'>cmcFilter_improved</a></span>(<span class='no'>comparison1</span>)
-
-<span class='co'>#initially selected CMCs based on x3p1 vs x3p2 comparison</span>
-<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>initialCMCs</span><span class='kw'>[[</span><span class='fl'>1</span>]]<span class='kw'>[[</span><span class='fl'>1</span>]])
-
-<span class='co'>#initialy selected CMCs based on x3p2 vs x3p1</span>
-<span class='fu'>cmcPlot</span>(<span class='no'>x3p2</span>,<span class='no'>cmcs</span>$<span class='no'>initialCMCs</span><span class='kw'>[[</span><span class='fl'>1</span>]]<span class='kw'>[[</span><span class='fl'>2</span>]])
-
-<span class='co'>#final selected CMCs (may be empty) based on both x3p1 vs x3p2 and x3p2 vs x3p1</span>
-<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>finalCMCs</span>)
-
-<span class='co'>#make plot using ggplot2::geom_tile</span>
-<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>cmcs</span>$<span class='no'>finalCMCs</span>,<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"ggplot2"</span>)
-}</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -191,7 +166,7 @@ cimg plot.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

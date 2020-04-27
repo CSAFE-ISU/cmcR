@@ -18,8 +18,8 @@ selectBFImpression_sample_x3p(
   offset = 0,
   offsetY = offset,
   gaussFilterRes,
-  gaussFilterWavelength,
-  gaussFilterType
+  gaussFilterWavelength = c(16, 250),
+  gaussFilterType = "bp"
 )
 }
 \arguments{

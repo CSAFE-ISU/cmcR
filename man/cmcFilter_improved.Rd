@@ -12,8 +12,7 @@ cmcFilter_improved(
   dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
-  consensus_function_theta = consensus_function,
-  ...
+  consensus_function_theta = consensus_function
 )
 }
 \arguments{

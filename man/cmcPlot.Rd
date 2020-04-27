@@ -2,45 +2,19 @@
 % Please edit documentation in R/diagnosticTools.R
 \name{cmcPlot}
 \alias{cmcPlot}
-\title{Plots the Congruent Matching Cells identified in a cartridge case scan}
+\title{Visualize initial and final CMCs for a cartridge case pair comparison}
 \usage{
-cmcPlot(x3p, cmcDF, method = "cimg")
+cmcPlot(x3p1, x3p2, cellCCF_bothDirections_output, cmcFilter_improved_output)
 }
 \arguments{
-\item{x3p}{The "questioned" cartridge case scan, in the form of an x3p
-object, for which CMCs were determined (this would be x3p1 in a call to
-cellCCF)}
+\item{x3p1}{an x3p object}
 
-\item{cmcDF}{data frame containing the congruent matching cells of the
-questioned x3p object}
+\item{x3p2}{a different x3p object}
 
-\item{method}{dictates whether a cimg plot is returned, or a ggplot2 plot.
-The ggplot2 plot looks nicer, but takes much longer to construct than the
-cimg plot.}
+\item{cellCCF_bothDirections_output}{output from the function cmcR::cellCCF_bothDirections}
+
+\item{cmcFilter_improved_output}{output from the function cmcR::cmcFilter_improved}
 }
 \description{
-Plots the selected congruent matching cells of a questioned x3p by either
-converting the surface matrix contained in the x3p to a cimg object and
-using base plot (fast, but doesn't look particularly great) or by plotting
-surface matrix using ggplot2::geom_tile (slow, but nice looking).
-}
-\examples{
-\dontrun{
-comparison1 <- cellCCF_bothDirections(x3p1,x3p2)
-
-cmcs <- cmcFilter_improved(comparison1)
-
-#initially selected CMCs based on x3p1 vs x3p2 comparison
-cmcPlot(x3p1,cmcs$initialCMCs[[1]][[1]])
-
-#initialy selected CMCs based on x3p2 vs x3p1
-cmcPlot(x3p2,cmcs$initialCMCs[[1]][[2]])
-
-#final selected CMCs (may be empty) based on both x3p1 vs x3p2 and x3p2 vs x3p1
-cmcPlot(x3p1,cmcs$finalCMCs)
-
-#make plot using ggplot2::geom_tile
-cmcPlot(x3p1,cmcs$finalCMCs,method = "ggplot2")
-}
-
+Visualize initial and final CMCs for a cartridge case pair comparison
 }

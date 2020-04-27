@@ -345,13 +345,13 @@ km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
 The improved CMC method did not yield any "final CMCs" for the comparison between km1 and unknown1. As such, we would assign the pair whichever was the minimum number of initial CMCs calculated between both directions. The CMC(s) between km1 and unknown1 are shown below.
 
 ```{r eval=FALSE}
-km1_unknown1_cmcs$initialCMCs[[1]][[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]][[1]]),
-                                                nrow(km1_unknown1_cmcs$initialCMCs[[1]][[2]])))]]
+km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
+                                                nrow(km1_unknown1_cmcs$initialCMCs[[2]])))]]
 ```
 
 ```{r echo=FALSE}
-km1_unknown1_cmcs$initialCMCs[[1]][[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]][[1]]),
-                                                nrow(km1_unknown1_cmcs$initialCMCs[[1]][[2]])))]] %>%
+km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
+                                                nrow(km1_unknown1_cmcs$initialCMCs[[2]])))]] %>%
   DT::datatable()
 ```
 
@@ -426,30 +426,38 @@ The `cmcPlot` function allows us to visualize the regions of a cartridge case sc
 
 For example, the 1 initial CMC calculated between km1 and unknown1 is shown below.
 
-```{r}
-cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km1_unknown1_cmcs$initialCMCs[[1]][[2]])
+```{r eval=FALSE}
+cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
+              x3p2 = unknown1_residuals$x3p,
+              cellCCF_bothDirections_output = km1_unknown1_comparison,
+              cmcFilter_improved_output = km1_unknown1_cmcs)
 ```
 
 In contrast, the final CMCs between km1 and unknown2 are shown below.
 
-```{r}
-cmcR::cmcPlot(unknown2_residuals$x3p,
-              cmcDF = km1_unknown2_cmcs$finalCMCs)
+```{r eval=FALSE}
+cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
+              x3p2 = unknown2_residuals$x3p,
+              cellCCF_bothDirections_output = km1_unknown2_comparison,
+              cmcFilter_improved_output = km1_unknown2_cmcs)
 ```
 
 The same types of plots can be made for the comparison between km2 and the unknown source scans. Below are the final CMCs between km2 and unknown1.
 
-```{r}
-cmcR::cmcPlot(unknown1_residuals$x3p,
-              cmcDF = km2_unknown1_cmcs$finalCMCs)
+```{r eval=FALSE}
+cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
+              x3p2 = unknown1_residuals$x3p,
+              cellCCF_bothDirections_output = km2_unknown1_comparison,
+              cmcFilter_improved_output = km2_unknown1_cmcs)
 ```
 
 And the CMCs for the comparison between km2 and unknown2 are shown below.
 
-```{r}
-cmcR::cmcPlot(unknown2_residuals$x3p,
-              cmcDF = km2_unknown2_cmcs$finalCMCs)
+```{r eval=FALSE}
+cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
+              x3p2 = unknown2_residuals$x3p,
+              cellCCF_bothDirections_output = km2_unknown2_comparison,
+              cmcFilter_improved_output = km2_unknown2_cmcs)
 ```
 
 ## References
