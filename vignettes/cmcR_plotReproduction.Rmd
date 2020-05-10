@@ -23,6 +23,11 @@ set.seed(4132020)
   
 TODO:
   - Add hyperlinks to .png images of original plots
+  - Add red squares indicating non-CMCs based on topResultsPerCell output
+  - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too.
+  - Try linear scale first
+  - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.)
+  - CCF map plot - show custom labels -- show 0, min, and max
   
   This vignette will give `R` code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the `cmcR` package.
   
@@ -46,28 +51,108 @@ For the sake of an example we will consider 3 cartridge cases are from Fadul et 
 
   <!-- This is all done within the `selectBFImpression_sample_x3p` function. See [the documentation](https://jzemmels.github.io/cmcR/reference/selectBFImpression_sample_x3p.html) for this function for more information. Note that the RANSAC method relies on randomly sampling points from the surface matrix. Thus results have been seen to vary, albeit slightly, between applications. Thus, a seed is set for reproducibility purposes. -->
 
-## Figure 1.1
+## Cartridge case scan image (Figure 1.1)
 
-The following code saves a 2D representation of the cartridge case surface as a .png file using the `x3ptools::image_x3p` function in a directory called `bfScanImages`. The `magick` package is then used to read and plot these saved images.
+The `rgl` package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an `rgl` "scene" including placing lights at desired locations and controlling color, surface reflectance, etc. Each `rgl` scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at $(0,0,10)$ and another located "north-by-northwest" of the scan at $(-1,2,2)$. Note that these positions are relative to where the viewer begins - which is somewhere along the $z$-axis depending on the value provided to the `zoom` attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There's truly an arbitrary amount of tinkering one could perform to get the "best" looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the `rgl` device is opened, the `x3ptools::x3p_snapshot` function saves the device's current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the `x3p2` object (not shown).
+
+To learn more about how various aspects of a scene are constructed, see [this vignette](https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html) for the `rgl` package. For more details on using `rgl` specifically applied to .x3p files, see the documentation for the [`x3ptools` package on Github](https://github.com/heike/x3ptools).
+
+
+```{r include=FALSE,eval=FALSE}
+x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d") %>%
+  x3ptools::image_x3p(file = "bfScanImages/fadul1-1.png",col = "white",zoom = .7,size = c(300,300))
+
+x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8") %>%
+  x3ptools::image_x3p(file = "bfScanImages/fadul1-2.png",col = "white",zoom = .7,size = c(300,300))
+```
 
 ```{r}
+library(rgl)
+
 if(!dir.exists("bfScanImages")){
   dir.create("bfScanImages")
 }
 
-x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d") %>%
-  x3ptools::image_x3p(file = "bfScanImages/fadul1-1.png",col = "#FCFCFC",zoom = .7,size = c(300,300))
+x3p1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+x3p2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8")
 
-x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8") %>%
-  x3ptools::image_x3p(file = "bfScanImages/fadul1-2.png",col = "#FCFCFC",zoom = .7,size = c(300,300))
 
+#apply lowpass filter to reduce noise in scan:
+surface1 <- x3p1$surface.matrix %>%
+  cmcR::preProcess_gaussFilter(res = 3.125e-06,wavelength = 16,filtertype = "lp")
+surface2 <- x3p2$surface.matrix %>%
+  cmcR::preProcess_gaussFilter(res = 3.125e-06,wavelength = 16,filtertype = "lp")
+
+params <- rgl::r3dDefaults
+
+zoom = .7
+size = c(300,300)
+
+params$windowRect <- c(40, 125, 40 + size[1], 125 + size[2])
+params$userMatrix <- diag(c(1, 1, 1, 1))
+params$zoom <- zoom
+
+#opens blank "canvas" upon which we can add lights, surfaces, etc.
+open3d(params = params)
+
+#removes any previously declared lights in scene
+rgl.pop("lights")
+
+#set-up two lights for scene -- a lot of experimentation possible here
+light3d(x = -1,y = 1,z = 2,viewpoint.rel = TRUE,ambient = "white",diffuse = "white",specular = "white")
+light3d(x = 0,y = 0,z = 10,ambient = "grey60",diffuse = "grey50",specular = "grey60",viewpoint.rel = TRUE)
+
+#setup surface visualization
+multiply <- 1 #x3ptools::image_x3p default to exaggerate relief
+z <- multiply * surface1 # Exaggerate the relief
+yidx <- ncol(z):1
+y <- x3p1$header.info$incrementY * yidx
+x <- x3p1$header.info$incrementX * (1:nrow(z))
+
+# emission, specular, ambient affect how the surface interacts with lights --
+# again, a lot of possible experimentation
+surface3d(x, y, z, back = "filled",emission = "grey30",specular = "grey50",ambient = "grey10")
+
+x3ptools::x3p_snapshot(file = "bfScanImages/fadul1-1.png")
+
+rgl.close()
+```
+
+```{r include=FALSE}
+#opens blank "canvas" upon which we can add lights, surfaces, etc.
+open3d(params = params)
+
+#removes any previously declared lights in scene
+rgl.pop("lights")
+
+#set-up two lights for scene -- a lot of experimentation possible here
+light3d(x = -1,y = 1,z = 2,viewpoint.rel = TRUE,ambient = "white",diffuse = "white",specular = "white")
+light3d(x = 0,y = 0,z = 10,ambient = "grey60",diffuse = "grey50",specular = "grey60",viewpoint.rel = TRUE)
+
+#setup surface visualization
+multiply <- 1 #x3ptools::image_x3p default to exaggerate relief
+z <- multiply * surface2 # Exaggerate the relief
+yidx <- ncol(z):1
+y <- x3p2$header.info$incrementY * yidx
+x <- x3p2$header.info$incrementX * (1:nrow(z))
+
+# emission, specular, ambient affect how the surface interacts with lights --
+# again, a lot of possible experimentation
+surface3d(x, y, z, back = "filled",emission = "grey30",specular = "grey50",ambient = "grey10")
+
+x3ptools::x3p_snapshot(file = "bfScanImages/fadul1-2.png")
+
+rgl.close()
+```
+
+The `magick` package can be used to read these .png files back into `R` for visualization. We can see the x3p scan snapshots below.
+
+```{r}
 magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
                        magick::image_read("bfScanImages/fadul1-2.png"))) %>%
-  magick::image_extent(geometry = "600x350",gravity = "South") %>%
-  magick::image_annotate("Fadul 1-1",size = 30,location = "+80") %>%
-  magick::image_annotate("Fadul 1-2",size = 30,location = "+380") %>%
   plot()
 ```
+
 
 ```{r}
 fadul1.1 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
@@ -109,20 +194,82 @@ fadul1.1$x3p %>%
   coord_fixed(expand = FALSE)
 ```
 
+```{r include=FALSE,eval=FALSE}
+#performing log/sigmoidal transformations don't seem to affect scale -- need
+#custom break function
+fadul1.1$x3p %>%
+  x3p_to_df() %>%
+  mutate(value = 1/(1 + exp(-value))) %>%
+  # mutate(value = sign(value)*log(abs(value) + 1)) %>%
+  ggplot(aes(x = x,y = y)) +
+  geom_raster(aes(fill = value))  +
+  # scale_fill_gradient2(low = "#1a6bff",
+  #                      mid = "#ffffff",
+  #                      high = "#ffae1a",
+  #                      midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),
+  #                                        na.rm = TRUE),
+  #                      na.value = "grey80") +
+  scale_fill_distiller(na.value = "grey80",palette = "PuOr") +
+  theme_grey() +
+  coord_fixed(expand = FALSE)
+
+fadul1.1$x3p %>%
+  x3p_to_df() %>%
+  # mutate(value = 1/(1 + exp(-value))) %>%
+  mutate(value = sign(value)*log(abs(value) + 1)) %>%
+  ggplot(aes(x = x,y = y)) +
+  geom_raster(aes(fill = value))  +
+  # scale_fill_gradient2(low = "#1a6bff",
+  #                      mid = "#ffffff",
+  #                      high = "#ffae1a",
+  #                      midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),
+  #                                        na.rm = TRUE),
+  #                      na.value = "grey80") +
+  scale_fill_distiller(na.value = "grey80",palette = "PuOr") +
+  theme_grey() +
+  coord_fixed(expand = FALSE)
+
+fadul1.1$x3p %>%
+  x3p_to_df() %>%
+  # mutate(value = 1/(1 + exp(-value))) %>%
+  # mutate(value = sign(value)*log(abs(value) + 1)) %>%
+  ggplot(aes(x = x,y = y)) +
+  geom_raster(aes(fill = value))  +
+  # scale_fill_gradient2(low = "#1a6bff",
+  #                      mid = "#ffffff",
+  #                      high = "#ffae1a",
+  #                      midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),
+  #                                        na.rm = TRUE),
+  #                      na.value = "grey80") +
+  scale_fill_distiller(na.value = "grey80",palette = "PuOr") +
+  theme_grey() +
+  coord_fixed(expand = FALSE)
+```
+
 ```{r}
 fadul1.1$x3p %>%
   x3p_to_df() %>%
+  # mutate(value = 1/(1 + exp(-value))) %>%
+  # mutate(value = sign(value)*log(abs(value) + 1)) %>%
   ggplot(aes(x = x,y = y)) +
   geom_raster(aes(fill = value))  +
-  scale_fill_gradient2(low = "#1a6bff",
-                       mid = "grey75",
-                       high = "#ffae1a",
-                       midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),
-                                         na.rm = TRUE),
-                       na.value = "white") +
-  theme_bw() +
+  # scale_fill_gradient2(low = "#1a6bff",
+  #                      mid = "#ffffff",
+  #                      high = "#ffae1a",
+  #                      midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),
+  #                                        na.rm = TRUE),
+  #                      na.value = "grey80") +
+  # scale_fill_distiller(na.value = "grey80",palette = "PuOr",
+  #                      breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.2,.4,.5,.6,.8,1),na.rm = TRUE)},
+  #                      ) +
+  scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                       values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                        # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                        na.value = "grey80") +
+  theme_grey() +
   coord_fixed(expand = FALSE)
 ```
+
 
 ```{r}
 kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
@@ -150,13 +297,17 @@ knmCMC <- cmcR::cmcFilter_improved(knmComparison,
 
 ## Figure 4
 
+TODO: 
+- Change labels in cells to start at top-left corner and count right/down
+- If all cells were identified as final CMCs, then need to ensure that they are all colored black -- currently all colored red. Maybe make cmc a factor and choose levels.
+
 ```{r}
 kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                   x3p2 = fadul1.2$x3p,
                   cellCCF_bothDirections_output = kmComparison,
                   cmcFilter_improved_output = kmCMC)
 
-gridExtra::grid.arrange(kmPlts$finalCMC)
+# gridExtra::grid.arrange(kmPlts$finalCMC)
 
 kmPlts$finalCMC$grobs[[1]] %>%
   plot()
@@ -164,6 +315,12 @@ kmPlts$finalCMC$grobs[[1]] %>%
 kmPlts$finalCMC$grobs[[2]] %>%
   plot()
 ```
+
+```{r}
+kmCMC$finalCMCs %>%
+  arrange(cellNum)
+```
+
 
 ```{r}
 knmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,

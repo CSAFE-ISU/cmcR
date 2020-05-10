@@ -91,7 +91,7 @@
 #&gt; Warning: package 'purrr' was built under R version 3.6.3
 #&gt; Warning: package 'dplyr' was built under R version 3.6.3
 #&gt; Warning: package 'forcats' was built under R version 3.6.3</code></pre>
-<p>TODO: - Add hyperlinks to .png images of original plots</p>
+<p>TODO: - Add hyperlinks to .png images of original plots - Add red squares indicating non-CMCs based on topResultsPerCell output - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too. - Try linear scale first - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.) - CCF map plot - show custom labels – show 0, min, and max</p>
 <p>This vignette will give <code>R</code> code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the <code>cmcR</code> package.</p>
 <div id="set-up" class="section level2">
 <h2 class="hasAnchor">
@@ -106,44 +106,94 @@
 <p><!-- 6. Apply a Gaussian bandpass filter to the resulting surface matrix with wavelength cutoffs 16 and 250 microns $(\mu m)$. --></p>
 <p><!-- This is all done within the `selectBFImpression_sample_x3p` function. See [the documentation](https://jzemmels.github.io/cmcR/reference/selectBFImpression_sample_x3p.html) for this function for more information. Note that the RANSAC method relies on randomly sampling points from the surface matrix. Thus results have been seen to vary, albeit slightly, between applications. Thus, a seed is set for reproducibility purposes. --></p>
 </div>
-<div id="figure-1-1" class="section level2">
+<div id="cartridge-case-scan-image-figure-1-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#figure-1-1" class="anchor"></a>Figure 1.1</h2>
-<p>The following code saves a 2D representation of the cartridge case surface as a .png file using the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_image.html">x3ptools::image_x3p</a></code> function in a directory called <code>bfScanImages</code>. The <code>magick</code> package is then used to read and plot these saved images.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw">if</span>(!<span class="fu"><a href="https://rdrr.io/r/base/files2.html">dir.exists</a></span>(<span class="st">"bfScanImages"</span>)){
+<a href="#cartridge-case-scan-image-figure-1-1" class="anchor"></a>Cartridge case scan image (Figure 1.1)</h2>
+<p>The <code>rgl</code> package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an <code>rgl</code> “scene” including placing lights at desired locations and controlling color, surface reflectance, etc. Each <code>rgl</code> scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at <span class="math inline">\((0,0,10)\)</span> and another located “north-by-northwest” of the scan at <span class="math inline">\((-1,2,2)\)</span>. Note that these positions are relative to where the viewer begins - which is somewhere along the <span class="math inline">\(z\)</span>-axis depending on the value provided to the <code>zoom</code> attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There’s truly an arbitrary amount of tinkering one could perform to get the “best” looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the <code>rgl</code> device is opened, the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3ptools::x3p_snapshot</a></code> function saves the device’s current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the <code>x3p2</code> object (not shown).</p>
+<p>To learn more about how various aspects of a scene are constructed, see <a href="https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html">this vignette</a> for the <code>rgl</code> package. For more details on using <code>rgl</code> specifically applied to .x3p files, see the documentation for the <a href="https://github.com/heike/x3ptools"><code>x3ptools</code> package on Github</a>.</p>
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rgl</span>)
+<span class="co">#&gt; Warning: package 'rgl' was built under R version 3.6.3</span>
+
+<span class="kw">if</span>(!<span class="fu"><a href="https://rdrr.io/r/base/files2.html">dir.exists</a></span>(<span class="st">"bfScanImages"</span>)){
   <span class="fu"><a href="https://rdrr.io/r/base/files2.html">dir.create</a></span>(<span class="st">"bfScanImages"</span>)
 }
 
-<span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>) <span class="kw">%&gt;%</span>
-  <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_image.html">image_x3p</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span>,<span class="kw">col</span> <span class="kw">=</span> <span class="st">"#FCFCFC"</span>,<span class="kw">zoom</span> <span class="kw">=</span> <span class="fl">.7</span>,<span class="kw">size</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">300</span>,<span class="fl">300</span>))
+<span class="no">x3p1</span> <span class="kw">&lt;-</span> <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
+<span class="no">x3p2</span> <span class="kw">&lt;-</span> <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
 
-<span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>) <span class="kw">%&gt;%</span>
-  <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_image.html">image_x3p</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"bfScanImages/fadul1-2.png"</span>,<span class="kw">col</span> <span class="kw">=</span> <span class="st">"#FCFCFC"</span>,<span class="kw">zoom</span> <span class="kw">=</span> <span class="fl">.7</span>,<span class="kw">size</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">300</span>,<span class="fl">300</span>))
 
-<span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-1.png"</span>),
+<span class="co">#apply lowpass filter to reduce noise in scan:</span>
+<span class="no">surface1</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">surface.matrix</span> <span class="kw">%&gt;%</span>
+  <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span>(<span class="kw">res</span> <span class="kw">=</span> <span class="fl">3.125e-06</span>,<span class="kw">wavelength</span> <span class="kw">=</span> <span class="fl">16</span>,<span class="kw">filtertype</span> <span class="kw">=</span> <span class="st">"lp"</span>)
+<span class="no">surface2</span> <span class="kw">&lt;-</span> <span class="no">x3p2</span>$<span class="no">surface.matrix</span> <span class="kw">%&gt;%</span>
+  <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span>(<span class="kw">res</span> <span class="kw">=</span> <span class="fl">3.125e-06</span>,<span class="kw">wavelength</span> <span class="kw">=</span> <span class="fl">16</span>,<span class="kw">filtertype</span> <span class="kw">=</span> <span class="st">"lp"</span>)
+
+<span class="no">params</span> <span class="kw">&lt;-</span> <span class="kw pkg">rgl</span><span class="kw ns">::</span><span class="no"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">r3dDefaults</a></span>
+
+<span class="no">zoom</span> <span class="kw">=</span> <span class="fl">.7</span>
+<span class="no">size</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">300</span>,<span class="fl">300</span>)
+
+<span class="no">params</span>$<span class="no">windowRect</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">40</span>, <span class="fl">125</span>, <span class="fl">40</span> + <span class="no">size</span>[<span class="fl">1</span>], <span class="fl">125</span> + <span class="no">size</span>[<span class="fl">2</span>])
+<span class="no">params</span>$<span class="no">userMatrix</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>))
+<span class="no">params</span>$<span class="no">zoom</span> <span class="kw">&lt;-</span> <span class="no">zoom</span>
+
+<span class="co">#opens blank "canvas" upon which we can add lights, surfaces, etc.</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">open3d</a></span>(<span class="kw">params</span> <span class="kw">=</span> <span class="no">params</span>)
+<span class="co">#&gt; wgl </span>
+<span class="co">#&gt;   1</span>
+
+<span class="co">#removes any previously declared lights in scene</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/scene.html">rgl.pop</a></span>(<span class="st">"lights"</span>)
+
+<span class="co">#set-up two lights for scene -- a lot of experimentation possible here</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span>(<span class="kw">x</span> <span class="kw">=</span> -<span class="fl">1</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">z</span> <span class="kw">=</span> <span class="fl">2</span>,<span class="kw">viewpoint.rel</span> <span class="kw">=</span> <span class="fl">TRUE</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"white"</span>,<span class="kw">diffuse</span> <span class="kw">=</span> <span class="st">"white"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"white"</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span>(<span class="kw">x</span> <span class="kw">=</span> <span class="fl">0</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="fl">0</span>,<span class="kw">z</span> <span class="kw">=</span> <span class="fl">10</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"grey60"</span>,<span class="kw">diffuse</span> <span class="kw">=</span> <span class="st">"grey50"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"grey60"</span>,<span class="kw">viewpoint.rel</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
+
+<span class="co">#setup surface visualization</span>
+<span class="no">multiply</span> <span class="kw">&lt;-</span> <span class="fl">1</span> <span class="co">#x3ptools::image_x3p default to exaggerate relief</span>
+<span class="no">z</span> <span class="kw">&lt;-</span> <span class="no">multiply</span> * <span class="no">surface1</span> <span class="co"># Exaggerate the relief</span>
+<span class="no">yidx</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">z</span>):<span class="fl">1</span>
+<span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">header.info</span>$<span class="no">incrementY</span> * <span class="no">yidx</span>
+<span class="no">x</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">header.info</span>$<span class="no">incrementX</span> * (<span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">z</span>))
+
+<span class="co"># emission, specular, ambient affect how the surface interacts with lights --</span>
+<span class="co"># again, a lot of possible experimentation</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/surface3d.html">surface3d</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="no">z</span>, <span class="kw">back</span> <span class="kw">=</span> <span class="st">"filled"</span>,<span class="kw">emission</span> <span class="kw">=</span> <span class="st">"grey30"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"grey50"</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"grey10"</span>)
+
+<span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3p_snapshot</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span>)
+
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span>()</pre></body></html></div>
+<p>The <code>magick</code> package can be used to read these .png files back into <code>R</code> for visualization. We can see the x3p scan snapshots below.</p>
+<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-1.png"</span>),
                        <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-2.png"</span>))) <span class="kw">%&gt;%</span>
-  <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/transform.html">image_extent</a></span>(<span class="kw">geometry</span> <span class="kw">=</span> <span class="st">"600x350"</span>,<span class="kw">gravity</span> <span class="kw">=</span> <span class="st">"South"</span>) <span class="kw">%&gt;%</span>
-  <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/painting.html">image_annotate</a></span>(<span class="st">"Fadul 1-1"</span>,<span class="kw">size</span> <span class="kw">=</span> <span class="fl">30</span>,<span class="kw">location</span> <span class="kw">=</span> <span class="st">"+80"</span>) <span class="kw">%&gt;%</span>
-  <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/painting.html">image_annotate</a></span>(<span class="st">"Fadul 1-2"</span>,<span class="kw">size</span> <span class="kw">=</span> <span class="fl">30</span>,<span class="kw">location</span> <span class="kw">=</span> <span class="st">"+380"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
 <span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
 <span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span>$<span class="no">x3p</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">fadul1.1</span>$<span class="no">x3p</span> <span class="kw">%&gt;%</span>
   <span class="fu">x3p_to_df</span>() <span class="kw">%&gt;%</span>
+  <span class="co"># mutate(value = 1/(1 + exp(-value))) %&gt;%</span>
+  <span class="co"># mutate(value = sign(value)*log(abs(value) + 1)) %&gt;%</span>
   <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="kw">x</span> <span class="kw">=</span> <span class="no">x</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="no">y</span>)) +
   <span class="fu">geom_raster</span>(<span class="fu">aes</span>(<span class="kw">fill</span> <span class="kw">=</span> <span class="no">value</span>))  +
-  <span class="fu">scale_fill_gradient2</span>(<span class="kw">low</span> <span class="kw">=</span> <span class="st">"#1a6bff"</span>,
-                       <span class="kw">mid</span> <span class="kw">=</span> <span class="st">"grey75"</span>,
-                       <span class="kw">high</span> <span class="kw">=</span> <span class="st">"#ffae1a"</span>,
-                       <span class="kw">midpoint</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>$<span class="no">surface.matrix</span>),
-                                         <span class="kw">na.rm</span> <span class="kw">=</span> <span class="fl">TRUE</span>),
-                       <span class="kw">na.value</span> <span class="kw">=</span> <span class="st">"white"</span>) +
-  <span class="fu">theme_bw</span>() +
+  <span class="co"># scale_fill_gradient2(low = "#1a6bff",</span>
+  <span class="co">#                      mid = "#ffffff",</span>
+  <span class="co">#                      high = "#ffae1a",</span>
+  <span class="co">#                      midpoint = median(as.vector(fadul1.1$x3p$surface.matrix),</span>
+  <span class="co">#                                        na.rm = TRUE),</span>
+  <span class="co">#                      na.value = "grey80") +</span>
+  <span class="co"># scale_fill_distiller(na.value = "grey80",palette = "PuOr",</span>
+  <span class="co">#                      breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.2,.4,.5,.6,.8,1),na.rm = TRUE)},</span>
+  <span class="co">#                      ) +</span>
+  <span class="fu">scale_fill_gradientn</span>(<span class="kw">colours</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'#7f3b08'</span>,<span class="st">'#b35806'</span>,<span class="st">'#e08214'</span>,<span class="st">'#fdb863'</span>,<span class="st">'#fee0b6'</span>,<span class="st">'#f7f7f7'</span>,<span class="st">'#d8daeb'</span>,<span class="st">'#b2abd2'</span>,<span class="st">'#8073ac'</span>,<span class="st">'#542788'</span>,<span class="st">'#2d004b'</span>)),
+                       <span class="kw">values</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.1</span>,<span class="fl">.2</span>,<span class="fl">.3</span>,<span class="fl">.4</span>,<span class="fl">.5</span>,<span class="fl">.6</span>,<span class="fl">.7</span>,<span class="fl">.8</span>,<span class="fl">.9</span>,<span class="fl">1</span>),
+                        <span class="co"># breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},</span>
+                        <span class="kw">na.value</span> <span class="kw">=</span> <span class="st">"grey80"</span>) +
+  <span class="fu">theme_grey</span>() +
   <span class="fu">coord_fixed</span>(<span class="kw">expand</span> <span class="kw">=</span> <span class="fl">FALSE</span>)</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">kmComparison</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cellCCF_bothDirections.html">cellCCF_bothDirections</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">kmComparison</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cellCCF_bothDirections.html">cellCCF_bothDirections</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                                              <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
                                              <span class="kw">cellNumHoriz</span> <span class="kw">=</span> <span class="fl">7</span>,
                                              <span class="kw">minObservedProp</span> <span class="kw">=</span> <span class="fl">.1</span>,
@@ -168,39 +218,60 @@
 <div id="figure-4" class="section level2">
 <h2 class="hasAnchor">
 <a href="#figure-4" class="anchor"></a>Figure 4</h2>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">kmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
+<p>TODO: - Change labels in cells to start at top-left corner and count right/down - If all cells were identified as final CMCs, then need to ensure that they are all colored black – currently all colored red. Maybe make cmc a factor and choose levels.</p>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">kmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                   <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
                   <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
                   <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>)
 
-<span class="kw pkg">gridExtra</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html">grid.arrange</a></span>(<span class="no">kmPlts</span>$<span class="no">finalCMC</span>)</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r">
+<span class="co"># gridExtra::grid.arrange(kmPlts$finalCMC)</span>
+
 <span class="no">kmPlts</span>$<span class="no">finalCMC</span>$<span class="no">grobs</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r">
 <span class="no">kmPlts</span>$<span class="no">finalCMC</span>$<span class="no">grobs</span><span class="kw">[[</span><span class="fl">2</span>]] <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-3.png" width="700"></p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-2.png" width="700"></p>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">kmCMC</span>$<span class="no">finalCMCs</span> <span class="kw">%&gt;%</span>
+  <span class="fu">arrange</span>(<span class="no">cellNum</span>)
+<span class="co">#&gt; # A tibble: 29 x 8</span>
+<span class="co">#&gt;    cellNum cellID                    ccf fft.ccf    dx    dy theta comparison   </span>
+<span class="co">#&gt;      &lt;int&gt; &lt;chr&gt;                   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;        </span>
+<span class="co">#&gt;  1       2 y = 1 - 83, x = 84 - 1~ 0.862   0.272   -10     8   -24 comparison_1~</span>
+<span class="co">#&gt;  2       3 y = 1 - 84, x = 168 - ~ 0.812   0.319     7   -14    24 comparison_2~</span>
+<span class="co">#&gt;  3       4 y = 1 - 84, x = 252 - ~ 0.852   0.369     6   -10    24 comparison_2~</span>
+<span class="co">#&gt;  4       5 y = 1 - 83, x = 332 - ~ 0.768   0.292     0    17   -21 comparison_1~</span>
+<span class="co">#&gt;  5       6 y = 1 - 84, x = 419 - ~ 0.796   0.235     0     2    21 comparison_2~</span>
+<span class="co">#&gt;  6       8 y = 85 - 167, x = 1 - ~ 0.920   0.311     2     1    21 comparison_2~</span>
+<span class="co">#&gt;  7       9 y = 85 - 167, x = 85 -~ 0.860   0.307    -3     0    21 comparison_2~</span>
+<span class="co">#&gt;  8      13 y = 84 - 166, x = 414 ~ 0.791   0.305    -2    14   -21 comparison_1~</span>
+<span class="co">#&gt;  9      14 y = 84 - 166, x = 497 ~ 0.807   0.230   -13   -17   -18 comparison_1~</span>
+<span class="co">#&gt; 10      15 y = 168 - 250, x = 1 -~ 0.922   0.407     6   -15    24 comparison_2~</span>
+<span class="co">#&gt; # ... with 19 more rows</span></pre></body></html></div>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                    <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
                    <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">knmComparison</span>,
                    <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">knmCMC</span>)
 
-<span class="kw pkg">gridExtra</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html">grid.arrange</a></span>(<span class="no">knmPlts</span>$<span class="no">initialCMC</span>)</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">finalCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
+<span class="no">knmPlts</span>$<span class="no">initialCMC</span>$<span class="no">grobs</span><span class="kw">[[</span><span class="fl">1</span>]] <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<div class="sourceCode" id="cb11"><html><body><pre class="r">
+<span class="no">knmPlts</span>$<span class="no">initialCMC</span>$<span class="no">grobs</span><span class="kw">[[</span><span class="fl">2</span>]] <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-14-2.png" width="700"></p>
+<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">finalCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
 
 <span class="fu"><a href="../reference/ccfMapPlot.html">ccfMapPlot</a></span>(<span class="kw">mat1</span> <span class="kw">=</span> <span class="no">kmCellRegionPairs</span>$<span class="no">`21`</span>$<span class="no">`x = 1 - 83,y = 414 - 496`</span><span class="kw">[[</span><span class="fl">1</span>]],
            <span class="kw">mat2</span> <span class="kw">=</span> <span class="no">kmCellRegionPairs</span>$<span class="no">`21`</span>$<span class="no">`x = 1 - 83,y = 414 - 496`</span><span class="kw">[[</span><span class="fl">2</span>]],
            <span class="kw">type</span> <span class="kw">=</span> <span class="st">"raster"</span>)</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r">
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
+<div class="sourceCode" id="cb13"><html><body><pre class="r">
 <span class="fu"><a href="../reference/ccfMapPlot.html">ccfMapPlot</a></span>(<span class="kw">mat1</span> <span class="kw">=</span> <span class="no">kmCellRegionPairs</span>$<span class="no">`21`</span>$<span class="no">`x = 1 - 83,y = 414 - 496`</span><span class="kw">[[</span><span class="fl">1</span>]],
            <span class="kw">mat2</span> <span class="kw">=</span> <span class="no">kmCellRegionPairs</span>$<span class="no">`21`</span>$<span class="no">`x = 1 - 83,y = 414 - 496`</span><span class="kw">[[</span><span class="fl">2</span>]],
            <span class="kw">type</span> <span class="kw">=</span> <span class="st">"contour"</span>)</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-15-2.png" width="700"></p>
 <!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
 <!-- ```{r} -->
 <!-- par(mar = c(1,1,1,1)) -->

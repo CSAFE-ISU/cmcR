@@ -142,24 +142,48 @@ ccfMapPlot <- function(mat1,
       dplyr::mutate(dx = rev(dx),
                     dy = rev(dy)) %>%
       ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
+      # ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
+      #                              breaks = quantile(as.vector(ccfDF$fft.ccf),probs = seq(0,1,by = .1),na.rm = TRUE)) +
       ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
-                                   breaks = c(seq(from = -1*max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
-                                                  to = 0,length.out = 7),
+                                   breaks = c(quantile(as.vector(ccfDF$fft.ccf)[(as.vector(ccfDF$fft.ccf) <= 0)],
+                                                       prob = seq(0,1,length.out = 6)),
                                               0,
-                                              seq(from = 0,
-                                                  to = max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
-                                                  length.out = 7)) %>%
-                                     unique()) +
+                                              quantile(as.vector(ccfDF$fft.ccf)[as.vector((ccfDF$fft.ccf) > 0)],
+                                                       prob = seq(0,1,length.out = 6))),
+                                   # breaks = c(seq(from = -1*max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
+                                   #                to = 0,length.out = 7),
+                                   #            0,
+                                   #            seq(from = 0,
+                                   #                to = max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
+                                   #                length.out = 7)) %>%
+                                   #   unique()
+      ) +
+      ggplot2::geom_point(data = ccfDF %>%
+                            mutate(dx = rev(dx),
+                                   dy = rev(dy)) %>%
+                            filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
+                            arrange(fft.ccf) %>%
+                            mutate(type = c("Minimum","Maximum")),
+                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          # shape = 4,
+                          colour = "white") +
+      ggplot2::scale_shape_manual(values = c(1,4)) +
       ggplot2::coord_fixed(expand = FALSE) +
-      ggplot2::theme_bw() +
-      ggplot2::scale_fill_manual(values = rev(c(rev(RColorBrewer::brewer.pal(7,"Oranges")),"white",RColorBrewer::brewer.pal(7,"Purples"))),
+      # scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+      #                      values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+      #                      # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+      #                      na.value = "grey80") +
+      # ggplot2::scale_fill_manual(values = rev(c(rev(RColorBrewer::brewer.pal(5,"Oranges")),"white",RColorBrewer::brewer.pal(5,"Blues"),RColorBrewer::brewer.pal(5,"Purples"))),
+      # drop = FALSE) +
+      ggplot2::scale_fill_manual(values = colorspace::diverge_hcl(13,"Purple-Brown"),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
                      panel.grid.minor = ggplot2::element_blank(),
                      legend.title = element_text(size = 7),
                      legend.text = element_text(size = 5)) +
-      ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE,ncol = 2))
+      ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE,ncol = 3),
+                      shape = ggplot2::guide_legend(direction = "horizontal",override.aes = list(colour = c("#312A56","#492900"))))
 
     layoutMat <- matrix(c(1,2,3,4,4,4),ncol = 3,byrow = TRUE)
   }
@@ -190,41 +214,61 @@ ccfMapPlot <- function(mat1,
 #'
 #' @keywords internal
 
-arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
+arrangeCMCPlot <- function(x3p1,
+                           x3p2,
+                           x3p1_cmcs,
+                           x3p1_nonCMCs,
+                           x3p2_cmcs,
+                           x3p2_nonCMCs,
+                           type,
+                           directionIndic){
 
   if(type == "Final"){
     x3p1_cmcs <- x3p1_cmcs %>%
       dplyr::mutate(theta = ifelse(comparison == "comparison_1to2",theta,-theta),
                     dx = ifelse(comparison == "comparison_1to2",dx,-dx),
-                    dy = ifelse(comparison == "comparison_1to2",dy,-dy))
+                    dy = ifelse(comparison == "comparison_1to2",dy,-dy),
+                    cmc = rep("yes",times = nrow(.))) %>%
+      select(-comparison) %>%
+      bind_rows(x3p1_nonCMCs %>%
+                  mutate(cmc = rep("no",times = nrow(.)))) %>%
+      mutate(cmc = factor(cmc, levels = c("yes","no")))
 
     x3p2_cmcs <- x3p2_cmcs %>%
       dplyr::mutate(theta = ifelse(comparison == "comparison_1to2",theta,-theta),
                     dx = ifelse(comparison == "comparison_1to2",dx,-dx),
-                    dy = ifelse(comparison == "comparison_1to2",dy,-dy))
+                    dy = ifelse(comparison == "comparison_1to2",dy,-dy),
+                    cmc = rep("yes",times = nrow(.))) %>%
+      select(-comparison) %>%
+      bind_rows(x3p2_nonCMCs %>%
+                  mutate(cmc = rep("no",times = nrow(.)))) %>%
+      mutate(cmc = factor(cmc, levels = c("yes","no")))
 
     x3p1_cmcPlot <- x3p1_cmcs %>%
       dplyr::left_join(x3p1_cmcs %>%
                          purrr::pmap_dfr(~ {
-                           idNum <- ..8 %>%
-                             stringr::str_extract_all(string = ..8,
+                           idNum <- ..7 %>%
+                             stringr::str_extract_all(string = ..7,
                                                       pattern = "[0-9]{1,}") %>%
                              unlist() %>%
                              as.numeric()
 
-                           data.frame(cellID = ..8,
+                           data.frame(cellID = ..7,
                                       firstRow = idNum[1],
                                       lastRow = idNum[2],
                                       firstCol = idNum[3],
-                                      lastCol = idNum[4],stringsAsFactors = FALSE)
+                                      lastCol = idNum[4],
+                                      stringsAsFactors = FALSE)
                          }),
                        by = "cellID") %>%
+      dplyr::arrange(cellNum) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow),
                     lastRow = 6.25*(lastRow),
                     firstCol = 6.25*(firstCol),
                     lastCol = 6.25*(lastCol)) %>%
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
-                    midRow = (lastRow + firstRow)/2) %>%
+                    midRow = (lastRow + firstRow)/2,
+                    cellInd = 1:nrow(.)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
@@ -236,20 +280,41 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                         y = 1e6*(y),
                         height = 1e6*height)},
         ggplot2::aes(x = x,y = y,fill = height),interpolate = TRUE) +
-      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,y = firstRow,angle = 0,radius = lastRow - firstRow)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,y = firstRow,angle = pi/2,radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,y = lastRow,angle = pi,radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,y = lastRow,angle = 3*pi/2,radius = lastRow - firstRow))  +
+      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,
+                                       y = firstRow,angle = 0,
+                                       radius = lastRow - firstRow,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,
+                                       y = firstRow,
+                                       angle = pi/2,
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,
+                                       y = lastRow,angle = pi,
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,
+                                       y = lastRow,
+                                       angle = 3*pi/2,
+                                       radius = lastRow - firstRow,
+                                       colour = cmc))  +
+      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("A",cellNum)),
+                                      label = paste0("A",cellInd),
+                                      colour = cmc),
                          size = 3) +
-      ggplot2::scale_fill_gradient2(low = "#1a6bff",
-                                    mid = "grey75",
-                                    high = "#ffae1a",
-                                    midpoint = median(as.vector(x3p1$surface.matrix),
-                                                      na.rm = TRUE),
-                                    na.value = "white") +
+      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           na.value = "grey80") +
+      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
+      #                               mid = "grey75",
+      #                               high = "#ffae1a",
+      #                               midpoint = median(as.vector(x3p1$surface.matrix),
+      #                                                 na.rm = TRUE),
+      #                               na.value = "white") +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
                      panel.grid.minor = ggplot2::element_blank()) +
@@ -263,19 +328,20 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
     x3p2_cmcPlot <- x3p2_cmcs  %>%
       dplyr::left_join(x3p2_cmcs %>%
                          purrr::pmap_dfr(~ {
-                           idNum <- ..8 %>%
-                             stringr::str_extract_all(string = ..8,
+                           idNum <- ..7 %>%
+                             stringr::str_extract_all(string = ..7,
                                                       pattern = "[0-9]{1,}") %>%
                              unlist() %>%
                              as.numeric()
 
-                           data.frame(cellID = ..8,
+                           data.frame(cellID = ..7,
                                       firstRow = idNum[1],
                                       lastRow = idNum[2],
                                       firstCol = idNum[3],
                                       lastCol = idNum[4],stringsAsFactors = FALSE)
                          }),
                        by = "cellID") %>%
+      dplyr::arrange(cellNum) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow - dy),
                     lastRow = 6.25*(lastRow - dy),
                     firstCol = 6.25*(firstCol - dx),
@@ -289,7 +355,8 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                     topRightCorner_col = lastColCentered*cos(theta*(pi/180)) - lastRowCentered*sin(theta*(pi/180)) + max(lastCol)/2,
                     topRightCorner_row = lastColCentered*sin(theta*(pi/180)) + lastRowCentered*cos(theta*(pi/180)) + max(lastRow)/2) %>%
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
-                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2) %>%
+                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
+                    cellInd = 1:nrow(.)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
@@ -301,21 +368,43 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                         y = 1e6*(y),
                         height = 1e6*height)},
         ggplot2::aes(x = x,y = y,fill = height),interpolate = TRUE) +
-      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,y = bottomLeftCorner_row,angle = theta*(pi/180),radius = lastRow - firstRow)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,y = bottomLeftCorner_row,angle = (pi/2 + theta*(pi/180)),radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,y = topRightCorner_row,angle = (pi + theta*(pi/180)),radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,y = topRightCorner_row,angle = (3*pi/2 + theta*(pi/180)),radius = lastRow - firstRow))  +
+      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,
+                                       y = bottomLeftCorner_row,
+                                       angle = theta*(pi/180),
+                                       radius = lastRow - firstRow,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,
+                                       y = bottomLeftCorner_row,angle = (pi/2 + theta*(pi/180)),
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,
+                                       y = topRightCorner_row,angle = (pi + theta*(pi/180)),
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,
+                                       y = topRightCorner_row,
+                                       angle = (3*pi/2 + theta*(pi/180)),
+                                       radius = lastRow - firstRow,
+                                       colour = cmc))  +
+
+      ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("B",cellNum),
-                                      angle = theta),
+                                      label = paste0("B",cellInd),
+                                      angle = theta,
+                                      colour = cmc),
                          size = 3) +
-      ggplot2::scale_fill_gradient2(low = "#1a6bff",
-                                    mid = "grey75",
-                                    high = "#ffae1a",
-                                    midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
-                                                      na.rm = TRUE),
-                                    na.value = "white") +
+      ggplot2::scale_colour_manual(values = c("black","red")) +
+      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           na.value = "grey80") +
+      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
+      #                               mid = "grey75",
+      #                               high = "#ffae1a",
+      #                               midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
+      #                                                 na.rm = TRUE),
+      #                               na.value = "white") +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
                      panel.grid.minor = ggplot2::element_blank()) +
@@ -331,12 +420,20 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
     x3p1_cmcs <- x3p1_cmcs %>%
       dplyr::mutate(theta = c(1,-1)[directionIndic]*theta,
                     dx = c(1,-1)[directionIndic]*dx,
-                    dy = c(1,-1)[directionIndic]*dy)
+                    dy = c(1,-1)[directionIndic]*dy,
+                    cmc = rep("yes",times = nrow(.))) %>%
+      bind_rows(x3p1_nonCMCs %>%
+                  mutate(cmc = rep("no",times = nrow(.)))) %>%
+      mutate(cmc = factor(cmc, levels = c("yes","no")))
 
     x3p2_cmcs <- x3p2_cmcs %>%
       dplyr::mutate(theta = c(1,-1)[directionIndic]*theta,
                     dx = c(1,-1)[directionIndic]*dx,
-                    dy = c(1,-1)[directionIndic]*dy)
+                    dy = c(1,-1)[directionIndic]*dy,
+                    cmc = rep("yes",times = nrow(.))) %>%
+      bind_rows(x3p1_nonCMCs %>%
+                  mutate(cmc = rep("no",times = nrow(.)))) %>%
+      mutate(cmc = factor(cmc, levels = c("yes","no")))
 
     x3p1_cmcPlot <- x3p1_cmcs %>%
       dplyr::left_join(x3p1_cmcs %>%
@@ -354,12 +451,14 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                                       lastCol = idNum[4],stringsAsFactors = FALSE)
                          }),
                        by = "cellID") %>%
+      dplyr::arrange(cellNum) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow),
                     lastRow = 6.25*(lastRow),
                     firstCol = 6.25*(firstCol),
                     lastCol = 6.25*(lastCol)) %>%
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
-                    midRow = (lastRow + firstRow)/2) %>%
+                    midRow = (lastRow + firstRow)/2,
+                    cellInd = 1:nrow(.)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
@@ -371,20 +470,43 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                         y = 1e6*(y),
                         height = 1e6*height)},
         ggplot2::aes(x = x,y = y,fill = height),interpolate = TRUE) +
-      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,y = firstRow,angle = 0,radius = lastRow - firstRow)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,y = firstRow,angle = pi/2,radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,y = lastRow,angle = pi,radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,y = lastRow,angle = 3*pi/2,radius = lastRow - firstRow))  +
+      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,
+                                       y = firstRow,
+                                       angle = 0,
+                                       radius = lastRow - firstRow,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = firstCol,
+                                       y = firstRow,
+                                       angle = pi/2,
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,
+                                       y = lastRow,
+                                       angle = pi,
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = lastCol,
+                                       y = lastRow,
+                                       angle = 3*pi/2,
+                                       radius = lastRow - firstRow,
+                                       colour = cmc))  +
+      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("A",cellNum)),
+                                      label = paste0("A",cellInd),
+                                      colour = cmc),
                          size = 3) +
-      ggplot2::scale_fill_gradient2(low = "#1a6bff",
-                                    mid = "grey75",
-                                    high = "#ffae1a",
-                                    midpoint = median(as.vector(x3p1$surface.matrix),
-                                                      na.rm = TRUE),
-                                    na.value = "white") +
+      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           na.value = "grey80") +
+      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
+      #                               mid = "grey75",
+      #                               high = "#ffae1a",
+      #                               midpoint = median(as.vector(x3p1$surface.matrix),
+      #                                                 na.rm = TRUE),
+      #                               na.value = "white") +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = element_blank(),
                      panel.grid.minor = element_blank()) +
@@ -411,6 +533,7 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                                       lastCol = idNum[4],stringsAsFactors = FALSE)
                          }),
                        by = "cellID") %>%
+      dplyr::arrange(cellID) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow - dy),
                     lastRow = 6.25*(lastRow - dy),
                     firstCol = 6.25*(firstCol - dx),
@@ -424,7 +547,8 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                     topRightCorner_col = lastColCentered*cos(theta*(pi/180)) - lastRowCentered*sin(theta*(pi/180)) + max(lastCol)/2,
                     topRightCorner_row = lastColCentered*sin(theta*(pi/180)) + lastRowCentered*cos(theta*(pi/180)) + max(lastRow)/2) %>%
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
-                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2) %>%
+                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
+                    cellInd = 1:nrow(.)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
@@ -436,21 +560,43 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
                         y = 1e6*(y),
                         height = 1e6*height)},
         ggplot2::aes(x = x,y = y,fill = height),interpolate = TRUE) +
-      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,y = bottomLeftCorner_row,angle = theta*(pi/180),radius = lastRow - firstRow)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,y = bottomLeftCorner_row,angle = (pi/2 + theta*(pi/180)),radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,y = topRightCorner_row,angle = (pi + theta*(pi/180)),radius = lastCol - firstCol)) +
-      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,y = topRightCorner_row,angle = (3*pi/2 + theta*(pi/180)),radius = lastRow - firstRow))  +
+      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,
+                                       y = bottomLeftCorner_row,
+                                       angle = theta*(pi/180),
+                                       radius = lastRow - firstRow,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = bottomLeftCorner_col,
+                                       y = bottomLeftCorner_row,
+                                       angle = (pi/2 + theta*(pi/180)),
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,
+                                       y = topRightCorner_row,
+                                       angle = (pi + theta*(pi/180)),
+                                       radius = lastCol - firstCol,
+                                       colour = cmc)) +
+      ggplot2::geom_spoke(ggplot2::aes(x = topRightCorner_col,
+                                       y = topRightCorner_row,
+                                       angle = (3*pi/2 + theta*(pi/180)),
+                                       radius = lastRow - firstRow,colour = cmc))  +
+      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("B",cellNum),
-                                      angle = theta),
+                                      label = paste0("B",cellInd),
+                                      angle = theta,
+                                      colour = cmc),
                          size = 3) +
-      ggplot2::scale_fill_gradient2(low = "#1a6bff",
-                                    mid = "grey75",
-                                    high = "#ffae1a",
-                                    midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
-                                                      na.rm = TRUE),
-                                    na.value = "white") +
+      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           na.value = "grey80") +
+      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
+      #                               mid = "grey75",
+      #                               high = "#ffae1a",
+      #                               midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
+      #                                                 na.rm = TRUE),
+      #                               na.value = "white") +
       ggplot2::theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank()) +
@@ -479,45 +625,113 @@ arrangeCMCPlot <- function(x3p1,x3p2,x3p1_cmcs,x3p2_cmcs,type,directionIndic){
 #'
 #' @export
 
-cmcPlot <- function(x3p1,x3p2,cellCCF_bothDirections_output,cmcFilter_improved_output){
-  x3p1_cellID <- cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]] %>%
+cmcPlot <- function(x3p1,
+                    x3p2,
+                    cellCCF_bothDirections_output,
+                    cmcFilter_improved_output){
+
+  # get all cellIDs considered in the comparison -- including those not
+  # identified as CMCs
+  x3p1_topResults <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
+    cmcR::topResultsPerCell()
+
+  x3p2_topResults <- cellCCF_bothDirections_output$comparison_2to1$ccfResults %>%
+    cmcR::topResultsPerCell()
+
+  x3p1_cellID <- x3p1_topResults %>%
     dplyr::select(cellNum,cellID)
 
-  x3p2_cellID <- cellCCF_bothDirections_output$comparison_2to1$ccfResults[[1]] %>%
+  x3p2_cellID <- x3p2_topResults %>%
     dplyr::select(cellNum,cellID)
 
-  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),nrow(cmcFilter_improved_output$initialCMC[[2]])))
+  # the initial CMCs assigned to particular pair are the minimum CMCs computed
+  # in either "direction", so we'll need to keep track of the direction
+  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
+                                nrow(cmcFilter_improved_output$initialCMC[[2]])))
 
+  # determine which cellIDs are identified as initial CMCs
   x3p1_initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
     dplyr::ungroup() %>%
     dplyr::select(-cellID) %>%
-    dplyr::left_join(x3p1_cellID,by = "cellNum")
+    dplyr::inner_join(x3p1_cellID,by = "cellNum")
 
   x3p2_initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
     dplyr::ungroup() %>%
     dplyr::select(-cellID) %>%
-    dplyr::left_join(x3p2_cellID,by = "cellNum")
+    dplyr::inner_join(x3p2_cellID,by = "cellNum")
 
+  #cells not identified as CMCs will be drawn as red squares
+  x3p1_nonInitialCMC <- x3p1_cellID %>%
+    ungroup() %>%
+    anti_join(cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
+                dplyr::ungroup() %>%
+                dplyr::select(-cellID),
+              by = "cellNum") %>%
+    select(-cellID) %>%
+    inner_join(cellCCF_bothDirections_output[[1]] %>%
+                 .$ccfResults %>%
+                 cmcR::topResultsPerCell(),
+               by = "cellNum")
+
+  x3p2_nonInitialCMC <- x3p2_cellID %>%
+    ungroup() %>%
+    anti_join(cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
+                dplyr::ungroup() %>%
+                dplyr::select(-cellID),
+              by = "cellNum") %>%
+    select(-cellID) %>%
+    inner_join(cellCCF_bothDirections_output[[2]] %>%
+                 .$ccfResults %>%
+                 cmcR::topResultsPerCell(),
+               by = "cellNum")
+
+  # creates plots of the initial CMCs on both x3ps
   initialPlt <- arrangeCMCPlot(x3p1 = x3p1,
                                x3p2 = x3p2,
                                x3p1_cmcs = x3p1_initialCMC,
+                               x3p1_nonCMCs = x3p1_nonInitialCMC,
                                x3p2_cmcs = x3p2_initialCMC,
+                               x3p2_nonCMCs = x3p2_nonInitialCMC,
                                type = "Initial",
                                directionIndic = directionIndic)
 
   if(!purrr::is_empty(cmcFilter_improved_output$finalCMCs)){
     x3p1_finalCMC <- cmcFilter_improved_output$finalCMCs %>%
       dplyr::select(-cellID) %>%
-      dplyr::left_join(x3p1_cellID,by = "cellNum")
+      dplyr::inner_join(x3p1_cellID,by = "cellNum")
 
     x3p2_finalCMC <- cmcFilter_improved_output$finalCMCs %>%
       dplyr::select(-cellID) %>%
-      dplyr::left_join(x3p2_cellID,by = "cellNum")
+      dplyr::inner_join(x3p2_cellID,by = "cellNum")
+
+    x3p1_nonFinalCMC <- x3p1_cellID %>%
+      ungroup() %>%
+      anti_join(cmcFilter_improved_output$finalCMCs %>%
+                  dplyr::select(-cellID),
+                by = "cellNum") %>%
+      select(-cellID) %>%
+      inner_join(cellCCF_bothDirections_output[[1]] %>%
+                   .$ccfResults %>%
+                   cmcR::topResultsPerCell(),
+                 by = "cellNum")
+
+    x3p2_nonFinalCMC <- x3p2_cellID %>%
+      ungroup() %>%
+      anti_join(cmcFilter_improved_output$finalCMCs %>%
+                  dplyr::select(-cellID),
+                by = "cellNum") %>%
+      select(-cellID) %>%
+      inner_join(cellCCF_bothDirections_output[[2]] %>%
+                   .$ccfResults %>%
+                   cmcR::topResultsPerCell(),
+                 by = "cellNum")
 
     finalPlt <- cmcR:::arrangeCMCPlot(x3p1 = x3p1,
                                       x3p2 = x3p2,
                                       x3p1_cmcs = x3p1_finalCMC,
+                                      x3p1_nonCMCs = x3p1_nonFinalCMC,
                                       x3p2_cmcs = x3p2_finalCMC,
+                                      x3p2_nonCMCs = x3p2_nonFinalCMC,
                                       type = "Final")
 
     return(list("initialCMC" = initialPlt,
