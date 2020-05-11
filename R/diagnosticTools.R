@@ -175,7 +175,7 @@ ccfMapPlot <- function(mat1,
       #                      na.value = "grey80") +
       # ggplot2::scale_fill_manual(values = rev(c(rev(RColorBrewer::brewer.pal(5,"Oranges")),"white",RColorBrewer::brewer.pal(5,"Blues"),RColorBrewer::brewer.pal(5,"Purples"))),
       # drop = FALSE) +
-      ggplot2::scale_fill_manual(values = colorspace::diverge_hcl(13,"Purple-Brown"),
+      ggplot2::scale_fill_manual(values = colorspace::divergingx_hcl(13,"PuOr"),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
