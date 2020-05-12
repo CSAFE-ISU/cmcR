@@ -113,7 +113,7 @@ preProcess_ransac <- function(surfaceMat,
 #' @export
 
 preProcess_levelBF <- function(ransacFit,
-                               useResiduals = FALSE){
+                               useResiduals = TRUE){
 
   if(useResiduals){ #if the residuals from the RANSAC method are desired...
     esimatedBFdf <- data.frame(which(!is.na(ransacFit$estimatedBreechFace),
@@ -376,7 +376,7 @@ preProcess_removeFPCircle <- function(surfaceMat,
 #' @export
 
 preProcess_gaussFilter <- function(surfaceMat,
-                                   res = 6.25e-06, #resolution of "raw" Fadul scans
+                                   res,
                                    wavelength = c(16,250),
                                    filtertype = "bp"){
 

@@ -175,7 +175,7 @@ ccfMapPlot <- function(mat1,
       #                      na.value = "grey80") +
       # ggplot2::scale_fill_manual(values = rev(c(rev(RColorBrewer::brewer.pal(5,"Oranges")),"white",RColorBrewer::brewer.pal(5,"Blues"),RColorBrewer::brewer.pal(5,"Purples"))),
       # drop = FALSE) +
-      ggplot2::scale_fill_manual(values = colorspace::divergingx_hcl(13,"PuOr"),
+      ggplot2::scale_fill_manual(values = rev(colorspace::divergingx_hcl(13,"PuOr")),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -210,6 +210,31 @@ ccfMapPlot <- function(mat1,
   }
 }
 
+#' @name linear_to_matrix
+#' @param index integer vector of indices, must be between 1 and nrow*ncol
+#' @param nrow number of rows, integer value defaults to 7
+#' @param ncol  number of columns, integer value, defaults to number of rows
+#' @param byrow logical value, is linear index folded into matrix by row (default) or by column (`byrow=FALSE`).
+#' @examples
+#' index <- sample(nrow*ncol, 10, replace = TRUE)
+#' linear_to_matrix(index, nrow=4, ncol = 5, byrow=TRUE)
+#'
+#' @keywords internal
+linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = ", ") {
+  index <- as.integer(index)
+  stopifnot(all(index <= nrow*ncol), all(index > 0))
+  idx <- 1:(nrow*ncol)
+  m <- matrix(idx, nrow = nrow, byrow = !byrow)
+  if (byrow) { # column is the fast index
+    idx_out_col <- ((index-1) %% ncol) + 1
+    idx_out_row <- ((index-1) %/% ncol) + 1
+  } else { # row is the fast index
+    idx_out_col <- ((index-1) %/% nrow) + 1
+    idx_out_row <- ((index-1) %% nrow) + 1
+  }
+  paste0(idx_out_row, sep, idx_out_col)
+}
+
 #' @name arrangeCMCPlot
 #'
 #' @keywords internal
@@ -220,7 +245,7 @@ arrangeCMCPlot <- function(x3p1,
                            x3p1_nonCMCs,
                            x3p2_cmcs,
                            x3p2_nonCMCs,
-                           type,
+                           type = "Initial",
                            directionIndic){
 
   if(type == "Final"){
@@ -268,7 +293,10 @@ arrangeCMCPlot <- function(x3p1,
                     lastCol = 6.25*(lastCol)) %>%
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
                     midRow = (lastRow + firstRow)/2,
-                    cellInd = 1:nrow(.)) %>%
+                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                               nrow = ceiling(sqrt(max(cellNum))),
+                                               byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
@@ -302,7 +330,7 @@ arrangeCMCPlot <- function(x3p1,
       ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("A",cellInd),
+                                      label = paste0("A[",cellInd,"]"),
                                       colour = cmc),
                          size = 3) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
@@ -356,7 +384,10 @@ arrangeCMCPlot <- function(x3p1,
                     topRightCorner_row = lastColCentered*sin(theta*(pi/180)) + lastRowCentered*cos(theta*(pi/180)) + max(lastRow)/2) %>%
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                     midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                    cellInd = 1:nrow(.)) %>%
+                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                               nrow = ceiling(sqrt(max(cellNum))),
+                                               byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
@@ -390,7 +421,7 @@ arrangeCMCPlot <- function(x3p1,
       ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("B",cellInd),
+                                      label = paste0("B[",cellInd,"]"),
                                       angle = theta,
                                       colour = cmc),
                          size = 3) +
@@ -458,7 +489,10 @@ arrangeCMCPlot <- function(x3p1,
                     lastCol = 6.25*(lastCol)) %>%
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
                     midRow = (lastRow + firstRow)/2,
-                    cellInd = 1:nrow(.)) %>%
+                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                               nrow = ceiling(sqrt(max(cellNum))),
+                                               byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
@@ -494,7 +528,7 @@ arrangeCMCPlot <- function(x3p1,
       ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("A",cellInd),
+                                      label = paste0("A[",cellInd,"]"),
                                       colour = cmc),
                          size = 3) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
@@ -548,7 +582,10 @@ arrangeCMCPlot <- function(x3p1,
                     topRightCorner_row = lastColCentered*sin(theta*(pi/180)) + lastRowCentered*cos(theta*(pi/180)) + max(lastRow)/2) %>%
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                     midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                    cellInd = 1:nrow(.)) %>%
+                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                               nrow = ceiling(sqrt(max(cellNum))),
+                                               byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
@@ -583,7 +620,7 @@ arrangeCMCPlot <- function(x3p1,
       ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = paste0("B",cellInd),
+                                      label = paste0("B[",cellInd,"]"),
                                       angle = theta,
                                       colour = cmc),
                          size = 3) +

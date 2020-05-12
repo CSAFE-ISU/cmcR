@@ -1,8 +1,8 @@
 ---
-title: "Reproduction of Tong et al. (2018) plots using the cmcR package"
+title: "Reproduction of Song et al. (2018) plots using the cmcR package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tong et al. (2018) reproduction}
+  %\VignetteIndexEntry{Song et al. (2018) reproduction}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,22 +14,22 @@ comment = "#>"
 )
 ```
 
-```{r setup,echo=FALSE,message=FALSE}
+```{r setup,echo=TRUE,message=FALSE,warning=FALSE}
 library(cmcR)
 library(tidyverse)
 library(x3ptools)
 set.seed(4132020)
 ```
   
-TODO:
-  - Add hyperlinks to .png images of original plots
-  - Add red squares indicating non-CMCs based on topResultsPerCell output
-  - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too.
-  - Try linear scale first
-  - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.)
-  - CCF map plot - show custom labels -- show 0, min, and max
-  
-  This vignette will give `R` code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the `cmcR` package.
+<!-- TODO: -->
+<!--   - Add hyperlinks to .png images of original plots -->
+<!--   - Add red squares indicating non-CMCs based on topResultsPerCell output -->
+<!--   - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too. -->
+<!--   - Try linear scale first -->
+<!--   - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.) -->
+<!--   - CCF map plot - show custom labels -- show 0, min, and max -->
+
+<!--   This vignette will give `R` code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the `cmcR` package. -->
   
 ## Set-up
   
@@ -247,12 +247,13 @@ fadul1.1$x3p %>%
 ```
 
 ```{r}
-fadul1.1$x3p %>%
+fadul1.2$x3p %>%
   x3p_to_df() %>%
+  mutate(height = value*1e6) %>%
   # mutate(value = 1/(1 + exp(-value))) %>%
   # mutate(value = sign(value)*log(abs(value) + 1)) %>%
   ggplot(aes(x = x,y = y)) +
-  geom_raster(aes(fill = value))  +
+  geom_raster(aes(fill = height))  +
   # scale_fill_gradient2(low = "#1a6bff",
   #                      mid = "#ffffff",
   #                      high = "#ffae1a",
@@ -267,9 +268,23 @@ fadul1.1$x3p %>%
                         # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
                         na.value = "grey80") +
   theme_grey() +
-  coord_fixed(expand = FALSE)
+  coord_fixed(expand = FALSE) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  guides(fill = guide_colourbar(barheight = grid::unit(3,"in"))) +
+  labs(fill = expression("Relative Height ["*mu*"m]"))
 ```
 
+TODO:
+- Shift by median, not mean
+- Add to legend percentile (microns in parentheses)
+- Frame legend in black
+- Index cells by (1,1), (1,2),...,(1,7),(2,1),...,(7,7)
+- Change to 8x8 cells to reflect Tong et al.
 
 ```{r}
 kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
