@@ -122,18 +122,35 @@ ccfMapPlot <- function(mat1,
                     dy = rev(dy)) %>%
       ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
       ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
+      ggplot2::geom_point(data = ccfDF %>%
+                            mutate(dx = rev(dx),
+                                   dy = rev(dy)) %>%
+                            filter(fft.ccf == max(fft.ccf)) %>%
+                            mutate(type = "Maximum"),
+                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          # shape = 4,
+                          colour = "white",
+                          fill = "white") +
       # ggplot2::geom_contour(aes(z = fft.ccf),
       #                       breaks = quantile(ccfDF$fft.ccf,seq(0,1,length.out = 5)),
       # colour = "black") +
-      ggplot2::coord_fixed() +
+      ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_bw() +
-      ggplot2::scale_fill_gradient2(low = "purple",
-                                    mid = "white",
-                                    high = "orange",
-                                    midpoint = 0,aesthetics = c("fill"))+
-      ggplot2::theme_bw() +
+      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           values = scales::rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
+                           guide = "colourbar",
+                           limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank())
+                     panel.grid.minor = ggplot2::element_blank()) +
+      ggplot2::scale_shape_manual(values = 1,
+                                  labels = expression("CCF"[max])) +
+      guides(fill = guide_colourbar(title = "CCF",
+                                    barheight = grid::unit(1,"in"),
+                                    label.theme = element_text(size = 8),
+                                    frame.colour = "black",
+                                    ticks.colour = "black"),
+             shape = ggplot2::guide_legend(title = NULL,
+                                           override.aes = list(colour = "black")))
 
     layoutMat <- matrix(c(1,2,4,3),ncol = 2,byrow = TRUE)
   }
@@ -142,39 +159,24 @@ ccfMapPlot <- function(mat1,
       dplyr::mutate(dx = rev(dx),
                     dy = rev(dy)) %>%
       ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
-      # ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
-      #                              breaks = quantile(as.vector(ccfDF$fft.ccf),probs = seq(0,1,by = .1),na.rm = TRUE)) +
       ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
                                    breaks = c(quantile(as.vector(ccfDF$fft.ccf)[(as.vector(ccfDF$fft.ccf) <= 0)],
                                                        prob = seq(0,1,length.out = 6)),
                                               0,
                                               quantile(as.vector(ccfDF$fft.ccf)[as.vector((ccfDF$fft.ccf) > 0)],
                                                        prob = seq(0,1,length.out = 6))),
-                                   # breaks = c(seq(from = -1*max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
-                                   #                to = 0,length.out = 7),
-                                   #            0,
-                                   #            seq(from = 0,
-                                   #                to = max(abs(c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf)))),
-                                   #                length.out = 7)) %>%
-                                   #   unique()
       ) +
       ggplot2::geom_point(data = ccfDF %>%
                             mutate(dx = rev(dx),
                                    dy = rev(dy)) %>%
                             filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
                             arrange(fft.ccf) %>%
-                            mutate(type = c("Minimum","Maximum")),
+                            mutate(type = factor(c("Minimum","Maximum"))),
                           ggplot2::aes(x = dx,y = dy,shape = type),
                           # shape = 4,
                           colour = "white") +
       ggplot2::scale_shape_manual(values = c(1,4)) +
       ggplot2::coord_fixed(expand = FALSE) +
-      # scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-      #                      values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-      #                      # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
-      #                      na.value = "grey80") +
-      # ggplot2::scale_fill_manual(values = rev(c(rev(RColorBrewer::brewer.pal(5,"Oranges")),"white",RColorBrewer::brewer.pal(5,"Blues"),RColorBrewer::brewer.pal(5,"Purples"))),
-      # drop = FALSE) +
       ggplot2::scale_fill_manual(values = rev(colorspace::divergingx_hcl(13,"PuOr")),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
@@ -193,8 +195,8 @@ ccfMapPlot <- function(mat1,
     dplyr::mutate(dx = -dx,
                   dy = -dy,
                   theta = theta) %>%
-    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
-    gridExtra::tableGrob(rows = c("fft.ccfMax","dx","dy","theta"),
+    t() %>%
+    gridExtra::tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
                          cols = "Summary")
 
   gridPlot <- gridExtra::arrangeGrob(mat1Plot,
@@ -224,7 +226,6 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
   index <- as.integer(index)
   stopifnot(all(index <= nrow*ncol), all(index > 0))
   idx <- 1:(nrow*ncol)
-  m <- matrix(idx, nrow = nrow, byrow = !byrow)
   if (byrow) { # column is the fast index
     idx_out_col <- ((index-1) %% ncol) + 1
     idx_out_row <- ((index-1) %/% ncol) + 1
@@ -294,14 +295,18 @@ arrangeCMCPlot <- function(x3p1,
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
                     midRow = (lastRow + firstRow)/2,
                     cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                nrow = ceiling(sqrt(max(cellNum))),
                                                byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
 
+        tmp$surface.matrix <- tmp$surface.matrix - median(tmp$surface.matrix,na.rm = TRUE)
+
         tmp %>%
+          x3ptools::rotate_x3p() %>%
           x3ptools::x3p_to_df() %>%
           dplyr::rename(height = value) %>%
           dplyr::mutate(x = 1e6*(x),
@@ -335,23 +340,28 @@ arrangeCMCPlot <- function(x3p1,
                          size = 3) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           breaks = function(lims){
+                             mat <- x3p1$surface.matrix - median(x3p1$surface.matrix,na.rm = TRUE)
+
+                             dat <- quantile(as.vector(mat*1e6),c(0,.1,.3,.5,.7,.9,1),na.rm = TRUE)
+
+                             dat <- dat %>%
+                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
+
+                             return(dat)
+                           },
                            na.value = "grey80") +
-      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
-      #                               mid = "grey75",
-      #                               high = "#ffae1a",
-      #                               midpoint = median(as.vector(x3p1$surface.matrix),
-      #                                                 na.rm = TRUE),
-      #                               na.value = "white") +
       ggplot2::theme_bw() +
-      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank()) +
-      # guides(fill = guide_colourbar(barheight = 18)) +
-      ggplot2::labs(fill = expression("Height ["*mu*"m]")) +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      guides(fill = guide_colourbar(barheight = grid::unit(2.5,"in"),
+                                    label.theme = element_text(size = 8),
+                                    frame.colour = "black",
+                                    ticks.colour = "black")) +
+      labs(fill = expression("Relative Height ["*mu*"m]")) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::ylab(expression("Y-Position ["*mu*"m]")) +
-      ggplot2::xlab(expression("X-Position ["*mu*"m]")) +
-      ggplot2::ggtitle(paste0("x3p1 ",type," CMCs"))
+      ggplot2::xlab(expression("X-Position ["*mu*"m]"))
 
     x3p2_cmcPlot <- x3p2_cmcs  %>%
       dplyr::left_join(x3p2_cmcs %>%
@@ -370,6 +380,9 @@ arrangeCMCPlot <- function(x3p1,
                          }),
                        by = "cellID") %>%
       dplyr::arrange(cellNum) %>%
+      dplyr::mutate(theta = c(-1,1)[directionIndic]*theta,
+                    dx = c(-1,1)[directionIndic]*dx,
+                    dy = c(-1,1)[directionIndic]*dy) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow - dy),
                     lastRow = 6.25*(lastRow - dy),
                     firstCol = 6.25*(firstCol - dx),
@@ -385,14 +398,19 @@ arrangeCMCPlot <- function(x3p1,
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                     midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
                     cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                nrow = ceiling(sqrt(max(cellNum))),
                                                byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
-        tmp$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p2$surface.matrix,theta = median(x3p2_cmcs$theta))
+
+        tmp$surface.matrix <- tmp$surface.matrix - median(tmp$surface.matrix,na.rm = TRUE)
+
+        tmp$surface.matrix <- cmcR:::rotateSurfaceMatrix(tmp$surface.matrix,theta = median(x3p2_cmcs$theta))
         tmp %>%
+          x3ptools::rotate_x3p() %>%
           x3ptools::x3p_to_df() %>%
           dplyr::rename(height = value) %>%
           dplyr::mutate(x = 1e6*(x),
@@ -428,39 +446,44 @@ arrangeCMCPlot <- function(x3p1,
       ggplot2::scale_colour_manual(values = c("black","red")) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           breaks = function(lims){
+                             mat <- x3p2$surface.matrix - median(x3p2$surface.matrix,na.rm = TRUE)
+
+                             dat <- quantile(as.vector(mat*1e6),c(0,.1,.3,.5,.7,.9,1),na.rm = TRUE)
+
+                             dat <- dat %>%
+                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
+
+                             return(dat)
+                           },
                            na.value = "grey80") +
-      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
-      #                               mid = "grey75",
-      #                               high = "#ffae1a",
-      #                               midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
-      #                                                 na.rm = TRUE),
-      #                               na.value = "white") +
       ggplot2::theme_bw() +
-      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank()) +
-      # guides(fill = guide_colourbar(barheight = 18)) +
-      ggplot2::labs(fill = expression("Height ["*mu*"m]")) +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      guides(fill = guide_colourbar(barheight = grid::unit(2.5,"in"),
+                                    label.theme = element_text(size = 8),
+                                    frame.colour = "black",
+                                    ticks.colour = "black")) +
+      labs(fill = expression("Relative Height ["*mu*"m]")) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::ylab(expression("Y-Position ["*mu*"m]")) +
-      ggplot2::xlab(expression("X-Position ["*mu*"m]")) +
-      ggplot2::ggtitle(paste0("x3p2 ",type," CMCs"))
+      ggplot2::xlab(expression("X-Position ["*mu*"m]"))
   }
 
   else{
     x3p1_cmcs <- x3p1_cmcs %>%
-      dplyr::mutate(theta = c(1,-1)[directionIndic]*theta,
-                    dx = c(1,-1)[directionIndic]*dx,
-                    dy = c(1,-1)[directionIndic]*dy,
+      dplyr::mutate(theta = theta,
+                    dx = dx,
+                    dy = dy,
                     cmc = rep("yes",times = nrow(.))) %>%
       bind_rows(x3p1_nonCMCs %>%
                   mutate(cmc = rep("no",times = nrow(.)))) %>%
       mutate(cmc = factor(cmc, levels = c("yes","no")))
 
     x3p2_cmcs <- x3p2_cmcs %>%
-      dplyr::mutate(theta = c(1,-1)[directionIndic]*theta,
-                    dx = c(1,-1)[directionIndic]*dx,
-                    dy = c(1,-1)[directionIndic]*dy,
+      dplyr::mutate(theta = theta,
+                    dx = dx,
+                    dy = dy,
                     cmc = rep("yes",times = nrow(.))) %>%
       bind_rows(x3p1_nonCMCs %>%
                   mutate(cmc = rep("no",times = nrow(.)))) %>%
@@ -490,14 +513,18 @@ arrangeCMCPlot <- function(x3p1,
       dplyr::mutate(midCol = (lastCol + firstCol)/2,
                     midRow = (lastRow + firstRow)/2,
                     cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                nrow = ceiling(sqrt(max(cellNum))),
                                                byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p1
 
+        tmp$surface.matrix <- tmp$surface.matrix - median(tmp$surface.matrix,na.rm = TRUE)
+
         tmp %>%
+          x3ptools::rotate_x3p() %>%
           x3ptools::x3p_to_df() %>%
           dplyr::rename(height = value) %>%
           dplyr::mutate(x = 1e6*(x),
@@ -533,23 +560,28 @@ arrangeCMCPlot <- function(x3p1,
                          size = 3) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           breaks = function(lims){
+                             mat <- x3p1$surface.matrix - median(x3p1$surface.matrix,na.rm = TRUE)
+
+                             dat <- quantile(as.vector(mat*1e6),c(0,.1,.3,.5,.7,.9,1),na.rm = TRUE)
+
+                             dat <- dat %>%
+                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
+
+                             return(dat)
+                           },
                            na.value = "grey80") +
-      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
-      #                               mid = "grey75",
-      #                               high = "#ffae1a",
-      #                               midpoint = median(as.vector(x3p1$surface.matrix),
-      #                                                 na.rm = TRUE),
-      #                               na.value = "white") +
       ggplot2::theme_bw() +
-      ggplot2::theme(panel.grid.major = element_blank(),
-                     panel.grid.minor = element_blank()) +
-      # guides(fill = guide_colourbar(barheight = 18)) +
-      ggplot2::labs(fill = expression("Height ["*mu*"m]")) +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()) +
+      guides(fill = guide_colourbar(barheight = grid::unit(2.5,"in"),
+                                    label.theme = element_text(size = 8),
+                                    frame.colour = "black",
+                                    ticks.colour = "black")) +
+      labs(fill = expression("Relative Height ["*mu*"m]")) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::ylab(expression("Y-Position ["*mu*"m]")) +
-      ggplot2::xlab(expression("X-Position ["*mu*"m]")) +
-      ggplot2::ggtitle(paste0("x3p1 ",type," CMCs"))
+      ggplot2::xlab(expression("X-Position ["*mu*"m]"))
 
     x3p2_cmcPlot <- x3p2_cmcs  %>%
       dplyr::left_join(x3p2_cmcs %>%
@@ -568,6 +600,9 @@ arrangeCMCPlot <- function(x3p1,
                          }),
                        by = "cellID") %>%
       dplyr::arrange(cellID) %>%
+      dplyr::mutate(theta = c(-1,1)[directionIndic]*theta,
+                    dx = c(-1,1)[directionIndic]*dx,
+                    dy = c(-1,1)[directionIndic]*dy) %>%
       dplyr::mutate(firstRow = 6.25*(firstRow - dy),
                     lastRow = 6.25*(lastRow - dy),
                     firstCol = 6.25*(firstCol - dx),
@@ -583,14 +618,20 @@ arrangeCMCPlot <- function(x3p1,
       dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                     midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
                     cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))),
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                nrow = ceiling(sqrt(max(cellNum))),
                                                byrow = TRUE)) %>%
       ggplot2::ggplot() +
       ggplot2::geom_raster(data = {
         tmp <- x3p2
-        tmp$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p2$surface.matrix,theta = median(x3p2_cmcs$theta))
+
+        tmp$surface.matrix <- tmp$surface.matrix - median(tmp$surface.matrix,na.rm = TRUE)
+
+        tmp$surface.matrix <- cmcR:::rotateSurfaceMatrix(tmp$surface.matrix,
+                                                         theta = median(x3p2_cmcs$theta))
         tmp %>%
+          x3ptools::rotate_x3p(angle = 90) %>%
           x3ptools::x3p_to_df() %>%
           dplyr::rename(height = value) %>%
           dplyr::mutate(x = 1e6*(x),
@@ -626,30 +667,31 @@ arrangeCMCPlot <- function(x3p1,
                          size = 3) +
       scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                           # breaks = function(lims) {quantile(as.vector(fadul1.1$x3p$surface.matrix),c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),na.rm = TRUE)},
+                           breaks = function(lims){
+                             mat <- x3p2$surface.matrix - median(x3p2$surface.matrix,na.rm = TRUE)
+
+                             dat <- quantile(as.vector(mat*1e6),c(0,.1,.3,.5,.7,.9,1),na.rm = TRUE)
+
+                             dat <- dat %>%
+                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
+
+                             return(dat)
+                           },
                            na.value = "grey80") +
-      # ggplot2::scale_fill_gradient2(low = "#1a6bff",
-      #                               mid = "grey75",
-      #                               high = "#ffae1a",
-      #                               midpoint = median(as.vector(fadul1.2$x3p$surface.matrix),
-      #                                                 na.rm = TRUE),
-      #                               na.value = "white") +
       ggplot2::theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank()) +
-      # guides(fill = guide_colourbar(barheight = 18)) +
-      ggplot2::labs(fill = expression("Height ["*mu*"m]")) +
+      guides(fill = guide_colourbar(barheight = grid::unit(2.5,"in"),
+                                    label.theme = element_text(size = 8),
+                                    frame.colour = "black",
+                                    ticks.colour = "black")) +
+      labs(fill = expression("Relative Height ["*mu*"m]")) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::ylab(expression("Y-Position ["*mu*"m]")) +
-      ggplot2::xlab(expression("X-Position ["*mu*"m]")) +
-      ggplot2::ggtitle(paste0("x3p2 ",type," CMCs"))
+      ggplot2::xlab(expression("X-Position ["*mu*"m]"))
   }
 
-  gridPlot <- gridExtra::arrangeGrob(x3p1_cmcPlot,
-                                     x3p2_cmcPlot,
-                                     layout_matrix = matrix(c(1,2),ncol = 2))
-
-  return(gridPlot)
+  return(list(x3p1_cmcPlot,x3p2_cmcPlot))
 }
 
 #' Visualize initial and final CMCs for a cartridge case pair comparison
@@ -723,12 +765,12 @@ cmcPlot <- function(x3p1,
                by = "cellNum")
 
   # creates plots of the initial CMCs on both x3ps
-  initialPlt <- arrangeCMCPlot(x3p1 = x3p1,
-                               x3p2 = x3p2,
-                               x3p1_cmcs = x3p1_initialCMC,
-                               x3p1_nonCMCs = x3p1_nonInitialCMC,
-                               x3p2_cmcs = x3p2_initialCMC,
-                               x3p2_nonCMCs = x3p2_nonInitialCMC,
+  initialPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+                               x3p2 = list(x3p2,x3p1)[[directionIndic]],
+                               x3p1_cmcs = list(x3p1_initialCMC,x3p2_initialCMC)[[directionIndic]],
+                               x3p1_nonCMCs = list(x3p1_nonInitialCMC,x3p2_nonInitialCMC)[[directionIndic]],
+                               x3p2_cmcs = list(x3p2_initialCMC,x3p1_initialCMC)[[directionIndic]],
+                               x3p2_nonCMCs = list(x3p2_nonInitialCMC,x3p1_nonInitialCMC)[[directionIndic]],
                                type = "Initial",
                                directionIndic = directionIndic)
 
@@ -763,13 +805,14 @@ cmcPlot <- function(x3p1,
                    cmcR::topResultsPerCell(),
                  by = "cellNum")
 
-    finalPlt <- cmcR:::arrangeCMCPlot(x3p1 = x3p1,
-                                      x3p2 = x3p2,
-                                      x3p1_cmcs = x3p1_finalCMC,
-                                      x3p1_nonCMCs = x3p1_nonFinalCMC,
-                                      x3p2_cmcs = x3p2_finalCMC,
-                                      x3p2_nonCMCs = x3p2_nonFinalCMC,
-                                      type = "Final")
+    finalPlt <- cmcR:::arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+                                      x3p2 = list(x3p2,x3p1)[[directionIndic]],
+                                      x3p1_cmcs = list(x3p1_finalCMC,x3p2_finalCMC)[[directionIndic]],
+                                      x3p1_nonCMCs = list(x3p1_nonFinalCMC,x3p2_nonFinalCMC)[[directionIndic]],
+                                      x3p2_cmcs = list(x3p2_finalCMC,x3p1_finalCMC)[[directionIndic]],
+                                      x3p2_nonCMCs = list(x3p2_nonFinalCMC,x3p1_nonFinalCMC)[[directionIndic]],
+                                      type = "Final",
+                                      directionIndic = directionIndic)
 
     return(list("initialCMC" = initialPlt,
                 "finalCMC" = finalPlt))

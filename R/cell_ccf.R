@@ -687,13 +687,12 @@ cellCCF <- function(x3p1,
       unlist()
 
     #remove cells that don't include enough breechface:
-    mat1_splitFiltered <- purrr::flatten(mat1_split$surfaceMat_split)[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
-    mat2_splitFiltered <- mat2_splitRotated[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
+    mat1_splitFiltered <- purrr::flatten(mat1_split$surfaceMat_split)[mat1_split$mat1PixCounts & mat2PixCounts]
+    mat2_splitFiltered <- mat2_splitRotated[mat1_split$mat1PixCounts & mat2PixCounts]
 
     #grab the cell IDs for each cell not removed above. This is used to update
     #topResults below
     filteredCellID <- mat1_split$cellIDs[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
-
 
     #creating this df is necessary so that we can compare cells in similar
     #positions between two comparisons (since their "cellID" may differ since
