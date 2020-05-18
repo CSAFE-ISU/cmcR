@@ -170,6 +170,11 @@
                        <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-2.png"</span>))) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>()</pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+</div>
+<div id="processed-cartrige-case-scan-figure-5" class="section level2">
+<h2 class="hasAnchor">
+<a href="#processed-cartrige-case-scan-figure-5" class="anchor"></a>Processed Cartrige Case Scan (Figure 5)</h2>
+<p>Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use <code>ggplot2</code> to accomplish this.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
 <span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
 <span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>)</pre></body></html></div>
@@ -208,7 +213,11 @@
                                 <span class="kw">ticks.colour</span> <span class="kw">=</span> <span class="st">"black"</span>)) +
   <span class="fu">labs</span>(<span class="kw">fill</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span>(<span class="st">"Relative Height ["</span>*<span class="no">mu</span>*<span class="st">"m]"</span>))</pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<p>TODO: - Shift by median, not mean - Add to legend percentile (microns in parentheses)</p>
+</div>
+<div id="cmc-plot-figure-4" class="section level2">
+<h2 class="hasAnchor">
+<a href="#cmc-plot-figure-4" class="anchor"></a>CMC Plot (Figure 4)</h2>
+<p>The code below will perform the cell-based comparison procedure and then determine the initial/final CMCs for the known match and known non-match pairs of cartridge cases. The “initial” CMCs are determined based on the originally proposed method from Song (2013) while the “final” CMCs are determined using the “High CMC” method proposed by Tong et al. (2015).</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># undebug(cmcR:::checkForBreechface)</span>
 <span class="co"># debug(cmcR:::cellCCF)</span>
 
@@ -233,10 +242,7 @@
                          <span class="kw">ccf_thresh</span> <span class="kw">=</span> <span class="fl">.5</span>,
                          <span class="kw">dx_thresh</span> <span class="kw">=</span> <span class="fl">20</span>,
                          <span class="kw">theta_thresh</span> <span class="kw">=</span> <span class="fl">6</span>)</pre></body></html></div>
-</div>
-<div id="cmc-plot-figure-4" class="section level2">
-<h2 class="hasAnchor">
-<a href="#cmc-plot-figure-4" class="anchor"></a>CMC Plot (Figure 4)</h2>
+<p>We can then visualize the CMCs for these comarisons. Below are the final CMCs for the known match pair.</p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># debug(cmcR:::arrangeCMCPlot)</span>
 
 <span class="no">kmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
@@ -244,13 +250,13 @@
                         <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
                         <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>)
 
-<span class="no">kmPlts</span>$<span class="no">initialCMC</span>
+<span class="no">kmPlts</span>$<span class="no">finalCMC</span>
 <span class="co">#&gt; [[1]]</span></pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
 <pre><code>#&gt; 
 #&gt; [[2]]</code></pre>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
-<p>TODO: Need to figre out why cell [3,3] (cell 43) is being drawn on the first plot, but doesn’t appear on the second:</p>
+<p>The known non-match pair didn’t yield any final CMCs, so we can only visualize the initial CMCs.</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="co"># debug(cmcR:::arrangeCMCPlot)</span>
 
 <span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
@@ -264,24 +270,11 @@
 <pre><code>#&gt; 
 #&gt; [[2]]</code></pre>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-2.png" width="700"></p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">knmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">ccfResults</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="../reference/topResultsPerCell.html">topResultsPerCell</a></span>()
-<span class="co">#&gt; # A tibble: 43 x 7</span>
-<span class="co">#&gt; # Groups:   cellID [43]</span>
-<span class="co">#&gt;    cellNum cellID                         ccf fft.ccf    dx    dy theta</span>
-<span class="co">#&gt;      &lt;int&gt; &lt;chr&gt;                        &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt;  1       3 y = 1 - 73, x = 146 - 217    0.790   0.404    -2   -26    27</span>
-<span class="co">#&gt;  2       4 y = 1 - 73, x = 218 - 289    0.686   0.304    35   -18     0</span>
-<span class="co">#&gt;  3       5 y = 1 - 73, x = 290 - 362    0.457   0.135    20    22   -30</span>
-<span class="co">#&gt;  4       6 y = 1 - 73, x = 363 - 434    0.466   0.167   -14   -11    18</span>
-<span class="co">#&gt;  5       7 y = 1 - 73, x = 435 - 506    0.832   0.169     2    -1    21</span>
-<span class="co">#&gt;  6       2 y = 1 - 73, x = 74 - 145     0.876   0.220   -17    12     9</span>
-<span class="co">#&gt;  7      17 y = 146 - 217, x = 1 - 73    0.712   0.259    -3    13    27</span>
-<span class="co">#&gt;  8      23 y = 146 - 217, x = 435 - 506 0.811   0.323    22   -33     0</span>
-<span class="co">#&gt;  9      24 y = 146 - 217, x = 507 - 578 0.857   0.274     5    -2    -9</span>
-<span class="co">#&gt; 10      18 y = 146 - 217, x = 74 - 145  0.759   0.193    -1   -30   -15</span>
-<span class="co">#&gt; # ... with 33 more rows</span></pre></body></html></div>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">finalCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
+</div>
+<div id="bonus-ccf-map" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bonus-ccf-map" class="anchor"></a>Bonus: CCF “Map”</h2>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">finalCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
 
 <span class="no">kmCellRegionPairs</span>[<span class="fl">3</span>] <span class="kw">%&gt;%</span>
   <span class="fu">map2</span>(<span class="kw">.x</span> <span class="kw">=</span> <span class="no">.</span>,
@@ -292,7 +285,7 @@
                           <span class="kw">theta</span> <span class="kw">=</span> <span class="no">theta</span>,
                           <span class="kw">type</span> <span class="kw">=</span> <span class="st">"raster"</span>))
          })</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 <pre><code>#&gt; $`-18`
 #&gt; $`-18`$`x = 507 - 578,y = 146 - 217`
 #&gt; NULL</code></pre>

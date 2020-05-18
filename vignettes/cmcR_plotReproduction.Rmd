@@ -152,6 +152,9 @@ magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
   plot()
 ```
 
+## Processed Cartrige Case Scan (Figure 5)
+
+Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use `ggplot2` to accomplish this.
 
 ```{r}
 fadul1.1 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
@@ -201,9 +204,9 @@ mat %>%
   labs(fill = expression("Relative Height ["*mu*"m]"))
 ```
 
-TODO:
-- Shift by median, not mean
-- Add to legend percentile (microns in parentheses)
+## CMC Plot (Figure 4)
+
+The code below will perform the cell-based comparison procedure and then determine the initial/final CMCs for the known match and known non-match pairs of cartridge cases. The "initial" CMCs are determined based on the originally proposed method from Song (2013) while the "final" CMCs are determined using the "High CMC" method proposed by Tong et al. (2015).
 
 ```{r}
 # undebug(cmcR:::checkForBreechface)
@@ -232,7 +235,7 @@ knmCMC <- cmcR::cmcFilter_improved(knmComparison,
                          theta_thresh = 6)
 ```
 
-## CMC Plot (Figure 4)
+We can then visualize the CMCs for these comarisons. Below are the final CMCs for the known match pair.
 
 ```{r}
 # debug(cmcR:::arrangeCMCPlot)
@@ -242,11 +245,10 @@ kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                         cellCCF_bothDirections_output = kmComparison,
                         cmcFilter_improved_output = kmCMC)
 
-kmPlts$initialCMC
+kmPlts$finalCMC
 ```
 
-TODO:
-Need to figre out why cell [3,3] (cell 43) is being drawn on the first plot, but doesn't appear on the second:
+The known non-match pair didn't yield any final CMCs, so we can only visualize the initial CMCs.
 
 ```{r}
 # debug(cmcR:::arrangeCMCPlot)
@@ -259,10 +261,7 @@ knmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
 knmPlts$initialCMC
 ```
 
-```{r}
-knmComparison$comparison_1to2$ccfResults %>%
-  topResultsPerCell()
-```
+## Bonus: CCF "Map"
 
 ```{r}
 kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$finalCMCs,params = kmComparison$comparison_1to2$params)
