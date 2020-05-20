@@ -144,6 +144,12 @@ x3ptools::x3p_snapshot(file = "bfScanImages/fadul1-2.png")
 rgl.close()
 ```
 
+TODO:
+- switch 30% and 70% quantiles for 25% and 75%
+- Determine "consensus" scale for coloring so that same height values are mapped to same color. Keep-in color scale that is calculated "on the fly." Basically add a scales = "free." Stack the data frames on top of each other and then call facet_wrap in a ggplot, faceting by which scan
+- Complete RCR citi course
+- Switch over to cmcR.Rmd document
+
 The `magick` package can be used to read these .png files back into `R` for visualization. We can see the x3p scan snapshots below.
 
 ```{r}
@@ -167,15 +173,20 @@ fadul2.1 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/S
 fadul2.2 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
 ```
 
+
 ```{r}
-mat <- fadul1.2$x3p
-
-mat$surface.matrix <- mat$surface.matrix - median(mat$surface.matrix,na.rm = TRUE)
-
-mat %>%
-  rotate_x3p(angle = 90) %>% #for continuity with plots below
-  x3p_to_df() %>%
-  mutate(height = value*1e6) %>%
+bind_rows(fadul1.1$x3p %>%
+            rotate_x3p(angle = 90) %>% #for continuity with plots below
+            x3p_to_df() %>%
+            mutate(value = value - median(value,na.rm = TRUE)) %>%
+            mutate(height = value*1e6) %>%
+            mutate(x3p = rep(1,times = nrow(.))),
+          fadul1.2$x3p %>%
+            rotate_x3p(angle = 90) %>% #for continuity with plots below
+            x3p_to_df() %>%
+            mutate(value = value - median(value,na.rm = TRUE)) %>%
+            mutate(height = value*1e6) %>%
+            mutate(x3p = rep(2,times = nrow(.)))) %>%
   ggplot(aes(x = x,y = y)) +
   geom_raster(aes(fill = height))  +
   scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
@@ -201,7 +212,10 @@ mat %>%
                                 label.theme = element_text(size = 8),
                                 frame.colour = "black",
                                 ticks.colour = "black")) +
-  labs(fill = expression("Relative Height ["*mu*"m]"))
+  labs(fill = expression("Relative Height ["*mu*"m]")) +
+  facet_wrap(~ x3p,nrow = 1)
+
+cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,"Fadul 1-2" = fadul1.2$x3p),type = "faceted",rotate = 90)
 ```
 
 ## CMC Plot (Figure 4)
@@ -238,15 +252,17 @@ knmCMC <- cmcR::cmcFilter_improved(knmComparison,
 We can then visualize the CMCs for these comarisons. Below are the final CMCs for the known match pair.
 
 ```{r}
-# debug(cmcR:::arrangeCMCPlot)
-
 kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                         x3p2 = fadul1.2$x3p,
                         cellCCF_bothDirections_output = kmComparison,
                         cmcFilter_improved_output = kmCMC)
-
 kmPlts$finalCMC
 ```
+
+```{r}
+dat1
+```
+
 
 The known non-match pair didn't yield any final CMCs, so we can only visualize the initial CMCs.
 

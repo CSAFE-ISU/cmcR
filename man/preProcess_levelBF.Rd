@@ -4,7 +4,7 @@
 \alias{preProcess_levelBF}
 \title{Levels a breech face impression matrix basedo on a RANSAC-fitted plane}
 \usage{
-preProcess_levelBF(ransacFit, useResiduals = FALSE)
+preProcess_levelBF(ransacFit, useResiduals = TRUE)
 }
 \arguments{
 \item{ransacFit}{output from the cmcR::preProcess_ransac function.}
