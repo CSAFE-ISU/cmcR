@@ -326,7 +326,7 @@ cmcPerThetaBarPlot(km1_unknown2_comparison,
 
 To settle on a final CMC number, Tong et al. (2015) proposes first identifying whether the high CMC theta values are too diffuse around the max CMC theta value using the logic described above. If a particular pair doesn't pass this criterion, then we assign to it the initial CMCs (described above) as its final CMC number. Otherwise, if a theta value mode is identified, then we count the number of CMCs in this mode, including those associated with the max CMC as well as CMCs associated with theta values within `theta_thresh` of the max CMC theta value. We do this for both the "forward" and "backward" CMC distributions and combine the results as the final CMC count, excluding any duplicate pairs.
 
-The `cmcFilter_improved` function counts the number of CMCs under this improved method. It will return not only the final CMCs, but also the initial CMCs determined under the initially proposed method (in both directions).
+The `cmcFilter_improved` function counts the number of CMCs under this improved method. It will return not only the high CMCs, but also the initial CMCs determined under the initially proposed method (in both directions).
 
 ```{r}
 km1_unknown1_cmcs <- cmcR::cmcFilter_improved(km1_unknown1_comparison,
@@ -342,7 +342,7 @@ km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               theta_thresh = 3)
 ```
 
-The improved CMC method did not yield any "final CMCs" for the comparison between km1 and unknown1. As such, we would assign the pair whichever was the minimum number of initial CMCs calculated between both directions. The CMC(s) between km1 and unknown1 are shown below.
+The improved CMC method did not yield any "high CMCs" for the comparison between km1 and unknown1. As such, we would assign the pair whichever was the minimum number of initial CMCs calculated between both directions. The CMC(s) between km1 and unknown1 are shown below.
 
 ```{r eval=FALSE}
 km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
@@ -355,14 +355,14 @@ km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1
   DT::datatable()
 ```
 
-In contrast, the comparison between km1 and unknown2 did yield final CMCs, which are shown below.
+In contrast, the comparison between km1 and unknown2 did yield high CMCs, which are shown below.
 
 ```{r eval=FALSE}
-km1_unknown2_cmcs$finalCMCs
+km1_unknown2_cmcs$highCMCs
 ```
 
 ```{r echo=FALSE}
-km1_unknown2_cmcs$finalCMCs %>%
+km1_unknown2_cmcs$highCMCs %>%
   DT::datatable(options = list(pageLength = 5))
 ```
 
@@ -398,25 +398,25 @@ km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
                                               dx_thresh = 15)
 ```
 
-Interestingly, we see that the comparison between km2 and unknown1 *does* actually yield final CMCs, although only 5. This illustates an important property of this method - its extreme sensitivity to making the "correct" pre, inter, and post-processing decisions. For example, changing `ccf_thresh` from .8 to .81 in the call to `cmcFilter_improved` between km1 and unknown1 above yields 0 initial and final CMCs.  
+Interestingly, we see that the comparison between km2 and unknown1 *does* actually yield high CMCs, although only 5. This illustates an important property of this method - its extreme sensitivity to making the "correct" pre, inter, and post-processing decisions. For example, changing `ccf_thresh` from .8 to .81 in the call to `cmcFilter_improved` between km1 and unknown1 above yields 0 initial and high CMCs.  
 
 ```{r eval=FALSE}
-km2_unknown1_cmcs$finalCMCs
+km2_unknown1_cmcs$highCMCs
 ```
 
 ```{r echo=FALSE}
-km2_unknown1_cmcs$finalCMCs %>%
+km2_unknown1_cmcs$highCMCs %>%
   DT::datatable()
 ```
 
-The final CMCs for the comparison between km2 and unknown2 are given below.
+The high CMCs for the comparison between km2 and unknown2 are given below.
 
 ```{r eval=FALSE}
-km2_unknown2_cmcs$finalCMCs
+km2_unknown2_cmcs$highCMCs
 ```
 
 ```{r echo=FALSE}
-km2_unknown2_cmcs$finalCMCs %>%
+km2_unknown2_cmcs$highCMCs %>%
   DT::datatable(options = list(pageLength = 5))
 ```
 
@@ -433,7 +433,7 @@ cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
               cmcFilter_improved_output = km1_unknown1_cmcs)
 ```
 
-In contrast, the final CMCs between km1 and unknown2 are shown below.
+In contrast, the high CMCs between km1 and unknown2 are shown below.
 
 ```{r eval=FALSE}
 cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
@@ -442,7 +442,7 @@ cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
               cmcFilter_improved_output = km1_unknown2_cmcs)
 ```
 
-The same types of plots can be made for the comparison between km2 and the unknown source scans. Below are the final CMCs between km2 and unknown1.
+The same types of plots can be made for the comparison between km2 and the unknown source scans. Below are the high CMCs between km2 and unknown1.
 
 ```{r eval=FALSE}
 cmcR::cmcPlot(x3p1 = km2_residuals$x3p,

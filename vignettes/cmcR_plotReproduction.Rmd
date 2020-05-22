@@ -42,7 +42,7 @@ For the sake of an example we will consider 3 cartridge cases are from Fadul et 
 
   <!-- 2. Identify the breech face impression height value in the surface matrix using the RANSAC (Random Sample Consensus method). -->
 
-  <!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `finalSelectionThresh` threshold. -->
+  <!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `highSelectionThresh` threshold. -->
 
   <!-- 4. Remove rows/columns on the exterior of the resulting breech face impression surface matrix. -->
 
@@ -220,7 +220,7 @@ cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,"Fadul 1-2" = fadul1
 
 ## CMC Plot (Figure 4)
 
-The code below will perform the cell-based comparison procedure and then determine the initial/final CMCs for the known match and known non-match pairs of cartridge cases. The "initial" CMCs are determined based on the originally proposed method from Song (2013) while the "final" CMCs are determined using the "High CMC" method proposed by Tong et al. (2015).
+The code below will perform the cell-based comparison procedure and then determine the initial/high CMCs for the known match and known non-match pairs of cartridge cases. The "initial" CMCs are determined based on the originally proposed method from Song (2013) while the "high" CMCs are determined using the "High CMC" method proposed by Tong et al. (2015).
 
 ```{r}
 # undebug(cmcR:::checkForBreechface)
@@ -249,14 +249,14 @@ knmCMC <- cmcR::cmcFilter_improved(knmComparison,
                          theta_thresh = 6)
 ```
 
-We can then visualize the CMCs for these comarisons. Below are the final CMCs for the known match pair.
+We can then visualize the CMCs for these comarisons. Below are the high CMCs for the known match pair.
 
 ```{r}
 kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                         x3p2 = fadul1.2$x3p,
                         cellCCF_bothDirections_output = kmComparison,
                         cmcFilter_improved_output = kmCMC)
-kmPlts$finalCMC
+kmPlts$highCMC
 ```
 
 ```{r}
@@ -264,7 +264,7 @@ dat1
 ```
 
 
-The known non-match pair didn't yield any final CMCs, so we can only visualize the initial CMCs.
+The known non-match pair didn't yield any high CMCs, so we can only visualize the initial CMCs.
 
 ```{r}
 # debug(cmcR:::arrangeCMCPlot)
@@ -280,7 +280,7 @@ knmPlts$initialCMC
 ## Bonus: CCF "Map"
 
 ```{r}
-kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$finalCMCs,params = kmComparison$comparison_1to2$params)
+kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$highCMCs,params = kmComparison$comparison_1to2$params)
 
 kmCellRegionPairs[3] %>%
   map2(.x = .,
@@ -470,7 +470,7 @@ kmCellRegionPairs[3] %>%
 <!--                                  theta_thresh = 3)) -->
 
 <!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = kmCMCs$`1.1_1.2`$finalCMCs) -->
+<!--               cmcDF = kmCMCs$`1.1_1.2`$highCMCs) -->
 <!-- ``` -->
 
 <!-- ```{r} -->
@@ -487,15 +487,15 @@ kmCellRegionPairs[3] %>%
 <!-- bind_rows(kmCMCs %>% -->
 <!--             map2_dfr(.x = ., -->
 <!--                      .y = names(.), -->
-<!--                      ~ .$finalCMCs %>% -->
+<!--                      ~ .$highCMCs %>% -->
 <!--                        mutate(pair = rep(.y,times = nrow(.)), -->
 <!--                               comparisonType = "known match")), -->
 <!--           knmCMCs %>% -->
 <!--             map2_dfr(.x = ., -->
 <!--                      .y = names(.), -->
 <!--                      function(cmcs = .x,name = .y){ -->
-<!--                        if(!is.null(cmcs$finalCMCs)){ -->
-<!--                        return(cmcs$finalCMCs %>% -->
+<!--                        if(!is.null(cmcs$highCMCs)){ -->
+<!--                        return(cmcs$highCMCs %>% -->
 <!--                        mutate(pair = rep(name,times = nrow(.)), -->
 <!--                               comparisonType = "known non-match")) -->
 <!--                        } -->

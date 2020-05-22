@@ -342,7 +342,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   #TODO (potentially): Add an argument "thetaDisagreement" that allows for more
   #conservative decisions if the theta modes are identified in both directions
   #but they don't agree with each other (aren't within theta_thresh of each
-  #other). Could only take the min of the Final CMCs identified in either
+  #other). Could only take the min of the High CMCs identified in either
   #direction or only give that pair its initial CMCs (i.e., it would "fail" the
   #both direction criterion).
 
@@ -391,18 +391,18 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
                 "initialCMCs" = initialCMCs,
-                "finalCMCs" = NULL))
+                "highCMCs" = NULL))
   }
 
   #if one direction didn't pass the high CMC criterion...
   if(any(is.na(thetaMax))){
     #the direction that didn't pass gets assigned initial CMCs:
-    finalCMCs1 <- initialCMCs[[which(is.na(thetaMax))]] %>%
+    highCMCs1 <- initialCMCs[[which(is.na(thetaMax))]] %>%
       ungroup() %>%
       mutate(comparison = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
 
 
-    finalCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],
+    highCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],
                                             names(cmcPerTheta)[which(!is.na(thetaMax))],
                                             thetaMax[which(!is.na(thetaMax))]),
                                   function(cmcs,compName,th){
@@ -410,16 +410,16 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                       dplyr::mutate(comparison = rep(compName,times = nrow(.)))
                                   })
 
-    finalCMCs <- finalCMCs2 %>%
+    highCMCs <- highCMCs2 %>%
       dplyr::bind_rows() %>%
-      dplyr::bind_rows(finalCMCs1) %>%
+      dplyr::bind_rows(highCMCs1) %>%
       dplyr::distinct() %>%
       dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
       dplyr::filter(ccf == max(ccf)) %>%
       dplyr::ungroup()
   } #if both directions pass the high CMC criterion...
   else{
-    finalCMCs <- purrr::pmap(.l = list(cmcPerTheta,
+    highCMCs <- purrr::pmap(.l = list(cmcPerTheta,
                                        names(cmcPerTheta),
                                        thetaMax),
                              function(cmcs,compName,th){
@@ -433,7 +433,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       dplyr::ungroup()
   }
 
-  thetaMed <- finalCMCs %>%
+  thetaMed <- highCMCs %>%
     dplyr::group_by(comparison) %>%
     dplyr::summarise(theta = median(theta)) %>%
     dplyr::pull(theta)
@@ -448,7 +448,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
                 "initialCMCs" = initialCMCs,
-                "finalCMCs" = NULL))
+                "highCMCs" = NULL))
   }
 
   return(list("params" = list(consensus_function = consensus_function,
@@ -458,5 +458,5 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                               theta_thresh = theta_thresh,
                               consensus_function_theta = consensus_function_theta),
               "initialCMCs" = initialCMCs,
-              "finalCMCs" = finalCMCs))
+              "highCMCs" = highCMCs))
 }
