@@ -27,8 +27,8 @@
 #' @keywords internal
 
 findPlaneRansac <- function(surfaceMat,
-                            inlierTreshold = (10^(-5)), # 1 micron
-                            finalSelectionThreshold = 2*(10^(-5)), # 2 micron
+                            inlierTreshold = 1e-5, # 1 micron
+                            finalSelectionThreshold = 2*1e-5, # 2 micron
                             iters = 150,...) {
   assertthat::not_empty(surfaceMat)
   testthat::expect_true(is.matrix(surfaceMat))
@@ -238,8 +238,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @export
 
 selectBFImpression <- function(x3p_path,
-                               ransacInlierThresh = (10^(-5)),
-                               ransacFinalSelectThresh = 2*(10^(-5)),
+                               ransacInlierThresh = 1e-5,
+                               ransacFinalSelectThresh = 2*1e-5,
                                ransacIters = 150,
                                useResiduals = TRUE,
                                croppingThresh = 1,
@@ -341,11 +341,12 @@ selectBFImpression <- function(x3p_path,
 #' @param offset integer value between 0 and m-1 to specify offset of the sample
 #' @param offsetY integer value between 0 and mY-1 to specify different offsets
 #'   for x and y direction.
-#' @param gaussFilterRes **Optional** sampling resolution of the surface matrix
+#' @param gaussFilterRes sampling resolution of the surface matrix
 #'   (given by incrementX or incrementY of the header.info element of an x3p
-#'   object)
-#' @param gaussFilterWavelength **Optional** cut-off wavelength to be attenuated
-#' @param gaussFilterType **Optional** specifies whether a low pass, "lp", high
+#'   object). If not given, then this is determined automatically within the
+#'   function
+#' @param gaussFilterWavelength cut-off wavelength(s) to be attenuated
+#' @param gaussFilterType specifies whether a low pass, "lp", high
 #'   pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
 #'   filterype = "bp" means that wavelength should be a vector of two numbers.
 #'   In this case, the max of these two number will be used for the high pass
@@ -367,8 +368,8 @@ selectBFImpression <- function(x3p_path,
 #' @seealso x3ptools package (LINK)
 
 selectBFImpression_sample_x3p <- function(x3p_path,
-                                          ransacInlierThresh = (10^(-5)),
-                                          ransacFinalSelectThresh = 2*(10^(-5)),
+                                          ransacInlierThresh = 1e-5,
+                                          ransacFinalSelectThresh = 2*1e-5,
                                           ransacIters = 150,
                                           useResiduals = TRUE,
                                           croppingThresh = 1,
@@ -513,8 +514,8 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @seealso imager package (LINK)
 
 selectBFImpression_resize <- function(x3p_path,
-                                      ransacInlierThresh = (10^(-5)),
-                                      ransacFinalSelectThresh = 2*(10^(-5)),
+                                      ransacInlierThresh = 1e-5,
+                                      ransacFinalSelectThresh = 2*1e-5,
                                       ransacIters = 150,
                                       useResiduals = TRUE,
                                       croppingThresh = 1,

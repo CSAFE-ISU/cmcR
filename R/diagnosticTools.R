@@ -24,7 +24,8 @@ x3pListPlot <- function(x3pList,
                                                 y = y*1e6,
                                                 height = value*1e6) %>%
                                          mutate(x3p = rep(name,times = nrow(.)))
-                                     })
+                                     }) %>%
+      mutate(x3p = factor(x3p,levels = names(x3pList)))
 
     plts <- surfaceMat_df %>%
       ggplot(aes(x = x,y = y)) +
@@ -354,260 +355,107 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 
 arrangeCMCPlot <- function(x3p1,
                            x3p2,
-                           x3p1_cmcs,
-                           x3p1_nonCMCs,
-                           x3p2_cmcs,
-                           x3p2_nonCMCs,
-                           cmcType = "Initial",
-                           directionIndic,
+                           allCells,
                            x3pNames,
                            pltType = "faceted"){
 
-  if(cmcType == "high"){
-    x3p1_cmcs <- x3p1_cmcs %>%
-      dplyr::mutate(theta = ifelse(comparison == "comparison_1to2",theta,-theta),
-                    dx = ifelse(comparison == "comparison_1to2",dx,-dx),
-                    dy = ifelse(comparison == "comparison_1to2",dy,-dy),
-                    cmc = rep("yes",times = nrow(.))) %>%
-      select(-comparison) %>%
-      bind_rows(x3p1_nonCMCs %>%
-                  mutate(cmc = rep("no",times = nrow(.)))) %>%
-      mutate(cmc = factor(cmc, levels = c("yes","no")))
+  x3p1_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = 6.25*(firstRow),
+                  lastRow = 6.25*(lastRow),
+                  firstCol = 6.25*(firstCol),
+                  lastCol = 6.25*(lastCol)) %>%
+    dplyr::mutate(midCol = (lastCol + firstCol)/2,
+                  midRow = (lastRow + firstRow)/2,
+                  cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                      floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                      ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                                                    nrow = ceiling(sqrt(max(cellNum))),
+                                                    byrow = TRUE),
+                  x3p = rep(x3pNames[1],times = nrow(.)),
+                  theta = rep(0,times = nrow(.)))
 
-    x3p2_cmcs <- x3p2_cmcs %>%
-      dplyr::mutate(theta = ifelse(comparison == "comparison_1to2",theta,-theta),
-                    dx = ifelse(comparison == "comparison_1to2",dx,-dx),
-                    dy = ifelse(comparison == "comparison_1to2",dy,-dy),
-                    cmc = rep("yes",times = nrow(.))) %>%
-      select(-comparison) %>%
-      bind_rows(x3p2_nonCMCs %>%
-                  mutate(cmc = rep("no",times = nrow(.)))) %>%
-      mutate(cmc = factor(cmc, levels = c("yes","no")))
-
-    x3p1_spokeData <- x3p1_cmcs %>%
-      dplyr::left_join(x3p1_cmcs %>%
-                         purrr::pmap_dfr(~ {
-                           idNum <- ..7 %>%
-                             stringr::str_extract_all(string = ..7,
-                                                      pattern = "[0-9]{1,}") %>%
-                             unlist() %>%
-                             as.numeric()
-
-                           data.frame(cellID = ..7,
-                                      firstRow = idNum[1],
-                                      lastRow = idNum[2],
-                                      firstCol = idNum[3],
-                                      lastCol = idNum[4],
-                                      stringsAsFactors = FALSE)
-                         }),
-                       by = "cellID") %>%
-      dplyr::arrange(cellNum) %>%
-      dplyr::mutate(firstRow = 6.25*(firstRow),
-                    lastRow = 6.25*(lastRow),
-                    firstCol = 6.25*(firstCol),
-                    lastCol = 6.25*(lastCol)) %>%
-      dplyr::mutate(midCol = (lastCol + firstCol)/2,
-                    midRow = (lastRow + firstRow)/2,
-                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                               nrow = ceiling(sqrt(max(cellNum))),
-                                               byrow = TRUE)) %>%
-      dplyr::mutate(x3p = rep(x3pNames[1],times = nrow(.)),
-                    theta = rep(0,times = nrow(.)))
-
-    x3p2_spokeData <- x3p2_cmcs  %>%
-      dplyr::left_join(x3p2_cmcs %>%
-                         purrr::pmap_dfr(~ {
-                           idNum <- ..7 %>%
-                             stringr::str_extract_all(string = ..7,
-                                                      pattern = "[0-9]{1,}") %>%
-                             unlist() %>%
-                             as.numeric()
-
-                           data.frame(cellID = ..7,
-                                      firstRow = idNum[1],
-                                      lastRow = idNum[2],
-                                      firstCol = idNum[3],
-                                      lastCol = idNum[4],stringsAsFactors = FALSE)
-                         }),
-                       by = "cellID") %>%
-      dplyr::arrange(cellNum) %>%
-      # dplyr::mutate(theta = c(-1,1)[directionIndic]*theta,
-      #               dx = c(-1,1)[directionIndic]*dx,
-      #               dy = c(-1,1)[directionIndic]*dy) %>%
-      dplyr::mutate(firstRow = 6.25*(firstRow - dy),
-                    lastRow = 6.25*(lastRow - dy),
-                    firstCol = 6.25*(firstCol - dx),
-                    lastCol = 6.25*(lastCol - dx)) %>%
-      dplyr::mutate(firstRowCentered = firstRow - max(lastRow)/2,
-                    lastRowCentered = lastRow - max(lastRow)/2,
-                    firstColCentered = firstCol - max(lastCol)/2,
-                    lastColCentered = lastCol - max(lastCol)/2) %>%
-      dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2,
-                    bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2,
-                    topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2,
-                    topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2) %>%
-      dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
-                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                               nrow = ceiling(sqrt(max(cellNum))),
-                                               byrow = TRUE)) %>%
-      dplyr::mutate(x3p = x3pNames[2],times = nrow(.))
-  }
-
-  else if(cmcType == "Initial"){
-    x3p1_cmcs <- x3p1_cmcs %>%
-      dplyr::mutate(theta = theta,
-                    dx = dx,
-                    dy = dy,
-                    cmc = rep("yes",times = nrow(.))) %>%
-      bind_rows(x3p1_nonCMCs %>%
-                  mutate(cmc = rep("no",times = nrow(.)))) %>%
-      mutate(cmc = factor(cmc, levels = c("yes","no")))
-
-    x3p2_cmcs <- x3p2_cmcs %>%
-      dplyr::mutate(theta = theta,
-                    dx = dx,
-                    dy = dy,
-                    cmc = rep("yes",times = nrow(.))) %>%
-      bind_rows(x3p2_nonCMCs %>%
-                  mutate(cmc = rep("no",times = nrow(.)))) %>%
-      mutate(cmc = factor(cmc, levels = c("yes","no")))
-
-    x3p1_spokeData <- x3p1_cmcs %>%
-      dplyr::left_join(x3p1_cmcs %>%
-                         purrr::pmap_dfr(~ {
-                           idNum <- ..7 %>%
-                             stringr::str_extract_all(string = ..7,
-                                                      pattern = "[0-9]{1,}") %>%
-                             unlist() %>%
-                             as.numeric()
-
-                           data.frame(cellID = ..7,
-                                      firstRow = idNum[1],
-                                      lastRow = idNum[2],
-                                      firstCol = idNum[3],
-                                      lastCol = idNum[4],stringsAsFactors = FALSE)
-                         }),
-                       by = "cellID") %>%
-      dplyr::arrange(cellNum) %>%
-      dplyr::mutate(firstRow = 6.25*(firstRow),
-                    lastRow = 6.25*(lastRow),
-                    firstCol = 6.25*(firstCol),
-                    lastCol = 6.25*(lastCol)) %>%
-      dplyr::mutate(midCol = (lastCol + firstCol)/2,
-                    midRow = (lastRow + firstRow)/2,
-                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                               nrow = ceiling(sqrt(max(cellNum))),
-                                               byrow = TRUE)) %>%
-      dplyr::mutate(x3p = x3pNames[1],times = nrow(.),
-                    theta = rep(0,times = nrow(.)))
-
-    x3p2_spokeData <- x3p2_cmcs  %>%
-      dplyr::left_join(x3p2_cmcs %>%
-                         purrr::pmap_dfr(~ {
-                           idNum <- ..7 %>%
-                             stringr::str_extract_all(string = ..7,
-                                                      pattern = "[0-9]{1,}") %>%
-                             unlist() %>%
-                             as.numeric()
-
-                           data.frame(cellID = ..7,
-                                      firstRow = idNum[1],
-                                      lastRow = idNum[2],
-                                      firstCol = idNum[3],
-                                      lastCol = idNum[4],stringsAsFactors = FALSE)
-                         }),
-                       by = "cellID") %>%
-      dplyr::arrange(cellID) %>%
-      # dplyr::mutate(theta = c(-1,1)[directionIndic]*theta,
-      #               dx = c(-1,1)[directionIndic]*dx,
-      #               dy = c(-1,1)[directionIndic]*dy) %>%
-      dplyr::mutate(firstRow = 6.25*(firstRow - dy),
-                    lastRow = 6.25*(lastRow - dy),
-                    firstCol = 6.25*(firstCol - dx),
-                    lastCol = 6.25*(lastCol - dx)) %>%
-      dplyr::mutate(firstRowCentered = firstRow - max(lastRow)/2,
-                    lastRowCentered = lastRow - max(lastRow)/2,
-                    firstColCentered = firstCol - max(lastCol)/2,
-                    lastColCentered = lastCol - max(lastCol)/2) %>%
-      dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2,
-                    bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2,
-                    topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2,
-                    topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2) %>%
-      dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
-                    midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                    cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                               nrow = ceiling(sqrt(max(cellNum))),
-                                               byrow = TRUE)) %>%
-      dplyr::mutate(x3p = x3pNames[2],times = nrow(.))
-  }
-
+  x3p2_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = 6.25*(firstRow),
+                  lastRow = 6.25*(lastRow),
+                  firstCol = 6.25*(firstCol),
+                  lastCol = 6.25*(lastCol)) %>%
+    dplyr::mutate(firstRowCentered = firstRow - max(lastRow)/2,
+                  lastRowCentered = lastRow - max(lastRow)/2,
+                  firstColCentered = firstCol - max(lastCol)/2,
+                  lastColCentered = lastCol - max(lastCol)/2) %>%
+    dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - 6.25*dx,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - 6.25*dy,
+                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - 6.25*dx,
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - 6.25*dy) %>%
+    dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
+                  midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
+                  cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                      floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                      ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                                                    nrow = ceiling(sqrt(max(cellNum))),
+                                                    byrow = TRUE),
+                  x3p = rep(x3pNames[2],times = nrow(.)),
+                  theta = theta - median(theta))
 
   x3pPlt <- cmcR::x3pListPlot(x3pList = list(x3p1,x3p2) %>%
                                 setNames(x3pNames),
-                              type = pltType,rotate = c(90,90 + median(x3p2_spokeData$theta)))
+                              type = pltType,
+                              rotate = c(90 - median(allCells %>%
+                                                       filter(cmc == "yes") %>%
+                                                       pull(theta)),
+                                         90))
 
   if(pltType == "faceted"){
 
     x3pPlt <- x3pPlt +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,angle = 0,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,
                                        angle = pi/2,
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,angle = pi,
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
                                        colour = cmc))  +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (theta - median(theta))*(pi/180),
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (pi + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("black","red")) +
-      # ggplot2::guides(colour = FALSE) +
-      ggplot2::geom_text(data = bind_rows(x3p1_spokeData,
-                                          x3p2_spokeData %>%
-                                            mutate(theta = theta - median(theta))),
+      ggplot2::geom_text(data = bind_rows(x3p1_cellGrid,
+                                          x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
@@ -640,7 +488,6 @@ arrangeCMCPlot <- function(x3p1,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("black","red")) +
-      # ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(data = x3p1_spokeData,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
@@ -650,33 +497,32 @@ arrangeCMCPlot <- function(x3p1,
                          size = 3)
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (theta - median(theta))*(pi/180),
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (pi + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p2_spokeData,
+      ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("black","red")) +
       # ggplot2::guides(colour = FALSE) +
-      ggplot2::geom_text(data = x3p2_spokeData %>%
-                           mutate(theta = theta - median(theta)),
+      ggplot2::geom_text(data = x3p2_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
@@ -705,153 +551,112 @@ cmcPlot <- function(x3p1,
                     type = "faceted",
                     x3pNames = c("x3p1","x3p2")){
 
-  # get all cellIDs considered in the comparison -- including those not
-  # identified as CMCs
-  x3p1_topResults <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
-    cmcR::topResultsPerCell()
-
-  x3p2_topResults <- cellCCF_bothDirections_output$comparison_2to1$ccfResults %>%
-    cmcR::topResultsPerCell()
-
-  x3p1_cellID <- x3p1_topResults %>%
-    dplyr::select(cellNum,cellID)
-
-  x3p2_cellID <- x3p2_topResults %>%
-    dplyr::select(cellNum,cellID)
-
-  #some cells are classified as CMCs in one direction, but aren't even
-  #considered in the other direction. To correctly plot the identified CMCs, we
-  #need to get all cellIDs in both directions:
-  mat1_cellIDs <- cellDivision(x3p1$surface.matrix,
-                               cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
-                               cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
-    purrr::map2(names(.),
-               function(mat,horizCell){
-                 purrr::map(.x = names(mat),
-                            function(vertCell) cmcR:::swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
-               }) %>%
-    unlist() %>%
-    data.frame(cellID = .) %>%
-    mutate(cellNum = 1:nrow(.))
-
-  mat2_cellIDs <- cellDivision(x3p2$surface.matrix,
-                               cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_2to1$ccfResults[[1]]$cellNum))),
-                               cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
-    purrr::map2(names(.),
-               function(mat,horizCell){
-                 purrr::map(.x = names(mat),
-                            function(vertCell) cmcR:::swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
-               }) %>%
-    unlist() %>%
-    data.frame(cellID = .) %>%
-    mutate(cellNum = 1:nrow(.))
-
-  # the initial CMCs assigned to particular pair are the minimum CMCs computed
-  # in either "direction", so we'll need to keep track of the direction
   directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
                                 nrow(cmcFilter_improved_output$initialCMC[[2]])))
 
-  # determine which cellIDs are identified as initial CMCs
-  x3p1_initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-cellID) %>%
-    dplyr::left_join(mat1_cellIDs,by = "cellNum") %>%
-    mutate(cellID = as.character(cellID))
 
-  x3p2_initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-cellID) %>%
-    dplyr::left_join(mat2_cellIDs,by = "cellNum") %>%
-    mutate(cellID = as.character(cellID))
+  initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
+    mutate(cmc = rep("yes",times = nrow(.)))
 
-  #cells not identified as CMCs will be drawn as red squares
-  x3p1_nonInitialCMC <- x3p1_cellID %>%
+  nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
+    cmcR::topResultsPerCell() %>%
+    anti_join(initialCMC,by = "cellID") %>%
     ungroup() %>%
-    anti_join(cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-                dplyr::ungroup() %>%
-                dplyr::select(-cellID),
-              by = "cellNum") %>%
-    select(-cellID) %>%
-    left_join(cellCCF_bothDirections_output[[directionIndic]] %>%
-                .$ccfResults %>%
-                cmcR::topResultsPerCell(),
-              by = "cellNum") %>%
-    mutate(cellID = as.character(cellID))
+    mutate(cmc = rep("no",times = nrow(.)))
 
-  x3p2_nonInitialCMC <- x3p2_cellID %>%
-    ungroup() %>%
-    anti_join(cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-                dplyr::ungroup() %>%
-                dplyr::select(-cellID),
-              by = "cellNum") %>%
-    select(-cellID) %>%
-    left_join(cellCCF_bothDirections_output[[directionIndic]] %>%
-                .$ccfResults %>%
-                cmcR::topResultsPerCell(),
-              by = "cellNum") %>%
-    mutate(cellID = as.character(cellID))
+  allInitialCells <- bind_rows(initialCMC,nonInitialCMC) %>%
+    mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+    dplyr::left_join(bind_rows(initialCMC,nonInitialCMC) %>%
+                       purrr::pmap_dfr(~ {
+                         idNum <- ..2 %>%
+                           stringr::str_extract_all(string = ..2,
+                                                    pattern = "[0-9]{1,}") %>%
+                           unlist() %>%
+                           as.numeric()
 
-  # creates plots of the initial CMCs on both x3ps
-  initialCMCPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
-                                  x3p2 = list(x3p2,x3p1)[[directionIndic]],
-                                  x3p1_cmcs = list(x3p1_initialCMC,x3p2_initialCMC)[[directionIndic]],
-                                  x3p1_nonCMCs = list(x3p1_nonInitialCMC,x3p2_nonInitialCMC)[[directionIndic]],
-                                  x3p2_cmcs = list(x3p2_initialCMC,x3p1_initialCMC)[[directionIndic]],
-                                  x3p2_nonCMCs = list(x3p2_nonInitialCMC,x3p1_nonInitialCMC)[[directionIndic]],
-                                  cmcType = "Initial",
-                                  directionIndic = directionIndic,
-                                  x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
-                                  pltType = type)
+                         data.frame(cellID = ..2,
+                                    firstRow = idNum[1],
+                                    lastRow = idNum[2],
+                                    firstCol = idNum[3],
+                                    lastCol = idNum[4],
+                                    stringsAsFactors = FALSE)
+                       }),
+                     by = "cellID")
 
-  if(!purrr::is_empty(cmcFilter_improved_output$highCMCs)){
-    x3p1_highCMC <- cmcFilter_improved_output$highCMCs %>%
-      dplyr::select(-cellID) %>%
-      dplyr::left_join(mat1_cellIDs,by = "cellNum") %>%
-      mutate(cellID = as.character(cellID))
+  initialCMCPlt <- cmcR:::arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+                                         x3p2 = list(x3p2,x3p1)[[directionIndic]],
+                                         allCells = allInitialCells,
+                                         x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
+                                         pltType = type)
 
-    x3p2_highCMC <- cmcFilter_improved_output$highCMCs %>%
-      dplyr::select(-cellID) %>%
-      dplyr::left_join(mat2_cellIDs,by = "cellNum") %>%
-      mutate(cellID = as.character(cellID))
+  highCMCPlt <- NULL #missing by default unless high CMCs exist:
 
-    x3p1_nonhighCMC <- x3p1_cellID %>%
-      ungroup() %>%
-      anti_join(cmcFilter_improved_output$highCMCs %>%
-                  dplyr::select(-cellID),
-                by = "cellNum") %>%
+  if(!purrr::is_empty(cmcFilter_improved_output$highCMC)){
+
+    x3p1_allCellIDs <- cmcR:::cellDivision(fadul1.1$x3p$surface.matrix,
+                                           cellNumHoriz = ceiling(sqrt(max(kmComparison$comparison_1to2$ccfResults[[1]]$cellNum))),
+                                           cellNumVert = ceiling(sqrt(max(kmComparison$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
+      purrr::map2(names(.),
+                  function(mat,horizCell){
+                    purrr::map(.x = names(mat),
+                               function(vertCell) cmcR:::swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
+                  }) %>%
+      unlist() %>%
+      data.frame(cellID = .) %>%
+      mutate(cellNum = 1:nrow(.))
+
+    highCMCs_directionCorrected <- kmCMC$highCMCs %>%
+      mutate(dx = ifelse(comparison == "comparison_2to1",
+                         yes = -dx,
+                         no = dx),
+             dy = ifelse(comparison == "comparison_2to1",
+                         yes = -dy,
+                         no = dy),
+             theta = ifelse(comparison == "comparison_2to1",
+                            yes = -theta,
+                            no = theta)) %>%
+      arrange(cellNum) %>%
       select(-cellID) %>%
-      left_join(cellCCF_bothDirections_output[[1]] %>%
-                  .$ccfResults %>%
-                  cmcR::topResultsPerCell(),
-                by = "cellNum")
-
-    x3p2_nonhighCMC <- x3p2_cellID %>%
+      left_join(x3p1_allCellIDs,by = "cellNum") %>%
       ungroup() %>%
-      anti_join(cmcFilter_improved_output$highCMCs %>%
-                  dplyr::select(-cellID),
-                by = "cellNum") %>%
-      select(-cellID) %>%
-      left_join(cellCCF_bothDirections_output[[2]] %>%
-                  .$ccfResults %>%
-                  cmcR::topResultsPerCell(),
-                by = "cellNum")
+      mutate(cmc = rep("yes",times = nrow(.)),
+             cellID = as.character(cellID))
 
-    highCMCPlt <- cmcR:::arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
-                                        x3p2 = list(x3p2,x3p1)[[directionIndic]],
-                                        x3p1_cmcs = list(x3p1_highCMC,x3p2_highCMC)[[directionIndic]],
-                                        x3p1_nonCMCs = list(x3p1_nonhighCMC,x3p2_nonhighCMC)[[directionIndic]],
-                                        x3p2_cmcs = list(x3p2_highCMC,x3p1_highCMC)[[directionIndic]],
-                                        x3p2_nonCMCs = list(x3p2_nonhighCMC,x3p1_nonhighCMC)[[directionIndic]],
-                                        cmcType = "high",
-                                        directionIndic = directionIndic,
-                                        x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
+    nonHighCMCs_directionCorrected <- kmComparison$comparison_1to2$ccfResults %>%
+      topResultsPerCell() %>%
+      anti_join(highCMCs_directionCorrected,by = "cellNum") %>%
+      ungroup() %>%
+      mutate(cmc = rep("no",times = nrow(.)),
+             cellID = as.character(cellID))
+
+    allHighCMCs <- bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
+      mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+      dplyr::left_join(bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
+                         purrr::pmap_dfr(~ {
+                           idNum <- ..8 %>%
+                             stringr::str_extract_all(string = ..8,
+                                                      pattern = "[0-9]{1,}") %>%
+                             unlist() %>%
+                             as.numeric()
+
+                           data.frame(cellID = ..8,
+                                      firstRow = idNum[1],
+                                      lastRow = idNum[2],
+                                      firstCol = idNum[3],
+                                      lastCol = idNum[4],
+                                      stringsAsFactors = FALSE)
+                         }),
+                       by = "cellID")
+
+    highCMCPlt <- cmcR:::arrangeCMCPlot(x3p1 = x3p1,
+                                        x3p2 = x3p2,
+                                        allCells = allHighCMCs,
+                                        x3pNames = x3pNames,
                                         pltType = type)
-
-    return(list("initialCMC" = initialCMCPlt,
-                "highCMC" = highCMCPlt))
   }
 
-  return(list("initialCMC" = initialCMCPlt))
+  return(list("initialCMC" = initialCMCPlt,
+              "highCMC" = highCMCPlt))
 }
 
 #' Create a bar plot of congruent matching cells per rotation value
@@ -886,7 +691,8 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
                                consensus_function_theta = consensus_function,
-                               highCMCThresh = 1){
+                               highCMCThresh = 1,
+                               x3pNames = c("x3p1","x3p2")){
   #make sure that cellCCF_output is either the output of the cellCCF function or
   #cellCCF_bothDirections
   testthat::expect_true(is.list(cellCCF_output))
@@ -902,14 +708,14 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
                                  theta_thresh = theta_thresh) %>%
-        dplyr::mutate(comparison = "x3p1 vs. x3p2"),
+        dplyr::mutate(comparison = paste0(x3pNames[1]," vs. ",x3pNames[2])),
       cellCCF_output$comparison_2to1$ccfResults %>%
         cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
                                  ccf_thresh = ccf_thresh,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
                                  theta_thresh = theta_thresh) %>%
-        dplyr::mutate(comparison = "x3p2 vs. x3p1")
+        dplyr::mutate(comparison = paste0(x3pNames[2]," vs. ",x3pNames[1]))
     ) %>%
       dplyr::group_by(comparison,theta) %>%
       dplyr::tally() %>%

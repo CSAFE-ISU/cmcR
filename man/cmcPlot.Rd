@@ -2,9 +2,16 @@
 % Please edit documentation in R/diagnosticTools.R
 \name{cmcPlot}
 \alias{cmcPlot}
-\title{Visualize initial and final CMCs for a cartridge case pair comparison}
+\title{Visualize initial and high CMCs for a cartridge case pair comparison}
 \usage{
-cmcPlot(x3p1, x3p2, cellCCF_bothDirections_output, cmcFilter_improved_output)
+cmcPlot(
+  x3p1,
+  x3p2,
+  cellCCF_bothDirections_output,
+  cmcFilter_improved_output,
+  type = "faceted",
+  x3pNames = c("x3p1", "x3p2")
+)
 }
 \arguments{
 \item{x3p1}{an x3p object}
@@ -16,5 +23,5 @@ cmcPlot(x3p1, x3p2, cellCCF_bothDirections_output, cmcFilter_improved_output)
 \item{cmcFilter_improved_output}{output from the function cmcR::cmcFilter_improved}
 }
 \description{
-Visualize initial and final CMCs for a cartridge case pair comparison
+Visualize initial and high CMCs for a cartridge case pair comparison
 }
