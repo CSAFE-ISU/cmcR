@@ -7,8 +7,8 @@ x3ptools::sample_x3p to downsample the scan.}
 \usage{
 selectBFImpression_sample_x3p(
   x3p_path,
-  ransacInlierThresh = (10^(-5)),
-  ransacFinalSelectThresh = 2 * (10^(-5)),
+  ransacInlierThresh = 1e-05,
+  ransacFinalSelectThresh = 2 * 1e-05,
   ransacIters = 150,
   useResiduals = TRUE,
   croppingThresh = 1,
@@ -55,13 +55,14 @@ direction and every mYth value is included in y direction}
 \item{offsetY}{integer value between 0 and mY-1 to specify different offsets
 for x and y direction.}
 
-\item{gaussFilterRes}{\strong{Optional} sampling resolution of the surface matrix
+\item{gaussFilterRes}{sampling resolution of the surface matrix
 (given by incrementX or incrementY of the header.info element of an x3p
-object)}
+object). If not given, then this is determined automatically within the
+function}
 
-\item{gaussFilterWavelength}{\strong{Optional} cut-off wavelength to be attenuated}
+\item{gaussFilterWavelength}{cut-off wavelength(s) to be attenuated}
 
-\item{gaussFilterType}{\strong{Optional} specifies whether a low pass, "lp", high
+\item{gaussFilterType}{specifies whether a low pass, "lp", high
 pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
 filterype = "bp" means that wavelength should be a vector of two numbers.
 In this case, the max of these two number will be used for the high pass

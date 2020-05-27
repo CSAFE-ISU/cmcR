@@ -12,7 +12,8 @@ cmcPerThetaBarPlot(
   dy_thresh = dx_thresh,
   theta_thresh = 3,
   consensus_function_theta = consensus_function,
-  highCMCThresh = 1
+  highCMCThresh = 1,
+  x3pNames = c("x3p1", "x3p2")
 )
 }
 \arguments{

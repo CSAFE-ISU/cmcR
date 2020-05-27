@@ -7,8 +7,8 @@ imager::resize to resize the scan.}
 \usage{
 selectBFImpression_resize(
   x3p_path,
-  ransacInlierThresh = (10^(-5)),
-  ransacFinalSelectThresh = 2 * (10^(-5)),
+  ransacInlierThresh = 1e-05,
+  ransacFinalSelectThresh = 2 * 1e-05,
   ransacIters = 150,
   useResiduals = TRUE,
   croppingThresh = 1,

@@ -730,6 +730,8 @@ cellCCF <- function(x3p1,
       }
     }
 
+    stopifnot(all(sd1 > 0),all(sd2 > 0))
+
     mat1_splitShifted <- purrr::pmap(list(mat1_splitFiltered,m1,sd1),
                                      ~ standardizeSurfaceMat(surfaceMat = ..1,
                                                              m = ..2,
@@ -806,8 +808,9 @@ cellCCF <- function(x3p1,
 #'
 #' @name cellCCF_bothDirections
 #'
-#' @description Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
-#' for x3p2 vs. x3p1. See cellCCF function documentation for more details.
+#' @description Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2
+#'   and again for x3p2 vs. x3p1. See cellCCF function documentation for more
+#'   details.
 #'
 #' @param x3p1 (no default) an x3p object containing the surface matrix of a
 #'   breech face impression
@@ -837,16 +840,16 @@ cellCCF <- function(x3p1,
 #'   (using rawCorrTieBreaker = which.min or which.max, respectively).
 #' @param use argument to be passed to the cor function. Dictates how NAs are
 #'   dealt with in computing the correlation.
-#' @param centerCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   shifted prior to CCF calculation. Default is that no shifting is performed.
-#'   If set to "wholeMatrix", then each cell is subracted by the mean of the
-#'   whole matrix. If set to "individualCell", then each cell is subtracted by
-#'   its particular mean.
-#' @param scaleCell **OPTIONAL** (default missing) dictates if cell is to be
-#'   scaled prior to CCF calculation. Default is that no scaling is performed.
-#'   If set to "wholeMatrix", then each cell is divided by the standard
-#'   deviation of the whole matrix. If set to "individualCell", then each cell
-#'   is divided by its particular standard deviation.
+#' @param centerCell  dictates if cell is to be shifted prior to CCF
+#'   calculation. Default is that no shifting is performed. If set to
+#'   "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+#'   If set to "individualCell", then each cell is subtracted by its particular
+#'   mean.
+#' @param scaleCell dictates if cell is to be scaled prior to CCF calculation.
+#'   Default is that no scaling is performed. If set to "wholeMatrix", then each
+#'   cell is divided by the standard deviation of the whole matrix. If set to
+#'   "individualCell", then each cell is divided by its particular standard
+#'   deviation.
 #'
 #' @examples
 #' \dontrun{

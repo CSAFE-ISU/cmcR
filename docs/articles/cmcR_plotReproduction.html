@@ -105,7 +105,7 @@
 <p><!-- The pseudocode below shows how you can read an x3p file into `R` and perform the necessary pre-processing procedures on the surface matrix therein before applying the CMC method. Note that the package defaults (as of 4/13/20) are to perform the following: --></p>
 <p><!-- 1. Downsample the surface matrix by a factor of 4 (i.e., sample every other row/column from the surface matrix) --></p>
 <p><!-- 2. Identify the breech face impression height value in the surface matrix using the RANSAC (Random Sample Consensus method). --></p>
-<p><!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `finalSelectionThresh` threshold. --></p>
+<p><!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `highSelectionThresh` threshold. --></p>
 <p><!-- 4. Remove rows/columns on the exterior of the resulting breech face impression surface matrix. --></p>
 <p><!-- 5. Detect and remove any observations within the firing pin impression circle on the interior of the breech face impression surface matrix. --></p>
 <p><!-- 6. Apply a Gaussian bandpass filter to the resulting surface matrix with wavelength cutoffs 16 and 250 microns $(\mu m)$. --></p>
@@ -165,6 +165,7 @@
 <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3p_snapshot</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span>)
 
 <span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span>()</pre></body></html></div>
+<p>TODO:</p>
 <p>The <code>magick</code> package can be used to read these .png files back into <code>R</code> for visualization. We can see the x3p scan snapshots below.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-1.png"</span>),
                        <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-2.png"</span>))) <span class="kw">%&gt;%</span>
@@ -178,46 +179,15 @@
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
 <span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
 <span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">mat</span> <span class="kw">&lt;-</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>
-
-<span class="no">mat</span>$<span class="no">surface.matrix</span> <span class="kw">&lt;-</span> <span class="no">mat</span>$<span class="no">surface.matrix</span> - <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span>(<span class="no">mat</span>$<span class="no">surface.matrix</span>,<span class="kw">na.rm</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
-
-<span class="no">mat</span> <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_rotate.html">rotate_x3p</a></span>(<span class="kw">angle</span> <span class="kw">=</span> <span class="fl">90</span>) <span class="kw">%&gt;%</span> <span class="co">#for continuity with plots below</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_to_df.html">x3p_to_df</a></span>() <span class="kw">%&gt;%</span>
-  <span class="fu">mutate</span>(<span class="kw">height</span> <span class="kw">=</span> <span class="no">value</span>*<span class="fl">1e6</span>) <span class="kw">%&gt;%</span>
-  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="kw">x</span> <span class="kw">=</span> <span class="no">x</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="no">y</span>)) +
-  <span class="fu">geom_raster</span>(<span class="fu">aes</span>(<span class="kw">fill</span> <span class="kw">=</span> <span class="no">height</span>))  +
-  <span class="fu">scale_fill_gradientn</span>(<span class="kw">colours</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'#7f3b08'</span>,<span class="st">'#b35806'</span>,<span class="st">'#e08214'</span>,<span class="st">'#fdb863'</span>,<span class="st">'#fee0b6'</span>,<span class="st">'#f7f7f7'</span>,<span class="st">'#d8daeb'</span>,<span class="st">'#b2abd2'</span>,<span class="st">'#8073ac'</span>,<span class="st">'#542788'</span>,<span class="st">'#2d004b'</span>)),
-                       <span class="kw">values</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.1</span>,<span class="fl">.2</span>,<span class="fl">.3</span>,<span class="fl">.4</span>,<span class="fl">.5</span>,<span class="fl">.6</span>,<span class="fl">.7</span>,<span class="fl">.8</span>,<span class="fl">.9</span>,<span class="fl">1</span>),
-                        <span class="kw">breaks</span> <span class="kw">=</span> <span class="kw">function</span>(<span class="no">lims</span>){
-                          <span class="no">dat</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span>(<span class="no">mat</span>$<span class="no">surface.matrix</span>*<span class="fl">1e6</span>),<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.1</span>,<span class="fl">.3</span>,<span class="fl">.5</span>,<span class="fl">.7</span>,<span class="fl">.9</span>,<span class="fl">1</span>),<span class="kw">na.rm</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
-
-                             <span class="no">dat</span> <span class="kw">&lt;-</span> <span class="no">dat</span> <span class="kw">%&gt;%</span>
-                               <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">dat</span>),<span class="st">" ["</span>,<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="no">dat</span>,<span class="fl">3</span>),<span class="st">"]"</span>))
-
-                          <span class="fu"><a href="https://rdrr.io/r/base/function.html">return</a></span>(<span class="no">dat</span>)
-                          },
-                        <span class="kw">na.value</span> <span class="kw">=</span> <span class="st">"grey80"</span>) +
-  <span class="fu">theme_grey</span>() +
-  <span class="fu">coord_fixed</span>(<span class="kw">expand</span> <span class="kw">=</span> <span class="fl">FALSE</span>) +
-  <span class="fu">theme</span>(<span class="kw">axis.title.x</span> <span class="kw">=</span> <span class="fu">element_blank</span>(),
-        <span class="kw">axis.text.x</span> <span class="kw">=</span> <span class="fu">element_blank</span>(),
-        <span class="kw">axis.ticks.x</span> <span class="kw">=</span> <span class="fu">element_blank</span>(),
-        <span class="kw">axis.title.y</span> <span class="kw">=</span> <span class="fu">element_blank</span>(),
-        <span class="kw">axis.text.y</span> <span class="kw">=</span> <span class="fu">element_blank</span>(),
-        <span class="kw">axis.ticks.y</span> <span class="kw">=</span> <span class="fu">element_blank</span>()) +
-  <span class="fu">guides</span>(<span class="kw">fill</span> <span class="kw">=</span> <span class="fu">guide_colourbar</span>(<span class="kw">barheight</span> <span class="kw">=</span> <span class="kw pkg">grid</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span>(<span class="fl">3</span>,<span class="st">"in"</span>),
-                                <span class="kw">label.theme</span> <span class="kw">=</span> <span class="fu">element_text</span>(<span class="kw">size</span> <span class="kw">=</span> <span class="fl">8</span>),
-                                <span class="kw">frame.colour</span> <span class="kw">=</span> <span class="st">"black"</span>,
-                                <span class="kw">ticks.colour</span> <span class="kw">=</span> <span class="st">"black"</span>)) +
-  <span class="fu">labs</span>(<span class="kw">fill</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span>(<span class="st">"Relative Height ["</span>*<span class="no">mu</span>*<span class="st">"m]"</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">x3pListPlot</span>(<span class="kw">x3pList</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="st">"Fadul 1-1"</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="st">"Fadul 1-2"</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>),
+                  <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>,
+                  <span class="kw">rotate</span> <span class="kw">=</span> <span class="fl">90</span>)</pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
 <div id="cmc-plot-figure-4" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cmc-plot-figure-4" class="anchor"></a>CMC Plot (Figure 4)</h2>
-<p>The code below will perform the cell-based comparison procedure and then determine the initial/final CMCs for the known match and known non-match pairs of cartridge cases. The “initial” CMCs are determined based on the originally proposed method from Song (2013) while the “final” CMCs are determined using the “High CMC” method proposed by Tong et al. (2015).</p>
+<p>The code below will perform the cell-based comparison procedure and then determine the initial/high CMCs for the known match and known non-match pairs of cartridge cases. The “initial” CMCs are determined based on the originally proposed method from Song (2013) while the “high” CMCs are determined using the “High CMC” method proposed by Tong et al. (2015).</p>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="co"># undebug(cmcR:::checkForBreechface)</span>
 <span class="co"># debug(cmcR:::cellCCF)</span>
 
@@ -242,39 +212,30 @@
                          <span class="kw">ccf_thresh</span> <span class="kw">=</span> <span class="fl">.5</span>,
                          <span class="kw">dx_thresh</span> <span class="kw">=</span> <span class="fl">20</span>,
                          <span class="kw">theta_thresh</span> <span class="kw">=</span> <span class="fl">6</span>)</pre></body></html></div>
-<p>We can then visualize the CMCs for these comarisons. Below are the final CMCs for the known match pair.</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># debug(cmcR:::arrangeCMCPlot)</span>
-
+<p>We can then visualize the CMCs for these comarisons. Below are the high CMCs for the known match pair.</p>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="co"># debugonce(cmcR:::x3pListPlot)</span>
 <span class="no">kmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                         <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
                         <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
-                        <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>)
-
-<span class="no">kmPlts</span>$<span class="no">finalCMC</span>
-<span class="co">#&gt; [[1]]</span></pre></body></html></div>
+                        <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>,
+                        <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>)
+<span class="no">kmPlts</span>$<span class="no">highCMC</span></pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<pre><code>#&gt; 
-#&gt; [[2]]</code></pre>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
-<p>The known non-match pair didn’t yield any final CMCs, so we can only visualize the initial CMCs.</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="co"># debug(cmcR:::arrangeCMCPlot)</span>
+<p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the initial CMCs.</p>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="co"># debug(cmcR:::arrangeCMCPlot)</span>
 
 <span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                    <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
                    <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">knmComparison</span>,
                    <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">knmCMC</span>)
 
-<span class="no">knmPlts</span>$<span class="no">initialCMC</span>
-<span class="co">#&gt; [[1]]</span></pre></body></html></div>
+<span class="no">knmPlts</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
-<pre><code>#&gt; 
-#&gt; [[2]]</code></pre>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-2.png" width="700"></p>
 </div>
 <div id="bonus-ccf-map" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bonus-ccf-map" class="anchor"></a>Bonus: CCF “Map”</h2>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">finalCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu">getCellRegionPairs</span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,<span class="no">fadul1.2</span>$<span class="no">x3p</span>,<span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">highCMCs</span>,<span class="kw">params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
 
 <span class="no">kmCellRegionPairs</span>[<span class="fl">3</span>] <span class="kw">%&gt;%</span>
   <span class="fu">map2</span>(<span class="kw">.x</span> <span class="kw">=</span> <span class="no">.</span>,
@@ -429,7 +390,7 @@
 <!--                                  dx_thresh = 10, -->
 <!--                                  theta_thresh = 3)) -->
 <!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = kmCMCs$`1.1_1.2`$finalCMCs) -->
+<!--               cmcDF = kmCMCs$`1.1_1.2`$highCMCs) -->
 <!-- ``` -->
 <!-- ```{r} -->
 <!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
@@ -441,15 +402,15 @@
 <!-- bind_rows(kmCMCs %>% -->
 <!--             map2_dfr(.x = ., -->
 <!--                      .y = names(.), -->
-<!--                      ~ .$finalCMCs %>% -->
+<!--                      ~ .$highCMCs %>% -->
 <!--                        mutate(pair = rep(.y,times = nrow(.)), -->
 <!--                               comparisonType = "known match")), -->
 <!--           knmCMCs %>% -->
 <!--             map2_dfr(.x = ., -->
 <!--                      .y = names(.), -->
 <!--                      function(cmcs = .x,name = .y){ -->
-<!--                        if(!is.null(cmcs$finalCMCs)){ -->
-<!--                        return(cmcs$finalCMCs %>% -->
+<!--                        if(!is.null(cmcs$highCMCs)){ -->
+<!--                        return(cmcs$highCMCs %>% -->
 <!--                        mutate(pair = rep(name,times = nrow(.)), -->
 <!--                               comparisonType = "known non-match")) -->
 <!--                        } -->

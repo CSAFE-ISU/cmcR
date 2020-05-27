@@ -52,7 +52,9 @@ preProcess_ransac <- function(surfaceMat,
     candidatePlane <- lm(depth ~ row + col,
                          data = observedPixelLocations[rowsToSample, ])
 
+    suppressWarnings(
     preds <- predict(candidatePlane, observedPixelLocations)
+    )
 
     errors <- abs(preds - observedPixelLocations$depth)
     inlierBool <- errors < inlierTreshold
@@ -165,7 +167,7 @@ preProcess_levelBF <- function(ransacFit,
 #' @export
 
 preProcess_cropWS <- function(surfaceMat,
-                              croppingThresh = 2){
+                              croppingThresh = 1){
   #Look at the middle 20% of columns and count the number of non-NA pixels in each
   colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
                          (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
@@ -380,8 +382,8 @@ preProcess_gaussFilter <- function(surfaceMat,
                                    wavelength = c(16,250),
                                    filtertype = "bp"){
 
-  if(res < .00001){ #if resolution measured in meters:
-    res <- res*(10^(6)) #rescale to microns
+  if(res < .0001){ #if resolution measured in meters:
+    res <- res*1e5 #rescale to microns
   }
 
   surfaceMatMissing <- is.na(surfaceMat)
@@ -389,7 +391,7 @@ preProcess_gaussFilter <- function(surfaceMat,
   surfaceMatFake <- surfaceMat - mean(as.vector(surfaceMat),na.rm=TRUE)
   surfaceMatFake[is.na(surfaceMatFake)] <- 0
 
-  surfaceMatFake <- surfaceMatFake*(10^6) #scale to microns (avoids small number numerical issues?)
+  surfaceMatFake <- surfaceMatFake*1e5
 
   surfaceMatFiltered <- cmcR:::gaussianFilter(surfaceMat = surfaceMatFake,
                                               res = res,

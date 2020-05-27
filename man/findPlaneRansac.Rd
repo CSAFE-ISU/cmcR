@@ -6,8 +6,8 @@
 \usage{
 findPlaneRansac(
   surfaceMat,
-  inlierTreshold = (10^(-5)),
-  finalSelectionThreshold = 2 * (10^(-5)),
+  inlierTreshold = 1e-05,
+  finalSelectionThreshold = 2 * 1e-05,
   iters = 150,
   ...
 )

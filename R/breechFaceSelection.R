@@ -54,7 +54,9 @@ findPlaneRansac <- function(surfaceMat,
     candidatePlane <- lm(depth ~ row + col,
                          data = observedPixelLocations[rowsToSample, ])
 
+    suppressWarnings(
     preds <- predict(candidatePlane, observedPixelLocations)
+    )
 
     errors <- abs(preds - observedPixelLocations$depth)
     inlierBool <- errors < inlierTreshold
@@ -216,15 +218,14 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #'   breech face impression
 #' @param standardizeBF subtract mean and divide by standard deviation of
 #'   processed surface matrix
-#' @param gaussFilterRes **Optional** sampling resolution of the surface matrix
-#'   (given by incrementX or incrementY of the header.info element of an x3p
-#'   object)
-#' @param gaussFilterWavelength **Optional** cut-off wavelength to be attenuated
-#' @param gaussFilterType **Optional** specifies whether a low pass, "lp", high
-#'   pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
-#'   filterype = "bp" means that wavelength should be a vector of two numbers.
-#'   In this case, the max of these two number will be used for the high pass
-#'   filter and the min for the low pass filter.
+#' @param gaussFilterRes sampling resolution of the surface matrix (given by
+#'   incrementX or incrementY of the header.info element of an x3p object)
+#' @param gaussFilterWavelength cut-off wavelength to be attenuated
+#' @param gaussFilterType specifies whether a low pass, "lp", high pass, "hp",
+#'   or bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
+#'   means that wavelength should be a vector of two numbers. In this case, the
+#'   max of these two number will be used for the high pass filter and the min
+#'   for the low pass filter.
 #'
 #' @return x3p object containing the processed breech face
 #' @examples
@@ -250,10 +251,6 @@ selectBFImpression <- function(x3p_path,
 
   x3p <- x3ptools::read_x3p(x3p_path)
 
-  if(!preProcess){
-    return(x3p)
-  }
-
   #First, we want to find the approximate height value(s) of the breech face
   #impression within the cartridge case scan. We can find this using the RANSAC
   #method
@@ -273,6 +270,10 @@ selectBFImpression <- function(x3p_path,
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
 
+  stopifnot(is.matrix(bfImpression_ransacSelected),
+            all(dim(bfImpression_ransacSelected) > c(0,0)),
+            sum(!is.na(bfImpression_ransacSelected)) > 0)
+
   #Some additional, unwanted pixels remain in the middle of the cartridge scan
   #even after the RANSAC method has selected the breech face impression height
   #values. We can remove these unwanted pixels by identifying the equation of
@@ -285,9 +286,13 @@ selectBFImpression <- function(x3p_path,
                                                    meshSize = 1,
                                                    houghScoreQuant = .9)
 
+  stopifnot(is.data.frame(fpImpressionCircle), nrow(fpImpressionCircle) == 1)
+
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
                                                 fpImpressionCircle = fpImpressionCircle)
+
+  stopifnot(is.matrix(bfImpressionFinal))
 
   if(standardizeBF){
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
@@ -304,6 +309,10 @@ selectBFImpression <- function(x3p_path,
                                    wavelength = gaussFilterWavelength,
                                    filtertype = gaussFilterType)
   }
+
+  stopifnot(is.matrix(bfImpressionFinal),
+            all(dim(bfImpressionFinal) > c(0,0)),
+            sum(!is.na(bfImpressionFinal)) > 0)
 
   x3p$surface.matrix <- bfImpressionFinal
 
@@ -409,6 +418,10 @@ selectBFImpression_sample_x3p <- function(x3p_path,
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
 
+  stopifnot(is.matrix(bfImpression_ransacSelected),
+            all(dim(bfImpression_ransacSelected) > c(0,0)),
+            sum(!is.na(bfImpression_ransacSelected)) > 0)
+
   #Some additional, unwanted pixels remain in the middle of the cartridge scan
   #even after the RANSAC method has selected the breech face impression height
   #values. We can remove these unwanted pixels by identifying the equation of
@@ -420,6 +433,9 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                                   smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
                                                   meshSize = 1,
                                                   houghScoreQuant = .9)
+
+  stopifnot(is.data.frame(fpImpressionCircle),
+            nrow(fpImpressionCircle) == 1)
 
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
@@ -439,6 +455,10 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                    wavelength = gaussFilterWavelength,
                                    filtertype = gaussFilterType)
   }
+
+  stopifnot(is.matrix(bfImpressionFinal),
+            all(dim(bfImpressionFinal) > c(0,0)),
+            sum(!is.na(bfImpressionFinal)) > 0)
 
   #Important note: x3ptools and imager read an image from a surface matrix
   #starting from the bottom left corner and moving upwards. Thus, a matrix ends
@@ -556,6 +576,10 @@ selectBFImpression_resize <- function(x3p_path,
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
 
+  stopifnot(is.matrix(bfImpression_ransacSelected),
+            all(dim(bfImpression_ransacSelected) > c(0,0)),
+            sum(!is.na(bfImpression_ransacSelected)) > 0)
+
   #Some additional, unwanted pixels remain in the middle of the cartridge scan
   #even after the RANSAC method has selected the breech face impression height
   #values. We can remove these unwanted pixels by identifying the equation of
@@ -567,6 +591,9 @@ selectBFImpression_resize <- function(x3p_path,
                                                   smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
                                                   meshSize = 1,
                                                   houghScoreQuant = .9)
+
+  stopifnot(is.data.frame(fpImpressionCircle),
+            nrow(fpImpressionCircle) == 1)
 
   #This then filters out any pixels within the firing pin
   bfImpressionFinal <- removeFPImpressionCircle(bfImpression = bfImpression_ransacSelected,
@@ -596,6 +623,10 @@ selectBFImpression_resize <- function(x3p_path,
                           sizeX = nrow(bfImpressionFinal),
                           incrementY = (x3p$incrementY/x3p$sizeY)*size_y,
                           incrementX = (x3p$incrementX/x3p$sizeX)*size_x)
+
+  stopifnot(is.matrix(bfImpressionFinal),
+            all(dim(bfImpressionFinal) > c(0,0)),
+            sum(!is.na(bfImpressionFinal)) > 0)
 
   x3p$surface.matrix <- bfImpressionFinal
 

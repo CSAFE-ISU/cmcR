@@ -142,7 +142,7 @@ cmcFilterPerTheta <- function(ccfResults,
                 .y = names(.),
                 function(thetaSpecificResults,theta){
                   thetaSpecificResults %>%
-                    select(-theta) %>%
+                    dplyr::select(-theta) %>%
                     dplyr::mutate(theta = rep(as.numeric(theta),times = nrow(.)))
                 }) %>%
     setNames(names(ccfResults))
@@ -354,7 +354,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                   dy_thresh = dy_thresh,
                                   theta_thresh = theta_thresh,
                                   consensus_function_theta = consensus_function_theta) %>%
-                 ungroup())
+                 dplyr::ungroup())
 
   cmcPerTheta <-  cellCCF_bothDirections_output %>%
     purrr::map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
@@ -398,8 +398,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   if(any(is.na(thetaMax))){
     #the direction that didn't pass gets assigned initial CMCs:
     highCMCs1 <- initialCMCs[[which(is.na(thetaMax))]] %>%
-      ungroup() %>%
-      mutate(comparison = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
+      dplyr::ungroup() %>%
+      dplyr::mutate(comparison = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
 
 
     highCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],

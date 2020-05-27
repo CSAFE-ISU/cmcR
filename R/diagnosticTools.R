@@ -18,95 +18,95 @@ x3pListPlot <- function(x3pList,
                                                                                         theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
                                        x3p %>%
-                                         x3p_to_df() %>%
-                                         mutate(value = value - median(value,na.rm = TRUE)) %>%
-                                         mutate(x = x*1e6,
-                                                y = y*1e6,
-                                                height = value*1e6) %>%
-                                         mutate(x3p = rep(name,times = nrow(.)))
+                                         x3ptools::x3p_to_df() %>%
+                                         dplyr::mutate(value = value - median(value,na.rm = TRUE)) %>%
+                                         dplyr::mutate(x = x*1e6,
+                                                       y = y*1e6,
+                                                       height = value*1e6) %>%
+                                         dplyr::mutate(x3p = rep(name,times = nrow(.)))
                                      }) %>%
-      mutate(x3p = factor(x3p,levels = names(x3pList)))
+      dplyr::mutate(x3p = factor(x3p,levels = names(x3pList)))
 
     plts <- surfaceMat_df %>%
-      ggplot(aes(x = x,y = y)) +
-      geom_raster(aes(fill = height))  +
-      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                           breaks = function(lims){
-                             dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
+      ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+      ggplot2::geom_raster(aes(fill = height))  +
+      ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                                    values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                                    breaks = function(lims){
+                                      dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
 
-                             dat <- dat %>%
-                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
+                                      dat <- dat %>%
+                                        setNames(paste0(names(dat)," [",round(dat,3),"]"))
 
-                             return(dat)
-                           },
-                           na.value = "grey80") +
-      coord_fixed(expand = FALSE) +
-      theme_minimal() +
-      theme(axis.title.x = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.title.y = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks.y = element_blank(),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.background = element_blank()) +
-      guides(fill = guide_colourbar(barheight = grid::unit(2.5,"in"),
-                                    label.theme = element_text(size = 8),
-                                    title.theme = ggplot2::element_text(size = 10),
-                                    frame.colour = "black",
-                                    ticks.colour = "black"),
-             colour = FALSE) +
-      labs(fill = expression("Rel. Height ["*mu*"m]")) +
-      facet_wrap(~ x3p)
+                                      return(dat)
+                                    },
+                                    na.value = "grey80") +
+      ggplot2::coord_fixed(expand = FALSE) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                     axis.text.x = ggplot2::element_blank(),
+                     axis.ticks.x = ggplot2::element_blank(),
+                     axis.title.y = ggplot2::element_blank(),
+                     axis.text.y = ggplot2::element_blank(),
+                     axis.ticks.y = ggplot2::element_blank(),
+                     panel.grid.major = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank(),
+                     panel.background = ggplot2::element_blank()) +
+      ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(2.5,"in"),
+                                                      label.theme = ggplot2::element_text(size = 8),
+                                                      title.theme = ggplot2::element_text(size = 10),
+                                                      frame.colour = "black",
+                                                      ticks.colour = "black"),
+                      colour = FALSE) +
+      ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
+      ggplot2::facet_wrap(~ x3p)
   }
   else if(type == "list"){
-    plts <- purrr::pmap_dfr(.l = list(x3pList,
-                                      names(x3pList),
-                                      rotate),
-                            function(x3p,name,theta){
-                              x3p$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p$surface.matrix,
-                                                                               theta = theta + 180) #+180 to stay with what rotate_x3p would output
+    plts <- purrr::pmap(.l = list(x3pList,
+                                  names(x3pList),
+                                  rotate),
+                        function(x3p,name,theta){
+                          x3p$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p$surface.matrix,
+                                                                           theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
-                              surfaceMat_df <- x3p %>%
-                                x3p_to_df() %>%
-                                mutate(value = value - median(value,na.rm = TRUE)) %>%
-                                mutate(x = x*1e6,
-                                       y = y*1e6,
-                                       height = value*1e6) %>%
-                                mutate(x3p = rep(name,times = nrow(.)))
+                          surfaceMat_df <- x3p %>%
+                            x3ptools::x3p_to_df() %>%
+                            dplyr::mutate(value = value - median(value,na.rm = TRUE)) %>%
+                            dplyr::mutate(x = x*1e6,
+                                          y = y*1e6,
+                                          height = value*1e6) %>%
+                            dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
-                              surfaceMat_df %>%
-                                ggplot(aes(x = x,y = y)) +
-                                geom_raster(aes(fill = height))  +
-                                scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                                                     values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
-                                                     breaks = function(lims){
-                                                       dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
+                          surfaceMat_df %>%
+                            ggplot2::ggplot(aes(x = x,y = y)) +
+                            ggplot2::geom_raster(aes(fill = height))  +
+                            ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                                                          values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                                                          breaks = function(lims){
+                                                            dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
 
-                                                       dat <- dat %>%
-                                                         setNames(paste0(names(dat)," [",round(dat,3),"]"))
+                                                            dat <- dat %>%
+                                                              setNames(paste0(names(dat)," [",round(dat,3),"]"))
 
-                                                       return(dat)
-                                                     },
-                                                     na.value = "grey80") +
-                                theme_minimal() +
-                                coord_fixed(expand = FALSE) +
-                                theme(axis.title.x = element_blank(),
-                                      axis.text.x = element_blank(),
-                                      axis.ticks.x = element_blank(),
-                                      axis.title.y = element_blank(),
-                                      axis.text.y = element_blank(),
-                                      axis.ticks.y = element_blank()) +
-                                guides(fill = guide_colourbar(barheight = grid::unit(3,"in"),
-                                                              label.theme = element_text(size = 8),
-                                                              title.theme = ggplot2::element_text(size = 10),
-                                                              frame.colour = "black",
-                                                              ticks.colour = "black"),
-                                       colour = FALSE) +
-                                labs(fill = expression("Rel. Height ["*mu*"m]"))
-                            })
+                                                            return(dat)
+                                                          },
+                                                          na.value = "grey80") +
+                            ggplot2::theme_minimal() +
+                            ggplot2::coord_fixed(expand = FALSE) +
+                            ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                                           axis.text.x = ggplot2::element_blank(),
+                                           axis.ticks.x = ggplot2::element_blank(),
+                                           axis.title.y = ggplot2::element_blank(),
+                                           axis.text.y = ggplot2::element_blank(),
+                                           axis.ticks.y = ggplot2::element_blank()) +
+                            ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(3,"in"),
+                                                                            label.theme = ggplot2::element_text(size = 8),
+                                                                            title.theme = ggplot2::element_text(size = 10),
+                                                                            frame.colour = "black",
+                                                                            ticks.colour = "black"),
+                                            colour = FALSE) +
+                            ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]"))
+                        })
   }
   return(plts)
 }
@@ -465,30 +465,30 @@ arrangeCMCPlot <- function(x3p1,
   }
   else if(pltType == "list"){
     x3pPlt[[1]] <- x3pPlt[[1]] +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,angle = 0,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,
                                        angle = pi/2,
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,angle = pi,
                                        radius = lastCol - firstCol,
                                        colour = cmc)) +
-      ggplot2::geom_spoke(data = x3p1_spokeData,
+      ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("black","red")) +
-      ggplot2::geom_text(data = x3p1_spokeData,
+      ggplot2::geom_text(data = x3p1_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
@@ -556,16 +556,16 @@ cmcPlot <- function(x3p1,
 
 
   initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-    mutate(cmc = rep("yes",times = nrow(.)))
+    dplyr::mutate(cmc = rep("yes",times = nrow(.)))
 
   nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     cmcR::topResultsPerCell() %>%
-    anti_join(initialCMC,by = "cellID") %>%
-    ungroup() %>%
-    mutate(cmc = rep("no",times = nrow(.)))
+    dplyr::anti_join(initialCMC,by = "cellID") %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(cmc = rep("no",times = nrow(.)))
 
-  allInitialCells <- bind_rows(initialCMC,nonInitialCMC) %>%
-    mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+  allInitialCells <- dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
     dplyr::left_join(bind_rows(initialCMC,nonInitialCMC) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
@@ -603,34 +603,35 @@ cmcPlot <- function(x3p1,
                   }) %>%
       unlist() %>%
       data.frame(cellID = .) %>%
-      mutate(cellNum = 1:nrow(.))
+      dplyr::mutate(cellNum = 1:nrow(.))
 
     highCMCs_directionCorrected <- kmCMC$highCMCs %>%
-      mutate(dx = ifelse(comparison == "comparison_2to1",
-                         yes = -dx,
-                         no = dx),
-             dy = ifelse(comparison == "comparison_2to1",
-                         yes = -dy,
-                         no = dy),
-             theta = ifelse(comparison == "comparison_2to1",
-                            yes = -theta,
-                            no = theta)) %>%
-      arrange(cellNum) %>%
-      select(-cellID) %>%
-      left_join(x3p1_allCellIDs,by = "cellNum") %>%
-      ungroup() %>%
-      mutate(cmc = rep("yes",times = nrow(.)),
-             cellID = as.character(cellID))
+      dplyr::mutate(dx = ifelse(comparison == "comparison_2to1",
+                                yes = -dx,
+                                no = dx),
+                    dy = ifelse(comparison == "comparison_2to1",
+                                yes = -dy,
+                                no = dy),
+                    theta = ifelse(comparison == "comparison_2to1",
+                                   yes = -theta,
+                                   no = theta)) %>%
+      dplyr::arrange(cellNum) %>%
+      dplyr::select(-cellID) %>%
+      dplyr::left_join(x3p1_allCellIDs,by = "cellNum") %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(cmc = rep("yes",times = nrow(.)),
+                    cellID = as.character(cellID))
 
     nonHighCMCs_directionCorrected <- kmComparison$comparison_1to2$ccfResults %>%
-      topResultsPerCell() %>%
-      anti_join(highCMCs_directionCorrected,by = "cellNum") %>%
-      ungroup() %>%
-      mutate(cmc = rep("no",times = nrow(.)),
-             cellID = as.character(cellID))
+      cmcR::topResultsPerCell() %>%
+      dplyr::anti_join(highCMCs_directionCorrected,
+                       by = "cellNum") %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(cmc = rep("no",times = nrow(.)),
+                    cellID = as.character(cellID))
 
-    allHighCMCs <- bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
-      mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+    allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
+      dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
       dplyr::left_join(bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
                          purrr::pmap_dfr(~ {
                            idNum <- ..8 %>%
