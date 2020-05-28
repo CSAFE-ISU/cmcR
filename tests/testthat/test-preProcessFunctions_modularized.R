@@ -1,8 +1,8 @@
-suppressWarnings(tmp1 <- x3ptools::read_x3p(tmpfile1))
+tmp1 <- x3ptools::read_x3p(tmpfile1)
 
 test_that("preProcess_ functions work as expected", {
   testthat::expect_equal(tmp1$header.info$incrementY,2.5e-05)
-  testthat::expect_equal(dim(tmp1$surface.matrix),c(154,153))
+  testthat::expect_equal(dim(tmp1$surface.matrix),c(145,144))
 
   testthat::expect_error(preProcess_ransac("not a matrix"))
   testthat::expect_error(preProcess_levelBF(tmp1$surface.matrix,

@@ -469,8 +469,8 @@ calcRawCorr <- function(cell,
     }
   }
 
-  #return NA if cor fails.
-  corSafe <- purrr::safely(cor,otherwise = NA,quiet = TRUE)
+  #return numeric(0) if cor fails.
+  corSafe <- purrr::safely(cor,otherwise = numeric(0),quiet = TRUE)
 
   corrVals <- purrr::map_dbl(regionCroppedList,function(croppedRegion){
 

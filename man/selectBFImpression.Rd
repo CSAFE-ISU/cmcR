@@ -40,17 +40,16 @@ breech face impression}
 \item{standardizeBF}{subtract mean and divide by standard deviation of
 processed surface matrix}
 
-\item{gaussFilterRes}{\strong{Optional} sampling resolution of the surface matrix
-(given by incrementX or incrementY of the header.info element of an x3p
-object)}
+\item{gaussFilterRes}{sampling resolution of the surface matrix (given by
+incrementX or incrementY of the header.info element of an x3p object)}
 
-\item{gaussFilterWavelength}{\strong{Optional} cut-off wavelength to be attenuated}
+\item{gaussFilterWavelength}{cut-off wavelength to be attenuated}
 
-\item{gaussFilterType}{\strong{Optional} specifies whether a low pass, "lp", high
-pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
-filterype = "bp" means that wavelength should be a vector of two numbers.
-In this case, the max of these two number will be used for the high pass
-filter and the min for the low pass filter.}
+\item{gaussFilterType}{specifies whether a low pass, "lp", high pass, "hp",
+or bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
+means that wavelength should be a vector of two numbers. In this case, the
+max of these two number will be used for the high pass filter and the min
+for the low pass filter.}
 }
 \value{
 x3p object containing the processed breech face

@@ -1,5 +1,5 @@
 {
-    "path" : "~/cmcR/R",
+    "path" : "~/cmcR/tests/testthat",
     "sortOrder" : [
         {
             "ascending" : true,

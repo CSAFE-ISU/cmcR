@@ -29,7 +29,7 @@ x3pListPlot <- function(x3pList,
 
     plts <- surfaceMat_df %>%
       ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
-      ggplot2::geom_raster(aes(fill = height))  +
+      ggplot2::geom_raster(ggplot2::aes(fill = height))  +
       ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                                     values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
                                     breaks = function(lims){
@@ -78,8 +78,8 @@ x3pListPlot <- function(x3pList,
                             dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
                           surfaceMat_df %>%
-                            ggplot2::ggplot(aes(x = x,y = y)) +
-                            ggplot2::geom_raster(aes(fill = height))  +
+                            ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+                            ggplot2::geom_raster(ggplot2::aes(fill = height))  +
                             ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                                                           values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
                                                           breaks = function(lims){
@@ -98,14 +98,18 @@ x3pListPlot <- function(x3pList,
                                            axis.ticks.x = ggplot2::element_blank(),
                                            axis.title.y = ggplot2::element_blank(),
                                            axis.text.y = ggplot2::element_blank(),
-                                           axis.ticks.y = ggplot2::element_blank()) +
+                                           axis.ticks.y = ggplot2::element_blank(),
+                                           panel.grid.major = ggplot2::element_blank(),
+                                           panel.grid.minor = ggplot2::element_blank(),
+                                           panel.background = ggplot2::element_blank()) +
                             ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(3,"in"),
                                                                             label.theme = ggplot2::element_text(size = 8),
                                                                             title.theme = ggplot2::element_text(size = 10),
                                                                             frame.colour = "black",
                                                                             ticks.colour = "black"),
                                             colour = FALSE) +
-                            ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]"))
+                            ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
+                            ggplot2::ggtitle(name)
                         })
   }
   return(plts)
@@ -236,10 +240,10 @@ ccfMapPlot <- function(mat1,
       ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
       ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
       ggplot2::geom_point(data = ccfDF %>%
-                            mutate(dx = rev(dx),
+                            dplyr::mutate(dx = rev(dx),
                                    dy = rev(dy)) %>%
-                            filter(fft.ccf == max(fft.ccf)) %>%
-                            mutate(type = "Maximum"),
+                            dplyr::filter(fft.ccf == max(fft.ccf)) %>%
+                            dplyr::mutate(type = "Maximum"),
                           ggplot2::aes(x = dx,y = dy,shape = type),
                           # shape = 4,
                           colour = "white",
@@ -249,7 +253,7 @@ ccfMapPlot <- function(mat1,
       # colour = "black") +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_bw() +
-      scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+      ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            values = scales::rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
                            guide = "colourbar",
                            limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
@@ -257,9 +261,9 @@ ccfMapPlot <- function(mat1,
                      panel.grid.minor = ggplot2::element_blank()) +
       ggplot2::scale_shape_manual(values = 1,
                                   labels = expression("CCF"[max])) +
-      guides(fill = guide_colourbar(title = "CCF",
+      ggplot2::guides(fill = ggplot2::guide_colourbar(title = "CCF",
                                     barheight = grid::unit(1,"in"),
-                                    label.theme = element_text(size = 8),
+                                    label.theme = ggplot2::element_text(size = 8),
                                     frame.colour = "black",
                                     ticks.colour = "black"),
              shape = ggplot2::guide_legend(title = NULL,
@@ -280,11 +284,11 @@ ccfMapPlot <- function(mat1,
                                                        prob = seq(0,1,length.out = 6))),
       ) +
       ggplot2::geom_point(data = ccfDF %>%
-                            mutate(dx = rev(dx),
+                            dplyr::mutate(dx = rev(dx),
                                    dy = rev(dy)) %>%
-                            filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
-                            arrange(fft.ccf) %>%
-                            mutate(type = factor(c("Minimum","Maximum"))),
+                            dplyr::filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
+                            dplyr::arrange(fft.ccf) %>%
+                            dplyr::mutate(type = factor(c("Minimum","Maximum"))),
                           ggplot2::aes(x = dx,y = dy,shape = type),
                           # shape = 4,
                           colour = "white") +
@@ -295,8 +299,8 @@ ccfMapPlot <- function(mat1,
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
                      panel.grid.minor = ggplot2::element_blank(),
-                     legend.title = element_text(size = 7),
-                     legend.text = element_text(size = 5)) +
+                     legend.title = ggplot2::element_text(size = 7),
+                     legend.text = ggplot2::element_text(size = 5)) +
       ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE,ncol = 3),
                       shape = ggplot2::guide_legend(direction = "horizontal",override.aes = list(colour = c("#312A56","#492900"))))
 
@@ -360,10 +364,10 @@ arrangeCMCPlot <- function(x3p1,
                            pltType = "faceted"){
 
   x3p1_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = 6.25*(firstRow),
-                  lastRow = 6.25*(lastRow),
-                  firstCol = 6.25*(firstCol),
-                  lastCol = 6.25*(lastCol)) %>%
+    dplyr::mutate(firstRow = (x3p1$header.info$incrementY*1e6)*(firstRow),
+                  lastRow = (x3p1$header.info$incrementY*1e6)*(lastRow),
+                  firstCol = (x3p1$header.info$incrementY*1e6)*(firstCol),
+                  lastCol = (x3p1$header.info$incrementY*1e6)*(lastCol)) %>%
     dplyr::mutate(midCol = (lastCol + firstCol)/2,
                   midRow = (lastRow + firstRow)/2,
                   cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
@@ -375,18 +379,18 @@ arrangeCMCPlot <- function(x3p1,
                   theta = rep(0,times = nrow(.)))
 
   x3p2_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = 6.25*(firstRow),
-                  lastRow = 6.25*(lastRow),
-                  firstCol = 6.25*(firstCol),
-                  lastCol = 6.25*(lastCol)) %>%
+    dplyr::mutate(firstRow = (x3p2$header.info$incrementY*1e6)*(firstRow),
+                  lastRow = (x3p2$header.info$incrementY*1e6)*(lastRow),
+                  firstCol = (x3p2$header.info$incrementY*1e6)*(firstCol),
+                  lastCol = (x3p2$header.info$incrementY*1e6)*(lastCol)) %>%
     dplyr::mutate(firstRowCentered = firstRow - max(lastRow)/2,
                   lastRowCentered = lastRow - max(lastRow)/2,
                   firstColCentered = firstCol - max(lastCol)/2,
                   lastColCentered = lastCol - max(lastCol)/2) %>%
-    dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - 6.25*dx,
-                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - 6.25*dy,
-                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - 6.25*dx,
-                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - 6.25*dy) %>%
+    dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
+                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy) %>%
     dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                   midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
                   cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
@@ -401,8 +405,8 @@ arrangeCMCPlot <- function(x3p1,
                                 setNames(x3pNames),
                               type = pltType,
                               rotate = c(90 - median(allCells %>%
-                                                       filter(cmc == "yes") %>%
-                                                       pull(theta)),
+                                                       dplyr::filter(cmc == "yes") %>%
+                                                       dplyr::pull(theta)),
                                          90))
 
   if(pltType == "faceted"){
@@ -454,7 +458,7 @@ arrangeCMCPlot <- function(x3p1,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("black","red")) +
-      ggplot2::geom_text(data = bind_rows(x3p1_cellGrid,
+      ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                           x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
                                       y = midRow,
@@ -566,7 +570,7 @@ cmcPlot <- function(x3p1,
 
   allInitialCells <- dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
     dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
-    dplyr::left_join(bind_rows(initialCMC,nonInitialCMC) %>%
+    dplyr::left_join(dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
                            stringr::str_extract_all(string = ..2,
@@ -593,9 +597,9 @@ cmcPlot <- function(x3p1,
 
   if(!purrr::is_empty(cmcFilter_improved_output$highCMC)){
 
-    x3p1_allCellIDs <- cmcR:::cellDivision(fadul1.1$x3p$surface.matrix,
-                                           cellNumHoriz = ceiling(sqrt(max(kmComparison$comparison_1to2$ccfResults[[1]]$cellNum))),
-                                           cellNumVert = ceiling(sqrt(max(kmComparison$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
+    x3p1_allCellIDs <- cmcR:::cellDivision(x3p1$surface.matrix,
+                                           cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
+                                           cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
       purrr::map2(names(.),
                   function(mat,horizCell){
                     purrr::map(.x = names(mat),
@@ -605,7 +609,7 @@ cmcPlot <- function(x3p1,
       data.frame(cellID = .) %>%
       dplyr::mutate(cellNum = 1:nrow(.))
 
-    highCMCs_directionCorrected <- kmCMC$highCMCs %>%
+    highCMCs_directionCorrected <- cmcFilter_improved_output$highCMCs %>%
       dplyr::mutate(dx = ifelse(comparison == "comparison_2to1",
                                 yes = -dx,
                                 no = dx),
@@ -622,7 +626,7 @@ cmcPlot <- function(x3p1,
       dplyr::mutate(cmc = rep("yes",times = nrow(.)),
                     cellID = as.character(cellID))
 
-    nonHighCMCs_directionCorrected <- kmComparison$comparison_1to2$ccfResults %>%
+    nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
       cmcR::topResultsPerCell() %>%
       dplyr::anti_join(highCMCs_directionCorrected,
                        by = "cellNum") %>%
@@ -632,7 +636,7 @@ cmcPlot <- function(x3p1,
 
     allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
       dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
-      dplyr::left_join(bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
+      dplyr::left_join(dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
                          purrr::pmap_dfr(~ {
                            idNum <- ..8 %>%
                              stringr::str_extract_all(string = ..8,

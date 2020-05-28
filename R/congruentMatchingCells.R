@@ -38,7 +38,7 @@
 #' @param consensus_function function to aggregate the translation (dx and dy)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
-#' @param corr_thresh minimum correlation threshold to call a cell pair
+#' @param ccf_thresh minimum correlation threshold to call a cell pair
 #'   "congruent matching"
 #' @param dx_thresh maximum distance from the consensus dx value that a cell
 #'   pair can be to be called "congruent matching"
@@ -64,6 +64,7 @@
 #' @seealso
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
+#' @export
 
 congruentMatchingCells <- function(x3p1,
                                    x3p2,
@@ -74,7 +75,7 @@ congruentMatchingCells <- function(x3p1,
                                    centerCell = "individualCell",
                                    scaleCell = "individualCell",
                                    consensus_function = median,
-                                   corr_thresh = .6,
+                                   ccf_thresh = .6,
                                    dx_thresh = 10,
                                    dy_thresh = dx_thresh,
                                    theta_thresh = 3,
@@ -91,7 +92,7 @@ congruentMatchingCells <- function(x3p1,
 
   cmcs <- cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ccfResults,
                                    consensus_function = consensus_function,
-                                   corr_thresh = corr_thresh,
+                                   ccf_thresh = ccf_thresh,
                                    dx_thresh = dx_thresh,
                                    dy_thresh = dy_thresh,
                                    theta_thresh = theta_thresh,
