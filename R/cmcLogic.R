@@ -427,7 +427,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
   #one last check to determine if the median theta in both directions agree with
   #each other up to a sign within theta_thresh
-  if(all(!is.na(thetaMed))){
+  if(all(!is.na(thetaMax))){
     if(sign(thetaMed[1]) == sign(thetaMed[2]) | (abs((abs(thetaMed[1]) - abs(thetaMed[2]))) > theta_thresh)){
       return(list("params" = list(consensus_function = consensus_function,
                                   ccf_thresh = ccf_thresh,
