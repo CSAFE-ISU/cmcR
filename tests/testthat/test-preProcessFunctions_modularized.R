@@ -9,7 +9,7 @@ test_that("preProcess_ functions work as expected", {
                                             useResiduals = logical(0)))
   testthat::expect_warning(
     testthat::expect_error(preProcess_cropWS(tmp1$surface.matrix,
-                                           croppingThresh = numeric(0))))
+                                             croppingThresh = numeric(0))))
   testthat::expect_error(preProcess_removeFPCircle(tmp1$surface.matrix,
                                                    aggregation_function = function(x){NULL}))
   testthat::expect_error(preProcess_gaussFilter(tmp1$surface.matrix,

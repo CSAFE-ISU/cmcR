@@ -403,12 +403,12 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
 
     highCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],
-                                            names(cmcPerTheta)[which(!is.na(thetaMax))],
-                                            thetaMax[which(!is.na(thetaMax))]),
-                                  function(cmcs,compName,th){
-                                    purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
-                                      dplyr::mutate(comparison = rep(compName,times = nrow(.)))
-                                  })
+                                       names(cmcPerTheta)[which(!is.na(thetaMax))],
+                                       thetaMax[which(!is.na(thetaMax))]),
+                             function(cmcs,compName,th){
+                               purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
+                                 dplyr::mutate(comparison = rep(compName,times = nrow(.)))
+                             })
 
     highCMCs <- highCMCs2 %>%
       dplyr::bind_rows() %>%
@@ -417,21 +417,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
       dplyr::filter(ccf == max(ccf)) %>%
       dplyr::ungroup()
-  } #if both directions pass the high CMC criterion...
-  else{
-    highCMCs <- purrr::pmap(.l = list(cmcPerTheta,
-                                       names(cmcPerTheta),
-                                       thetaMax),
-                             function(cmcs,compName,th){
-                               purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
-                                 dplyr::mutate(comparison = rep(compName,times = nrow(.)))
-                             }) %>%
-      dplyr::bind_rows() %>%
-      dplyr::distinct() %>%
-      dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
-      dplyr::filter(ccf == max(ccf)) %>%
-      dplyr::ungroup()
   }
+  #if both directions pass the high CMC criterion...
 
   thetaMed <- highCMCs %>%
     dplyr::group_by(comparison) %>%
@@ -440,15 +427,31 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
   #one last check to determine if the median theta in both directions agree with
   #each other up to a sign within theta_thresh
-  if(all(!is.na(thetaMed)) & sign(thetaMed[1]) == sign(thetaMed[2]) | (abs((abs(thetaMed[1]) - abs(thetaMed[2]))) > theta_thresh)){
-    return(list("params" = list(consensus_function = consensus_function,
-                                ccf_thresh = ccf_thresh,
-                                dx_thresh = dx_thresh,
-                                dy_thresh = dy_thresh,
-                                theta_thresh = theta_thresh,
-                                consensus_function_theta = consensus_function_theta),
-                "initialCMCs" = initialCMCs,
-                "highCMCs" = NULL))
+  if(all(!is.na(thetaMed))){
+    if(sign(thetaMed[1]) == sign(thetaMed[2]) | (abs((abs(thetaMed[1]) - abs(thetaMed[2]))) > theta_thresh)){
+      return(list("params" = list(consensus_function = consensus_function,
+                                  ccf_thresh = ccf_thresh,
+                                  dx_thresh = dx_thresh,
+                                  dy_thresh = dy_thresh,
+                                  theta_thresh = theta_thresh,
+                                  consensus_function_theta = consensus_function_theta),
+                  "initialCMCs" = initialCMCs,
+                  "highCMCs" = NULL))
+    }
+    else{
+      highCMCs <- purrr::pmap(.l = list(cmcPerTheta,
+                                        names(cmcPerTheta),
+                                        thetaMax),
+                              function(cmcs,compName,th){
+                                purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - 3 & theta <= . + 3)) %>%
+                                  dplyr::mutate(comparison = rep(compName,times = nrow(.)))
+                              }) %>%
+        dplyr::bind_rows() %>%
+        dplyr::distinct() %>%
+        dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
+        dplyr::filter(ccf == max(ccf)) %>%
+        dplyr::ungroup()
+    }
   }
 
   return(list("params" = list(consensus_function = consensus_function,
