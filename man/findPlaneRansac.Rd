@@ -36,6 +36,11 @@ Given input depths (in microns), find best-fitting plane using RANSAC. This
 should be the plane that the breechface marks are on. Adapted from
 cartridges3D::findPlaneRansac function
 }
+\note{
+The function will throw an error if the final plane estimate is
+rank-deficient (which is relatively unlikely, but theoretically possible).
+Re-run the function (possibly setting a different seed) if this occurs.
+}
 \examples{
 \dontrun{
     testImage <- findPlaneRansac(surfaceMat)

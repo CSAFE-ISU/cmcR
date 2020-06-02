@@ -381,8 +381,8 @@ preProcess_gaussFilter <- function(surfaceMat,
                                    wavelength = c(16,250),
                                    filtertype = "bp"){
 
-  if(res < .0001){ #if resolution measured in meters:
-    res <- res*1e5 #rescale to microns
+  if(res < .0001){ #rescale surface matrix for intermediate calculations
+    res <- res*1e6
   }
 
   surfaceMatMissing <- is.na(surfaceMat)
@@ -390,7 +390,7 @@ preProcess_gaussFilter <- function(surfaceMat,
   surfaceMatFake <- surfaceMat - mean(as.vector(surfaceMat),na.rm=TRUE)
   surfaceMatFake[is.na(surfaceMatFake)] <- 0
 
-  surfaceMatFake <- surfaceMatFake*1e5
+  surfaceMatFake <- surfaceMatFake*1e6
 
   surfaceMatFiltered <- gaussianFilter(surfaceMat = surfaceMatFake,
                                               res = res,
@@ -399,7 +399,7 @@ preProcess_gaussFilter <- function(surfaceMat,
 
   surfaceMatFiltered[surfaceMatMissing] <- NA
 
-  surfaceMatFiltered <- surfaceMatFiltered/(10^6)
+  surfaceMatFiltered <- surfaceMatFiltered/(1e6)
 
   return(surfaceMatFiltered)
 }

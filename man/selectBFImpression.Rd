@@ -3,20 +3,6 @@
 \name{selectBFImpression}
 \alias{selectBFImpression}
 \title{Select breech face impression from a cartridge case scan}
-\usage{
-selectBFImpression(
-  x3p_path,
-  ransacInlierThresh = 1e-05,
-  ransacFinalSelectThresh = 2 * 1e-05,
-  ransacIters = 150,
-  useResiduals = TRUE,
-  croppingThresh = 1,
-  standardizeBF = FALSE,
-  gaussFilterRes,
-  gaussFilterWavelength = c(16, 250),
-  gaussFilterType = "bp"
-)
-}
 \arguments{
 \item{x3p_path}{path to an .x3p file}
 

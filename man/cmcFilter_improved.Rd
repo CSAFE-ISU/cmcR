@@ -4,17 +4,6 @@
 \alias{cmcFilter_improved}
 \title{Implements "improved" CMC logic on a list of CCF results for a comparison
 between two cartridge case scans as proposed by Tong et al. (2015)}
-\usage{
-cmcFilter_improved(
-  cellCCF_bothDirections_output,
-  consensus_function = median,
-  ccf_thresh = 0.6,
-  dx_thresh = 10,
-  dy_thresh = dx_thresh,
-  theta_thresh = 3,
-  consensus_function_theta = consensus_function
-)
-}
 \arguments{
 \item{cellCCF_bothDirections_output}{list returned by the function
 cmcR::cellCCF_bothdirections}
@@ -35,6 +24,13 @@ pair can be to be called "congruent matching"}
 \item{theta_thresh}{maximum distance from the consensus theta value that a
 cell pair can be to be called "congruent matching"}
 
+\item{missingTheta_decision}{dictates how function should handle situations
+in which one direction passes the high CMC criterion while another
+direction does not. "replace": replaces theta value in failed direction
+with opposite of theta value in successful direction. "dismiss": only
+counts the initial CMCs in failed direction and high CMCs in successful
+direction. "fail": only counts the initial CMCs in either direction.}
+
 \item{consensus_function_theta}{\emph{(OPTIONAL)} function (separate from
 consensus_function) to aggregate the rotation (theta) values in the ccfDF
 data frame to determine "consensus" values}
@@ -54,6 +50,7 @@ cmcs <- cmcFilter_improved(comparison1,
                            dx_thresh = 20,
                            dy_thresh = dx_thresh,
                            theta_thresh = 3,
+                           missingTheta_decision = "replace",
                            consensus_function_theta = getMode)
 }
 }

@@ -3,9 +3,6 @@
 \name{getCellRegionPairs}
 \alias{getCellRegionPairs}
 \title{Extract cell/region pair matrices for a comparison of interest}
-\usage{
-getCellRegionPairs(x3p1, x3p2, ccfDF, cellCCF_params)
-}
 \arguments{
 \item{x3p1}{an x3p object}
 

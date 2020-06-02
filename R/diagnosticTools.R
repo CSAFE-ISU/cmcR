@@ -180,6 +180,10 @@ ccfMap <- function(mat1,mat2){
 #'
 #'  ccfMapPlot(mat1,mat2)
 #'
+#' @importFrom gridExtra tableGrob arrangeGrob grid.arrange
+#' @importFrom colorspace divergingx_hcl
+#' @importFrom scales rescale
+#'
 #' @export
 
 utils::globalVariables(c("x","y","value","fft.ccf","dx","dy"))
@@ -276,7 +280,7 @@ ccfMapPlot <- function(mat1,
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                           values = scales::rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
+                           values = rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
                            guide = "colourbar",
                            limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -316,7 +320,7 @@ ccfMapPlot <- function(mat1,
                           colour = "white") +
       ggplot2::scale_shape_manual(values = c(1,4)) +
       ggplot2::coord_fixed(expand = FALSE) +
-      ggplot2::scale_fill_manual(values = rev(colorspace::divergingx_hcl(13,"PuOr")),
+      ggplot2::scale_fill_manual(values = rev(divergingx_hcl(13,"PuOr")),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
@@ -335,16 +339,16 @@ ccfMapPlot <- function(mat1,
                   dy = -dy,
                   theta = theta) %>%
     t() %>%
-    gridExtra::tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
+    tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
                          cols = "Summary")
 
-  gridPlot <- gridExtra::arrangeGrob(mat1Plot,
+  gridPlot <- arrangeGrob(mat1Plot,
                                      mat2Plot,
                                      ccfMaxSummary,
                                      ccfPlot,
                                      layout_matrix = layoutMat)
 
-  gridExtra::grid.arrange(gridPlot)
+  grid.arrange(gridPlot)
 
   if(returnGrob){
     return(gridPlot)

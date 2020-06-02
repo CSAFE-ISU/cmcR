@@ -3,9 +3,6 @@
 \name{x3pListPlot}
 \alias{x3pListPlot}
 \title{Plot a list of x3ps}
-\usage{
-x3pListPlot(x3pList, type = "faceted", rotate = 0)
-}
 \arguments{
 \item{x3pList}{a list of x3p objects. If the x3p objects are named in the
 list, then these names will be included in the title of their respective

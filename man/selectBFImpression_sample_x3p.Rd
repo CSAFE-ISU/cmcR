@@ -4,24 +4,6 @@
 \alias{selectBFImpression_sample_x3p}
 \title{Select breech face impression from a cartridge case scan after using
 x3ptools::sample_x3p to downsample the scan.}
-\usage{
-selectBFImpression_sample_x3p(
-  x3p_path,
-  ransacInlierThresh = 1e-05,
-  ransacFinalSelectThresh = 2 * 1e-05,
-  ransacIters = 150,
-  useResiduals = TRUE,
-  croppingThresh = 1,
-  standardizeBF = FALSE,
-  m = 2,
-  mY = m,
-  offset = 0,
-  offsetY = offset,
-  gaussFilterRes,
-  gaussFilterWavelength = c(16, 250),
-  gaussFilterType = "bp"
-)
-}
 \arguments{
 \item{x3p_path}{path to an .x3p file}
 

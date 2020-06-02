@@ -3,16 +3,6 @@
 \name{cmcPlot}
 \alias{cmcPlot}
 \title{Visualize initial and high CMCs for a cartridge case pair comparison}
-\usage{
-cmcPlot(
-  x3p1,
-  x3p2,
-  cellCCF_bothDirections_output,
-  cmcFilter_improved_output,
-  type = "faceted",
-  x3pNames = c("x3p1", "x3p2")
-)
-}
 \arguments{
 \item{x3p1}{an x3p object}
 

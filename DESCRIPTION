@@ -6,7 +6,7 @@ Authors@R: as.person(c("Joe Zemmels <jzemmels@iastate.edu> [aut,cre]","Heike Hof
 Maintainer: Joe Zemmels <jzemmels@iastate.edu>
 Description: An open-source implementation of the Congruent Matching Cells 
     method for cartridge case identification as proposed by Song (2013) as well 
-    as an "improved" version of the method proposed by Tong et al. (2015).
+    as an extension of the method proposed by Tong et al. (2015).
     Provides a wide range of pre, inter, and post-processing options when
     working with cartridge case scan data and their associated comparisons. See
     the cmcR package website for more details and examples.
@@ -26,8 +26,10 @@ Imports:
     zoo,
     stringr,
     assertthat,
-    gridExtra,
+    stats,
+    utils,
     colorspace,
+    gridExtra,
     scales
 Suggests: 
     knitr,

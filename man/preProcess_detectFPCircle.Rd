@@ -4,22 +4,13 @@
 \alias{preProcess_detectFPCircle}
 \title{Detect the radius and center of a firing pin impression circle in a breech face
 impression scan using a circular Hough transform.}
-\usage{
-preProcess_detectFPCircle(
-  surfaceMat,
-  aggregation_function = mean,
-  smootherSize = 2 * round((0.1 * nrow(surfaceMat)/2)) + 1,
-  meshSize = 1,
-  houghScoreQuant = 0.9
-)
-}
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
+\item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
+
 \item{aggregation_function}{function to select initial radius estimate from
 those calculated using fpRadiusGridSearch}
-
-\item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
 
 \item{meshSize}{size of radius mesh to be used for further refinement of the
 radius estimate obtained from fpRadiusGridSearch}

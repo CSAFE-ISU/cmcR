@@ -3,19 +3,6 @@
 \name{cmcPerThetaBarPlot}
 \alias{cmcPerThetaBarPlot}
 \title{Create a bar plot of congruent matching cells per rotation value}
-\usage{
-cmcPerThetaBarPlot(
-  cellCCF_output,
-  consensus_function = median,
-  ccf_thresh = 0.6,
-  dx_thresh = 10,
-  dy_thresh = dx_thresh,
-  theta_thresh = 3,
-  consensus_function_theta = consensus_function,
-  highCMCThresh = 1,
-  x3pNames = c("x3p1", "x3p2")
-)
-}
 \arguments{
 \item{cellCCF_output}{list returned by the cellCCF or cellCCF_bothDirections
 function. If from the cellCCF_bothDirections, then the ggplot will be

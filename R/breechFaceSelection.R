@@ -17,6 +17,11 @@
 #' @return List object containing fitted plane (as an lm object) and selected
 #'   breechface marks (matrix of same size as original matrix containing all
 #'   inliers close to fitted plane).
+#'
+#' @note The function will throw an error if the final plane estimate is
+#'   rank-deficient (which is relatively unlikely, but theoretically possible).
+#'   Re-run the function (possibly setting a different seed) if this occurs.
+#'
 #' @examples
 #' \dontrun{
 #'     testImage <- findPlaneRansac(surfaceMat)
@@ -71,9 +76,11 @@ findPlaneRansac <- function(surfaceMat,
   }
 
   # final coefs only computed using inliers. fit the plane based on what we've
-  # identified to be inliers
+  # identified to be inliers. We will not allow this final estimate to be
+  # rank-deficient
   finalRansacPlane <- lm(depth ~ row + col,
-                         data = observedPixelLocations[inliers, ])
+                         data = observedPixelLocations[inliers, ],
+                         singular.ok = FALSE)
 
   #Once the plane is fitted based on the inliers identified, we want to take a
   #potentially larger band of observations around the fitted plane than just the
@@ -184,6 +191,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
                                  no = NA)) %>%
     imager::as.cimg(dim = c(max(.$x),max(.$y),1,1)) %>%
     as.matrix()
+
+  return(breechFace_firingPinFiltered)
 }
 
 #' Select breech face impression from a cartridge case scan
