@@ -149,7 +149,8 @@ cmcFilterPerTheta <- function(ccfResults,
                 function(thetaSpecificResults,theta){
                   thetaSpecificResults %>%
                     dplyr::select(-theta) %>%
-                    dplyr::mutate(theta = rep(as.numeric(theta),times = nrow(.)))
+                    dplyr::mutate(theta = rep(as.numeric(theta),
+                                              times = nrow(.)))
                 }) %>%
     setNames(names(ccfResults))
 
@@ -274,7 +275,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   if(distanceToCMCMaxTieBreaker == "medDistance"){
     tieBreaker <- median
   }
-  else{
+  else if(distanceToCMCMaxTieBreaker == "minDistance"){
     tieBreaker <- min
   }
 
@@ -292,7 +293,7 @@ calcMaxCMCTheta <- function(cmcPerTheta,
     if(distanceToCMCMaxTieBreaker == "medDistance"){
       return(median(cmcMax$theta))
     }
-    return(cmcMax$theta)
+    return(median(cmcMax$theta))
   }
 }
 
@@ -376,6 +377,9 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                    theta_thresh = theta_thresh,
                                    consensus_function_theta = consensus_function_theta))
 
+  #Important note: there may be multiple theta values that tie for the CMC max
+  #count. The default of the cmcR package is to take the median of these theta
+  #values as the thetaMax value
   thetaMax <- purrr::map(cmcPerTheta,~ calcMaxCMCTheta(cmcPerTheta = .,
                                                        highCMC_thresh = 1,
                                                        theta_thresh = theta_thresh,
