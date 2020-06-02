@@ -33,8 +33,6 @@
 #'   cell is divided by the standard deviation of the whole matrix. If set to
 #'   "individualCell", then each cell is divided by its particular standard
 #'   deviation.
-#' @param cellCCF_bothDirections_output list returned by the function
-#'   cmcR::cellCCF_bothdirections
 #' @param consensus_function function to aggregate the translation (dx and dy)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
@@ -70,8 +68,9 @@ congruentMatchingCells <- function(x3p1,
                                    x3p2,
                                    thetas = seq(-30,30,by = 3),
                                    cellNumHoriz = 8,
-                                   regionToCellProp = 4,
                                    cellNumVert = cellNumHoriz,
+                                   regionToCellProp = 4,
+                                   minObservedProp = .15,
                                    centerCell = "individualCell",
                                    scaleCell = "individualCell",
                                    consensus_function = median,
@@ -81,22 +80,23 @@ congruentMatchingCells <- function(x3p1,
                                    theta_thresh = 3,
                                    consensus_function_theta = consensus_function,...){
 
-  ccfResults <- cmcR::cellCCF_bothDirections(x3p1 = x3p1,
-                                             x3p2 = x3p2,
-                                             thetas = thetas,
-                                             cellNumHoriz = cellNumHoriz,
-                                             cellNumVert = cellNumVert,
-                                             regionToCellProp = regionToCellProp,
-                                             centerCell = centerCell,
-                                             scaleCell = scaleCell)
+  ccfResults <- cellCCF_bothDirections(x3p1 = x3p1,
+                                       x3p2 = x3p2,
+                                       thetas = thetas,
+                                       cellNumHoriz = cellNumHoriz,
+                                       cellNumVert = cellNumVert,
+                                       regionToCellProp = regionToCellProp,
+                                       centerCell = centerCell,
+                                       scaleCell = scaleCell,
+                                       minObservedProp = minObservedProp)
 
-  cmcs <- cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ccfResults,
-                                   consensus_function = consensus_function,
-                                   ccf_thresh = ccf_thresh,
-                                   dx_thresh = dx_thresh,
-                                   dy_thresh = dy_thresh,
-                                   theta_thresh = theta_thresh,
-                                   consensus_function_theta = consensus_function_theta,...)
+  cmcs <- cmcFilter_improved(cellCCF_bothDirections_output = ccfResults,
+                             consensus_function = consensus_function,
+                             ccf_thresh = ccf_thresh,
+                             dx_thresh = dx_thresh,
+                             dy_thresh = dy_thresh,
+                             theta_thresh = theta_thresh,
+                             consensus_function_theta = consensus_function_theta,...)
 
   return(cmcs)
 }

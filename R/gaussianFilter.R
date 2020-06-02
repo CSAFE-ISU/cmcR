@@ -18,6 +18,8 @@ gaussianKernel <- function(size,sig){
 #' @seealso https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
 #' @keywords internal
 
+utils::globalVariables(".")
+
 gaussianFilter <- function(surfaceMat,
                            res,
                            wavelength,
@@ -77,7 +79,7 @@ gaussianFilter <- function(surfaceMat,
       magrittr::multiply_by(fft(kernPadded)) %>%
       fft(inverse = TRUE) %>%
       magrittr::divide_by(prod(dimPadded)) %>%
-      cartridges3D:::fftshift()
+      fftshift()
 
     imFiltered <- Re(imFiltered) %>%
       imager::as.cimg() %>%
@@ -95,7 +97,7 @@ gaussianFilter <- function(surfaceMat,
       magrittr::multiply_by(fft(kernPadded)) %>%
       fft(inverse = TRUE) %>%
       magrittr::divide_by(prod(dimPadded)) %>%
-      cartridges3D:::fftshift()
+      fftshift()
 
     imFiltered <- imPadded - imFilteredLP
 

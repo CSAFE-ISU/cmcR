@@ -20,15 +20,14 @@ cellCCF(
 )
 }
 \arguments{
-\item{x3p1}{(no default) an x3p object containing the surface matrix of a
-breech face impression}
+\item{x3p1}{an x3p object containing the surface matrix of a cartridge case
+scan}
 
-\item{x3p2}{(no default) an x3p object containing the surface matrix of a
-breech face impression to be compared to that in x3p1}
+\item{x3p2}{an x3p object containing the surface matrix of a cartridge case
+scan to be compared to that in x3p1}
 
-\item{thetas}{(default seq(from = -30,to = 30,by = 3)) rotation values (in
-degrees) for which x3p2$surface.matrix will be rotated, split into cells,
-and compared to x3p1$surface.matrix}
+\item{thetas}{rotation values (in degrees) for which x3p2$surface.matrix will
+be rotated, split into cells, and compared to x3p1$surface.matrix}
 
 \item{cellNumHoriz}{number of cells along horizontal axis to divide
 x3p1$surface.matrix into}

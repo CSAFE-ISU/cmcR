@@ -9,4 +9,7 @@ filterViaFFT(A, B)
 \description{
 Calculates cross-correlation between two matrices using FFTs
 }
+\seealso{
+cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+}
 \keyword{internal}

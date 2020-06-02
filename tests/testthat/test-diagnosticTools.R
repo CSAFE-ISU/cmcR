@@ -18,8 +18,8 @@ cmcs <- cmcR::cmcFilter_improved(cellCCF_bothDirections_output = comp,
 cellRegPairs <- cmcR::getCellRegionPairs(tmp1,
                                          tmp2,
                                          comp$comparison_1to2$ccfResults %>%
-                                           topResultsPerCell(),
-                                         params = comp$comparison_1to2$params)
+                                           cmcR::topResultsPerCell(),
+                                         cellCCF_params = comp$comparison_1to2$params)
 
 p1 <- cmcR::ccfMapPlot(cellRegPairs[[1]][[1]][[1]],
                        cellRegPairs[[1]][[1]][[2]],
@@ -33,12 +33,12 @@ p2 <- cmcR::cmcPlot(x3p1 = tmp1,x3p2 = tmp2,
 
 p3 <- cmcR::cmcPerThetaBarPlot(comp)
 
-test_that("diagnosticTools functions work as expected", {
+testthat::test_that("diagnosticTools functions work as expected", {
   testthat::expect_equal(cellRegPairs %>%
                            purrr::flatten() %>%
                            length(),
                          comp$comparison_1to2$ccfResults %>%
-                           topResultsPerCell() %>%
+                           cmcR::topResultsPerCell() %>%
                            nrow())
 
   testthat::expect_s3_class(p1,class = c("gtable","gTree","grob","gDesc"))

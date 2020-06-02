@@ -43,8 +43,8 @@ data frame to determine "consensus" values}
 consensus_function_theta (e.g., na.rm = TRUE) if necessary}
 }
 \description{
-Applies initially proposed Congruent Matching Cells method logic to the CCF
-results of a comparison between two cartridge case scans.
+Applies initially proposed Congruent Matching Cells method logic
+to the CCF results of a comparison between two cartridge case scans.
 }
 \examples{
 \dontrun{

@@ -16,7 +16,10 @@ comment = "#>"
 
 ```{r setup,echo=TRUE,message=FALSE,warning=FALSE}
 library(cmcR)
-library(tidyverse)
+library(magrittr)
+library(ggplot2)
+library(purrr)
+library(dplyr)
 library(x3ptools)
 library(rgl)
 set.seed(4132020)
@@ -235,7 +238,7 @@ knmPlts$initialCMC
 ## Bonus: CCF "Map"
 
 ```{r}
-kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$highCMCs,params = kmComparison$comparison_1to2$params)
+kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$highCMCs,cellCCF_params = kmComparison$comparison_1to2$params)
 
 kmCellRegionPairs[3] %>%
   map2(.x = .,
@@ -248,6 +251,9 @@ kmCellRegionPairs[3] %>%
          })
 ```
 
+```{r}
+cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1$x3p,"Fadul 2-1" = fadul2.1$x3p),rotate = 90)
+```
 
 
 <!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->

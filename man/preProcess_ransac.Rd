@@ -6,13 +6,17 @@
 \usage{
 preProcess_ransac(
   surfaceMat,
-  inlierTreshold = (10^(-5)),
-  finalSelectionThreshold = 2 * (10^(-5)),
+  inlierThreshold = 1e-05,
+  finalSelectionThreshold = 2 * (1e-05),
   iters = 150
 )
 }
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
+
+\item{inlierThreshold}{threshold to declare an observed value close to the
+fitted plane an "inlier". A smaller value will yield a more stable
+estimate.}
 
 \item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
 inlierThreshold, this argument dictates which observations are selected as
@@ -20,15 +24,6 @@ the final breech face estimate.}
 
 \item{iters}{number of candidate planes to fit (higher value yields more
 stable breech face estimate)}
-
-\item{inlierThreshold}{threshold to declare an observed value close to the
-fitted plane an "inlier". A smaller value will yield a more stable
-estimate.}
-}
-\value{
-List object containing fitted plane (as an lm object) and selected
-breechface marks (matrix of same size as original matrix containing all
-inliers close to fitted plane).
 }
 \description{
 Given input depths (in microns), find best-fitting plane using
@@ -41,7 +36,7 @@ raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
   x3ptools::sample_x3p(m = 2)
 
 fittedPlane <- raw_x3p$surface.matrix \%>\%
-  preProcess_ransac(inlierTreshold = 10^(-5),
+  preProcess_ransac(inlierThreshold = 10^(-5),
                     finalSelectionThreshold = 2*10^(-5),
                     iters = 150)
 }

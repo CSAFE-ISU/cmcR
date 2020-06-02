@@ -11,5 +11,7 @@ Shifts CCF matrix output so that Nyquist frequency is in middle of matrix
 }
 \seealso{
 http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
+
+cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 }
 \keyword{internal}

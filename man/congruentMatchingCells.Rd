@@ -10,12 +10,13 @@ congruentMatchingCells(
   x3p2,
   thetas = seq(-30, 30, by = 3),
   cellNumHoriz = 8,
-  regionToCellProp = 4,
   cellNumVert = cellNumHoriz,
+  regionToCellProp = 4,
+  minObservedProp = 0.15,
   centerCell = "individualCell",
   scaleCell = "individualCell",
   consensus_function = median,
-  corr_thresh = 0.6,
+  ccf_thresh = 0.6,
   dx_thresh = 10,
   dy_thresh = dx_thresh,
   theta_thresh = 3,
@@ -37,12 +38,16 @@ and compared to x3p1$surface.matrix}
 \item{cellNumHoriz}{(default 7) number of cells along horizontal axis to
 divide x3p1$surface.matrix into}
 
+\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
+vertical axis to divide x3p1$surface.matrix into}
+
 \item{regionToCellProp}{determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
 the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)}
 
-\item{cellNumVert}{(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into}
+\item{minObservedProp}{(default 15) the minimum proportion of a cell that
+needs to contain observed (i.e., non-NA) values for it to be included in
+the CCF calculation procedure}
 
 \item{centerCell}{dictates if cell is to be shifted prior to CCF
 calculation. Default is that no shifting is performed. If set to
@@ -60,7 +65,7 @@ deviation.}
 and rotation (theta) values in the ccfDF data frame to determine
 "consensus" values}
 
-\item{corr_thresh}{minimum correlation threshold to call a cell pair
+\item{ccf_thresh}{minimum correlation threshold to call a cell pair
 "congruent matching"}
 
 \item{dx_thresh}{maximum distance from the consensus dx value that a cell
@@ -78,13 +83,6 @@ data frame to determine "consensus" values}
 
 \item{...}{arguments to be passed to consensus_function or
 consensus_function_theta (e.g., na.rm = TRUE) if necessary}
-
-\item{minObservedProp}{(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure}
-
-\item{cellCCF_bothDirections_output}{list returned by the function
-cmcR::cellCCF_bothdirections}
 }
 \description{
 Wrapper for calling the cellCCF_bothDirections and

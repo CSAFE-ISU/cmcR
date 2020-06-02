@@ -25,12 +25,18 @@ Imports:
     purrr,
     zoo,
     stringr,
-    assertthat
+    assertthat,
+    gridExtra,
+    colorspace,
+    scales
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    DT,
+    magick,
+    rgl
 Remotes: github::xhtai/cartridges3D
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)

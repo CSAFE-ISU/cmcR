@@ -1,7 +1,27 @@
-
-
+#' Plot a list of x3ps
 #' @name x3pListPlot
+#'
+#' @description Plots the surface matrices in a list of x3p objects. Either
+#'   creates one plot faceted by surface matrix or creates individual plots per
+#'   surface matrix and returns them in a list.
+#'
+#' @param x3pList a list of x3p objects. If the x3p objects are named in the
+#'   list, then these names will be included in the title of their respective
+#'   plot
+#' @param type dictates whether one plot faceted by surface matrix or a list of
+#'   plots per surface matrix is returned. The faceted plot will have a
+#'   consistent height scale across all surface matrices.
+#' @param rotate angle (in degrees) to rotate all surface matrices plotted
+#'
+#' @examples
+#' \dontrun{
+#'  x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
+#' }
 #' @export
+#'
+
+utils::globalVariables(c("value","x","y",".","x3p","height"))
+
 x3pListPlot <- function(x3pList,
                         type = "faceted",
                         rotate = 0){
@@ -14,7 +34,7 @@ x3pListPlot <- function(x3pList,
                                                names(x3pList),
                                                rotate),
                                      function(x3p,name,theta){
-                                       x3p$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p$surface.matrix,
+                                       x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
                                                                                         theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
                                        x3p %>%
@@ -66,7 +86,7 @@ x3pListPlot <- function(x3pList,
                                   names(x3pList),
                                   rotate),
                         function(x3p,name,theta){
-                          x3p$surface.matrix <- cmcR:::rotateSurfaceMatrix(x3p$surface.matrix,
+                          x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
                                                                            theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
                           surfaceMat_df <- x3p %>%
@@ -162,13 +182,15 @@ ccfMap <- function(mat1,mat2){
 #'
 #' @export
 
+utils::globalVariables(c("x","y","value","fft.ccf","dx","dy"))
+
 ccfMapPlot <- function(mat1,
                        mat2,
                        theta = NA,
                        returnGrob = FALSE,
                        type = "raster"){
 
-  ccfMat <- cmcR:::ccfMap(mat1,mat2)
+  ccfMat <- ccfMap(mat1,mat2)
 
   ccfDF <- ccfMat %>%
     t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
@@ -339,6 +361,7 @@ ccfMapPlot <- function(mat1,
 #' linear_to_matrix(index, nrow=4, ncol = 5, byrow=TRUE)
 #'
 #' @keywords internal
+
 linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = ", ") {
   index <- as.integer(index)
   stopifnot(all(index <= nrow*ncol), all(index > 0))
@@ -357,6 +380,8 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #'
 #' @keywords internal
 
+utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","dx","dy","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
+
 arrangeCMCPlot <- function(x3p1,
                            x3p2,
                            allCells,
@@ -370,7 +395,7 @@ arrangeCMCPlot <- function(x3p1,
                   lastCol = (x3p1$header.info$incrementY*1e6)*(lastCol)) %>%
     dplyr::mutate(midCol = (lastCol + firstCol)/2,
                   midRow = (lastRow + firstRow)/2,
-                  cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                  cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
                                                       floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
                                                       ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                     nrow = ceiling(sqrt(max(cellNum))),
@@ -393,7 +418,7 @@ arrangeCMCPlot <- function(x3p1,
                   topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy) %>%
     dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                   midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                  cellInd = cmcR:::linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                  cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
                                                       floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
                                                       ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
                                                     nrow = ceiling(sqrt(max(cellNum))),
@@ -401,7 +426,7 @@ arrangeCMCPlot <- function(x3p1,
                   x3p = rep(x3pNames[2],times = nrow(.)),
                   theta = theta - median(theta))
 
-  x3pPlt <- cmcR::x3pListPlot(x3pList = list(x3p1,x3p2) %>%
+  x3pPlt <- x3pListPlot(x3pList = list(x3p1,x3p2) %>%
                                 setNames(x3pNames),
                               type = pltType,
                               rotate = c(90 - median(allCells %>%
@@ -538,15 +563,34 @@ arrangeCMCPlot <- function(x3p1,
   return(x3pPlt)
 }
 
-#' Visualize initial and high CMCs for a cartridge case pair comparison
-#' @name cmcPlot
+#'Visualize initial and high CMCs for a cartridge case pair comparison
+#'@name cmcPlot
 #'
-#' @param x3p1 an x3p object
-#' @param x3p2 a different x3p object
-#' @param cellCCF_bothDirections_output output from the function cmcR::cellCCF_bothDirections
-#' @param cmcFilter_improved_output output from the function cmcR::cmcFilter_improved
+#'@description Constructs either a single faceted plot or a list of plots
+#'  depicting the CMCs/non-CMCs under the initially proposed and High CMC
+#'  methods for a pair of cartridge case scans
 #'
-#' @export
+#'@param x3p1 an x3p object
+#'@param x3p2 a different x3p object
+#'@param cellCCF_bothDirections_output output from the function
+#'  cmcR::cellCCF_bothDirections
+#'@param cmcFilter_improved_output output from the function
+#'  cmcR::cmcFilter_improved
+#'@param type argument to be passed to cmcR::x3pListPlot function
+#'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
+#'  function
+#'
+#' @examples
+#' \dontrun{
+#' comparison <- cellCCF_bothDirections(x3p1,x3p2)
+#' cmcs <- cmcFilter_improved(comparison)
+#'
+#' cmcPlot(x3p1,x3p2,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
+#'}
+#'
+#'@export
+
+utils::globalVariables(c(".","cmc","comparison","dx","dy","theta","cellNum","cellID"))
 
 cmcPlot <- function(x3p1,
                     x3p2,
@@ -563,7 +607,7 @@ cmcPlot <- function(x3p1,
     dplyr::mutate(cmc = rep("yes",times = nrow(.)))
 
   nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
-    cmcR::topResultsPerCell() %>%
+    topResultsPerCell() %>%
     dplyr::anti_join(initialCMC,by = "cellID") %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cmc = rep("no",times = nrow(.)))
@@ -587,7 +631,7 @@ cmcPlot <- function(x3p1,
                        }),
                      by = "cellID")
 
-  initialCMCPlt <- cmcR:::arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+  initialCMCPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
                                          x3p2 = list(x3p2,x3p1)[[directionIndic]],
                                          allCells = allInitialCells,
                                          x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
@@ -597,13 +641,13 @@ cmcPlot <- function(x3p1,
 
   if(!purrr::is_empty(cmcFilter_improved_output$highCMC)){
 
-    x3p1_allCellIDs <- cmcR:::cellDivision(x3p1$surface.matrix,
+    x3p1_allCellIDs <- cellDivision(x3p1$surface.matrix,
                                            cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
                                            cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
       purrr::map2(names(.),
                   function(mat,horizCell){
                     purrr::map(.x = names(mat),
-                               function(vertCell) cmcR:::swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
+                               function(vertCell) swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
                   }) %>%
       unlist() %>%
       data.frame(cellID = .) %>%
@@ -627,7 +671,7 @@ cmcPlot <- function(x3p1,
                     cellID = as.character(cellID))
 
     nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
-      cmcR::topResultsPerCell() %>%
+      topResultsPerCell() %>%
       dplyr::anti_join(highCMCs_directionCorrected,
                        by = "cellNum") %>%
       dplyr::ungroup() %>%
@@ -653,7 +697,7 @@ cmcPlot <- function(x3p1,
                          }),
                        by = "cellID")
 
-    highCMCPlt <- cmcR:::arrangeCMCPlot(x3p1 = x3p1,
+    highCMCPlt <- arrangeCMCPlot(x3p1 = x3p1,
                                         x3p2 = x3p2,
                                         allCells = allHighCMCs,
                                         x3pNames = x3pNames,
@@ -672,7 +716,25 @@ cmcPlot <- function(x3p1,
 #'   function. If from the cellCCF_bothDirections, then the ggplot will be
 #'   faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
 #'   played the role as the "questioned" cartridge case scan)
-#'
+#' @param consensus_function function to aggregate the translation (dx and dy)
+#'   and rotation (theta) values in the ccfDF data frame to determine
+#'   "consensus" values
+#' @param ccf_thresh minimum correlation threshold to call a cell pair
+#'   "congruent matching"
+#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#'   pair can be to be called "congruent matching"
+#' @param theta_thresh maximum distance from the consensus theta value that a
+#'   cell pair can be to be called "congruent matching"
+#' @param consensus_function_theta *(OPTIONAL)* function (separate from
+#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
+#'   data frame to determine "consensus" values
+#' @param highCMCThresh number of CMCs less than the max CMC count that should
+#'   be classified as a "High CMC" count. That is, CMC_high = CMC_max -
+#'   highCMCThresh
+#' @param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
+#'   function
 #' @examples
 #' \dontrun{
 #'  #x3p1 and x3p2 are two x3p objects containing processed cartridge case scans
@@ -688,6 +750,8 @@ cmcPlot <- function(x3p1,
 #' }
 #'
 #' @export
+
+utils::globalVariables(c("comparison","theta","n","cmcHigh"))
 
 cmcPerThetaBarPlot <- function(cellCCF_output,
                                consensus_function = median,
@@ -708,14 +772,14 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
   if(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1"))){
     dplyr::bind_rows(
       cellCCF_output$comparison_1to2$ccfResults %>%
-        cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+        cmcFilterPerTheta(consensus_function = consensus_function,
                                  ccf_thresh = ccf_thresh,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
                                  theta_thresh = theta_thresh) %>%
         dplyr::mutate(comparison = paste0(x3pNames[1]," vs. ",x3pNames[2])),
       cellCCF_output$comparison_2to1$ccfResults %>%
-        cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+        cmcFilterPerTheta(consensus_function = consensus_function,
                                  ccf_thresh = ccf_thresh,
                                  dx_thresh = dx_thresh,
                                  dy_thresh = dy_thresh,
@@ -744,7 +808,7 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
   }
   else{
     cellCCF_output$ccfResults  %>%
-      cmcR:::cmcFilterPerTheta(consensus_function = consensus_function,
+      cmcFilterPerTheta(consensus_function = consensus_function,
                                ccf_thresh = ccf_thresh,
                                dx_thresh = dx_thresh,
                                dy_thresh = dy_thresh,
@@ -771,37 +835,58 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
 
 }
 
-#' @name getCellRegionPairs
+#'Extract cell/region pair matrices for a comparison of interest
+#'@name getCellRegionPairs
 #'
-#' @description This function is meant as a diagnostic tool to determine what
-#'   the cell region pairs for a particular cartridge case comparison looked
-#'   like right before calculation of the CCF.
+#'@description This function is meant as a diagnostic tool to determine what the
+#'  cell/region pairs for a particular cartridge case comparison looked like
+#'  right before calculation of the CCF.
 #'
-#' @export
+#'@param x3p1 an x3p object
+#'@param x3p2 another x3p object
+#'@param ccfDF data frame containing comparison results between x3p1 and x3p2. At a
+#'  minimum, this needs to contain "cellNum" and "theta" columns.
+#'@param cellCCF_params list of parameters under which the comparison represented in
+#'  ccfDF was performed. Such a list is returned by the cellCCF and
+#'  cellCCF_bothDirections function
+#'
+#'@examples
+#'\dontrun{
+#' comparison <- cellCCF(x3p1,x3p2)
+#'
+#' topResults <- comparison$ccfResults %>%
+#'  cmcR::topResultsPerCell()
+#'
+#' cellRegionPairs <- getCellRegionPairs(x3p1,x3p2,topResults,comparison$params)
+#'}
+#'
+#'@export
 
-getCellRegionPairs <- function(x3p1,x3p2,ccfDF,params){
+utils::globalVariables(c("theta"))
+
+getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
   mat1 <- x3p1$surface.matrix
   mat2 <- x3p2$surface.matrix
 
-  if(is.null(params$centerCell)){
+  if(is.null(cellCCF_params$centerCell)){
     m1 <- 0
     m2 <- 0
   }
-  if(is.null(params$scaleCell)){
+  if(is.null(cellCCF_params$scaleCell)){
     sd1 <- 1
     sd2 <- 1
   }
 
-  if(!is.null(params$centerCell)){
-    if(params$centerCell == "wholeMatrix"){
+  if(!is.null(cellCCF_params$centerCell)){
+    if(cellCCF_params$centerCell == "wholeMatrix"){
       m1 <- mean(as.vector(mat1),na.rm = TRUE)
 
       m2 <- mean(as.vector(mat2),na.rm = TRUE)
     }
   }
 
-  if(!is.null(params$scaleCell)){
-    if(params$scaleCell == "wholeMatrix"){
+  if(!is.null(cellCCF_params$scaleCell)){
+    if(cellCCF_params$scaleCell == "wholeMatrix"){
       sd1 <- sd(as.vector(mat1),na.rm = TRUE)
 
       sd2 <- sd(as.vector(mat2),na.rm = TRUE)
@@ -809,11 +894,11 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,params){
   }
 
   mat1_split <- splitSurfaceMat1(surfaceMat = mat1,
-                                 cellNumHoriz = params$cellNumHoriz,
-                                 cellNumVert = params$cellNumVert,
-                                 minObservedProp = params$minObservedProp)
+                                 cellNumHoriz = cellCCF_params$cellNumHoriz,
+                                 cellNumVert = cellCCF_params$cellNumVert,
+                                 minObservedProp = cellCCF_params$minObservedProp)
 
-  sidelengthMultiplier <- floor(sqrt(params$regionToCellProp))
+  sidelengthMultiplier <- floor(sqrt(cellCCF_params$regionToCellProp))
 
   mat2_splitCorners <- getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
                                              cellSideLengths = mat1_split$cellSideLengths,
@@ -843,8 +928,8 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,params){
 
     filteredCellID <- mat1_split$cellIDs[ccfDFSplit[[ind]]$cellNum]
 
-    if(!is.null(params$centerCell)){
-      if(params$centerCell == "individualCell"){
+    if(!is.null(cellCCF_params$centerCell)){
+      if(cellCCF_params$centerCell == "individualCell"){
         m1 <- mat1_splitFiltered %>%
           purrr::map(~ mean(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)
@@ -857,8 +942,8 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,params){
       }
     }
 
-    if(!is.null(params$scaleCell)){
-      if(params$scaleCell == "individualCell"){
+    if(!is.null(cellCCF_params$scaleCell)){
+      if(cellCCF_params$scaleCell == "individualCell"){
         sd1 <-  mat1_splitFiltered %>%
           purrr::map(~ sd(.,na.rm = TRUE)) %>%
           setNames(filteredCellID)

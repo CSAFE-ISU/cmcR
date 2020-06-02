@@ -94,6 +94,8 @@ extractCellbyCornerLocs <- function(cornerLocs,
 #'
 #' @keywords internal
 
+utils::globalVariables(c("."))
+
 rotateSurfaceMatrix <- function(surfaceMat,
                                 theta = 0,
                                 interpolation = 0){
@@ -190,6 +192,8 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 #' @name getMat2SplitLocations
 #'
 #' @keywords internal
+
+utils::globalVariables(c("."))
 
 getMat2SplitLocations <- function(cellIDs,
                                   cellSideLengths,
@@ -495,13 +499,12 @@ calcRawCorr <- function(cell,
 #'
 #' @export
 #'
-#' @param x3p1 (no default) an x3p object containing the surface matrix of a
-#'   breech face impression
-#' @param x3p2 (no default) an x3p object containing the surface matrix of a
-#'   breech face impression to be compared to that in x3p1
-#' @param thetas (default seq(from = -30,to = 30,by = 3)) rotation values (in
-#'   degrees) for which x3p2$surface.matrix will be rotated, split into cells,
-#'   and compared to x3p1$surface.matrix
+#' @param x3p1 an x3p object containing the surface matrix of a cartridge case
+#'   scan
+#' @param x3p2 an x3p object containing the surface matrix of a cartridge case
+#'   scan to be compared to that in x3p1
+#' @param thetas rotation values (in degrees) for which x3p2$surface.matrix will
+#'   be rotated, split into cells, and compared to x3p1$surface.matrix
 #' @param cellNumHoriz number of cells along horizontal axis to divide
 #'   x3p1$surface.matrix into
 #' @param cellNumVert number of cells along vertical axis to divide
@@ -575,6 +578,8 @@ calcRawCorr <- function(cell,
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #' @seealso cmcR::cmcFilter
 #'
+
+utils::globalVariables(c("cellID","."))
 
 cellCCF <- function(x3p1,
                     x3p2,
@@ -751,7 +756,7 @@ cellCCF <- function(x3p1,
     #calculate the correlation of each cell pair
     ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
                                  .y = mat2_splitShifted,
-                                 .f = ~ data.frame(purrr::flatten(cmcR:::comparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
+                                 .f = ~ data.frame(purrr::flatten(ccfComparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
       dplyr::bind_cols(cellIDdf_filtered,.) %>%
       dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
                                                     mat2_splitFiltered,
@@ -812,23 +817,23 @@ cellCCF <- function(x3p1,
 #'   and again for x3p2 vs. x3p1. See cellCCF function documentation for more
 #'   details.
 #'
-#' @param x3p1 (no default) an x3p object containing the surface matrix of a
-#'   breech face impression
-#' @param x3p2 (no default) an x3p object containing the surface matrix of a
-#'   breech face impression to be compared to that in x3p1
-#' @param thetas (default seq(from = -30,to = 30,by = 3)) rotation values (in
-#'   degrees) for which x3p2$surface.matrix will be rotated, split into cells,
-#'   and compared to x3p1$surface.matrix
-#' @param cellNumHoriz (default 7) number of cells along horizontal axis to
-#'   divide x3p1$surface.matrix into
-#' @param cellNumVert (default equal to cellNumHoriz) number of cells along
-#'   vertical axis to divide x3p1$surface.matrix into
+#' @param x3p1 an x3p object containing the surface matrix of a cartridge case
+#'   scan
+#' @param x3p2 an x3p object containing the surface matrix of a cartridge case
+#'   scan to be compared to that in x3p1
+#' @param thetas rotation values (in degrees) for which x3p2$surface.matrix will
+#'   be rotated, split into cells, and compared to x3p1$surface.matrix
+#' @param cellNumHoriz number of cells along horizontal axis to divide
+#'   x3p1$surface.matrix into
+#' @param cellNumVert number of cells along vertical axis to divide
+#'   x3p1$surface.matrix into
 #' @param regionToCellProp determines how much larger the x3p2 regions will be
 #'   relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
-#'   the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)
-#' @param minObservedProp (default 15) the minimum proportion of a cell that
-#'   needs to contain observed (i.e., non-NA) values for it to be included in
-#'   the CCF calculation procedure
+#'   the x3p2 regions will be 4 times times larger (sidelengths multiplied by
+#'   2).
+#' @param minObservedProp the minimum proportion of a cell that needs to contain
+#'   observed (i.e., non-NA) values for it to be included in the CCF calculation
+#'   procedure.
 #' @param rawCorrTieBreaker the way in which the "raw" correlation (see
 #'   description) is calculated may require slight padding/cropping of the
 #'   mat1-sized matrix extracted from mat2 to make their dimensions equal. This
@@ -883,7 +888,7 @@ cellCCF_bothDirections <- function(x3p1,
 
 
 
-  comparison_1to2 <- cmcR::cellCCF(x3p1 = x3p1,
+  comparison_1to2 <- cellCCF(x3p1 = x3p1,
                                    x3p2 = x3p2,
                                    thetas = thetas,
                                    cellNumHoriz = cellNumHoriz,
@@ -895,7 +900,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    centerCell = centerCell,
                                    scaleCell = scaleCell)
 
-  comparison_2to1 <- cmcR::cellCCF(x3p1 = x3p2,
+  comparison_2to1 <- cellCCF(x3p1 = x3p2,
                                    x3p2 = x3p1,
                                    thetas = thetas,
                                    cellNumHoriz = cellNumHoriz,

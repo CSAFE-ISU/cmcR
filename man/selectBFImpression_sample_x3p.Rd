@@ -69,7 +69,7 @@ In this case, the max of these two number will be used for the high pass
 filter and the min for the low pass filter.}
 }
 \value{
-
+x3p object containing the processed, down-sampled breech face
 }
 \description{
 Select breech face impression from a cartridge case scan after using

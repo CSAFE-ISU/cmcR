@@ -16,16 +16,13 @@
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
 #'
-#' @return List object containing fitted plane (as an lm object) and selected
-#'   breechface marks (matrix of same size as original matrix containing all
-#'   inliers close to fitted plane).
 #' @examples
 #' \dontrun{
 #' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
 #'   x3ptools::sample_x3p(m = 2)
 #'
 #' fittedPlane <- raw_x3p$surface.matrix %>%
-#'   preProcess_ransac(inlierTreshold = 10^(-5),
+#'   preProcess_ransac(inlierThreshold = 10^(-5),
 #'                     finalSelectionThreshold = 2*10^(-5),
 #'                     iters = 150)
 #' }
@@ -34,8 +31,8 @@
 #' @export
 
 preProcess_ransac <- function(surfaceMat,
-                              inlierTreshold = (10^(-5)), # 1 micron
-                              finalSelectionThreshold = 2*(10^(-5)), # 2 micron
+                              inlierThreshold = 1e-5,
+                              finalSelectionThreshold = 2*(1e-5),
                               iters = 150) {
   inlierCount <- 0
 
@@ -57,7 +54,7 @@ preProcess_ransac <- function(surfaceMat,
     )
 
     errors <- abs(preds - observedPixelLocations$depth)
-    inlierBool <- errors < inlierTreshold
+    inlierBool <- errors < inlierThreshold
 
     if (sum(inlierBool) > inlierCount) { #if candidate plane is closer to more observed values, make this the new fitted plane
       finalPlaneErrors <- errors
@@ -227,6 +224,8 @@ preProcess_cropWS <- function(surfaceMat,
 #'
 #' @keywords internal
 
+utils::globalVariables(c(".","value","x","y","r"))
+
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregation_function = mean,
                                       smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
@@ -393,7 +392,7 @@ preProcess_gaussFilter <- function(surfaceMat,
 
   surfaceMatFake <- surfaceMatFake*1e5
 
-  surfaceMatFiltered <- cmcR:::gaussianFilter(surfaceMat = surfaceMatFake,
+  surfaceMatFiltered <- gaussianFilter(surfaceMat = surfaceMatFake,
                                               res = res,
                                               wavelength = wavelength,
                                               filtertype = filtertype)

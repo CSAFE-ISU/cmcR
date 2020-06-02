@@ -22,3 +22,6 @@ export(selectBFImpression_sample_x3p)
 export(topResultsPerCell)
 export(x3pListPlot)
 importFrom(magrittr,"%>%")
+importFrom("stats", "ccf", "cor", "fft", "lm", "median", "predict",
+               "quantile", "sd", "setNames")
+importFrom("utils", "head", "tail")

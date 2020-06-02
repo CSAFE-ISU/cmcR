@@ -2,6 +2,7 @@
 #'
 #' @name filterViaFFT
 #'
+#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
 
 filterViaFFT <- function(A, B) {
@@ -35,7 +36,7 @@ filterViaFFT <- function(A, B) {
 #'
 #' @name round2
 #' @seealso http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
-#'
+#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
 
 round2 = function(x, n) {
@@ -51,7 +52,7 @@ round2 = function(x, n) {
 #'
 #' @name fftshift
 #' @seealso http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
-#'
+#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
 
 fftshift <- function(input_matrix) {
@@ -80,6 +81,7 @@ fftshift <- function(input_matrix) {
 #'
 #' @name circshift
 #' @seealso http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
 
 circshift <- function(x, vec) {
@@ -101,9 +103,10 @@ circshift <- function(x, vec) {
 #' Computes the location of the maximum CCF value in a CCF map between two
 #' matrices
 #'
-#' @name comparison
+#' @name ccfComparison
+#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
-comparison <- function(im1, im2) {
+ccfComparison <- function(im1, im2) {
   resp <- filterViaFFT(im1, im2) / (sqrt(sum(im1^2)) * sqrt(sum(im2^2)))
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]

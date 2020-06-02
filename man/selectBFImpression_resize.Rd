@@ -25,8 +25,11 @@ selectBFImpression_resize(
 \arguments{
 \item{x3p_path}{path to an .x3p file}
 
-\item{ransacFinalSelectThresh}{threshold to declare an observed value close to the
+\item{ransacInlierThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method}
+
+\item{ransacFinalSelectThresh}{threshold to declare an observed value close
+to the fitted plane an "inlier" for the RANSAC method}
 
 \item{ransacIters}{number of candidate planes to fit for the RANSAC method
 (higher value yields more stable breech face estimate)}
@@ -68,7 +71,7 @@ In this case, the max of these two number will be used for the high pass
 filter and the min for the low pass filter.}
 }
 \value{
-
+x3p object containing the processed, resized breech face
 }
 \description{
 Select breech face impression from a cartridge case scan after using
@@ -82,7 +85,10 @@ rows in the original matrix and size_y the number of columns.
 \examples{
 \dontrun{
  #use moving average interpolation to resize matrix to be 560x560
- processedBF1 <- cmcR::selectBFImpression_resize(x3p_path = "path/to/file.x3p",size_x = 560,size_y = 560,interpolation_type = 2)
+ processedBF1 <- cmcR::selectBFImpression_resize(x3p_path="path/to/file.x3p",
+                                                 size_x = 560,
+                                                 size_y = 560,
+                                                 interpolation_type = 2)
 }
 }
 \seealso{

@@ -23,6 +23,8 @@
 #' @seealso cmcR::cellCCF
 #' @export
 
+utils::globalVariables(c(".","cellID"))
+
 topResultsPerCell <- function(ccfResults){
 
   ccfResults  %>%
@@ -31,7 +33,7 @@ topResultsPerCell <- function(ccfResults){
                     ~ .x %>%
                       dplyr::mutate(theta = as.numeric(rep(.y,times = nrow(.))))) %>%
     dplyr::group_by(cellID) %>%
-    dplyr::filter(ccf == max(ccf)) %>%
+    dplyr::filter(ccf == max(ccf,na.rm = TRUE)) %>%
     dplyr::arrange(cellID)
 }
 
@@ -39,8 +41,8 @@ topResultsPerCell <- function(ccfResults){
 #'
 #' @name cmcFilter
 #'
-#' @description Applies initially proposed Congruent Matching Cells method logic to the CCF
-#'   results of a comparison between two cartridge case scans.
+#' @description Applies initially proposed Congruent Matching Cells method logic
+#'   to the CCF results of a comparison between two cartridge case scans.
 #'
 #' @param ccfDF data frame containing ccf results from a comparison between two
 #'   cartridge case scans
@@ -81,6 +83,8 @@ topResultsPerCell <- function(ccfResults){
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #'
 #' @export
+
+utils::globalVariables(c("dx","dy","theta"))
 
 cmcFilter <- function(ccfDF,
                       consensus_function = median,
@@ -128,6 +132,8 @@ cmcFilter <- function(ccfDF,
 #'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
 #' @keywords internal
+
+utils::globalVariables(c("."))
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
@@ -224,6 +230,8 @@ getMode <- function(x){
 #'   can only be one!" - Highlander).
 #'
 #' @keywords internal
+
+utils::globalVariables(c("theta","n","distanceToCMCMax"))
 
 calcMaxCMCTheta <- function(cmcPerTheta,
                             highCMC_thresh = 1,
@@ -331,6 +339,8 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #'
 #' @export
 
+utils::globalVariables(c(".","cellNum","comparison","theta"))
+
 cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                consensus_function = median,
                                ccf_thresh = .6,
@@ -347,8 +357,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   #both direction criterion).
 
   initialCMCs <- cellCCF_bothDirections_output %>%
-    purrr::map(~ cmcR::topResultsPerCell(.$ccfResults) %>%
-                 cmcR:::cmcFilter(consensus_function = consensus_function,
+    purrr::map(~ topResultsPerCell(.$ccfResults) %>%
+                 cmcFilter(consensus_function = consensus_function,
                                   ccf_thresh = ccf_thresh,
                                   dx_thresh = dx_thresh,
                                   dy_thresh = dy_thresh,
@@ -357,7 +367,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                  dplyr::ungroup())
 
   cmcPerTheta <-  cellCCF_bothDirections_output %>%
-    purrr::map(~ cmcR:::cmcFilterPerTheta(ccfResults = .$ccfResults,
+    purrr::map(~ cmcFilterPerTheta(ccfResults = .$ccfResults,
                                           consensus_function = consensus_function,
                                           ccf_thresh = ccf_thresh,
                                           dx_thresh = dx_thresh,
@@ -365,13 +375,14 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                           theta_thresh = theta_thresh,
                                           consensus_function_theta = consensus_function_theta))
 
-  thetaMax <- purrr::map(cmcPerTheta,~ cmcR:::calcMaxCMCTheta(cmcPerTheta = .,
+  thetaMax <- purrr::map(cmcPerTheta,~ calcMaxCMCTheta(cmcPerTheta = .,
                                                               highCMC_thresh = 1,
                                                               theta_thresh = theta_thresh,
                                                               distanceToCMCMaxTieBreaker = "minDistance"))
 
   #This was the least "conservative" option if one direction didn't yield a
-  #theta mode but the other direction did. I think this was assigning to many "false positive" CMCs for our liking for KNMs.
+  #theta mode but the other direction did. I think this was assigning to many
+  #"false positive" CMCs for our liking for KNMs.
   #if(purrr::is_empty(thetaMax$comparison_1to2) &
   #!purrr::is_empty(thetaMax$comparison_2to1)){ thetaMax$comparison_1to2 <-
   #-thetaMax$comparison_2to1 } if(!purrr::is_empty(thetaMax$comparison_1to2) &
@@ -391,7 +402,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
                 "initialCMCs" = initialCMCs,
-                "highCMCs" = NULL))
+                "highCMCs" = data.frame()))
   }
 
   #if one direction didn't pass the high CMC criterion...
@@ -415,7 +426,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       dplyr::bind_rows(highCMCs1) %>%
       dplyr::distinct() %>%
       dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
-      dplyr::filter(ccf == max(ccf)) %>%
+      dplyr::filter(ccf == max(ccf, na.rm = TRUE)) %>%
       dplyr::ungroup()
   }
   else{
@@ -429,7 +440,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       dplyr::bind_rows() %>%
       dplyr::distinct() %>%
       dplyr::group_by(cellNum) %>% #we don't want a cell being double-counted between the two comparisons
-      dplyr::filter(ccf == max(ccf)) %>%
+      dplyr::filter(ccf == max(ccf, na.rm = TRUE)) %>%
       dplyr::ungroup()
   }
   #if both directions pass the high CMC criterion...

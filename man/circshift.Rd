@@ -11,5 +11,7 @@ Performs a circular shift based on periodic boundary conditions in a vector
 }
 \seealso{
 http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+
+cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 }
 \keyword{internal}

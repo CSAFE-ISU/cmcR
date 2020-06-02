@@ -18,10 +18,28 @@ cmcPlot(
 
 \item{x3p2}{a different x3p object}
 
-\item{cellCCF_bothDirections_output}{output from the function cmcR::cellCCF_bothDirections}
+\item{cellCCF_bothDirections_output}{output from the function
+cmcR::cellCCF_bothDirections}
 
-\item{cmcFilter_improved_output}{output from the function cmcR::cmcFilter_improved}
+\item{cmcFilter_improved_output}{output from the function
+cmcR::cmcFilter_improved}
+
+\item{type}{argument to be passed to cmcR::x3pListPlot function}
+
+\item{x3pNames}{(Optional) Names of x3p objects to be included in x3pListPlot
+function}
 }
 \description{
-Visualize initial and high CMCs for a cartridge case pair comparison
+Constructs either a single faceted plot or a list of plots
+depicting the CMCs/non-CMCs under the initially proposed and High CMC
+methods for a pair of cartridge case scans
+}
+\examples{
+\dontrun{
+comparison <- cellCCF_bothDirections(x3p1,x3p2)
+cmcs <- cmcFilter_improved(comparison)
+
+cmcPlot(x3p1,x3p2,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
+}
+
 }

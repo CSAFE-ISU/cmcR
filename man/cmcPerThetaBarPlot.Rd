@@ -21,6 +21,33 @@ cmcPerThetaBarPlot(
 function. If from the cellCCF_bothDirections, then the ggplot will be
 faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
 played the role as the "questioned" cartridge case scan)}
+
+\item{consensus_function}{function to aggregate the translation (dx and dy)
+and rotation (theta) values in the ccfDF data frame to determine
+"consensus" values}
+
+\item{ccf_thresh}{minimum correlation threshold to call a cell pair
+"congruent matching"}
+
+\item{dx_thresh}{maximum distance from the consensus dx value that a cell
+pair can be to be called "congruent matching"}
+
+\item{dy_thresh}{maximum distance from the consensus dy value that a cell
+pair can be to be called "congruent matching"}
+
+\item{theta_thresh}{maximum distance from the consensus theta value that a
+cell pair can be to be called "congruent matching"}
+
+\item{consensus_function_theta}{\emph{(OPTIONAL)} function (separate from
+consensus_function) to aggregate the rotation (theta) values in the ccfDF
+data frame to determine "consensus" values}
+
+\item{highCMCThresh}{number of CMCs less than the max CMC count that should
+be classified as a "High CMC" count. That is, CMC_high = CMC_max -
+highCMCThresh}
+
+\item{x3pNames}{(Optional) Names of x3p objects to be included in x3pListPlot
+function}
 }
 \description{
 Create a bar plot of congruent matching cells per rotation value

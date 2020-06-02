@@ -112,12 +112,12 @@ km1_residuals <- km1_raw %>%
   x3ptools::sample_x3p(m = 2) #down-sampled copy of km1_raw
 
 km1_residuals$surface.matrix <- km1_residuals$surface.matrix %>%
-  preProcess_ransac(inlierTreshold = 10^(-5),
-                    finalSelectionThreshold = 2*(10^(-5)),
+  preProcess_ransac(inlierThreshold = 1e5,
+                    finalSelectionThreshold = 2*(1e5),
                     iters = 150) %>%
   preProcess_levelBF(useResiduals = TRUE) %>%
-  preProcess_ransac(inlierTreshold = .1*(10^(-5)),
-                    finalSelectionThreshold = 2*(10^(-5)),
+  preProcess_ransac(inlierThreshold = .1*(1e5),
+                    finalSelectionThreshold = 2*(1e5),
                     iters = 300) %>%
   preProcess_levelBF(useResiduals = TRUE) %>%
   preProcess_cropWS(croppingThresh = 2) %>%
@@ -138,17 +138,17 @@ km1_residuals %>%
 The `selectBFImpression_` functions perform all of the pre-processing steps except for the Gaussian filtering in one function call. The following will process the 3 other scans in an equivalent manner to km1_residuals above. Note that the `selectBFImpression_` functions actually returns a list of two elements: `params` containing the list of parameters under which the function call was made (for reproducibility purposes) and `x3p` containing the actual processed x3p object.
 
 ```{r}
-km2_residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul 1-2.x3p",
+km2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8",
                                                ransacIters = 150,
                                                ransacInlierThresh = 10^-5,
                                                ransacFinalSelectThresh = 2*(10^-5),
                                                useResiduals = TRUE)
-unknown1_residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_2/cc/Fadul 2-1.x3p",
+unknown1_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96",
                                                     ransacIters = 150,
                                                     ransacInlierThresh = 10^-5,
                                                     ransacFinalSelectThresh = 2*(10^-5),
                                                     useResiduals = TRUE)
-unknown2_residuals <- selectBFImpression_sample_x3p(x3p_path = "../../bulletCartridgeScans/fadul_allScans/Fadul_1/cc/Fadul F.x3p",
+unknown2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/9a054edf-f648-40a5-a061-b05ad036c61e",
                                                     ransacIters = 150,
                                                     ransacInlierThresh = 10^-5,
                                                     ransacFinalSelectThresh = 2*(10^-5),

@@ -55,7 +55,7 @@ findPlaneRansac <- function(surfaceMat,
                          data = observedPixelLocations[rowsToSample, ])
 
     suppressWarnings(
-    preds <- predict(candidatePlane, observedPixelLocations)
+      preds <- predict(candidatePlane, observedPixelLocations)
     )
 
     errors <- abs(preds - observedPixelLocations$depth)
@@ -173,6 +173,8 @@ cropScanWhitespace <- function(surfaceMat,
 #'
 #' @keywords internal
 
+utils::globalVariables(c("x","y","value","."))
+
 removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
   breechFace_firingPinFiltered <- bfImpression %>%
     imager::as.cimg() %>%
@@ -228,6 +230,7 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #'   for the low pass filter.
 #'
 #' @return x3p object containing the processed breech face
+#'
 #' @examples
 #' \dontrun{
 #'  processedBF1 <- cmcR::selectBFImpression(x3p_path = "path/to/file.x3p")
@@ -237,6 +240,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @seealso x3ptools (LINK)
 #'
 #' @export
+
+utils::globalVariables("preProcess")
 
 selectBFImpression <- function(x3p_path,
                                ransacInlierThresh = 1e-5,
@@ -305,9 +310,9 @@ selectBFImpression <- function(x3p_path,
   #apply gaussian filter if arguments supplied
   if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
-      cmcR::preProcess_gaussFilter(res = gaussFilterRes,
-                                   wavelength = gaussFilterWavelength,
-                                   filtertype = gaussFilterType)
+      preProcess_gaussFilter(res = gaussFilterRes,
+                             wavelength = gaussFilterWavelength,
+                             filtertype = gaussFilterType)
   }
 
   stopifnot(is.matrix(bfImpressionFinal),
@@ -365,7 +370,9 @@ selectBFImpression <- function(x3p_path,
 #'   starting in the top left corner moving right by reading the the matrix from
 #'   the bottom left corner and moving up. Effectively rotating the matrix by 90
 #'   degrees clockwise.
-#' @return
+#'
+#' @return x3p object containing the processed, down-sampled breech face
+#'
 #' @examples
 #' \dontrun{
 #'  #downsample x3p to a quarter the original size (every other row/col selected)
@@ -375,6 +382,8 @@ selectBFImpression <- function(x3p_path,
 #'
 #' @seealso cartridges3D package (LINK)
 #' @seealso x3ptools package (LINK)
+
+utils::globalVariables(".")
 
 selectBFImpression_sample_x3p <- function(x3p_path,
                                           ransacInlierThresh = 1e-5,
@@ -451,9 +460,9 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 
   if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
-      cmcR::preProcess_gaussFilter(res = gaussFilterRes,
-                                   wavelength = gaussFilterWavelength,
-                                   filtertype = gaussFilterType)
+      preProcess_gaussFilter(res = gaussFilterRes,
+                             wavelength = gaussFilterWavelength,
+                             filtertype = gaussFilterType)
   }
 
   stopifnot(is.matrix(bfImpressionFinal),
@@ -488,8 +497,10 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @name selectBFImpression_resize
 #'
 #' @param x3p_path path to an .x3p file
-#' @param ransacFinalSelectThresh threshold to declare an observed value close to the
+#' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
+#' @param ransacFinalSelectThresh threshold to declare an observed value close
+#'   to the fitted plane an "inlier" for the RANSAC method
 #' @param ransacIters number of candidate planes to fit for the RANSAC method
 #'   (higher value yields more stable breech face estimate)
 #' @param useResiduals dictates whether the difference between the estimated
@@ -522,11 +533,16 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @note imager treats a matrix as its transpose (i.e., x and y axes are
 #'   swapped). As such the size_x argument corresponds to changing the number of
 #'   rows in the original matrix and size_y the number of columns.
-#' @return
+#'
+#' @return x3p object containing the processed, resized breech face
+#'
 #' @examples
 #' \dontrun{
 #'  #use moving average interpolation to resize matrix to be 560x560
-#'  processedBF1 <- cmcR::selectBFImpression_resize(x3p_path = "path/to/file.x3p",size_x = 560,size_y = 560,interpolation_type = 2)
+#'  processedBF1 <- cmcR::selectBFImpression_resize(x3p_path="path/to/file.x3p",
+#'                                                  size_x = 560,
+#'                                                  size_y = 560,
+#'                                                  interpolation_type = 2)
 #' }
 #' @export
 #'
@@ -559,7 +575,9 @@ selectBFImpression_resize <- function(x3p_path,
                    boundary_conditions = boundary_conditions) %>%
     as.matrix()
 
-  #First, we want to find the approximate height value(s) of the breech face impression within the cartridge case scan. We can find this using the RANSAC method
+  #First, we want to find the approximate height value(s) of the breech face
+  #impression within the cartridge case scan. We can find this using the RANSAC
+  #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
@@ -609,9 +627,9 @@ selectBFImpression_resize <- function(x3p_path,
 
   if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
-      cmcR::preProcess_gaussFilter(res = gaussFilterRes,
-                                   wavelength = gaussFilterWavelength,
-                                   filtertype = gaussFilterType)
+      preProcess_gaussFilter(res = gaussFilterRes,
+                             wavelength = gaussFilterWavelength,
+                             filtertype = gaussFilterType)
   }
 
   #Important note: x3ptools and imager read an image from a surface matrix

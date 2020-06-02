@@ -47,6 +47,8 @@
 #'   indicated by the nonNA_sum_smootherSize argument.
 #'   @keywords internal
 
+utils::globalVariables(c(".","naSum","nonNA_sum","smoothednonNA_sum","smoothednonNA_sum_diff","smoothednonNA_sum_diff_lag","rowNum"))
+
 fpRadiusEstimation <- function(surfaceMat,
                                sum_over = "row",
                                nonNA_sum_smootherSize){
@@ -114,12 +116,12 @@ fpRadiusGridSearch <- function(surfaceMat,
                                 }
 
                                 estimByRow_rotated <-
-                                  cmcR:::fpRadiusEstimation(surfaceMatRotated,
+                                  fpRadiusEstimation(surfaceMatRotated,
                                                      sum_over = "row",
                                                      nonNA_sum_smootherSize = smootherSize)
 
                                 estimByCol_rotated <-
-                                  cmcR:::fpRadiusEstimation(surfaceMatRotated,
+                                  fpRadiusEstimation(surfaceMatRotated,
                                                      sum_over = "col",
                                                      nonNA_sum_smootherSize = smootherSize)
 
