@@ -460,16 +460,14 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       thetaMax_dismissed <- highCMCs %>%
         dplyr::group_by(comparison,theta) %>%
         dplyr::tally() %>%
-        dplyr::filter(n == max(n)) %>%
-        dplyr::pull(theta) %>%
-        median()
+        dplyr::filter(n == max(n))
 
       #it's theoretically possible, albeit improbable, that one direction will
       #pass the high CMC criterion while the other direction fails *and*
       #produces 0 initial CMCs. In this case, we would only take the high CMCs
       #in the one direction. Not including this if statement first would throw
       #an error in the next if statement
-      if(length(thetaMax_dismissed) == 1){
+      if(nrow(thetaMax_dismissed) == 1){
         return(list("params" = list(consensus_function = consensus_function,
                                     ccf_thresh = ccf_thresh,
                                     dx_thresh = dx_thresh,
@@ -480,12 +478,63 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                     "highCMCs" = highCMCs))
       }
 
+      #another possibility is that more than one theta in one direction ties for
+      #the CMC max count -- we can again determine whether these theta values
+      #are "close" to each other (if not, then fail the criterion) and otherwise
+      #take their median. Note that if there are three
+      else if(nrow(thetaMax_dismissed) > 2){
+
+        thetaMax_comparison_1to2_diff <- thetaMax_dismissed %>%
+          dplyr::filter(comparison == "comparison_1to2") %>%
+          dplyr::arrange(theta) %>%
+          dplyr::pull(theta) %>%
+          diff()
+
+        thetaMax_comparison_2to1_diff <- thetaMax_dismissed %>%
+          dplyr::filter(comparison == "comparison_2to1") %>%
+          dplyr::arrange(theta) %>%
+          dplyr::pull(theta) %>%
+          diff()
+
+        comparison_1to2_failure <- any(thetaMax_comparison_1to2_diff > theta_thresh)
+
+        comparison_2to1_failure <- any(thetaMax_comparison_2to1_diff > theta_thresh)
+
+        #in the event of a failure, don't assign any high CMCs
+
+        if(comparison_1to2_failure | comparison_2to1_failure){
+          return(list("params" = list(consensus_function = consensus_function,
+                                      ccf_thresh = ccf_thresh,
+                                      dx_thresh = dx_thresh,
+                                      dy_thresh = dy_thresh,
+                                      theta_thresh = theta_thresh,
+                                      consensus_function_theta = consensus_function_theta),
+                      "initialCMCs" = initialCMCs,
+                      "highCMCs" = data.frame(cellNum = integer(0),
+                                              cellID = character(0),
+                                              ccf = double(0),
+                                              fft.ccf = double(0),
+                                              dx = integer(0),
+                                              dy = integer(0),
+                                              theta = integer(0),
+                                              comparison = character(0))))
+        }
+        #otherwise, take the median of the theta values within their respective
+        #directions
+        else{
+          thetaMax_dismissed <- thetaMax_dismissed %>%
+            dplyr::group_by(comparison) %>%
+            dplyr::summarise(theta = median(theta)) %>%
+            dplyr::pull(theta)
+        }
+      }
+
       #if thetaMax has length 2, then we want to make sure that these are
       #actually opposites or close to opposites of each other. If not, then we
       #won't assign any high CMCs to the comparison
-      else if((sign(thetaMax_dismissed[1]) == sign(thetaMax_dismissed[2]) &
+      if((sign(thetaMax_dismissed[1]) == sign(thetaMax_dismissed[2]) &
                sign(thetaMax_dismissed[1]) != 0 & sign(thetaMax_dismissed[2]) != 0) |
-              (abs((abs(thetaMax_dismissed[1]) - abs(thetaMax_dismissed[2]))) > thetaMax_dismissed)){
+              (abs((abs(thetaMax_dismissed[1]) - abs(thetaMax_dismissed[2]))) > theta_thresh)){
         return(list("params" = list(consensus_function = consensus_function,
                                     ccf_thresh = ccf_thresh,
                                     dx_thresh = dx_thresh,
