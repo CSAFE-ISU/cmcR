@@ -134,8 +134,8 @@ imager::resize to resize the scan.</p>
 
     <pre class="usage"><span class='fu'>selectBFImpression_resize</span>(
   <span class='no'>x3p_path</span>,
-  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
+  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fl'>1e-05</span>,
   <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
   <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
@@ -157,9 +157,14 @@ imager::resize to resize the scan.</p>
       <td><p>path to an .x3p file</p></td>
     </tr>
     <tr>
-      <th>ransacFinalSelectThresh</th>
+      <th>ransacInlierThresh</th>
       <td><p>threshold to declare an observed value close to the
 fitted plane an "inlier" for the RANSAC method</p></td>
+    </tr>
+    <tr>
+      <th>ransacFinalSelectThresh</th>
+      <td><p>threshold to declare an observed value close
+to the fitted plane an "inlier" for the RANSAC method</p></td>
     </tr>
     <tr>
       <th>ransacIters</th>
@@ -226,9 +231,7 @@ filter and the min for the low pass filter.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    
-
-
+    <p>x3p object containing the processed, resized breech face</p>
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
     <p>imager treats a matrix as its transpose (i.e., x and y axes are
@@ -242,7 +245,10 @@ rows in the original matrix and size_y the number of columns.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
  <span class='co'>#use moving average interpolation to resize matrix to be 560x560</span>
- <span class='no'>processedBF1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>selectBFImpression_resize</span>(<span class='kw'>x3p_path</span> <span class='kw'>=</span> <span class='st'>"path/to/file.x3p"</span>,<span class='kw'>size_x</span> <span class='kw'>=</span> <span class='fl'>560</span>,<span class='kw'>size_y</span> <span class='kw'>=</span> <span class='fl'>560</span>,<span class='kw'>interpolation_type</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+ <span class='no'>processedBF1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>selectBFImpression_resize</span>(<span class='kw'>x3p_path</span><span class='kw'>=</span><span class='st'>"path/to/file.x3p"</span>,
+                                                 <span class='kw'>size_x</span> <span class='kw'>=</span> <span class='fl'>560</span>,
+                                                 <span class='kw'>size_y</span> <span class='kw'>=</span> <span class='fl'>560</span>,
+                                                 <span class='kw'>interpolation_type</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

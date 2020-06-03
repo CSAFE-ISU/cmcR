@@ -92,7 +92,7 @@ rows in the original matrix and size_y the number of columns.
 }
 }
 \seealso{
-cartridges3D package (LINK)
+cartridges3D package
 
-imager package (LINK)
+imager package
 }

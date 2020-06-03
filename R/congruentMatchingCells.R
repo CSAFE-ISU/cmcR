@@ -63,6 +63,8 @@
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
 #' @export
+#'
+#' @importFrom stats median
 
 congruentMatchingCells <- function(x3p1,
                                    x3p2,

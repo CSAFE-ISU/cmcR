@@ -4,6 +4,8 @@
 #'
 #' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
+#'
+#' @importFrom stats fft
 
 filterViaFFT <- function(A, B) {
   # size of full filter
@@ -83,6 +85,8 @@ fftshift <- function(input_matrix) {
 #' @seealso http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
 #' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal
+#'
+#' @importFrom utils head tail
 
 circshift <- function(x, vec) {
   dimx <- dim(x)

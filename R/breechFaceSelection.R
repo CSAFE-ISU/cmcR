@@ -30,6 +30,8 @@
 #' @seealso cartridges3D package (LINK)
 #'
 #' @keywords internal
+#'
+#' @importFrom stats lm predict
 
 findPlaneRansac <- function(surfaceMat,
                             inlierTreshold = 1e-5, # 1 micron
@@ -110,6 +112,8 @@ findPlaneRansac <- function(surfaceMat,
 #'   breech face is simply shifted down by its mean value
 #'
 #' @keywords internal
+#'
+#' @importFrom stats predict
 
 levelBFImpression <- function(ransacFit,
                               useResiduals = TRUE,...){
@@ -249,6 +253,8 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @seealso x3ptools (LINK)
 #'
 #' @export
+#'
+#' @importFrom stats sd
 
 utils::globalVariables("preProcess")
 
@@ -389,8 +395,10 @@ selectBFImpression <- function(x3p_path,
 #' }
 #' @export
 #'
-#' @seealso cartridges3D package (LINK)
-#' @seealso x3ptools package (LINK)
+#' @seealso cartridges3D package
+#' @seealso x3ptools package
+#'
+#' @importFrom stats sd
 
 utils::globalVariables(".")
 
@@ -555,8 +563,10 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' }
 #' @export
 #'
-#' @seealso cartridges3D package (LINK)
-#' @seealso imager package (LINK)
+#' @seealso cartridges3D package
+#' @seealso imager package
+#'
+#' @importFrom stats sd
 
 selectBFImpression_resize <- function(x3p_path,
                                       ransacInlierThresh = 1e-5,

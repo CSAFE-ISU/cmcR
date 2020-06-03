@@ -192,6 +192,8 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 #' @name getMat2SplitLocations
 #'
 #' @keywords internal
+#'
+#' @importFrom stats setNames
 
 utils::globalVariables(c("."))
 
@@ -279,6 +281,8 @@ swapCellIDAxes <- function(cellID){
 #'
 #'
 #' @keywords internal
+#'
+#' @importFrom stats cor
 
 calcRawCorr <- function(cell,
                         region,
@@ -577,6 +581,8 @@ calcRawCorr <- function(cell,
 #' @seealso
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #' @seealso cmcR::cmcFilter
+#'
+#' @importFrom stats sd setNames
 #'
 
 utils::globalVariables(c("cellID","."))

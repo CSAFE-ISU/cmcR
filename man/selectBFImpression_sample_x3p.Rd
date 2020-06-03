@@ -70,7 +70,7 @@ degrees clockwise.
 }
 }
 \seealso{
-cartridges3D package (LINK)
+cartridges3D package
 
-x3ptools package (LINK)
+x3ptools package
 }

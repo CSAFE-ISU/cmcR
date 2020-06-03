@@ -40,7 +40,9 @@
 
 
 <meta property="og:title" content="Visualize initial and high CMCs for a cartridge case pair comparison — cmcPlot" />
-<meta property="og:description" content="Visualize initial and high CMCs for a cartridge case pair comparison" />
+<meta property="og:description" content="Constructs either a single faceted plot or a list of plots
+depicting the CMCs/non-CMCs under the initially proposed and High CMC
+methods for a pair of cartridge case scans" />
 
 
 
@@ -124,17 +126,11 @@
     </div>
 
     <div class="ref-description">
-    <p>Visualize initial and high CMCs for a cartridge case pair comparison</p>
+    <p>Constructs either a single faceted plot or a list of plots
+depicting the CMCs/non-CMCs under the initially proposed and High CMC
+methods for a pair of cartridge case scans</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cmcPlot</span>(
-  <span class='no'>x3p1</span>,
-  <span class='no'>x3p2</span>,
-  <span class='no'>cellCCF_bothDirections_output</span>,
-  <span class='no'>cmcFilter_improved_output</span>,
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"faceted"</span>,
-  <span class='kw'>x3pNames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"x3p1"</span>, <span class='st'>"x3p2"</span>)
-)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -149,15 +145,33 @@
     </tr>
     <tr>
       <th>cellCCF_bothDirections_output</th>
-      <td><p>output from the function cmcR::cellCCF_bothDirections</p></td>
+      <td><p>output from the function
+cmcR::cellCCF_bothDirections</p></td>
     </tr>
     <tr>
       <th>cmcFilter_improved_output</th>
-      <td><p>output from the function cmcR::cmcFilter_improved</p></td>
+      <td><p>output from the function
+cmcR::cmcFilter_improved</p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>argument to be passed to cmcR::x3pListPlot function</p></td>
+    </tr>
+    <tr>
+      <th>x3pNames</th>
+      <td><p>(Optional) Names of x3p objects to be included in x3pListPlot
+function</p></td>
     </tr>
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='no'>comparison</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
+<span class='no'>cmcs</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cmcFilter_improved.html'>cmcFilter_improved</a></span>(<span class='no'>comparison</span>)
+
+<span class='fu'>cmcPlot</span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>,<span class='no'>comparison</span>,<span class='no'>cmcs</span>,<span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"faceted"</span>,<span class='kw'>x3pNames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"name1"</span>,<span class='st'>"name2"</span>))
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

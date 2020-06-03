@@ -244,15 +244,11 @@ kmCellRegionPairs[3] %>%
   map2(.x = .,
        .y = names(.), 
        function(set,theta){
-         map(set[6], ~ ccfMapPlot(mat1 = .[[1]],
+         map(set[5], ~ ccfMapPlot(mat1 = .[[1]],
                           mat2 = .[[2]],
                           theta = theta,
                           type = "raster"))
          })
-```
-
-```{r}
-cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1$x3p,"Fadul 2-1" = fadul2.1$x3p),rotate = 90)
 ```
 
 

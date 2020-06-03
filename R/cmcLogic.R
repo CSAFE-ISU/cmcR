@@ -22,8 +22,9 @@
 #'
 #' @seealso cmcR::cellCCF
 #' @export
+#'
 
-utils::globalVariables(c(".","cellID"))
+utils::globalVariables(c(".","cellID","ccf"))
 
 topResultsPerCell <- function(ccfResults){
 
@@ -33,6 +34,7 @@ topResultsPerCell <- function(ccfResults){
                     ~ .x %>%
                       dplyr::mutate(theta = as.numeric(rep(.y,times = nrow(.))))) %>%
     dplyr::group_by(cellID) %>%
+    dplyr::filer(!is.na(ccf)) %>%
     dplyr::filter(ccf == max(ccf,na.rm = TRUE)) %>%
     dplyr::arrange(cellID)
 }
@@ -83,8 +85,10 @@ topResultsPerCell <- function(ccfResults){
 #' \url{https://pdfs.semanticscholar.org/4bf3/0b3a23c38d8396fa5e0d116cba63a3681494.pdf}
 #'
 #' @export
+#'
+#' @importFrom stats median
 
-utils::globalVariables(c("dx","dy","theta"))
+utils::globalVariables(c("dx","dy","theta","ccf"))
 
 cmcFilter <- function(ccfDF,
                       consensus_function = median,
@@ -132,8 +136,10 @@ cmcFilter <- function(ccfDF,
 #'   consensus_function_theta (e.g., na.rm = TRUE) if necessary
 #'
 #' @keywords internal
+#'
+#' @importFrom stats median setNames
 
-utils::globalVariables(c("."))
+utils::globalVariables(c(".","ccf"))
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
@@ -231,6 +237,8 @@ getMode <- function(x){
 #'   can only be one!" - Highlander).
 #'
 #' @keywords internal
+#'
+#' @importFrom stats median
 
 utils::globalVariables(c("theta","n","distanceToCMCMax"))
 

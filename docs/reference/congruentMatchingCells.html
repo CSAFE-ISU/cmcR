@@ -137,12 +137,13 @@ cmcFilter_improved functions together</p>
   <span class='no'>x3p2</span>,
   <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
   <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
   <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
+  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
+  <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.15</span>,
   <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
   <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
   <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
-  <span class='kw'>corr_thresh</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
+  <span class='kw'>ccf_thresh</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
   <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>10</span>,
   <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
   <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
@@ -175,15 +176,21 @@ and compared to x3p1$surface.matrix</p></td>
 divide x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
+      <th>cellNumVert</th>
+      <td><p>(default equal to cellNumHoriz) number of cells along
+vertical axis to divide x3p1$surface.matrix into</p></td>
+    </tr>
+    <tr>
       <th>regionToCellProp</th>
       <td><p>determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
 the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)</p></td>
     </tr>
     <tr>
-      <th>cellNumVert</th>
-      <td><p>(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into</p></td>
+      <th>minObservedProp</th>
+      <td><p>(default 15) the minimum proportion of a cell that
+needs to contain observed (i.e., non-NA) values for it to be included in
+the CCF calculation procedure</p></td>
     </tr>
     <tr>
       <th>centerCell</th>
@@ -208,7 +215,7 @@ and rotation (theta) values in the ccfDF data frame to determine
 "consensus" values</p></td>
     </tr>
     <tr>
-      <th>corr_thresh</th>
+      <th>ccf_thresh</th>
       <td><p>minimum correlation threshold to call a cell pair
 "congruent matching"</p></td>
     </tr>
@@ -237,17 +244,6 @@ data frame to determine "consensus" values</p></td>
       <th>...</th>
       <td><p>arguments to be passed to consensus_function or
 consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
-    </tr>
-    <tr>
-      <th>minObservedProp</th>
-      <td><p>(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure</p></td>
-    </tr>
-    <tr>
-      <th>cellCCF_bothDirections_output</th>
-      <td><p>list returned by the function
-cmcR::cellCCF_bothdirections</p></td>
     </tr>
     </table>
 

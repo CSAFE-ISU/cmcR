@@ -132,22 +132,6 @@ x3ptools::sample_x3p to downsample the scan.</h1>
 x3ptools::sample_x3p to downsample the scan.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>selectBFImpression_sample_x3p</span>(
-  <span class='no'>x3p_path</span>,
-  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
-  <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>standardizeBF</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>,
-  <span class='kw'>mY</span> <span class='kw'>=</span> <span class='no'>m</span>,
-  <span class='kw'>offset</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>offsetY</span> <span class='kw'>=</span> <span class='no'>offset</span>,
-  <span class='no'>gaussFilterRes</span>,
-  <span class='kw'>gaussFilterWavelength</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>16</span>, <span class='fl'>250</span>),
-  <span class='kw'>gaussFilterType</span> <span class='kw'>=</span> <span class='st'>"bp"</span>
-)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -208,17 +192,18 @@ for x and y direction.</p></td>
     </tr>
     <tr>
       <th>gaussFilterRes</th>
-      <td><p><strong>Optional</strong> sampling resolution of the surface matrix
+      <td><p>sampling resolution of the surface matrix
 (given by incrementX or incrementY of the header.info element of an x3p
-object)</p></td>
+object). If not given, then this is determined automatically within the
+function</p></td>
     </tr>
     <tr>
       <th>gaussFilterWavelength</th>
-      <td><p><strong>Optional</strong> cut-off wavelength to be attenuated</p></td>
+      <td><p>cut-off wavelength(s) to be attenuated</p></td>
     </tr>
     <tr>
       <th>gaussFilterType</th>
-      <td><p><strong>Optional</strong> specifies whether a low pass, "lp", high
+      <td><p>specifies whether a low pass, "lp", high
 pass, "hp", or bandpass, "bp" filter is to be used. Note that setting
 filterype = "bp" means that wavelength should be a vector of two numbers.
 In this case, the max of these two number will be used for the high pass
@@ -228,9 +213,7 @@ filter and the min for the low pass filter.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    
-
-
+    <p>x3p object containing the processed, down-sampled breech face</p>
     <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
 
     <p>Given a matrix, x3ptools populates an x3p object's surface matrix

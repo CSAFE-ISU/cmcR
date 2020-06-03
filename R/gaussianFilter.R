@@ -17,6 +17,8 @@ gaussianKernel <- function(size,sig){
 #'
 #' @seealso https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
 #' @keywords internal
+#'
+#' @importFrom stats fft
 
 utils::globalVariables(".")
 

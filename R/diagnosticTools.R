@@ -19,6 +19,7 @@
 #' }
 #' @export
 #'
+#' @importFrom stats setNames median quantile
 
 utils::globalVariables(c("value","x","y",".","x3p","height"))
 
@@ -183,6 +184,7 @@ ccfMap <- function(mat1,mat2){
 #' @importFrom gridExtra tableGrob arrangeGrob grid.arrange
 #' @importFrom colorspace divergingx_hcl
 #' @importFrom scales rescale
+#' @importFrom stats quantile
 #'
 #' @export
 
@@ -383,6 +385,8 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #' @name arrangeCMCPlot
 #'
 #' @keywords internal
+#'
+#' @importFrom stats median setNames
 
 utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","dx","dy","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
 
@@ -754,6 +758,8 @@ cmcPlot <- function(x3p1,
 #' }
 #'
 #' @export
+#'
+#' @importFrom stats median
 
 utils::globalVariables(c("comparison","theta","n","cmcHigh"))
 
@@ -865,6 +871,8 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
 #'}
 #'
 #'@export
+#'
+#'@importFrom stats sd setNames
 
 utils::globalVariables(c("theta"))
 

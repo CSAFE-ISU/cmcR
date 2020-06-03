@@ -134,15 +134,6 @@ proposed by Tong et al. (2015), to the CCF results of a comparison between
 two cartridge case scans.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cmcFilter_improved</span>(
-  <span class='no'>cellCCF_bothDirections_output</span>,
-  <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
-  <span class='kw'>ccf_thresh</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>10</span>,
-  <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
-  <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
-  <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>consensus_function</span>
-)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -179,6 +170,15 @@ pair can be to be called "congruent matching"</p></td>
 cell pair can be to be called "congruent matching"</p></td>
     </tr>
     <tr>
+      <th>missingTheta_decision</th>
+      <td><p>dictates how function should handle situations
+in which one direction passes the high CMC criterion while another
+direction does not. "replace": replaces theta value in failed direction
+with opposite of theta value in successful direction. "dismiss": only
+counts the initial CMCs in failed direction and high CMCs in successful
+direction. "fail": only counts the initial CMCs in either direction.</p></td>
+    </tr>
+    <tr>
       <th>consensus_function_theta</th>
       <td><p><em>(OPTIONAL)</em> function (separate from
 consensus_function) to aggregate the rotation (theta) values in the ccfDF
@@ -200,6 +200,7 @@ data frame to determine "consensus" values</p></td>
                            <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>20</span>,
                            <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
                            <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+                           <span class='kw'>missingTheta_decision</span> <span class='kw'>=</span> <span class='st'>"replace"</span>,
                            <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>getMode</span>)
 }</div></pre>
   </div>

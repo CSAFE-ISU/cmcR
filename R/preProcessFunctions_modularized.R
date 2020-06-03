@@ -29,6 +29,8 @@
 #'
 #' @seealso cartridges3D package
 #' @export
+#'
+#' @importFrom stats lm predict
 
 preProcess_ransac <- function(surfaceMat,
                               inlierThreshold = 1e-5,
@@ -110,6 +112,8 @@ preProcess_ransac <- function(surfaceMat,
 #'
 #' @seealso cartridges3D package
 #' @export
+#'
+#' @importFrom stats predict
 
 preProcess_levelBF <- function(ransacFit,
                                useResiduals = TRUE){
@@ -223,6 +227,8 @@ preProcess_cropWS <- function(surfaceMat,
 #'   estimate.
 #'
 #' @keywords internal
+#'
+#' @importFrom stats quantile
 
 utils::globalVariables(c(".","value","x","y","r"))
 

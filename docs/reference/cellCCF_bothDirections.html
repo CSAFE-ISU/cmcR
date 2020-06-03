@@ -40,8 +40,9 @@
 
 
 <meta property="og:title" content="Applies cellCCF function twice for a pair of cartridge case scans. — cellCCF_bothDirections" />
-<meta property="og:description" content="Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
-for x3p2 vs. x3p1. See cellCCF function documentation for more details." />
+<meta property="og:description" content="Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2
+and again for x3p2 vs. x3p1. See cellCCF function documentation for more
+details." />
 
 
 
@@ -125,8 +126,9 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details." />
     </div>
 
     <div class="ref-description">
-    <p>Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2 and again
-for x3p2 vs. x3p1. See cellCCF function documentation for more details.</p>
+    <p>Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2
+and again for x3p2 vs. x3p1. See cellCCF function documentation for more
+details.</p>
     </div>
 
     <pre class="usage"><span class='fu'>cellCCF_bothDirections</span>(
@@ -148,41 +150,41 @@ for x3p2 vs. x3p1. See cellCCF function documentation for more details.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x3p1</th>
-      <td><p>(no default) an x3p object containing the surface matrix of a
-breech face impression</p></td>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan</p></td>
     </tr>
     <tr>
       <th>x3p2</th>
-      <td><p>(no default) an x3p object containing the surface matrix of a
-breech face impression to be compared to that in x3p1</p></td>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan to be compared to that in x3p1</p></td>
     </tr>
     <tr>
       <th>thetas</th>
-      <td><p>(default seq(from = -30,to = 30,by = 3)) rotation values (in
-degrees) for which x3p2$surface.matrix will be rotated, split into cells,
-and compared to x3p1$surface.matrix</p></td>
+      <td><p>rotation values (in degrees) for which x3p2$surface.matrix will
+be rotated, split into cells, and compared to x3p1$surface.matrix</p></td>
     </tr>
     <tr>
       <th>cellNumHoriz</th>
-      <td><p>(default 7) number of cells along horizontal axis to
-divide x3p1$surface.matrix into</p></td>
+      <td><p>number of cells along horizontal axis to divide
+x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
       <th>cellNumVert</th>
-      <td><p>(default equal to cellNumHoriz) number of cells along
-vertical axis to divide x3p1$surface.matrix into</p></td>
+      <td><p>number of cells along vertical axis to divide
+x3p1$surface.matrix into</p></td>
     </tr>
     <tr>
       <th>regionToCellProp</th>
       <td><p>determines how much larger the x3p2 regions will be
 relative to the x3p1 cells. For example, if regionToCellProp = 4 means that
-the x3p2 regions will be 4 times times larger (sidelengths multiplied by 2)</p></td>
+the x3p2 regions will be 4 times times larger (sidelengths multiplied by
+2).</p></td>
     </tr>
     <tr>
       <th>minObservedProp</th>
-      <td><p>(default 15) the minimum proportion of a cell that
-needs to contain observed (i.e., non-NA) values for it to be included in
-the CCF calculation procedure</p></td>
+      <td><p>the minimum proportion of a cell that needs to contain
+observed (i.e., non-NA) values for it to be included in the CCF calculation
+procedure.</p></td>
     </tr>
     <tr>
       <th>rawCorrTieBreaker</th>
@@ -203,19 +205,19 @@ dealt with in computing the correlation.</p></td>
     </tr>
     <tr>
       <th>centerCell</th>
-      <td><p><strong>OPTIONAL</strong> (default missing) dictates if cell is to be
-shifted prior to CCF calculation. Default is that no shifting is performed.
-If set to "wholeMatrix", then each cell is subracted by the mean of the
-whole matrix. If set to "individualCell", then each cell is subtracted by
-its particular mean.</p></td>
+      <td><p>dictates if cell is to be shifted prior to CCF
+calculation. Default is that no shifting is performed. If set to
+"wholeMatrix", then each cell is subracted by the mean of the whole matrix.
+If set to "individualCell", then each cell is subtracted by its particular
+mean.</p></td>
     </tr>
     <tr>
       <th>scaleCell</th>
-      <td><p><strong>OPTIONAL</strong> (default missing) dictates if cell is to be
-scaled prior to CCF calculation. Default is that no scaling is performed.
-If set to "wholeMatrix", then each cell is divided by the standard
-deviation of the whole matrix. If set to "individualCell", then each cell
-is divided by its particular standard deviation.</p></td>
+      <td><p>dictates if cell is to be scaled prior to CCF calculation.
+Default is that no scaling is performed. If set to "wholeMatrix", then each
+cell is divided by the standard deviation of the whole matrix. If set to
+"individualCell", then each cell is divided by its particular standard
+deviation.</p></td>
     </tr>
     </table>
 

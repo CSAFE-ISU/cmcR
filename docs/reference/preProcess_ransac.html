@@ -133,8 +133,8 @@ from cartridges3D::findPlaneRansac function.</p>
 
     <pre class="usage"><span class='fu'>preProcess_ransac</span>(
   <span class='no'>surfaceMat</span>,
-  <span class='kw'>inlierTreshold</span> <span class='kw'>=</span> (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
-  <span class='kw'>finalSelectionThreshold</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>10</span>^(-<span class='fl'>5</span>)),
+  <span class='kw'>inlierThreshold</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>finalSelectionThreshold</span> <span class='kw'>=</span> <span class='fl'>2</span> * (<span class='fl'>1e-05</span>),
   <span class='kw'>iters</span> <span class='kw'>=</span> <span class='fl'>150</span>
 )</pre>
 
@@ -144,6 +144,12 @@ from cartridges3D::findPlaneRansac function.</p>
     <tr>
       <th>surfaceMat</th>
       <td><p>a surface matrix representing a breech face impression scan</p></td>
+    </tr>
+    <tr>
+      <th>inlierThreshold</th>
+      <td><p>threshold to declare an observed value close to the
+fitted plane an "inlier". A smaller value will yield a more stable
+estimate.</p></td>
     </tr>
     <tr>
       <th>finalSelectionThreshold</th>
@@ -156,19 +162,8 @@ the final breech face estimate.</p></td>
       <td><p>number of candidate planes to fit (higher value yields more
 stable breech face estimate)</p></td>
     </tr>
-    <tr>
-      <th>inlierThreshold</th>
-      <td><p>threshold to declare an observed value close to the
-fitted plane an "inlier". A smaller value will yield a more stable
-estimate.</p></td>
-    </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>List object containing fitted plane (as an lm object) and selected
-breechface marks (matrix of same size as original matrix containing all
-inliers close to fitted plane).</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>cartridges3D package</p></div>
@@ -179,7 +174,7 @@ inliers close to fitted plane).</p>
   <span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>sample_x3p</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 
 <span class='no'>fittedPlane</span> <span class='kw'>&lt;-</span> <span class='no'>raw_x3p</span>$<span class='no'>surface.matrix</span> <span class='kw'>%&gt;%</span>
-  <span class='fu'>preProcess_ransac</span>(<span class='kw'>inlierTreshold</span> <span class='kw'>=</span> <span class='fl'>10</span>^(-<span class='fl'>5</span>),
+  <span class='fu'>preProcess_ransac</span>(<span class='kw'>inlierThreshold</span> <span class='kw'>=</span> <span class='fl'>10</span>^(-<span class='fl'>5</span>),
                     <span class='kw'>finalSelectionThreshold</span> <span class='kw'>=</span> <span class='fl'>2</span>*<span class='fl'>10</span>^(-<span class='fl'>5</span>),
                     <span class='kw'>iters</span> <span class='kw'>=</span> <span class='fl'>150</span>)
 }</div></pre>

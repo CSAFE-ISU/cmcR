@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Finds plane of breechface marks using RANSAC — findPlaneRansac • cmcR</title>
+<title>Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
+functions from the cmcR package — fadulData_processed • cmcR</title>
 
 
 <!-- jquery -->
@@ -39,10 +40,12 @@
 
 
 
-<meta property="og:title" content="Finds plane of breechface marks using RANSAC — findPlaneRansac" />
-<meta property="og:description" content="Given input depths (in microns), find best-fitting plane using RANSAC. This
-should be the plane that the breechface marks are on. Adapted from
-cartridges3D::findPlaneRansac function" />
+<meta property="og:title" content="Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
+functions from the cmcR package — fadulData_processed" />
+<meta property="og:description" content="An x3p (XML 3D Surface Profile) object containing a processed version of the
+&quot;Fadul 1-1&quot; and &quot;Fadul 1-2&quot; cartridge cases from Fadul et al. (2011). The
+scans have been downsampled by a factor of 8 and processed using functions
+from the cmcR package." />
 
 
 
@@ -120,69 +123,55 @@ cartridges3D::findPlaneRansac function" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Finds plane of breechface marks using RANSAC</h1>
+    <h1>Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
+functions from the cmcR package</h1>
     
-    <div class="hidden name"><code>findPlaneRansac.Rd</code></div>
+    <div class="hidden name"><code>fadulData_processed.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given input depths (in microns), find best-fitting plane using RANSAC. This
-should be the plane that the breechface marks are on. Adapted from
-cartridges3D::findPlaneRansac function</p>
+    <p>An x3p (XML 3D Surface Profile) object containing a processed version of the
+"Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The
+scans have been downsampled by a factor of 8 and processed using functions
+from the cmcR package.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>findPlaneRansac</span>(
-  <span class='no'>surfaceMat</span>,
-  <span class='kw'>inlierTreshold</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
-  <span class='kw'>finalSelectionThreshold</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fl'>1e-05</span>,
-  <span class='kw'>iters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='no'>fadul1.1_processed</span>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>surfaceMat</th>
-      <td><p>matrix of input depths in microns.</p></td>
-    </tr>
-    <tr>
-      <th>finalSelectionThreshold</th>
-      <td><p>once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
-the final breech face estimate.</p></td>
-    </tr>
-    <tr>
-      <th>iters</th>
-      <td><p>number of candidate planes to fit (higher value yields more
-stable breech face estimate)</p></td>
-    </tr>
-    <tr>
-      <th>inlierThreshold</th>
-      <td><p>threshold to declare an observed value close to the
-fitted plane an "inlier". A smaller value will yield a more stable
-estimate.</p></td>
-    </tr>
-    </table>
+<span class='no'>fadul1.2_processed</span></pre>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>List object containing fitted plane (as an lm object) and selected
-breechface marks (matrix of same size as original matrix containing all
-inliers close to fitted plane).</p>
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>The function will throw an error if the final plane estimate is
-rank-deficient (which is relatively unlikely, but theoretically possible).
-Re-run the function (possibly setting a different seed) if this occurs.</p>
+    <p>An x3p object containing a surface matrix and metainformation
+concerning the conditions under which the scan was taken</p><dl'>
+<dt>header.info</dt><dd><p>size and resolution of scan</p></dd>
+
+<dt>surface.matrix</dt><dd><p>spatially-ordered matrix of elements representing the
+height values of the processed cartridge case surface at particular
+locations</p></dd>
+
+<dt>feature.info</dt><dd><p>provides structure for storing surface data</p></dd>
+
+<dt>general.info</dt><dd><p>information concerning the author of the scan and
+capturing device</p></dd>
+
+<dt>matrix.info</dt><dd><p>provides link to surface measurements in binary format</p></dd>
+
+
+</dl>
+
+<p>An object of class <code>x3p</code> of length 5.</p>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p><a href='https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d'>https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d</a></p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>cartridges3D package (LINK)</p></div>
+    <div class='dont-index'><p>T. Fadul, G. Hernandez, S. Stoiloff, and G. Sneh. An Empirical Study
+to Improve the Scientific Foundation of Forensic Firearm and Tool Mark
+Identification Utilizing 10 Consecutively Manufactured Slides, 2011.</p>
+<p><a href='https://github.com/heike/x3ptools'>https://github.com/heike/x3ptools</a></p></div>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-    <span class='no'>testImage</span> <span class='kw'>&lt;-</span> <span class='fu'>findPlaneRansac</span>(<span class='no'>surfaceMat</span>)
-}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

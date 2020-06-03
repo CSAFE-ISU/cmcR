@@ -182,38 +182,24 @@ is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cellCCF</span>(
-  <span class='no'>x3p1</span>,
-  <span class='no'>x3p2</span>,
-  <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
-  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
-  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.15</span>,
-  <span class='kw'>rawCorrTieBreaker</span> <span class='kw'>=</span> <span class='no'>which.max</span>,
-  <span class='kw'>use</span> <span class='kw'>=</span> <span class='st'>"pairwise.complete.obs"</span>,
-  <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-  <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>
-)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x3p1</th>
-      <td><p>(no default) an x3p object containing the surface matrix of a
-breech face impression</p></td>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan</p></td>
     </tr>
     <tr>
       <th>x3p2</th>
-      <td><p>(no default) an x3p object containing the surface matrix of a
-breech face impression to be compared to that in x3p1</p></td>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan to be compared to that in x3p1</p></td>
     </tr>
     <tr>
       <th>thetas</th>
-      <td><p>(default seq(from = -30,to = 30,by = 3)) rotation values (in
-degrees) for which x3p2$surface.matrix will be rotated, split into cells,
-and compared to x3p1$surface.matrix</p></td>
+      <td><p>rotation values (in degrees) for which x3p2$surface.matrix will
+be rotated, split into cells, and compared to x3p1$surface.matrix</p></td>
     </tr>
     <tr>
       <th>cellNumHoriz</th>

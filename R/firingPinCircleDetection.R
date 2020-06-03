@@ -97,6 +97,8 @@ fpRadiusEstimation <- function(surfaceMat,
 #'   preliminary tests).
 #'
 #' @keywords internal
+#'
+#' @importFrom stats setNames
 
 fpRadiusGridSearch <- function(surfaceMat,
                                smootherSize,

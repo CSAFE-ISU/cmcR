@@ -164,13 +164,6 @@ found, the average of these radii values is used as the final radius
 estimate.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>preProcess_detectFPCircle</span>(
-  <span class='no'>surfaceMat</span>,
-  <span class='kw'>aggregation_function</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-  <span class='kw'>smootherSize</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>((<span class='fl'>0.1</span> * <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>surfaceMat</span>)/<span class='fl'>2</span>)) + <span class='fl'>1</span>,
-  <span class='kw'>meshSize</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>houghScoreQuant</span> <span class='kw'>=</span> <span class='fl'>0.9</span>
-)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -180,13 +173,13 @@ estimate.</p>
       <td><p>a surface matrix representing a breech face impression scan</p></td>
     </tr>
     <tr>
+      <th>smootherSize</th>
+      <td><p>size of average smoother (to be passed to zoo::roll_mean)</p></td>
+    </tr>
+    <tr>
       <th>aggregation_function</th>
       <td><p>function to select initial radius estimate from
 those calculated using fpRadiusGridSearch</p></td>
-    </tr>
-    <tr>
-      <th>smootherSize</th>
-      <td><p>size of average smoother (to be passed to zoo::roll_mean)</p></td>
     </tr>
     <tr>
       <th>meshSize</th>
