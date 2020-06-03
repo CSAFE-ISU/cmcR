@@ -34,7 +34,7 @@ topResultsPerCell <- function(ccfResults){
                     ~ .x %>%
                       dplyr::mutate(theta = as.numeric(rep(.y,times = nrow(.))))) %>%
     dplyr::group_by(cellID) %>%
-    dplyr::filer(!is.na(ccf)) %>%
+    dplyr::filter(!is.na(ccf)) %>%
     dplyr::filter(ccf == max(ccf,na.rm = TRUE)) %>%
     dplyr::arrange(cellID)
 }
@@ -458,7 +458,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       thetaMax_dismissed <- highCMCs %>%
         dplyr::group_by(comparison,theta) %>%
         dplyr::tally() %>%
-        dplyr::filter(n = max(n)) %>%
+        dplyr::filter(n == max(n)) %>%
         dplyr::pull(theta)
 
       #it's theoretically possible, albeit improbable, that one direction will
