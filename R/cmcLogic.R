@@ -354,6 +354,8 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
 #' @export
+#'
+#' @importFrom stats median
 
 utils::globalVariables(c(".","cellNum","comparison","theta"))
 
@@ -459,7 +461,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
         dplyr::group_by(comparison,theta) %>%
         dplyr::tally() %>%
         dplyr::filter(n == max(n)) %>%
-        dplyr::pull(theta)
+        dplyr::pull(theta) %>%
+        median()
 
       #it's theoretically possible, albeit improbable, that one direction will
       #pass the high CMC criterion while the other direction fails *and*
