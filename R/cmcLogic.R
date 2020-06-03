@@ -531,7 +531,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       #actually opposites or close to opposites of each other. If not, then we
       #won't assign any high CMCs to the comparison
       else{
-        thetaMax_dismissed %>% thetaMax_dismissed %>%
+        thetaMax_dismissed <- thetaMax_dismissed %>%
           dplyr::pull(theta)
 
         if((sign(thetaMax_dismissed[1]) == sign(thetaMax_dismissed[2]) &
