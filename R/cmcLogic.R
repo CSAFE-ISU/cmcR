@@ -533,6 +533,17 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       thetaMax_dismissed <- thetaMax_dismissed %>%
         dplyr::pull(theta)
 
+      if(length(thetaMax_dismissed) == 1){
+        return(list("params" = list(consensus_function = consensus_function,
+                                    ccf_thresh = ccf_thresh,
+                                    dx_thresh = dx_thresh,
+                                    dy_thresh = dy_thresh,
+                                    theta_thresh = theta_thresh,
+                                    consensus_function_theta = consensus_function_theta),
+                    "initialCMCs" = initialCMCs,
+                    "highCMCs" = highCMCs))
+      }
+
       if((sign(thetaMax_dismissed[1]) == sign(thetaMax_dismissed[2]) &
           sign(thetaMax_dismissed[1]) != 0 & sign(thetaMax_dismissed[2]) != 0) |
          (abs((abs(thetaMax_dismissed[1]) - abs(thetaMax_dismissed[2]))) > theta_thresh)){
