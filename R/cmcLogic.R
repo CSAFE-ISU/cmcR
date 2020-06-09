@@ -333,6 +333,15 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #'   with opposite of theta value in successful direction. "dismiss": only
 #'   counts the initial CMCs in failed direction and high CMCs in successful
 #'   direction. "fail": only counts the initial CMCs in either direction.
+#' @param compareInitialAndHighThetas dictates if the consensus theta values
+#'   determined under the initially proposed method should be compared to the
+#'   consensus theta values determined under the High CMC method. In particular,
+#'   determines for each direction whether the consensus theta values determined
+#'   under the two methods are within theta_thresh of each other. It is often
+#'   the case that non-matching cartridge cases, even if they pass the High CMC
+#'   criterion, will have differing consensus theta values under the two
+#'   methods. If this isn't taken into account, non-matches tend to be assigned
+#'   a lot of false positive CMCs under the High CMC method.
 #' @param consensus_function_theta *(OPTIONAL)* function (separate from
 #'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
 #'   data frame to determine "consensus" values
@@ -366,6 +375,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                dy_thresh = dx_thresh,
                                theta_thresh = 3,
                                missingTheta_decision = "replace",
+                               compareInitialAndHighThetas = FALSE,
                                consensus_function_theta = consensus_function){
 
   initialCMCs <- cellCCF_bothDirections_output %>%
@@ -531,22 +541,85 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       #are actually opposites or close to opposites of each other. If not, then
       #we won't assign any high CMCs to the comparison
       thetaMax_dismissed <- thetaMax_dismissed %>%
-        dplyr::pull(theta)
+        dplyr::ungroup() %>%
+        dplyr::arrange(comparison) #%>%
+      # dplyr::pull(theta)
 
-      if(length(thetaMax_dismissed) == 1){
-        return(list("params" = list(consensus_function = consensus_function,
-                                    ccf_thresh = ccf_thresh,
-                                    dx_thresh = dx_thresh,
-                                    dy_thresh = dy_thresh,
-                                    theta_thresh = theta_thresh,
-                                    consensus_function_theta = consensus_function_theta),
-                    "initialCMCs" = initialCMCs,
-                    "highCMCs" = highCMCs))
+      if(nrow(thetaMax_dismissed) == 1){
+
+        if(compareInitialAndHighThetas){
+
+          intitialCMCs_nonMissingDirection <- initialCMCs[[which(names(initialCMCs) == thetaMax_dismissed$comparison)]]
+
+          thetaCompareBool_dismissed <- abs(thetaMax_dismissed$theta - median(intitialCMCs_nonMissingDirection$theta,na.rm = TRUE)) > theta_thresh
+
+          if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
+            return(list("params" = list(consensus_function = consensus_function,
+                                        ccf_thresh = ccf_thresh,
+                                        dx_thresh = dx_thresh,
+                                        dy_thresh = dy_thresh,
+                                        theta_thresh = theta_thresh,
+                                        consensus_function_theta = consensus_function_theta),
+                        "initialCMCs" = initialCMCs,
+                        "highCMCs" = data.frame(cellNum = integer(0),
+                                                cellID = character(0),
+                                                ccf = double(0),
+                                                fft.ccf = double(0),
+                                                dx = integer(0),
+                                                dy = integer(0),
+                                                theta = integer(0),
+                                                comparison = character(0))))
+
+          }
+          else{
+            return(list("params" = list(consensus_function = consensus_function,
+                                        ccf_thresh = ccf_thresh,
+                                        dx_thresh = dx_thresh,
+                                        dy_thresh = dy_thresh,
+                                        theta_thresh = theta_thresh,
+                                        consensus_function_theta = consensus_function_theta),
+                        "initialCMCs" = initialCMCs,
+                        "highCMCs" = highCMCs))
+          }
+        }
+        else{
+          return(list("params" = list(consensus_function = consensus_function,
+                                      ccf_thresh = ccf_thresh,
+                                      dx_thresh = dx_thresh,
+                                      dy_thresh = dy_thresh,
+                                      theta_thresh = theta_thresh,
+                                      consensus_function_theta = consensus_function_theta),
+                      "initialCMCs" = initialCMCs,
+                      "highCMCs" = highCMCs))
+        }
       }
 
-      if((sign(thetaMax_dismissed[1]) == sign(thetaMax_dismissed[2]) &
-          sign(thetaMax_dismissed[1]) != 0 & sign(thetaMax_dismissed[2]) != 0) |
-         (abs((abs(thetaMax_dismissed[1]) - abs(thetaMax_dismissed[2]))) > theta_thresh)){
+      if(compareInitialAndHighThetas){
+        thetaCompareBool_dismissed <- (((abs((thetaMax_dismissed[1,"theta"] - median(initialCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
+                                         (abs((thetaMax_dismissed[2,"theta"] - median(initialCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
+
+        if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
+          return(list("params" = list(consensus_function = consensus_function,
+                                      ccf_thresh = ccf_thresh,
+                                      dx_thresh = dx_thresh,
+                                      dy_thresh = dy_thresh,
+                                      theta_thresh = theta_thresh,
+                                      consensus_function_theta = consensus_function_theta),
+                      "initialCMCs" = initialCMCs,
+                      "highCMCs" = data.frame(cellNum = integer(0),
+                                              cellID = character(0),
+                                              ccf = double(0),
+                                              fft.ccf = double(0),
+                                              dx = integer(0),
+                                              dy = integer(0),
+                                              theta = integer(0),
+                                              comparison = character(0))))
+        }
+      }
+
+      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) &
+          sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
+         (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > theta_thresh)){
         return(list("params" = list(consensus_function = consensus_function,
                                     ccf_thresh = ccf_thresh,
                                     dx_thresh = dx_thresh,
@@ -603,10 +676,75 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   #CMC criterion. That is a CMC count "mode" has been identified at a particular
   #theta value in both directions.
 
+  #It is often the case for known non-matches, even if they pass the high CMC
+  #criterion, that the theta values obtained from the initially proposed method
+  #disagree considerably with the theta values obtained from the high CMC
+  #method. This leads to assigning a lot of false positive high CMCs when
+  #there's already evidence that they are in fact NOT matching. We can use this
+  #to our advantage for teasing out non-matches. If there is a disagreement in
+  #theta values in *either* direction between the initial and High CMC methods,
+  #then the pair will not be assigned any high CMCs. Note: this might be changed
+  #to determine whether there is a disagreement in *both* directions later on if
+  #this is determined to be too strict
+
+  if(compareInitialAndHighThetas){
+
+    thetaCompareBool <- (((abs((thetaMax$comparison_1to2 - median(initialCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
+                           (abs((thetaMax$comparison_2to1 - median(initialCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
+
+    if(thetaCompareBool | is.na(thetaCompareBool) | purrr::is_empty(thetaCompareBool)){
+      return(list("params" = list(consensus_function = consensus_function,
+                                  ccf_thresh = ccf_thresh,
+                                  dx_thresh = dx_thresh,
+                                  dy_thresh = dy_thresh,
+                                  theta_thresh = theta_thresh,
+                                  consensus_function_theta = consensus_function_theta),
+                  "initialCMCs" = initialCMCs,
+                  "highCMCs" = data.frame(cellNum = integer(0),
+                                          cellID = character(0),
+                                          ccf = double(0),
+                                          fft.ccf = double(0),
+                                          dx = integer(0),
+                                          dy = integer(0),
+                                          theta = integer(0),
+                                          comparison = character(0))))
+
+    }
+  }
+
   #The last contingency is making sure that these theta modes are opposites of
   #each other (or within theta_thresh of being opposites).
-  if((sign(thetaMax$comparison_1to2) == sign(thetaMax$comparison_2to1) & sign(thetaMax$comparison_1to2) != 0 & sign(thetaMax$comparison_2to1) != 0) |
-     (abs((abs(thetaMax$comparison_1to2) - abs(thetaMax$comparison_2to1))) > theta_thresh)){
+
+  #The following determines whether (1) the theta modes in either direction are
+  #the same sign as each other (which they shouldn't be for matches) AND (2)
+  #whether they are far away from 0. An older version of this function didn't
+  #cover cases in which, for example, the theta_thresh was 6 and both
+  #comparisons voted for a consensual theta value of 3. Given the theta_thresh,
+  #this should be admissable since they are "close enough" (according to
+  #theta_thresh) to each other.
+  if(sign(thetaMax$comparison_1to2) == sign(thetaMax$comparison_2to1) & abs(thetaMax$comparison_1to2 - -1*thetaMax$comparison_2to1) > theta_thresh){
+
+    return(list("params" = list(consensus_function = consensus_function,
+                                ccf_thresh = ccf_thresh,
+                                dx_thresh = dx_thresh,
+                                dy_thresh = dy_thresh,
+                                theta_thresh = theta_thresh,
+                                consensus_function_theta = consensus_function_theta),
+                "initialCMCs" = initialCMCs,
+                "highCMCs" = data.frame(cellNum = integer(0),
+                                        cellID = character(0),
+                                        ccf = double(0),
+                                        fft.ccf = double(0),
+                                        dx = integer(0),
+                                        dy = integer(0),
+                                        theta = integer(0),
+                                        comparison = character(0))))
+  }
+  #Even if the two theta values are of opposite signs, it's possible that they
+  #don't agree with each other. For example, one direction might vote for -27
+  #degrees as the consensual theta value while the other votes for 12. Such a
+  #comparison shouldn't pass the High CMC criterion.
+  if((abs((abs(thetaMax$comparison_1to2) - abs(thetaMax$comparison_2to1))) > theta_thresh)){
     return(list("params" = list(consensus_function = consensus_function,
                                 ccf_thresh = ccf_thresh,
                                 dx_thresh = dx_thresh,
