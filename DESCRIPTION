@@ -39,7 +39,9 @@ Suggests:
     magick,
     rgl,
     covr
-Remotes: github::xhtai/cartridges3D
+Remotes: 
+    github::xhtai/cartridges3D
+    https://github.com/heike/x3ptools
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5.0)

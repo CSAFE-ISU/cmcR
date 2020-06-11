@@ -42,7 +42,7 @@ r_packages:
 # https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
 script:
   - |
-    R CMD build --no-build-vignettes .
+    R CMD build .
     travis_wait 20 R CMD check cmcR*tar.gz
 after_success:
   - Rscript -e 'covr::codecov()'
