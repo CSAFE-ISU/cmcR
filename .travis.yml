@@ -6,6 +6,10 @@ cache: packages
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
+# do not build vignettes...takes too long and times out on travis
+r_build_args: --no-build-vignettes --no-manual
+r_check_args: --no-build-vignettes --no-manual --timings
+
 addons:
        apt:
          update: true
@@ -13,6 +17,10 @@ addons:
            - sourceline: 'ppa:opencpu/imagemagick'
          packages:
            - libmagick++-dev
+
+# for codecov
+r_packages:
+  - covr
 
 after_success:
   - Rscript -e 'covr::codecov()'
