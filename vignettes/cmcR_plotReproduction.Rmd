@@ -2,8 +2,8 @@
 title: "Reproduction of Song et al. (2018) plots using the cmcR package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Song et al. (2018) reproduction}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Reproduction of Song et al. (2018) plots using the cmcR package}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
   

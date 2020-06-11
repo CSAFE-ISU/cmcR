@@ -3,7 +3,7 @@ title: "Reproducible Example"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{cmcR Reproducible Example}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 

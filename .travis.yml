@@ -43,6 +43,6 @@ r_packages:
 script:
   - |
     R CMD build .
-    travis_wait 20 R CMD check cmcR*tar.gz
+    travis_wait 20 R CMD check .
 after_success:
   - Rscript -e 'covr::codecov()'
