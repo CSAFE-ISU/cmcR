@@ -32,8 +32,8 @@ addons:
          - tesseract-ocr-eng
          - libtiff-dev
 
-r_binary_packages:
-  - rgl
+#r_binary_packages:
+#  - rgl
 
 # for codecov
 r_packages:
@@ -44,6 +44,5 @@ script:
   - |
     R CMD build --no-build-vignettes .
     travis_wait 20 R CMD check cmcR*tar.gz
-
 after_success:
   - Rscript -e 'covr::codecov()'
