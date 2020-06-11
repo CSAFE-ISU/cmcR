@@ -7,6 +7,8 @@
 
 [![Travis build
 status](https://travis-ci.com/jzemmels/cmcR.svg?branch=master)](https://travis-ci.com/jzemmels/cmcR)
+[![Codecov test
+coverage](https://codecov.io/gh/jzemmels/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/jzemmels/cmcR?branch=master)
 <!-- badges: end -->
 
 The cmcR package provides an open-source implementation of the Congruent

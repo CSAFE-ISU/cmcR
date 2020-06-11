@@ -9,3 +9,4 @@
 ^LICENSE\.md$
 ^data-raw$
 ^\.travis\.yml$
+^codecov\.yml$

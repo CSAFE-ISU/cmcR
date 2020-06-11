@@ -37,7 +37,8 @@ Suggests:
     testthat,
     DT,
     magick,
-    rgl
+    rgl,
+    covr
 Remotes: github::xhtai/cartridges3D
 VignetteBuilder: knitr
 Depends: 

@@ -3,6 +3,9 @@
 language: R
 cache: packages
 
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
+
 addons:
        apt:
          update: true
@@ -10,3 +13,6 @@ addons:
            - sourceline: 'ppa:opencpu/imagemagick'
          packages:
            - libmagick++-dev
+
+after_success:
+  - Rscript -e 'covr::codecov()'
