@@ -40,7 +40,7 @@ Suggests:
     rgl,
     covr
 Remotes: 
-    github::xhtai/cartridges3D
+    github::xhtai/cartridges3D,
     https://github.com/heike/x3ptools
 VignetteBuilder: knitr
 Depends: 
