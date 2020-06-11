@@ -7,8 +7,8 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
 # do not build vignettes...takes too long and times out on travis
-r_build_args: --no-build-vignettes --no-manual
-r_check_args: --no-build-vignettes --no-manual --timings
+#r_build_args: --no-build-vignettes --no-manual
+#r_check_args: --no-manual --ignore-vignettes --as-cran *. tar.gz
 
 addons:
        apt:
@@ -16,11 +16,34 @@ addons:
          sources:
            - sourceline: 'ppa:opencpu/imagemagick'
          packages:
-           - libmagick++-dev
+         - libglu1-mesa-dev # rgl
+         - freeglut3-dev
+         - mesa-common-dev
+         - libmagick++-dev
+         - libjpeg-dev # imagemagick
+         - libpng-dev
+         - libgif-dev
+         - libmagick++-dev
+         - librsvg2-dev
+         - libwebp-dev
+         - libpoppler-cpp-dev
+         - libtesseract-dev
+         - libleptonica-dev
+         - tesseract-ocr-eng
+         - libtiff-dev
+
+r_binary_packages:
+  - rgl
 
 # for codecov
 r_packages:
   - covr
+
+# https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
+script:
+  - |
+    R CMD build --no-build-vignettes .
+    travis_wait 20 R CMD check cmcR*tar.gz
 
 after_success:
   - Rscript -e 'covr::codecov()'
