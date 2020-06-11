@@ -5,3 +5,6 @@
 inst/doc
 doc
 Meta
+.gitignore
+.Rhistory
+.RData

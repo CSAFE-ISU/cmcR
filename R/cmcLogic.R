@@ -617,8 +617,9 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
         }
       }
 
-      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) &
-          sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
+      sign(thetaMax$comparison_1to2) == sign(thetaMax$comparison_2to1) & abs(thetaMax$comparison_1to2 - -1*thetaMax$comparison_2to1) > theta_thresh
+
+      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed) != 0) |
          (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > theta_thresh)){
         return(list("params" = list(consensus_function = consensus_function,
                                     ccf_thresh = ccf_thresh,
@@ -636,6 +637,42 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                             theta = integer(0),
                                             comparison = character(0))))
       }
+
+      # if(sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) &
+      #     abs(thetaMax_dismissed[1,"theta"] - -1*thetaMax_dismissed[2,"theta"]) > theta_thresh){
+        # return(list("params" = list(consensus_function = consensus_function,
+        #                             ccf_thresh = ccf_thresh,
+        #                             dx_thresh = dx_thresh,
+        #                             dy_thresh = dy_thresh,
+        #                             theta_thresh = theta_thresh,
+        #                             consensus_function_theta = consensus_function_theta),
+        #             "initialCMCs" = initialCMCs,
+        #             "highCMCs" = data.frame(cellNum = integer(0),
+        #                                     cellID = character(0),
+        #                                     ccf = double(0),
+        #                                     fft.ccf = double(0),
+        #                                     dx = integer(0),
+        #                                     dy = integer(0),
+        #                                     theta = integer(0),
+        #                                     comparison = character(0))))
+      # }
+      # else if((abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > theta_thresh)){
+      #   return(list("params" = list(consensus_function = consensus_function,
+      #                               ccf_thresh = ccf_thresh,
+      #                               dx_thresh = dx_thresh,
+      #                               dy_thresh = dy_thresh,
+      #                               theta_thresh = theta_thresh,
+      #                               consensus_function_theta = consensus_function_theta),
+      #               "initialCMCs" = initialCMCs,
+      #               "highCMCs" = data.frame(cellNum = integer(0),
+      #                                       cellID = character(0),
+      #                                       ccf = double(0),
+      #                                       fft.ccf = double(0),
+      #                                       dx = integer(0),
+      #                                       dy = integer(0),
+      #                                       theta = integer(0),
+      #                                       comparison = character(0))))
+      # }
       # if we've made it this far, then the theta values should be at least to
       # within theta_thresh of being opposites of each other, so we can return
       # the highCMCs without worrying about a disagreement
@@ -744,7 +781,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
   #don't agree with each other. For example, one direction might vote for -27
   #degrees as the consensual theta value while the other votes for 12. Such a
   #comparison shouldn't pass the High CMC criterion.
-  if((abs((abs(thetaMax$comparison_1to2) - abs(thetaMax$comparison_2to1))) > theta_thresh)){
+  else if((abs((abs(thetaMax$comparison_1to2) - abs(thetaMax$comparison_2to1))) > theta_thresh)){
     return(list("params" = list(consensus_function = consensus_function,
                                 ccf_thresh = ccf_thresh,
                                 dx_thresh = dx_thresh,
