@@ -32,6 +32,9 @@ addons:
          - tesseract-ocr-eng
          - libtiff-dev
 
+r_build_args: --no-build-vignettes
+r_check_args: --as-cran --ignore-vignettes
+
 #r_binary_packages:
 #  - rgl
 
@@ -40,9 +43,10 @@ r_packages:
   - covr
 
 # https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
-script:
-  - |
-    R CMD build .
-    travis_wait 20 R CMD check *tar.gz
+#script:
+#  - |
+#    R CMD build .
+#    travis_wait 20 R CMD check *.tar.gz
+
 after_success:
   - Rscript -e 'covr::codecov()'
