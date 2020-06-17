@@ -1,8 +1,9 @@
 #' Finds plane of breechface marks using RANSAC
 #'
 #' Given input depths (in microns), find best-fitting plane using RANSAC. This
-#' should be the plane that the breechface marks are on. Adapted from
-#' cartridges3D::findPlaneRansac function
+#' should be the plane that the breechface marks are on. This a modified version
+#' of the findPlaneRansac function available in the cartridges3D package on
+#' GitHub.
 #'
 #' @param surfaceMat matrix of input depths in microns.
 #' @param inlierThreshold threshold to declare an observed value close to the
@@ -27,7 +28,7 @@
 #'     testImage <- findPlaneRansac(surfaceMat)
 #' }
 #'
-#' @seealso cartridges3D package (LINK)
+#' @seealso https://github.com/xhtai/cartridges3D
 #'
 #' @keywords internal
 #'
@@ -104,12 +105,15 @@ findPlaneRansac <- function(surfaceMat,
               estimatedBreechFace = estimatedBreechFace))
 }
 
-#' Helper for selectBFImpression
+#' Helper for selectBFImpression. This ia modified version of the levelBF3D
+#' function available in the cartridges3D package on GitHub.
 #' @name levelBFImpression
 #'
 #' @param useResiduals dictates whether the difference between the estimated
 #'   breech face and fitted plane are returned (residuals) or if the estimates
 #'   breech face is simply shifted down by its mean value
+#'
+#' @seealso https://github.com/xhtai/cartridges3D
 #'
 #' @keywords internal
 #'
@@ -259,9 +263,9 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 utils::globalVariables("preProcess")
 
 selectBFImpression <- function(x3p_path,
-                               ransacInlierThresh = 1e-5,
+                               ransacInlierThresh = 1e-6,
                                ransacFinalSelectThresh = 2*1e-5,
-                               ransacIters = 150,
+                               ransacIters = 300,
                                useResiduals = TRUE,
                                croppingThresh = 1,
                                standardizeBF = FALSE,
@@ -275,17 +279,17 @@ selectBFImpression <- function(x3p_path,
   #impression within the cartridge case scan. We can find this using the RANSAC
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
+    findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    iters = ceiling(ransacIters/2)) %>%
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #do it again, but with more restrictive thresholds:
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
     #impression
-    levelBFImpression(useResiduals = useResiduals) %>%
-    #do it again, but with more restrictive thresholds:
-    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
-                    iters = 2*ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
@@ -318,12 +322,15 @@ selectBFImpression <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & missing(gaussFilterType))){
+  if(length(gaussFilterWavelength) == 2 & is.null(gaussFilterType)){
+    gaussFilterType <- "bp"
+  }
+
+  if(missing(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     gaussFilterRes <- x3p$header.info$incrementY
   }
 
-  #apply gaussian filter if arguments supplied
-  if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
+  if(!is.null(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
       preProcess_gaussFilter(res = gaussFilterRes,
                              wavelength = gaussFilterWavelength,
@@ -403,9 +410,9 @@ selectBFImpression <- function(x3p_path,
 utils::globalVariables(".")
 
 selectBFImpression_sample_x3p <- function(x3p_path,
-                                          ransacInlierThresh = 1e-5,
+                                          ransacInlierThresh = 1e-6,
                                           ransacFinalSelectThresh = 2*1e-5,
-                                          ransacIters = 150,
+                                          ransacIters = 300,
                                           useResiduals = TRUE,
                                           croppingThresh = 1,
                                           standardizeBF = FALSE,
@@ -429,17 +436,17 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #impression within the cartridge case scan. We can find this using the RANSAC
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
-    findPlaneRansac(inlierTreshold = ransacInlierThresh,
+    findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
-                    iters = ransacIters) %>%
+                    iters = ceiling(ransacIters/2)) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
     #impression
     levelBFImpression(useResiduals = useResiduals) %>%
     #do it again, but with more restrictive thresholds:
-    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
+    findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
-                    iters = 2*ransacIters) %>%
+                    iters = ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
@@ -471,11 +478,15 @@ selectBFImpression_sample_x3p <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & !missing(gaussFilterType))){
+  if(length(gaussFilterWavelength) == 2 & is.null(gaussFilterType)){
+    gaussFilterType <- "bp"
+  }
+
+  if(missing(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     gaussFilterRes <- x3p$header.info$incrementY
   }
 
-  if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
+  if(!is.null(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
       preProcess_gaussFilter(res = gaussFilterRes,
                              wavelength = gaussFilterWavelength,
@@ -569,9 +580,9 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 #' @importFrom stats sd
 
 selectBFImpression_resize <- function(x3p_path,
-                                      ransacInlierThresh = 1e-5,
+                                      ransacInlierThresh = 1e-6,
                                       ransacFinalSelectThresh = 2*1e-5,
-                                      ransacIters = 150,
+                                      ransacIters = 300,
                                       useResiduals = TRUE,
                                       croppingThresh = 1,
                                       standardizeBF = FALSE,
@@ -598,17 +609,17 @@ selectBFImpression_resize <- function(x3p_path,
   #impression within the cartridge case scan. We can find this using the RANSAC
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
+    findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
+                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    iters = ceiling(ransacIters/2)) %>%
+    levelBFImpression(useResiduals = useResiduals) %>%
+    #do it again, but with more restrictive thresholds:
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
                     finalSelectionThreshold = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
     #impression
-    levelBFImpression(useResiduals = useResiduals) %>%
-    #do it again, but with more restrictive thresholds:
-    findPlaneRansac(inlierTreshold = .1*ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
-                    iters = 2*ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #also crop out whitespace on exterior of cartridge case scan
     cropScanWhitespace(croppingThresh = croppingThresh)
@@ -640,11 +651,15 @@ selectBFImpression_resize <- function(x3p_path,
     bfImpressionFinal <- (bfImpressionFinal - mean(bfImpressionFinal,na.rm = TRUE))/sd(bfImpressionFinal,na.rm = TRUE)
   }
 
-  if(missing(gaussFilterRes) & !(missing(gaussFilterWavelength) & !missing(gaussFilterType))){
+  if(length(gaussFilterWavelength) == 2 & is.null(gaussFilterType)){
+    gaussFilterType <- "bp"
+  }
+
+  if(missing(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     gaussFilterRes <- (x3p$header.info$incrementY/nrow(x3p$surface.matrix))*nrow(bfImpressionFinal)
   }
 
-  if(!missing(gaussFilterRes) & !missing(gaussFilterWavelength) & !missing(gaussFilterType)){
+  if(!is.null(gaussFilterRes) & !is.null(gaussFilterWavelength) & !is.null(gaussFilterType)){
     bfImpressionFinal <- bfImpressionFinal %>%
       preProcess_gaussFilter(res = gaussFilterRes,
                              wavelength = gaussFilterWavelength,

@@ -1,6 +1,16 @@
+# These functions were copied from the cartridges3D R package currently (as of
+# 6/13/2020) available on GitHub: https://github.com/xhtai/cartridges3D.
+
+#These functions were copied because they are internal to both the cartridges3D
+#and cmcR packages and referring to another package's internal functions is not
+#SOP in R package development (devtools::check warnings when I had it
+#differently)
+
+
 #' Calculates cross-correlation between two matrices using FFTs
 #'
 #' @name filterViaFFT
+#'
 #'
 #' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
 #' @keywords internal

@@ -2,7 +2,8 @@
 #'
 #' @description Given input depths (in microns), find best-fitting plane using
 #'   RANSAC. This should be the plane that the breechface marks are on. Adapted
-#'   from cartridges3D::findPlaneRansac function.
+#'   from cartridges3D::findPlaneRansac function. This a modified version of the
+#'   findPlaneRansac function available in the cartridges3D package on GitHub.
 #'
 #' @name preProcess_ransac
 #'
@@ -27,7 +28,8 @@
 #'                     iters = 150)
 #' }
 #'
-#' @seealso cartridges3D package
+#' @seealso
+#'   https://github.com/xhtai/cartridges3D
 #' @export
 #'
 #' @importFrom stats lm predict
@@ -89,7 +91,8 @@ preProcess_ransac <- function(surfaceMat,
 #'
 #' @description Given the output of preProcess_ransac, extracts values (either
 #'   raw or residual) from the surface matrix to which the RANSAC plane was fit.
-#'   Adapted from the cartridges3D::levelBF3D function.
+#'   Adapted from the cartridges3D::levelBF3D function. This ia modified version
+#'   of the levelBF3D function available in the cartridges3D package on GitHub.
 #'
 #' @param ransacFit output from the cmcR::preProcess_ransac function.
 #' @param useResiduals dictates whether the difference between the estimated
@@ -110,7 +113,7 @@ preProcess_ransac <- function(surfaceMat,
 #'  cmcR::preProcess_levelBF(useResiduals = TRUE)
 #' }
 #'
-#' @seealso cartridges3D package
+#' @seealso https://github.com/xhtai/cartridges3D
 #' @export
 #'
 #' @importFrom stats predict
