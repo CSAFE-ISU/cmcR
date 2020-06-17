@@ -619,7 +619,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
       sign(thetaMax$comparison_1to2) == sign(thetaMax$comparison_2to1) & abs(thetaMax$comparison_1to2 - -1*thetaMax$comparison_2to1) > theta_thresh
 
-      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed) != 0) |
+      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
          (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > theta_thresh)){
         return(list("params" = list(consensus_function = consensus_function,
                                     ccf_thresh = ccf_thresh,
