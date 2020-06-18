@@ -1,6 +1,6 @@
-Sys.setenv("R_TESTS" = "")
+# Sys.setenv("R_TESTS" = "")
 
 library(testthat)
 library(cmcR)
 
-test_check("cmcR")
+test_check("cmcR",reporter = "summary")
