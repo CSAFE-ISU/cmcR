@@ -3,4 +3,4 @@
 library(testthat)
 library(cmcR)
 
-test_check("cmcR",reporter = "summary")
+test_check("cmcR",stop_on_failure = FALSE)
