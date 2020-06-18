@@ -147,10 +147,6 @@ x3ptools::x3p_snapshot(file = "bfScanImages/fadul1-2.png")
 rgl.close()
 ```
 
-TODO:
-
-The `magick` package can be used to read these .png files back into `R` for visualization. We can see the x3p scan snapshots below.
-
 ```{r}
 magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
                        magick::image_read("bfScanImages/fadul1-2.png"))) %>%
@@ -197,20 +193,19 @@ knmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
                                               regionToCellProp = 9)
 
 kmCMC <- cmcR::cmcFilter_improved(kmComparison,
-                         ccf_thresh = .5,
-                         dx_thresh = 20,
+                         ccf_thresh = .6,
+                         dx_thresh = 15,
                          theta_thresh = 6)
 
 knmCMC <- cmcR::cmcFilter_improved(knmComparison,
-                         ccf_thresh = .5,
-                         dx_thresh = 20,
+                         ccf_thresh = .6,
+                         dx_thresh = 15,
                          theta_thresh = 6)
 ```
 
 We can then visualize the CMCs for these comarisons. Below are the high CMCs for the known match pair.
 
 ```{r}
-
 kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                         x3p2 = fadul1.2$x3p,
                         cellCCF_bothDirections_output = kmComparison,
@@ -222,7 +217,6 @@ kmPlts$highCMC
 The known non-match pair didn't yield any high CMCs, so we can only visualize the initial CMCs.
 
 ```{r}
-
 knmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                    x3p2 = fadul2.1$x3p,
                    cellCCF_bothDirections_output = knmComparison,
@@ -240,13 +234,12 @@ kmCellRegionPairs[3] %>%
   map2(.x = .,
        .y = names(.), 
        function(set,theta){
-         map(set[5], ~ ccfMapPlot(mat1 = .[[1]],
+         map(set[9], ~ ccfMapPlot(mat1 = .[[1]],
                           mat2 = .[[2]],
                           theta = theta,
                           type = "raster"))
          })
 ```
-
 
 <!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
 

@@ -134,9 +134,9 @@ imager::resize to resize the scan.</p>
 
     <pre class="usage"><span class='fu'>selectBFImpression_resize</span>(
   <span class='no'>x3p_path</span>,
-  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
+  <span class='kw'>ransacInlierThresh</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>,
   <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fl'>1e-05</span>,
-  <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
+  <span class='kw'>ransacIters</span> <span class='kw'>=</span> <span class='fl'>300</span>,
   <span class='kw'>useResiduals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>standardizeBF</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
@@ -239,8 +239,8 @@ swapped). As such the size_x argument corresponds to changing the number of
 rows in the original matrix and size_y the number of columns.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>cartridges3D package (LINK)</p>
-<p>imager package (LINK)</p></div>
+    <div class='dont-index'><p>cartridges3D package</p>
+<p>imager package</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {

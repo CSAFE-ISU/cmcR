@@ -31,6 +31,16 @@ with opposite of theta value in successful direction. "dismiss": only
 counts the initial CMCs in failed direction and high CMCs in successful
 direction. "fail": only counts the initial CMCs in either direction.}
 
+\item{compareInitialAndHighThetas}{dictates if the consensus theta values
+determined under the initially proposed method should be compared to the
+consensus theta values determined under the High CMC method. In particular,
+determines for each direction whether the consensus theta values determined
+under the two methods are within theta_thresh of each other. It is often
+the case that non-matching cartridge cases, even if they pass the High CMC
+criterion, will have differing consensus theta values under the two
+methods. If this isn't taken into account, non-matches tend to be assigned
+a lot of false positive CMCs under the High CMC method.}
+
 \item{consensus_function_theta}{\emph{(OPTIONAL)} function (separate from
 consensus_function) to aggregate the rotation (theta) values in the ccfDF
 data frame to determine "consensus" values}

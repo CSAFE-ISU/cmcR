@@ -33,8 +33,9 @@ inliers close to fitted plane).
 }
 \description{
 Given input depths (in microns), find best-fitting plane using RANSAC. This
-should be the plane that the breechface marks are on. Adapted from
-cartridges3D::findPlaneRansac function
+should be the plane that the breechface marks are on. This a modified version
+of the findPlaneRansac function available in the cartridges3D package on
+GitHub.
 }
 \note{
 The function will throw an error if the final plane estimate is
@@ -48,6 +49,6 @@ Re-run the function (possibly setting a different seed) if this occurs.
 
 }
 \seealso{
-cartridges3D package (LINK)
+https://github.com/xhtai/cartridges3D
 }
 \keyword{internal}

@@ -1,5 +1,5 @@
 ---
-title: "Reproducible Example"
+title: "cmcR Reproducible Example"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{cmcR Reproducible Example}
@@ -35,158 +35,91 @@ library(dplyr)
 For this use case, suppose we have two known match cartridge cases (km1 and km2) and two of unknown source (unknown1 and unknown2). Let's pretend that we don't see the file path clearing indicating which of the unknown source cartridge cases match the known source. These cartridge case data came from a study done by Fadul et al. (2011) and are accessible [here](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1).
 
 ```{r}
-km1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
-km2_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/cb296c98-39f5-46eb-abff-320a2f5568e8")
-unknown1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/8ae0b86d-210a-41fd-ad75-8212f9522f96")
-unknown2_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/9a054edf-f648-40a5-a061-b05ad036c61e")
+#Sys.sleep since hitting the database too rapidly will cause an error
+km1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+Sys.sleep(5)
+km2_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8")
+Sys.sleep(5)
+unknown1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96")
+Sys.sleep(5)
+unknown2_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/9a054edf-f648-40a5-a061-b05ad036c61e")
 ```
 
-## Cartridge case visualization
-
-Visualizing cartridge case data is useful for determining, for example, how various pre-processing methods affect the final estimation of the breech face impressions. There are a number of ways to visualize cartridge case data, each with their own strengths and weaknesses.
-
-### Imager with Base Plot
-A quick yet inflexible way is to turn the surface matrix into a `cimg` object and use base plot.
+The 4 x3ps can be visualized on the same color scale using `x3pListPlot` function. It's difficult to see much structure in these plots due to the extreme values, but take note of the inner circle of observations that are considerably higher than the surrounding observations. These plateaued regions are formed from the firing pin striking the base of the cartridge case and literally pushing aside some of the metal. These do not come into consistent contact with the breech face of the barrel, so are not of interest when we want to compare breech face impressions. Also, there are clusters of observations in the 4 corners of each scan that will also need to be removed. This is done during the "pre-processing" phase.
 
 ```{r}
-par(mar = c(1,1,1,1))
-
-imager::imlist(
-km1_raw$surface.matrix %>%
-  imager::as.cimg(),
-km2_raw$surface.matrix %>%
-  imager::as.cimg(),
-unknown1_raw$surface.matrix %>%
-  imager::as.cimg(),
-unknown2_raw$surface.matrix %>%
-  imager::as.cimg()
-) %>%
-  plot()
+cmcR::x3pListPlot(list("Known Match 1" = km1_raw,
+                       "Known Match 2" = km2_raw,
+                       "Unknown Source 1" = unknown1_raw,
+                       "Unknown Source 2" = unknown2_raw))
 ```
-
-### ggplot2
-
-ggplots are more flexible, but geom_tile takes a considerable amount of time to plot relative to base plotting a cimg object. For the sake of space, only one ggplot is shown below.
-
-```{r}
-km1_raw$surface.matrix %>%
-  imager::as.cimg() %>%
-  as.data.frame() %>%
-  ggplot(aes(x = x,y = y)) +
-  geom_raster(aes(fill = value)) +
-  scale_fill_gradient2(low = "grey0",
-                       mid = "grey50",
-                       high = "grey100",
-                       na.value = "white",
-                       midpoint = median(as.vector(median(km1_raw$surface.matrix,
-                                                          na.rm = TRUE)))) +
-  coord_fixed(expand = FALSE) +
-  theme_bw() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank())
-```
-
-### x3ptools::image_x3p
-
-The `x3ptools::image_x3p` function provides 3D visualization functionality, but requires opening an RGL device on an individual machine (can't be viewed in an R Markdown file without making it huge)
-
-```{r eval=FALSE}
-km1_raw %>%
-  x3ptools::image_x3p(zoom = .7)
-```
-
 
 ## Pre-processing
 
-If we want to compare these cartridge case scans based on their breech face impressions, they need to undergo some pre-processing. The `cmcR` package has the modularized family of `preProcess_` functions or the all-in-one (except Gaussian filtering) `selectBFImpression_` functions to accomplish this.
+If we want to compare these cartridge case scans based on their breech face impressions, they need to undergo some pre-processing. The `cmcR` package has the modularized family of `preProcess_` functions or the all-in-one) `selectBFImpression_` functions to accomplish this.
 
-Below we can see how the `preProcess_` family of functions can be used to process a cartridge case scan. The RANSAC method is applied twice for a more precise estimate of the breech face impression height value. Then the whitespace (all NA-valued rows/columns) on the exterior of the breech face impression is cropped. Next the firing pin circle is automatically estimated and any pixels within this circle are filtered out the scan. Lastly, a lowpass Gaussian filter meant to reduce the effect of high frequency "noise" in the scan is applied.
+Below we can see how the `preProcess_` family of functions can be used to process a cartridge case scan. The RANSAC method is applied twice for a more precise estimate of the breech face impression height value. Then the whitespace (all NA-valued rows/columns) on the exterior of the breech face impression is cropped. Next the firing pin circle is automatically estimated and any pixels within this circle are filtered out the scan. Lastly, a bandpass Gaussian filter meant to reduce the effect of high frequency "noise" and low frequency "global" structure in the scan is applied.
 
 ```{r}
-set.seed(3152020) #RANSAC method is based on randomly sampling points in matrix
+set.seed(4132020) #RANSAC method is based on randomly sampling points in matrix
 
 km1_residuals <- km1_raw %>%
   x3ptools::sample_x3p(m = 2) #down-sampled copy of km1_raw
 
 km1_residuals$surface.matrix <- km1_residuals$surface.matrix %>%
-  preProcess_ransac(inlierThreshold = 1e5,
-                    finalSelectionThreshold = 2*(1e5),
+  preProcess_ransac(inlierThreshold = 1e-5,
+                    finalSelectionThreshold = 2*(1e-5),
                     iters = 150) %>%
-  preProcess_levelBF(useResiduals = TRUE) %>%
-  preProcess_ransac(inlierThreshold = .1*(1e5),
-                    finalSelectionThreshold = 2*(1e5),
+  preProcess_levelBF() %>%
+  preProcess_ransac(inlierThreshold = (1e-6),
+                    finalSelectionThreshold = 2*(1e-5),
                     iters = 300) %>%
-  preProcess_levelBF(useResiduals = TRUE) %>%
-  preProcess_cropWS(croppingThresh = 2) %>%
-  preProcess_removeFPCircle(aggregation_function = mean,
-                            smootherSize = 2*round((.1*nrow(.)/2)) + 1,
-                            meshSize = 1,
-                            houghScoreQuant = .9) %>%
+  preProcess_levelBF()  %>%
+  preProcess_cropWS() %>%
+  preProcess_removeFPCircle()  %>%
   preProcess_gaussFilter(res = km1_residuals$header.info$incrementY,
-                         wavelength = 16,
-                         filtertype = "lp")
+                         wavelength = c(16,400),
+                         filtertype = "bp")
+
+#this information needs to be updated manually if not using the
+#selectBFImpression_ functions:
+km1_residuals$header.info$sizeY <- ncol(km1_residuals$surface.matrix)
+km1_residuals$header.info$sizeX <- nrow(km1_residuals$surface.matrix)
 ```
 
-```{r eval=FALSE}
-km1_residuals %>%
-  x3ptools::image_x3p(zoom = .7)
-```
-
-The `selectBFImpression_` functions perform all of the pre-processing steps except for the Gaussian filtering in one function call. The following will process the 3 other scans in an equivalent manner to km1_residuals above. Note that the `selectBFImpression_` functions actually returns a list of two elements: `params` containing the list of parameters under which the function call was made (for reproducibility purposes) and `x3p` containing the actual processed x3p object.
+The `selectBFImpression_` functions perform all of the pre-processing steps in one function call. The following will process the 3 other scans in an equivalent manner to km1_residuals above. Note that the `selectBFImpression_` functions actually returns a list of two elements: `params` containing the list of parameters under which the function call was made (for reproducibility purposes) and `x3p` containing the actual processed x3p object.
 
 ```{r}
 km2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8",
-                                               ransacIters = 150,
-                                               ransacInlierThresh = 10^-5,
-                                               ransacFinalSelectThresh = 2*(10^-5),
-                                               useResiduals = TRUE)
+                                               ransacIters = 300,
+                                               ransacInlierThresh = 1e-6,
+                                               ransacFinalSelectThresh = 2*(1e-5),
+                                               useResiduals = TRUE,
+                                               gaussFilterWavelength = c(16,400),
+                                               gaussFilterType = "bp")
 unknown1_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96",
-                                                    ransacIters = 150,
-                                                    ransacInlierThresh = 10^-5,
-                                                    ransacFinalSelectThresh = 2*(10^-5),
-                                                    useResiduals = TRUE)
+                                                    ransacIters = 300,
+                                                    ransacInlierThresh = 1e-6,
+                                                    ransacFinalSelectThresh = 2*(1e-5),
+                                                    useResiduals = TRUE,
+                                                    gaussFilterWavelength = c(16,400),
+                                                    gaussFilterType = "bp")
 unknown2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/9a054edf-f648-40a5-a061-b05ad036c61e",
-                                                    ransacIters = 150,
-                                                    ransacInlierThresh = 10^-5,
-                                                    ransacFinalSelectThresh = 2*(10^-5),
-                                                    useResiduals = TRUE)
-
-km2_residuals$x3p$surface.matrix <- 
-  cmcR::preProcess_gaussFilter(surfaceMat = km2_residuals$x3p$surface.matrix,
-                               res = km2_residuals$x3p$header.info$incrementY,
-                               wavelength = 16,
-                               filtertype = "lp")
-
-unknown1_residuals$x3p$surface.matrix <- 
-  cmcR::preProcess_gaussFilter(surfaceMat = unknown1_residuals$x3p$surface.matrix,
-                               res = unknown1_residuals$x3p$header.info$incrementY,
-                               wavelength = 16,
-                               filtertype = "lp")
-
-unknown2_residuals$x3p$surface.matrix <- 
-  cmcR::preProcess_gaussFilter(surfaceMat = unknown2_residuals$x3p$surface.matrix,
-                               res = unknown2_residuals$x3p$header.info$incrementY,
-                               wavelength = 16,
-                               filtertype = "lp")
+                                                    ransacIters = 300,
+                                                    ransacInlierThresh = 1e-6,
+                                                    ransacFinalSelectThresh = 2*(1e-5),
+                                                    useResiduals = TRUE,
+                                                    gaussFilterWavelength = c(16,400),
+                                                    gaussFilterType = "bp")
 ```
 
-```{r}
-par(mar = c(1,1,1,1))
+The plot below shows the 4 processed scans. The highpass filter applied to the image removes exce
 
-imager::imlist(
-km1_residuals$surface.matrix %>%
-  imager::as.cimg(),
-km2_residuals$x3p$surface.matrix %>%
-  imager::as.cimg(),
-unknown1_residuals$x3p$surface.matrix %>%
-  imager::as.cimg(),
-unknown2_residuals$x3p$surface.matrix %>%
-  imager::as.cimg()
-) %>%
-  plot()
+```{r}
+cmcR::x3pListPlot(list("Known Match 1" = km1_residuals,
+                       "Known Match 2" = km2_residuals$x3p,
+                       "Unknown Source 1" = unknown1_residuals$x3p,
+                       "Unknown Source 2" = unknown2_residuals$x3p))
 ```
 
 ## Cartridge case cell pair CCF calculation
@@ -234,11 +167,11 @@ km1_unknown2_comparison <- cellCCF_bothDirections(km1_residuals,
 
 We can see one of these data frames below, specifically where unknown1_residuals was rotated by 21 degrees before being compared to the cells of km1_residuals. The `cellID` column corresponds to the locations of each cell in km1_residuals. The `cellNum` column indexes the cells starting in the top left corner of the matrix moving right. The fact that this `cellNum == 1` is missing from this data frame means that the top left corner of the matrix contains too few observed (less than 15%) observed values to be considered for the CCF calculation. The `ccf`, `dx`, and `dy` columns represent the CCF$_{\max}$ value for a particular cell/region pair as well as the associated translation values at which this CCF value occurred. The values in the `ccf` column were calculated by replacing missing values (of which there are often many) with the average value in the cells/regions (which is necessary for calculating the CCF using the Cross-Correlation Theorem). The `rawCorr` column, on the other hand, contains correlation values calculated by effectively ignoring any NA-valued elements (specifically, using the `cor` function with `use = "pairwise.complete.obs"`).
 
-```{r eval=FALSE}
-km1_unknown1_comparison$comparison_1to2$ccfResults$`21`
+```{r}
+head(km1_unknown1_comparison$comparison_1to2$ccfResults$`21`)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown1_comparison$comparison_1to2$ccfResults$`21` %>%
   DT::datatable(options = list(pageLength = 5))
 ```
@@ -247,12 +180,13 @@ We are interested in extracting features from these CCF comparison results to di
 
 The `topResultsPerCell` function will take the list of data frames returned by cellCCF (or cellCCF_bothDirections) and  extract information about the `dx`, `dy`, and `theta` values at which each cell pair attained its maximum CCF value across the entire comparison (i.e., across every rotation). If we think of the CMC method as allowing cell pairs to "vote" for a translation and rotation of one cartridge case scan to align well with another, then the resulting data frame from `topResultsPerCell` is the number one choice per cell pair.
 
-```{r eval=FALSE}
+```{r}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
-  topResultsPerCell()
+  topResultsPerCell() %>%
+  head()
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
   DT::datatable(options = list(pageLength = 5))
@@ -266,14 +200,14 @@ Song (2013) initially proposed using this data frame to determine CMCs. In parti
 
 Below we can see the CMCs selected using the top results between km1 and unknown1. We'll refer to these as the "initial CMCs" since they were determined under the initially proposed CMC method by Song. There aren't very many initial CMCs between km1 and unknown1.
 
-```{r eval=FALSE}
+```{r}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
   cmcFilter(ccf_thresh = .8,
             dx_thresh = 15)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown1_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
   cmcFilter(ccf_thresh = .8,
@@ -283,14 +217,14 @@ km1_unknown1_comparison$comparison_1to2$ccfResults %>%
 
 In contrast, there are more initial CMCs between km1 and unknown2. This indicates a greater level of similarity between km1 and unknown2.
 
-```{r eval=FALSE}
+```{r}
 km1_unknown2_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
   cmcFilter(ccf_thresh = .8,
             dx_thresh = 15)
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown2_comparison$comparison_1to2$ccfResults %>%
   topResultsPerCell() %>%
   cmcFilter(ccf_thresh = .8,
@@ -342,14 +276,15 @@ km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
                                               theta_thresh = 3)
 ```
 
-The improved CMC method did not yield any "high CMCs" for the comparison between km1 and unknown1. As such, we would assign the pair whichever was the minimum number of initial CMCs calculated between both directions. The CMC(s) between km1 and unknown1 are shown below.
+The comparison between km1 and unknown1 yields 0 CMCs under both the initially proposed method (in either direction) and the High CMC method. This provides considerable evidence that the pair is non-matching.
 
-```{r eval=FALSE}
-km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
-                                                nrow(km1_unknown1_cmcs$initialCMCs[[2]])))]]
+```{r}
+any(c(nrow(km1_unknown1_cmcs$initialCMCs$comparison_1to2) > 0,
+      nrow(km1_unknown1_cmcs$initialCMCs$comparison_2to1) > 0,
+      nrow(km1_unknown1_cmcs$highCMCs) > 0))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
                                                 nrow(km1_unknown1_cmcs$initialCMCs[[2]])))]] %>%
   DT::datatable()
@@ -357,11 +292,11 @@ km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1
 
 In contrast, the comparison between km1 and unknown2 did yield high CMCs, which are shown below.
 
-```{r eval=FALSE}
+```{r}
 km1_unknown2_cmcs$highCMCs
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km1_unknown2_cmcs$highCMCs %>%
   DT::datatable(options = list(pageLength = 5))
 ```
@@ -398,24 +333,26 @@ km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
                                               dx_thresh = 15)
 ```
 
-Interestingly, we see that the comparison between km2 and unknown1 *does* actually yield high CMCs, although only 5. This illustates an important property of this method - its extreme sensitivity to making the "correct" pre, inter, and post-processing decisions. For example, changing `ccf_thresh` from .8 to .81 in the call to `cmcFilter_improved` between km1 and unknown1 above yields 0 initial and high CMCs.  
+The comparison between km2 and unknown1 also yielded 0 CMCs under both methods.
 
-```{r eval=FALSE}
-km2_unknown1_cmcs$highCMCs
+```{r}
+any(c(nrow(km2_unknown1_cmcs$initialCMCs$comparison_1to2) > 0,
+      nrow(km2_unknown1_cmcs$initialCMCs$comparison_2to1) > 0,
+      nrow(km2_unknown1_cmcs$highCMCs) > 0))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km2_unknown1_cmcs$highCMCs %>%
   DT::datatable()
 ```
 
 The high CMCs for the comparison between km2 and unknown2 are given below.
 
-```{r eval=FALSE}
+```{r}
 km2_unknown2_cmcs$highCMCs
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE,eval=FALSE}
 km2_unknown2_cmcs$highCMCs %>%
   DT::datatable(options = list(pageLength = 5))
 ```
@@ -424,45 +361,63 @@ km2_unknown2_cmcs$highCMCs %>%
 
 The `cmcPlot` function allows us to visualize the regions of a cartridge case scan that have been identified as "congruent matching." 
 
-For example, the 1 initial CMC calculated between km1 and unknown1 is shown below.
+Although there were 0 cell/region pairs declared CMCs between km1 and unknown1, we can still visualize the translation/rotation at which the CCF$_{\max}$ value was attained for each cell/region pair. We can clearly see that there is little consensus among these cells.
 
-```{r eval=FALSE}
-cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
-              x3p2 = unknown1_residuals$x3p,
-              cellCCF_bothDirections_output = km1_unknown1_comparison,
-              cmcFilter_improved_output = km1_unknown1_cmcs)
+```{r}
+km1_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
+                                       x3p2 = unknown1_residuals$x3p,
+                                       cellCCF_bothDirections_output = km1_unknown1_comparison,
+                                       cmcFilter_improved_output = km1_unknown1_cmcs)
+
+km1_unknown1_cmcPlots$initialCMC
 ```
 
-In contrast, the high CMCs between km1 and unknown2 are shown below.
+In contrast, the initial and CMCs between km1 and unknown2 are shown in black below. Red cells again represent the translations/rotations at which the CCF$_{\max}$ values occurred for the respective cell/region pairs. We can see that the black cells indeed appear to align as we might expect for a truly matching pair of cartridge cases.
 
-```{r eval=FALSE}
-cmcR::cmcPlot(x3p1 = km1_residuals$x3p,
+```{r}
+km1_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
               x3p2 = unknown2_residuals$x3p,
               cellCCF_bothDirections_output = km1_unknown2_comparison,
               cmcFilter_improved_output = km1_unknown2_cmcs)
+
+km1_unknown2_cmcPlots$initialCMC
+```
+The high CMCs between km1 and unknown2 are shown below. As we've already concluded, there are more cell/region pairs declared CMCs under the high CMC method than the initially proposed method.
+
+```{r}
+km1_unknown2_cmcPlots$highCMC
 ```
 
-The same types of plots can be made for the comparison between km2 and the unknown source scans. Below are the high CMCs between km2 and unknown1.
+The same types of plots can be made for the comparison between km2 and the unknown source scans. Below are the non-CMCs between km2 and unknown1.
 
-```{r eval=FALSE}
-cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
-              x3p2 = unknown1_residuals$x3p,
-              cellCCF_bothDirections_output = km2_unknown1_comparison,
-              cmcFilter_improved_output = km2_unknown1_cmcs)
+```{r}
+km2_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
+                                       x3p2 = unknown1_residuals$x3p,
+                                       cellCCF_bothDirections_output = km2_unknown1_comparison,
+                                       cmcFilter_improved_output = km2_unknown1_cmcs)
+
+km2_unknown1_cmcPlots$initialCMC
 ```
 
-And the CMCs for the comparison between km2 and unknown2 are shown below.
+And the CMCs for the comparison between km2 and unknown2 are shown below. Note that the initial CMCs are defined based on a particular comparison "direction" (while the High CMC method combines information from both directions). The surface matrices shown on the left and right are those of km2_residuals and unknown2_residuals, respectively.
 
-```{r eval=FALSE}
-cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
-              x3p2 = unknown2_residuals$x3p,
-              cellCCF_bothDirections_output = km2_unknown2_comparison,
-              cmcFilter_improved_output = km2_unknown2_cmcs)
+```{r}
+km2_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
+                                       x3p2 = unknown2_residuals$x3p,
+                                       cellCCF_bothDirections_output = km2_unknown2_comparison,
+                                       cmcFilter_improved_output = km2_unknown2_cmcs)
+
+km2_unknown2_cmcPlots$initialCMC
 ```
+
+```{r}
+km2_unknown2_cmcPlots$highCMC
+```
+
 
 ## References
 
-Song, J. (2013).  Proposed “NIST Ballistics Identification System (NBIS)” Based on 3D Topogra-phy Measurements on Correlation Cells.American Firearm and Tool Mark Examiners Journal,45(2):11.
+Song, J. (2013).  Proposed “NIST Ballistics Identification System (NBIS)” Based on 3D Topography Measurements on Correlation Cells.American Firearm and Tool Mark Examiners Journal,45(2):11.
 
 Tong, M.,  Song,  J.,  and Chu,  W. (2015).  An Improved Algorithm of Congruent Matching Cells(CMC) Method for Firearm Evidence Identifications.Journal of Research of the National Institute of Standards and Technology, 120:102.
 

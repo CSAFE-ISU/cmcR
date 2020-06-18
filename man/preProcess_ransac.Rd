@@ -28,7 +28,8 @@ stable breech face estimate)}
 \description{
 Given input depths (in microns), find best-fitting plane using
 RANSAC. This should be the plane that the breechface marks are on. Adapted
-from cartridges3D::findPlaneRansac function.
+from cartridges3D::findPlaneRansac function. This a modified version of the
+findPlaneRansac function available in the cartridges3D package on GitHub.
 }
 \examples{
 \dontrun{
@@ -43,5 +44,5 @@ fittedPlane <- raw_x3p$surface.matrix \%>\%
 
 }
 \seealso{
-cartridges3D package
+https://github.com/xhtai/cartridges3D
 }

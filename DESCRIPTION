@@ -10,7 +10,7 @@ Description: An open-source implementation of the Congruent Matching Cells
     Provides a wide range of pre, inter, and post-processing options when
     working with cartridge case scan data and their associated comparisons. See
     the cmcR package website for more details and examples.
-License: MIT + file LICENSE
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -40,7 +40,7 @@ Suggests:
     rgl,
     covr
 Remotes: 
-    github::xhtai/cartridges3D,
+    https://github.com/xhtai/cartridges3D,
     https://github.com/heike/x3ptools
 VignetteBuilder: knitr
 Depends: 

@@ -52,7 +52,7 @@ x3pListPlot <- function(x3pList,
       ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
       ggplot2::geom_raster(ggplot2::aes(fill = height))  +
       ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                                    values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                                    values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                     breaks = function(lims){
                                       dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
 
@@ -102,7 +102,7 @@ x3pListPlot <- function(x3pList,
                             ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
                             ggplot2::geom_raster(ggplot2::aes(fill = height))  +
                             ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                                                          values = c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1),
+                                                          values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                                           breaks = function(lims){
                                                             dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
 
@@ -434,12 +434,14 @@ arrangeCMCPlot <- function(x3p1,
                   x3p = rep(x3pNames[2],times = nrow(.)),
                   theta = theta - median(theta))
 
+  x3p1_rotate <- 90 - median(allCells %>%
+                               dplyr::filter(cmc == "yes") %>%
+                               dplyr::pull(theta))
+
   x3pPlt <- x3pListPlot(x3pList = list(x3p1,x3p2) %>%
                                 setNames(x3pNames),
                               type = pltType,
-                              rotate = c(90 - median(allCells %>%
-                                                       dplyr::filter(cmc == "yes") %>%
-                                                       dplyr::pull(theta)),
+                              rotate = c(ifelse(is.na(x3p1_rotate),90,x3p1_rotate),
                                          90))
 
   if(pltType == "faceted"){
@@ -490,7 +492,7 @@ arrangeCMCPlot <- function(x3p1,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::scale_colour_manual(values = c("red","black")) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                           x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
@@ -524,7 +526,7 @@ arrangeCMCPlot <- function(x3p1,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::scale_colour_manual(values = c("red","black")) +
       ggplot2::geom_text(data = x3p1_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
@@ -621,7 +623,7 @@ cmcPlot <- function(x3p1,
     dplyr::mutate(cmc = rep("no",times = nrow(.)))
 
   allInitialCells <- dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
-    dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("no","yes"))) %>%
     dplyr::left_join(dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
@@ -687,7 +689,7 @@ cmcPlot <- function(x3p1,
                     cellID = as.character(cellID))
 
     allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
-      dplyr::mutate(cmc = factor(cmc,levels = c("yes","no"))) %>%
+      dplyr::mutate(cmc = factor(cmc,levels = c("no","yes"))) %>%
       dplyr::left_join(dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
                          purrr::pmap_dfr(~ {
                            idNum <- ..8 %>%

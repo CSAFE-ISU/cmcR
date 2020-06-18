@@ -2,7 +2,8 @@
 % Please edit documentation in R/breechFaceSelection.R
 \name{levelBFImpression}
 \alias{levelBFImpression}
-\title{Helper for selectBFImpression}
+\title{Helper for selectBFImpression. This ia modified version of the levelBF3D
+function available in the cartridges3D package on GitHub.}
 \usage{
 levelBFImpression(ransacFit, useResiduals = TRUE, ...)
 }
@@ -12,6 +13,10 @@ breech face and fitted plane are returned (residuals) or if the estimates
 breech face is simply shifted down by its mean value}
 }
 \description{
-Helper for selectBFImpression
+Helper for selectBFImpression. This ia modified version of the levelBF3D
+function available in the cartridges3D package on GitHub.
+}
+\seealso{
+https://github.com/xhtai/cartridges3D
 }
 \keyword{internal}

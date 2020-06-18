@@ -21,7 +21,8 @@ observed values.
 \description{
 Given the output of preProcess_ransac, extracts values (either
 raw or residual) from the surface matrix to which the RANSAC plane was fit.
-Adapted from the cartridges3D::levelBF3D function.
+Adapted from the cartridges3D::levelBF3D function. This ia modified version
+of the levelBF3D function available in the cartridges3D package on GitHub.
 }
 \examples{
 \dontrun{
@@ -35,5 +36,5 @@ raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
 
 }
 \seealso{
-cartridges3D package
+https://github.com/xhtai/cartridges3D
 }

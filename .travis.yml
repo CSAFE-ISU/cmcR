@@ -3,6 +3,10 @@
 language: R
 cache: packages
 
+os:
+ - linux
+ - osx
+
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
