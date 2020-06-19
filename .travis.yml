@@ -36,7 +36,7 @@ r_build_args: --no-build-vignettes --no-manual
 #          - tesseract-ocr-eng
 #          - libtiff-dev
 
-# r_build_args: --no-build-vignettes
+r_build_args: --no-build-vignettes
 # r_check_args: --as-cran --ignore-vignettes
 
 #r_binary_packages:
@@ -53,7 +53,7 @@ r_build_args: --no-build-vignettes --no-manual
 
 script:
  - R CMD build .
- - Rscript devtools::test
+ - Rscript -e 'devtools::test()'
 # - R CMD check *tar.gz
 
 # after_success:
