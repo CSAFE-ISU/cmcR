@@ -1,7 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
-# cache: packages
+cache: packages
 
 os:
  # - linux
@@ -11,7 +11,7 @@ os:
   # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
 # do not build vignettes...takes too long and times out on travis
-r_build_args: --no-build-vignettes --no-manual
+#r_build_args: --no-build-vignettes --no-manual
 #r_check_args: --no-manual --ignore-vignettes --as-cran *. tar.gz
 
 # addons:
@@ -35,26 +35,15 @@ r_build_args: --no-build-vignettes --no-manual
 #          - libleptonica-dev
 #          - tesseract-ocr-eng
 #          - libtiff-dev
-
-r_build_args: --no-build-vignettes
+#
+# r_build_args: --no-build-vignettes
 # r_check_args: --as-cran --ignore-vignettes
-
-#r_binary_packages:
-#  - rgl
-
-# for codecov
-# r_packages:
-  # - covr
-  # - testthat
-
-# https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
-# install:
-# - R -e 'devtools::install_deps(dep = T)'
-
-script:
- - R CMD build .
- - Rscript -e 'devtools::test()'
-# - R CMD check *tar.gz
 
 # after_success:
 #   - Rscript -e 'covr::codecov()'
+
+r_packages:
+ - devtools
+ - testthat
+
+script: make test
