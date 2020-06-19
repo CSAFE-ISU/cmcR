@@ -1,7 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
-cache: packages
+# cache: packages
 
 os:
  # - linux
@@ -45,5 +45,8 @@ os:
 r_packages:
  - devtools
  - testthat
+
+install:
+ - Rscript -e 'devtools::install_github("https://github.com/jzemmels/cmcR")'
 
 script: make test
