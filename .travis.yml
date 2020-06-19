@@ -11,7 +11,7 @@ os:
   # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
 # do not build vignettes...takes too long and times out on travis
-#r_build_args: --no-build-vignettes --no-manual
+r_build_args: --no-build-vignettes --no-manual
 #r_check_args: --no-manual --ignore-vignettes --as-cran *. tar.gz
 
 # addons:
@@ -45,14 +45,15 @@ os:
 # for codecov
 r_packages:
   # - covr
-  - testthat
+  # - testthat
 
 # https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
-# install:
-# - R -e 'devtools::install_deps(dep = T)'
+install:
+- R -e 'devtools::install_deps(dep = T)'
 
 script:
- - Rscript testthat.R
+ - R CMD build .
+ - Rscript devtools::test
 # - R CMD check *tar.gz
 
 # after_success:
