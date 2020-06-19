@@ -43,13 +43,13 @@ r_build_args: --no-build-vignettes --no-manual
 #  - rgl
 
 # for codecov
-r_packages:
+# r_packages:
   # - covr
   # - testthat
 
 # https://github.com/travis-ci/travis-ci/issues/3849#issuecomment-255096774
-install:
-- R -e 'devtools::install_deps(dep = T)'
+# install:
+# - R -e 'devtools::install_deps(dep = T)'
 
 script:
  - R CMD build .
