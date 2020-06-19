@@ -1,53 +1,58 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
-# cache: packages
+cache: packages
 
 os:
- # - linux
+ - linux
  - osx
 
-# before_install:
-  # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
-
-# do not build vignettes...takes too long and times out on travis
-#r_build_args: --no-build-vignettes --no-manual
-#r_check_args: --no-manual --ignore-vignettes --as-cran *. tar.gz
-
-# addons:
-#        apt:
-#          update: true
-#          sources:
-#            - sourceline: 'ppa:opencpu/imagemagick'
-#          packages:
-#          - libglu1-mesa-dev # rgl
-#          - freeglut3-dev
-#          - mesa-common-dev
-#          - libmagick++-dev
-#          - libjpeg-dev # imagemagick
-#          - libpng-dev
-#          - libgif-dev
-#          - libmagick++-dev
-#          - librsvg2-dev
-#          - libwebp-dev
-#          - libpoppler-cpp-dev
-#          - libtesseract-dev
-#          - libleptonica-dev
-#          - tesseract-ocr-eng
-#          - libtiff-dev
-#
-# r_build_args: --no-build-vignettes
-# r_check_args: --as-cran --ignore-vignettes
-
-# after_success:
-#   - Rscript -e 'covr::codecov()'
+jobs:
+ allow_failures:
+  - os: osx
 
 before_install:
- - git clone https://github.com/jzemmels/cmcR
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
 
-install:
- - Rscript -e 'install.packages(c("devtools", "testthat"))'
- - Rscript -e 'devtools::install("cmcR")'
+addons:
+       apt:
+         update: true
+         sources:
+           - sourceline: 'ppa:opencpu/imagemagick'
+         packages:
+         - libglu1-mesa-dev # rgl
+         - freeglut3-dev
+         - mesa-common-dev
+         - libmagick++-dev
+         - libjpeg-dev # imagemagick
+         - libpng-dev
+         - libgif-dev
+         - libmagick++-dev
+         - librsvg2-dev
+         - libwebp-dev
+         - libpoppler-cpp-dev
+         - libtesseract-dev
+         - libleptonica-dev
+         - tesseract-ocr-eng
+         - libtiff-dev
 
-script:
- - Rscript -e 'devtools::test("cmcR")'
+r_build_args: --no-build-vignettes
+r_check_args: --as-cran --ignore-vignettes
+
+r_packages:
+ - covr
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
+
+# Trying to determine why test fails just on OSx
+# before_install:
+#  - git clone https://github.com/jzemmels/cmcR
+#
+# install:
+#  - Rscript -e 'install.packages(c("devtools", "testthat"))'
+#  - Rscript -e 'devtools::install("cmcR")'
+#  #Everything except this last step seems to break...
+# script:
+#  - Rscript -e 'devtools::test("cmcR")'
