@@ -42,11 +42,8 @@ os:
 # after_success:
 #   - Rscript -e 'covr::codecov()'
 
-r_packages:
- - devtools
- - testthat
-
 install:
+ - Rscript -e 'install.packages(c("devtools", "testthat"))'
  - Rscript -e 'devtools::install_github("https://github.com/jzemmels/cmcR")'
 
 script: make test
