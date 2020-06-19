@@ -46,4 +46,5 @@ install:
  - Rscript -e 'install.packages(c("devtools", "testthat"))'
  - Rscript -e 'devtools::install_github("https://github.com/jzemmels/cmcR")'
 
-script: make test
+script:
+ - Rscript -e 'devtools::test("cmcR")'
