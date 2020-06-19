@@ -42,9 +42,12 @@ os:
 # after_success:
 #   - Rscript -e 'covr::codecov()'
 
+before_install:
+ - git clone https://github.com/jzemmels/cmcR
+
 install:
  - Rscript -e 'install.packages(c("devtools", "testthat"))'
- - Rscript -e 'devtools::install_github("https://github.com/jzemmels/cmcR")'
+ - Rscript -e 'devtools::install("cmcR")'
 
 script:
  - Rscript -e 'devtools::test("cmcR")'
