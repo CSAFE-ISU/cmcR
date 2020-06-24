@@ -12,7 +12,8 @@
 #'   plots per surface matrix is returned. The faceted plot will have a
 #'   consistent height scale across all surface matrices.
 #' @param rotate angle (in degrees) to rotate all surface matrices plotted
-#'
+#' @param legend.quantiles vector of quantiles to be shown as tick marks on
+#'   legend plot
 #' @examples
 #' \dontrun{
 #'  x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
@@ -25,7 +26,8 @@ utils::globalVariables(c("value","x","y",".","x3p","height"))
 
 x3pListPlot <- function(x3pList,
                         type = "faceted",
-                        rotate = 0){
+                        rotate = 0,
+                        legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
@@ -36,7 +38,7 @@ x3pListPlot <- function(x3pList,
                                                rotate),
                                      function(x3p,name,theta){
                                        x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
-                                                                                        theta = theta + 180) #+180 to stay with what rotate_x3p would output
+                                                                                 theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
                                        x3p %>%
                                          x3ptools::x3p_to_df() %>%
@@ -54,7 +56,7 @@ x3pListPlot <- function(x3pList,
       ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                                     values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                     breaks = function(lims){
-                                      dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
+                                      dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
 
                                       dat <- dat %>%
                                         setNames(paste0(names(dat)," [",round(dat,3),"]"))
@@ -88,7 +90,7 @@ x3pListPlot <- function(x3pList,
                                   rotate),
                         function(x3p,name,theta){
                           x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
-                                                                           theta = theta + 180) #+180 to stay with what rotate_x3p would output
+                                                                    theta = theta + 180) #+180 to stay with what rotate_x3p would output
 
                           surfaceMat_df <- x3p %>%
                             x3ptools::x3p_to_df() %>%
@@ -104,7 +106,7 @@ x3pListPlot <- function(x3pList,
                             ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                                                           values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                                           breaks = function(lims){
-                                                            dat <- quantile(surfaceMat_df$height,c(0,.1,.25,.5,.75,.9,1),na.rm = TRUE)
+                                                            dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
 
                                                             dat <- dat %>%
                                                               setNames(paste0(names(dat)," [",round(dat,3),"]"))
@@ -269,7 +271,7 @@ ccfMapPlot <- function(mat1,
       ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
       ggplot2::geom_point(data = ccfDF %>%
                             dplyr::mutate(dx = rev(dx),
-                                   dy = rev(dy)) %>%
+                                          dy = rev(dy)) %>%
                             dplyr::filter(fft.ccf == max(fft.ccf)) %>%
                             dplyr::mutate(type = "Maximum"),
                           ggplot2::aes(x = dx,y = dy,shape = type),
@@ -282,20 +284,20 @@ ccfMapPlot <- function(mat1,
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                           values = rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
-                           guide = "colourbar",
-                           limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
+                                    values = rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
+                                    guide = "colourbar",
+                                    limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
                      panel.grid.minor = ggplot2::element_blank()) +
       ggplot2::scale_shape_manual(values = 1,
                                   labels = expression("CCF"[max])) +
       ggplot2::guides(fill = ggplot2::guide_colourbar(title = "CCF",
-                                    barheight = grid::unit(1,"in"),
-                                    label.theme = ggplot2::element_text(size = 8),
-                                    frame.colour = "black",
-                                    ticks.colour = "black"),
-             shape = ggplot2::guide_legend(title = NULL,
-                                           override.aes = list(colour = "black")))
+                                                      barheight = grid::unit(1,"in"),
+                                                      label.theme = ggplot2::element_text(size = 8),
+                                                      frame.colour = "black",
+                                                      ticks.colour = "black"),
+                      shape = ggplot2::guide_legend(title = NULL,
+                                                    override.aes = list(colour = "black")))
 
     layoutMat <- matrix(c(1,2,4,3),ncol = 2,byrow = TRUE)
   }
@@ -313,7 +315,7 @@ ccfMapPlot <- function(mat1,
       ) +
       ggplot2::geom_point(data = ccfDF %>%
                             dplyr::mutate(dx = rev(dx),
-                                   dy = rev(dy)) %>%
+                                          dy = rev(dy)) %>%
                             dplyr::filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
                             dplyr::arrange(fft.ccf) %>%
                             dplyr::mutate(type = factor(c("Minimum","Maximum"))),
@@ -342,13 +344,13 @@ ccfMapPlot <- function(mat1,
                   theta = theta) %>%
     t() %>%
     tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
-                         cols = "Summary")
+              cols = "Summary")
 
   gridPlot <- arrangeGrob(mat1Plot,
-                                     mat2Plot,
-                                     ccfMaxSummary,
-                                     ccfPlot,
-                                     layout_matrix = layoutMat)
+                          mat2Plot,
+                          ccfMaxSummary,
+                          ccfPlot,
+                          layout_matrix = layoutMat)
 
   grid.arrange(gridPlot)
 
@@ -394,7 +396,8 @@ arrangeCMCPlot <- function(x3p1,
                            x3p2,
                            allCells,
                            x3pNames,
-                           pltType = "faceted"){
+                           pltType = "faceted",
+                           legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
 
   x3p1_cellGrid <- allCells %>%
     dplyr::mutate(firstRow = (x3p1$header.info$incrementY*1e6)*(firstRow),
@@ -404,10 +407,10 @@ arrangeCMCPlot <- function(x3p1,
     dplyr::mutate(midCol = (lastCol + firstCol)/2,
                   midRow = (lastRow + firstRow)/2,
                   cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                      floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                      ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                                    nrow = ceiling(sqrt(max(cellNum))),
-                                                    byrow = TRUE),
+                                               floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                               ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                                             nrow = ceiling(sqrt(max(cellNum))),
+                                             byrow = TRUE),
                   x3p = rep(x3pNames[1],times = nrow(.)),
                   theta = rep(0,times = nrow(.)))
 
@@ -427,10 +430,10 @@ arrangeCMCPlot <- function(x3p1,
     dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                   midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
                   cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                                      floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                                      ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                                    nrow = ceiling(sqrt(max(cellNum))),
-                                                    byrow = TRUE),
+                                               floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                               ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                                             nrow = ceiling(sqrt(max(cellNum))),
+                                             byrow = TRUE),
                   x3p = rep(x3pNames[2],times = nrow(.)),
                   theta = theta - median(theta))
 
@@ -439,10 +442,11 @@ arrangeCMCPlot <- function(x3p1,
                                dplyr::pull(theta))
 
   x3pPlt <- x3pListPlot(x3pList = list(x3p1,x3p2) %>%
-                                setNames(x3pNames),
-                              type = pltType,
-                              rotate = c(ifelse(is.na(x3p1_rotate),90,x3p1_rotate),
-                                         90))
+                          setNames(x3pNames),
+                        type = pltType,
+                        rotate = c(ifelse(is.na(x3p1_rotate),90,x3p1_rotate),
+                                   90),
+                        legend.quantiles = legend.quantiles)
 
   if(pltType == "faceted"){
 
@@ -494,7 +498,7 @@ arrangeCMCPlot <- function(x3p1,
                                        radius = lastRow - firstRow,colour = cmc)) +
       ggplot2::scale_colour_manual(values = c("red","black")) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
-                                          x3p2_cellGrid),
+                                                 x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
@@ -589,6 +593,8 @@ arrangeCMCPlot <- function(x3p1,
 #'@param type argument to be passed to cmcR::x3pListPlot function
 #'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
 #'  function
+#'@param legend.quantiles vector of quantiles to be shown as tick marks on
+#'   legend plot
 #'
 #' @examples
 #' \dontrun{
@@ -607,7 +613,8 @@ cmcPlot <- function(x3p1,
                     cellCCF_bothDirections_output,
                     cmcFilter_improved_output,
                     type = "faceted",
-                    x3pNames = c("x3p1","x3p2")){
+                    x3pNames = c("x3p1","x3p2"),
+                    legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
 
   directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
                                 nrow(cmcFilter_improved_output$initialCMC[[2]])))
@@ -618,7 +625,7 @@ cmcPlot <- function(x3p1,
 
   nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     topResultsPerCell() %>%
-    dplyr::anti_join(initialCMC,by = "cellID") %>%
+    dplyr::anti_join(initialCMC,by = "cellNum") %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cmc = rep("no",times = nrow(.)))
 
@@ -642,18 +649,19 @@ cmcPlot <- function(x3p1,
                      by = "cellID")
 
   initialCMCPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
-                                         x3p2 = list(x3p2,x3p1)[[directionIndic]],
-                                         allCells = allInitialCells,
-                                         x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
-                                         pltType = type)
+                                  x3p2 = list(x3p2,x3p1)[[directionIndic]],
+                                  allCells = allInitialCells,
+                                  x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
+                                  pltType = type,
+                                  legend.quantiles = legend.quantiles)
 
   highCMCPlt <- NULL #missing by default unless high CMCs exist:
 
   if(!purrr::is_empty(cmcFilter_improved_output$highCMC)){
 
     x3p1_allCellIDs <- cellDivision(x3p1$surface.matrix,
-                                           cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
-                                           cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
+                                    cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
+                                    cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
       purrr::map2(names(.),
                   function(mat,horizCell){
                     purrr::map(.x = names(mat),
@@ -708,10 +716,11 @@ cmcPlot <- function(x3p1,
                        by = "cellID")
 
     highCMCPlt <- arrangeCMCPlot(x3p1 = x3p1,
-                                        x3p2 = x3p2,
-                                        allCells = allHighCMCs,
-                                        x3pNames = x3pNames,
-                                        pltType = type)
+                                 x3p2 = x3p2,
+                                 allCells = allHighCMCs,
+                                 x3pNames = x3pNames,
+                                 pltType = type,
+                                 legend.quantiles = legend.quantiles)
   }
 
   return(list("initialCMC" = initialCMCPlt,
@@ -782,25 +791,33 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
 
   #if cellCCF_output is from cellCCF_bothDirections:
   if(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1"))){
-    dplyr::bind_rows(
+    cmcDat <- dplyr::bind_rows(
       cellCCF_output$comparison_1to2$ccfResults %>%
         cmcFilterPerTheta(consensus_function = consensus_function,
-                                 ccf_thresh = ccf_thresh,
-                                 dx_thresh = dx_thresh,
-                                 dy_thresh = dy_thresh,
-                                 theta_thresh = theta_thresh) %>%
+                          ccf_thresh = ccf_thresh,
+                          dx_thresh = dx_thresh,
+                          dy_thresh = dy_thresh,
+                          theta_thresh = theta_thresh) %>%
         dplyr::mutate(comparison = paste0(x3pNames[1]," vs. ",x3pNames[2])),
       cellCCF_output$comparison_2to1$ccfResults %>%
         cmcFilterPerTheta(consensus_function = consensus_function,
-                                 ccf_thresh = ccf_thresh,
-                                 dx_thresh = dx_thresh,
-                                 dy_thresh = dy_thresh,
-                                 theta_thresh = theta_thresh) %>%
+                          ccf_thresh = ccf_thresh,
+                          dx_thresh = dx_thresh,
+                          dy_thresh = dy_thresh,
+                          theta_thresh = theta_thresh) %>%
         dplyr::mutate(comparison = paste0(x3pNames[2]," vs. ",x3pNames[1]))
     ) %>%
       dplyr::group_by(comparison,theta) %>%
       dplyr::tally() %>%
-      dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%
+      dplyr::ungroup()
+
+    highCMCDat <- cmcDat %>%
+      dplyr::group_by(comparison) %>%
+      dplyr::summarise(x = min(theta) + 3,
+                       y = max(n) + 2,
+                       cmcHigh = max(n) - highCMCThresh)
+
+    cmcDat %>%
       ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
       ggplot2::geom_bar(stat = "identity") +
       ggplot2::theme_bw()  +
@@ -808,23 +825,24 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
       ggplot2::ylab("CMC number") +
       ggplot2::facet_wrap(~ comparison,ncol = 1)  +
       ggplot2::ylim(c(NA,25)) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
+      ggplot2::geom_hline(data = highCMCDat,
+                          ggplot2::aes(yintercept = cmcHigh),
                           colour = "black",
                           linetype = "dashed") +
-      ggplot2::geom_text(ggplot2::aes(x = min(theta) + 3,
-                                      y = cmcHigh,
+      ggplot2::geom_text(data = highCMCDat,
+                         ggplot2::aes(x = x,
+                                      y = y,
                                       label = paste0("High CMC = ",cmcHigh)),
-                         nudge_y = 1,
                          fontface = "plain",
                          family = "sans")
   }
   else{
     cellCCF_output$ccfResults  %>%
       cmcFilterPerTheta(consensus_function = consensus_function,
-                               ccf_thresh = ccf_thresh,
-                               dx_thresh = dx_thresh,
-                               dy_thresh = dy_thresh,
-                               theta_thresh = theta_thresh) %>%
+                        ccf_thresh = ccf_thresh,
+                        dx_thresh = dx_thresh,
+                        dy_thresh = dy_thresh,
+                        theta_thresh = theta_thresh) %>%
       dplyr::group_by(theta) %>%
       dplyr::tally() %>%
       dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%

@@ -170,7 +170,8 @@ fadul2.2 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/S
 
 
 ```{r}
-cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,"Fadul 1-2" = fadul1.2$x3p),
+cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,
+                                 "Fadul 1-2" = fadul1.2$x3p),
                   type = "faceted",
                   rotate = 90)
 ```

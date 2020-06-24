@@ -269,7 +269,7 @@ selectBFImpression <- function(x3p_path,
                                useResiduals = TRUE,
                                croppingThresh = 1,
                                standardizeBF = FALSE,
-                               gaussFilterRes,
+                               gaussFilterRes = NULL,
                                gaussFilterWavelength = c(16,250),
                                gaussFilterType = "bp"){
 
@@ -420,7 +420,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                           mY = m,
                                           offset = 0,
                                           offsetY = offset,
-                                          gaussFilterRes,
+                                          gaussFilterRes = NULL,
                                           gaussFilterWavelength = c(16,250),
                                           gaussFilterType = "bp"){
 
@@ -590,7 +590,7 @@ selectBFImpression_resize <- function(x3p_path,
                                       size_y = size_x,
                                       interpolation_type = 1,
                                       boundary_conditions = 0,
-                                      gaussFilterRes,
+                                      gaussFilterRes = NULL,
                                       gaussFilterWavelength = c(16,250),
                                       gaussFilterType = "bp"){
 
