@@ -5,11 +5,11 @@ cache: packages
 
 os:
  - linux
- - osx
+ # - osx
 
-jobs:
- allow_failures:
-  - os: osx
+# jobs:
+#  allow_failures:
+#   - os: osx
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install libcgal-dev libglu1-mesa-dev mesa-common-dev; fi
@@ -37,7 +37,7 @@ addons:
          - libtiff-dev
 
 r_build_args: --no-build-vignettes
-r_check_args: --as-cran --ignore-vignettes
+r_check_args: --as-cran #--ignore-vignettes
 
 r_packages:
  - covr
