@@ -36,7 +36,7 @@ addons:
          - tesseract-ocr-eng
          - libtiff-dev
 
-r_build_args: --no-build-vignettes
+# r_build_args: --no-build-vignettes
 r_check_args: --as-cran #--ignore-vignettes
 
 r_packages:
