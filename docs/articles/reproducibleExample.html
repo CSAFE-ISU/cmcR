@@ -169,7 +169,8 @@
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="st">"Known Match 1"</span> <span class="kw">=</span> <span class="no">km1_residuals</span>,
                        <span class="st">"Known Match 2"</span> <span class="kw">=</span> <span class="no">km2_residuals</span>$<span class="no">x3p</span>,
                        <span class="st">"Unknown Source 1"</span> <span class="kw">=</span> <span class="no">unknown1_residuals</span>$<span class="no">x3p</span>,
-                       <span class="st">"Unknown Source 2"</span> <span class="kw">=</span> <span class="no">unknown2_residuals</span>$<span class="no">x3p</span>))</pre></body></html></div>
+                       <span class="st">"Unknown Source 2"</span> <span class="kw">=</span> <span class="no">unknown2_residuals</span>$<span class="no">x3p</span>),
+                  <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))</pre></body></html></div>
 <p><img src="reproducibleExample_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 </div>
 <div id="cartridge-case-cell-pair-ccf-calculation" class="section level2">
@@ -386,7 +387,8 @@
 <div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">km1_unknown1_cmcPlots</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">km1_residuals</span>,
                                        <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">unknown1_residuals</span>$<span class="no">x3p</span>,
                                        <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">km1_unknown1_comparison</span>,
-                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km1_unknown1_cmcs</span>)
+                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km1_unknown1_cmcs</span>,
+                                       <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 
 <span class="no">km1_unknown1_cmcPlots</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="reproducibleExample_files/figure-html/unnamed-chunk-29-1.png" width="700"></p>
@@ -394,7 +396,8 @@
 <div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">km1_unknown2_cmcPlots</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">km1_residuals</span>,
               <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">unknown2_residuals</span>$<span class="no">x3p</span>,
               <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">km1_unknown2_comparison</span>,
-              <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km1_unknown2_cmcs</span>)
+              <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km1_unknown2_cmcs</span>,
+              <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 
 <span class="no">km1_unknown2_cmcPlots</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="reproducibleExample_files/figure-html/unnamed-chunk-30-1.png" width="700"> The high CMCs between km1 and unknown2 are shown below. As we’ve already concluded, there are more cell/region pairs declared CMCs under the high CMC method than the initially proposed method.</p>
@@ -404,7 +407,8 @@
 <div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">km2_unknown1_cmcPlots</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">km2_residuals</span>$<span class="no">x3p</span>,
                                        <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">unknown1_residuals</span>$<span class="no">x3p</span>,
                                        <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">km2_unknown1_comparison</span>,
-                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km2_unknown1_cmcs</span>)
+                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km2_unknown1_cmcs</span>,
+                                       <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 
 <span class="no">km2_unknown1_cmcPlots</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="reproducibleExample_files/figure-html/unnamed-chunk-32-1.png" width="700"></p>
@@ -412,7 +416,8 @@
 <div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="no">km2_unknown2_cmcPlots</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">km2_residuals</span>$<span class="no">x3p</span>,
                                        <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">unknown2_residuals</span>$<span class="no">x3p</span>,
                                        <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">km2_unknown2_comparison</span>,
-                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km2_unknown2_cmcs</span>)
+                                       <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">km2_unknown2_cmcs</span>,
+                                       <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 
 <span class="no">km2_unknown2_cmcPlots</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="reproducibleExample_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>

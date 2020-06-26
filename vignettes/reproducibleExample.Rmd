@@ -119,7 +119,8 @@ The plot below shows the 4 processed scans. The highpass filter applied to the i
 cmcR::x3pListPlot(list("Known Match 1" = km1_residuals,
                        "Known Match 2" = km2_residuals$x3p,
                        "Unknown Source 1" = unknown1_residuals$x3p,
-                       "Unknown Source 2" = unknown2_residuals$x3p))
+                       "Unknown Source 2" = unknown2_residuals$x3p),
+                  legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
 ```
 
 ## Cartridge case cell pair CCF calculation
@@ -367,7 +368,8 @@ Although there were 0 cell/region pairs declared CMCs between km1 and unknown1, 
 km1_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
                                        x3p2 = unknown1_residuals$x3p,
                                        cellCCF_bothDirections_output = km1_unknown1_comparison,
-                                       cmcFilter_improved_output = km1_unknown1_cmcs)
+                                       cmcFilter_improved_output = km1_unknown1_cmcs,
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
 
 km1_unknown1_cmcPlots$initialCMC
 ```
@@ -378,7 +380,8 @@ In contrast, the initial and CMCs between km1 and unknown2 are shown in black be
 km1_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
               x3p2 = unknown2_residuals$x3p,
               cellCCF_bothDirections_output = km1_unknown2_comparison,
-              cmcFilter_improved_output = km1_unknown2_cmcs)
+              cmcFilter_improved_output = km1_unknown2_cmcs,
+              legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
 
 km1_unknown2_cmcPlots$initialCMC
 ```
@@ -394,7 +397,8 @@ The same types of plots can be made for the comparison between km2 and the unkno
 km2_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
                                        x3p2 = unknown1_residuals$x3p,
                                        cellCCF_bothDirections_output = km2_unknown1_comparison,
-                                       cmcFilter_improved_output = km2_unknown1_cmcs)
+                                       cmcFilter_improved_output = km2_unknown1_cmcs,
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
 
 km2_unknown1_cmcPlots$initialCMC
 ```
@@ -405,7 +409,8 @@ And the CMCs for the comparison between km2 and unknown2 are shown below. Note t
 km2_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
                                        x3p2 = unknown2_residuals$x3p,
                                        cellCCF_bothDirections_output = km2_unknown2_comparison,
-                                       cmcFilter_improved_output = km2_unknown2_cmcs)
+                                       cmcFilter_improved_output = km2_unknown2_cmcs,
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
 
 km2_unknown2_cmcPlots$initialCMC
 ```

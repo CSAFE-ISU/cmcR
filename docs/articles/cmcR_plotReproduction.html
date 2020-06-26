@@ -180,13 +180,17 @@
 <h2 class="hasAnchor">
 <a href="#processed-cartrige-case-scan-figure-5" class="anchor"></a>Processed Cartrige Case Scan (Figure 5)</h2>
 <p>Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use <code>ggplot2</code> to accomplish this.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
-<span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
-<span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>,
+                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))
+<span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>,
+                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))
+<span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>,
+                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))</pre></body></html></div>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span>(<span class="kw">x3pList</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="st">"Fadul 1-1"</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
                                  <span class="st">"Fadul 1-2"</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>),
                   <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>,
-                  <span class="kw">rotate</span> <span class="kw">=</span> <span class="fl">90</span>)</pre></body></html></div>
+                  <span class="kw">rotate</span> <span class="kw">=</span> <span class="fl">90</span>,
+                  <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))</pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
 <div id="cmc-plot-figure-4" class="section level2">
@@ -219,14 +223,16 @@
                         <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
                         <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
                         <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>,
-                        <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>)
+                        <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>,
+                        <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 <span class="no">kmPlts</span>$<span class="no">highCMC</span></pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
 <p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the initial CMCs.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                   <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
-                   <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">knmComparison</span>,
-                   <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">knmCMC</span>)
+                         <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
+                         <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">knmComparison</span>,
+                         <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">knmCMC</span>,
+                         <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))
 
 <span class="no">knmPlts</span>$<span class="no">initialCMC</span></pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
@@ -246,8 +252,8 @@
                           <span class="kw">type</span> <span class="kw">=</span> <span class="st">"raster"</span>))
          })</pre></body></html></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
-<pre><code>#&gt; $`-21`
-#&gt; $`-21`$`x = 507 - 578,y = 363 - 434`
+<pre><code>#&gt; $`-24`
+#&gt; $`-24`$`x = 507 - 578,y = 363 - 434`
 #&gt; NULL</code></pre>
 <!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
 <!-- ```{r} -->
