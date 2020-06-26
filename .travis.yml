@@ -43,9 +43,13 @@ r_check_args: --as-cran #--ignore-vignettes
 r_packages:
  - covr
 
+script:
+  - |
+    travis_wait 20 R CMD build .
+    travis_wait 20 R CMD check cmcR*tar.gz
+
 after_success:
   - Rscript -e 'covr::codecov()'
-
 
 # Trying to determine why test fails just on OSx
 # before_install:
