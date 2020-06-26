@@ -78,7 +78,7 @@ km1_residuals$surface.matrix <- km1_residuals$surface.matrix %>%
   preProcess_cropWS() %>%
   preProcess_removeFPCircle()  %>%
   preProcess_gaussFilter(res = km1_residuals$header.info$incrementY,
-                         wavelength = c(16,400),
+                         wavelength = c(16,500),
                          filtertype = "bp")
 
 #this information needs to be updated manually if not using the
@@ -95,21 +95,21 @@ km2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.g
                                                ransacInlierThresh = 1e-6,
                                                ransacFinalSelectThresh = 2*(1e-5),
                                                useResiduals = TRUE,
-                                               gaussFilterWavelength = c(16,400),
+                                               gaussFilterWavelength = c(16,500),
                                                gaussFilterType = "bp")
 unknown1_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96",
                                                     ransacIters = 300,
                                                     ransacInlierThresh = 1e-6,
                                                     ransacFinalSelectThresh = 2*(1e-5),
                                                     useResiduals = TRUE,
-                                                    gaussFilterWavelength = c(16,400),
+                                                    gaussFilterWavelength = c(16,500),
                                                     gaussFilterType = "bp")
 unknown2_residuals <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/9a054edf-f648-40a5-a061-b05ad036c61e",
                                                     ransacIters = 300,
                                                     ransacInlierThresh = 1e-6,
                                                     ransacFinalSelectThresh = 2*(1e-5),
                                                     useResiduals = TRUE,
-                                                    gaussFilterWavelength = c(16,400),
+                                                    gaussFilterWavelength = c(16,500),
                                                     gaussFilterType = "bp")
 ```
 
@@ -232,7 +232,7 @@ km1_unknown2_comparison$comparison_1to2$ccfResults %>%
   DT::datatable(options = list(pageLength = 5))
 ```
 
-### "Improved" method
+### High CMC method
 
 Having chosen correlation and translation thresholds by which we can classify cell pairs as "congruent matching cells," a useful way to determine an estimate for the rotation values by which two cartridge cases will align is to plot the number of CMCs per rotation value. Identifying "modes" in these CMC-per-theta plots is what Tong et al. (2015) proposed as one improvement to the initially proposed method.
 
@@ -260,7 +260,7 @@ cmcPerThetaBarPlot(km1_unknown2_comparison,
 
 To settle on a final CMC number, Tong et al. (2015) proposes first identifying whether the high CMC theta values are too diffuse around the max CMC theta value using the logic described above. If a particular pair doesn't pass this criterion, then we assign to it the initial CMCs (described above) as its final CMC number. Otherwise, if a theta value mode is identified, then we count the number of CMCs in this mode, including those associated with the max CMC as well as CMCs associated with theta values within `theta_thresh` of the max CMC theta value. We do this for both the "forward" and "backward" CMC distributions and combine the results as the final CMC count, excluding any duplicate pairs.
 
-The `cmcFilter_improved` function counts the number of CMCs under this improved method. It will return not only the high CMCs, but also the initial CMCs determined under the initially proposed method (in both directions).
+The `cmcFilter_improved` function counts the number of CMCs under this High CMC method. It will return not only the high CMCs, but also the initial CMCs determined under the initially proposed method (in both directions).
 
 ```{r}
 km1_unknown1_cmcs <- cmcR::cmcFilter_improved(km1_unknown1_comparison,
