@@ -17,7 +17,7 @@ selectBFImpression_resize(
   size_y = size_x,
   interpolation_type = 1,
   boundary_conditions = 0,
-  gaussFilterRes,
+  gaussFilterRes = NULL,
   gaussFilterWavelength = c(16, 250),
   gaussFilterType = "bp"
 )

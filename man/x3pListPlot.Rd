@@ -13,6 +13,15 @@ plots per surface matrix is returned. The faceted plot will have a
 consistent height scale across all surface matrices.}
 
 \item{rotate}{angle (in degrees) to rotate all surface matrices plotted}
+
+\item{legend.quantiles}{vector of quantiles to be shown as tick marks on
+legend plot}
+
+\item{height.colors}{vector of colors to be passed to scale_fill_gradientn
+that dictates the height value colorscale}
+
+\item{na.value}{color to be used for NA values (passed to
+scale_fill_gradientn)}
 }
 \description{
 Plots the surface matrices in a list of x3p objects. Either

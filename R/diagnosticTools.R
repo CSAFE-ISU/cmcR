@@ -403,6 +403,8 @@ arrangeCMCPlot <- function(x3p1,
 #'  legend plot
 #'@param height.colors vector of colors to be passed to scale_fill_gradientn
 #'  that dictates the height value colorscale
+#'@param cell.colors vector of 2 colors for plotting non-matching and matching
+#'  (in that order) cells
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'

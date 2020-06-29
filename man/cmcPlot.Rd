@@ -18,6 +18,18 @@ cmcR::cmcFilter_improved}
 
 \item{x3pNames}{(Optional) Names of x3p objects to be included in x3pListPlot
 function}
+
+\item{legend.quantiles}{vector of quantiles to be shown as tick marks on
+legend plot}
+
+\item{height.colors}{vector of colors to be passed to scale_fill_gradientn
+that dictates the height value colorscale}
+
+\item{cell.colors}{vector of 2 colors for plotting non-matching and matching
+(in that order) cells}
+
+\item{na.value}{color to be used for NA values (passed to
+scale_fill_gradientn)}
 }
 \description{
 Constructs either a single faceted plot or a list of plots
