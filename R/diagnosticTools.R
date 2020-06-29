@@ -14,6 +14,10 @@
 #' @param rotate angle (in degrees) to rotate all surface matrices plotted
 #' @param legend.quantiles vector of quantiles to be shown as tick marks on
 #'   legend plot
+#' @param height.colors vector of colors to be passed to scale_fill_gradientn
+#'   that dictates the height value colorscale
+#' @param na.value color to be used for NA values (passed to
+#'   scale_fill_gradientn)
 #' @examples
 #' \dontrun{
 #'  x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
@@ -27,7 +31,9 @@ utils::globalVariables(c("value","x","y",".","x3p","height"))
 x3pListPlot <- function(x3pList,
                         type = "faceted",
                         rotate = 0,
-                        legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
+                        legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
+                        height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                        na.value = "gray80"){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
@@ -53,7 +59,7 @@ x3pListPlot <- function(x3pList,
     plts <- surfaceMat_df %>%
       ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
       ggplot2::geom_raster(ggplot2::aes(fill = height))  +
-      ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+      ggplot2::scale_fill_gradientn(colours = height.colors,
                                     values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                     breaks = function(lims){
                                       dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
@@ -63,7 +69,7 @@ x3pListPlot <- function(x3pList,
 
                                       return(dat)
                                     },
-                                    na.value = "grey80") +
+                                    na.value = na.value) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_minimal() +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
@@ -103,7 +109,7 @@ x3pListPlot <- function(x3pList,
                           surfaceMat_df %>%
                             ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
                             ggplot2::geom_raster(ggplot2::aes(fill = height))  +
-                            ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                            ggplot2::scale_fill_gradientn(colours = height.colors,
                                                           values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                                           breaks = function(lims){
                                                             dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
@@ -113,7 +119,7 @@ x3pListPlot <- function(x3pList,
 
                                                             return(dat)
                                                           },
-                                                          na.value = "grey80") +
+                                                          na.value = na.value) +
                             ggplot2::theme_minimal() +
                             ggplot2::coord_fixed(expand = FALSE) +
                             ggplot2::theme(axis.title.x = ggplot2::element_blank(),
@@ -136,227 +142,6 @@ x3pListPlot <- function(x3pList,
                         })
   }
   return(plts)
-}
-
-#' @name ccfMap
-#'
-#' @keywords internal
-
-ccfMap <- function(mat1,mat2){
-  #Test that mat1,mat2 contain no NAs
-  if(any(is.na(as.vector(mat1))) | any(is.na(as.vector(mat2)))){
-    mat1[is.na(mat1)] <- 0
-    mat2[is.na(mat2)] <- 0
-  }
-
-  ccfMat <- filterViaFFT(mat1,mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-
-  return(Re(ccfMat))
-}
-
-#' Plots the CCF map between two matrices
-#'
-#' @name ccfMapPlot
-#'
-#' @description Uses the gridExtra::arrangeGrob function to put 3 plots and a
-#'   table on the same grob object.
-#'
-#' @param mat1 a matrix
-#' @param mat2 another matrix
-#' @param theta *(OPTIONAL)* if considering multiple cell/region pairs over
-#'   various rotation values, it may be useful to include the rotation value in
-#'   the fft.ccf summary. If a value of theta is supplied to this argument, it
-#'   will be included in the summary table. Otherwise, theta will be NA
-#' @param type dictates whether the CCF map is created using geom_raster (type =
-#'   "raster") or geom_contour_filled (type = "contour")
-#' @param returnGrob if TRUE, then function will return the gridExtra grob
-#'   object
-#'
-#' @examples
-#'  mat1 <- imager::imfill(x = 100,y = 100) %>%
-#'  imager::draw_rect(x0 = 40,y0 = 40,x1 = 60,y1 = 60,color = 255) %>%
-#'  as.matrix()
-#'
-#'  mat2 <- imager::imfill(x = 100,y = 100) %>%
-#'  imager::draw_rect(x0 = 15,y0 = 30,x1 = 35,y1 = 50,color = 255) %>%
-#'  as.matrix()
-#'
-#'  ccfMapPlot(mat1,mat2)
-#'
-#' @importFrom gridExtra tableGrob arrangeGrob grid.arrange
-#' @importFrom colorspace divergingx_hcl
-#' @importFrom scales rescale
-#' @importFrom stats quantile
-#'
-#' @export
-
-utils::globalVariables(c("x","y","value","fft.ccf","dx","dy"))
-
-ccfMapPlot <- function(mat1,
-                       mat2,
-                       theta = NA,
-                       returnGrob = FALSE,
-                       type = "raster"){
-
-  ccfMat <- ccfMap(mat1,mat2)
-
-  ccfDF <- ccfMat %>%
-    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
-    imager::as.cimg() %>%
-    as.data.frame() %>%
-    dplyr::mutate(dx = x - max(x)/2,
-                  dy = y - max(y)/2) %>%
-    dplyr::rename(fft.ccf = value)
-
-  ccfMaxInfo <- ccfDF %>%
-    dplyr::filter(fft.ccf == max(fft.ccf)) %>%
-    dplyr::mutate(fft.ccf = round(fft.ccf,3))
-
-  # mat1 <- (mat1 - mean(mat1,na.rm = TRUE))/(sd(mat1,na.rm = TRUE))
-  # mat2 <- (mat2 - mean(mat2,na.rm = TRUE))/(sd(mat2,na.rm = TRUE))
-
-  mat1Plot <- mat1 %>%
-    t() %>%
-    imager::as.cimg() %>%
-    as.data.frame() %>%
-    # mutate(x = x + floor(max(nrow(mat1),nrow(mat2))/4),
-    #        y = y + floor(max(ncol(mat1),ncol(mat2))/4)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
-    ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-    ggplot2::scale_fill_gradient2(low = "grey0",
-                                  mid = "grey50",
-                                  high = "grey100") +
-    ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
-                         ylim = c(0,max(ncol(mat1),ncol(mat2))),
-                         expand = FALSE) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                   panel.grid.minor = ggplot2::element_blank(),
-                   legend.position = "none",
-                   axis.title.x = ggplot2::element_blank(),
-                   axis.title.y = ggplot2::element_blank())
-
-  mat2Plot <- mat2 %>%
-    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
-    imager::as.cimg() %>%
-    as.data.frame() %>%
-    ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
-    ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-    ggplot2::scale_fill_gradient2(low = "grey0",
-                                  mid = "grey50",
-                                  high = "grey100",
-                                  midpoint = 0) +
-    ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
-                         ylim = c(0,max(ncol(mat1),ncol(mat2))),
-                         expand = FALSE) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                   panel.grid.minor = ggplot2::element_blank(),
-                   legend.position = "none",
-                   axis.title.x = ggplot2::element_blank(),
-                   axis.title.y = ggplot2::element_blank()) +
-    ggplot2::geom_tile(ggplot2::aes(
-      x = max(x)/2 - ccfMaxInfo$dx,
-      y = max(y)/2 - ccfMaxInfo$dy,
-      width = ncol(mat1),
-      height = nrow(mat1)),
-      alpha = 0,
-      colour = "orange")
-
-  if(type == "raster"){
-    ccfPlot <- ccfDF %>%
-      dplyr::mutate(dx = rev(dx),
-                    dy = rev(dy)) %>%
-      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
-      ggplot2::geom_point(data = ccfDF %>%
-                            dplyr::mutate(dx = rev(dx),
-                                          dy = rev(dy)) %>%
-                            dplyr::filter(fft.ccf == max(fft.ccf)) %>%
-                            dplyr::mutate(type = "Maximum"),
-                          ggplot2::aes(x = dx,y = dy,shape = type),
-                          # shape = 4,
-                          colour = "white",
-                          fill = "white") +
-      # ggplot2::geom_contour(aes(z = fft.ccf),
-      #                       breaks = quantile(ccfDF$fft.ccf,seq(0,1,length.out = 5)),
-      # colour = "black") +
-      ggplot2::coord_fixed(expand = FALSE) +
-      ggplot2::theme_bw() +
-      ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                                    values = rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
-                                    guide = "colourbar",
-                                    limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
-      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank()) +
-      ggplot2::scale_shape_manual(values = 1,
-                                  labels = expression("CCF"[max])) +
-      ggplot2::guides(fill = ggplot2::guide_colourbar(title = "CCF",
-                                                      barheight = grid::unit(1,"in"),
-                                                      label.theme = ggplot2::element_text(size = 8),
-                                                      frame.colour = "black",
-                                                      ticks.colour = "black"),
-                      shape = ggplot2::guide_legend(title = NULL,
-                                                    override.aes = list(colour = "black")))
-
-    layoutMat <- matrix(c(1,2,4,3),ncol = 2,byrow = TRUE)
-  }
-  if(type == "contour"){
-    ccfPlot <- ccfDF %>%
-      dplyr::mutate(dx = rev(dx),
-                    dy = rev(dy)) %>%
-      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
-      ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
-                                   breaks = c(quantile(as.vector(ccfDF$fft.ccf)[(as.vector(ccfDF$fft.ccf) <= 0)],
-                                                       prob = seq(0,1,length.out = 6)),
-                                              0,
-                                              quantile(as.vector(ccfDF$fft.ccf)[as.vector((ccfDF$fft.ccf) > 0)],
-                                                       prob = seq(0,1,length.out = 6))),
-      ) +
-      ggplot2::geom_point(data = ccfDF %>%
-                            dplyr::mutate(dx = rev(dx),
-                                          dy = rev(dy)) %>%
-                            dplyr::filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
-                            dplyr::arrange(fft.ccf) %>%
-                            dplyr::mutate(type = factor(c("Minimum","Maximum"))),
-                          ggplot2::aes(x = dx,y = dy,shape = type),
-                          # shape = 4,
-                          colour = "white") +
-      ggplot2::scale_shape_manual(values = c(1,4)) +
-      ggplot2::coord_fixed(expand = FALSE) +
-      ggplot2::scale_fill_manual(values = rev(divergingx_hcl(13,"PuOr")),
-                                 drop = FALSE) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank(),
-                     legend.title = ggplot2::element_text(size = 7),
-                     legend.text = ggplot2::element_text(size = 5)) +
-      ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE,ncol = 3),
-                      shape = ggplot2::guide_legend(direction = "horizontal",override.aes = list(colour = c("#312A56","#492900"))))
-
-    layoutMat <- matrix(c(1,2,3,4,4,4),ncol = 3,byrow = TRUE)
-  }
-
-  ccfMaxSummary <- ccfMaxInfo %>%
-    dplyr::select(-c(x,y)) %>%
-    dplyr::mutate(dx = -dx,
-                  dy = -dy,
-                  theta = theta) %>%
-    t() %>%
-    tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
-              cols = "Summary")
-
-  gridPlot <- arrangeGrob(mat1Plot,
-                          mat2Plot,
-                          ccfMaxSummary,
-                          ccfPlot,
-                          layout_matrix = layoutMat)
-
-  grid.arrange(gridPlot)
-
-  if(returnGrob){
-    return(gridPlot)
-  }
 }
 
 #' @name linear_to_matrix
@@ -397,7 +182,10 @@ arrangeCMCPlot <- function(x3p1,
                            allCells,
                            x3pNames,
                            pltType = "faceted",
-                           legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
+                           legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
+                           height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                           cell.colors = c("#a50026","#313695"),
+                           na.value = "gray80"){
 
   x3p1_cellGrid <- allCells %>%
     dplyr::mutate(firstRow = (x3p1$header.info$incrementY*1e6)*(firstRow),
@@ -446,7 +234,9 @@ arrangeCMCPlot <- function(x3p1,
                         type = pltType,
                         rotate = c(ifelse(is.na(x3p1_rotate),90,x3p1_rotate),
                                    90),
-                        legend.quantiles = legend.quantiles)
+                        legend.quantiles = legend.quantiles,
+                        height.colors = height.colors,
+                        na.value = na.value)
 
   if(pltType == "faceted"){
 
@@ -455,48 +245,56 @@ arrangeCMCPlot <- function(x3p1,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,angle = 0,
                                        radius = lastRow - firstRow,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,
                                        angle = pi/2,
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,angle = pi,
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
-                                       colour = cmc))  +
+                                       colour = cmc),
+                          size = .2)  +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (theta - median(theta))*(pi/180),
                                        radius = lastRow - firstRow,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (pi + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastRow - firstRow,colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
+                                       radius = lastRow - firstRow,colour = cmc),
+                          size = .2) +
+      ggplot2::scale_colour_manual(values = cell.colors) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                                  x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
@@ -512,25 +310,29 @@ arrangeCMCPlot <- function(x3p1,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,angle = 0,
                                        radius = lastRow - firstRow,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = firstCol,
                                        y = firstRow,
                                        angle = pi/2,
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,angle = pi,
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p1_cellGrid,
                           ggplot2::aes(x = lastCol,
                                        y = lastRow,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
-                                       colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
+                                       colour = cmc),
+                          size = .2) +
+      ggplot2::scale_colour_manual(values = cell.colors) +
       ggplot2::geom_text(data = x3p1_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
@@ -545,25 +347,29 @@ arrangeCMCPlot <- function(x3p1,
                                        y = bottomLeftCorner_row,
                                        angle = (theta - median(theta))*(pi/180),
                                        radius = lastRow - firstRow,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = bottomLeftCorner_col,
                                        y = bottomLeftCorner_row,
                                        angle = (pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (pi + (theta - median(theta))*(pi/180)),
                                        radius = lastCol - firstCol,
-                                       colour = cmc)) +
+                                       colour = cmc),
+                          size = .2) +
       ggplot2::geom_spoke(data = x3p2_cellGrid,
                           ggplot2::aes(x = topRightCorner_col,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastRow - firstRow,colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
+                                       radius = lastRow - firstRow,colour = cmc),
+                          size = .2) +
+      ggplot2::scale_colour_manual(values = cell.colors) +
       # ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(data = x3p2_cellGrid,
                          ggplot2::aes(x = midCol,
@@ -594,7 +400,11 @@ arrangeCMCPlot <- function(x3p1,
 #'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
 #'  function
 #'@param legend.quantiles vector of quantiles to be shown as tick marks on
-#'   legend plot
+#'  legend plot
+#'@param height.colors vector of colors to be passed to scale_fill_gradientn
+#'  that dictates the height value colorscale
+#'@param na.value color to be used for NA values (passed to
+#'  scale_fill_gradientn)
 #'
 #' @examples
 #' \dontrun{
@@ -614,7 +424,10 @@ cmcPlot <- function(x3p1,
                     cmcFilter_improved_output,
                     type = "faceted",
                     x3pNames = c("x3p1","x3p2"),
-                    legend.quantiles = c(0,.01,.25,.5,.75,.99,1)){
+                    legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
+                    height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                    cell.colors = c("#a50026","#313695"),
+                    na.value = "gray80"){
 
   directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
                                 nrow(cmcFilter_improved_output$initialCMC[[2]])))
@@ -653,7 +466,10 @@ cmcPlot <- function(x3p1,
                                   allCells = allInitialCells,
                                   x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
                                   pltType = type,
-                                  legend.quantiles = legend.quantiles)
+                                  legend.quantiles = legend.quantiles,
+                                  height.colors = height.colors,
+                                  cell.colors = cell.colors,
+                                  na.value = na.value)
 
   highCMCPlt <- NULL #missing by default unless high CMCs exist:
 
@@ -720,7 +536,10 @@ cmcPlot <- function(x3p1,
                                  allCells = allHighCMCs,
                                  x3pNames = x3pNames,
                                  pltType = type,
-                                 legend.quantiles = legend.quantiles)
+                                 legend.quantiles = legend.quantiles,
+                                 height.colors = height.colors,
+                                 cell.colors = cell.colors,
+                                 na.value = na.value)
   }
 
   return(list("initialCMC" = initialCMCPlt,
@@ -1006,4 +825,227 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
 
   cellRegionPairs %>%
     setNames(thetas)
+}
+
+#' @name ccfMap
+#'
+#' @keywords internal
+
+ccfMap <- function(mat1,mat2){
+  #Test that mat1,mat2 contain no NAs
+  if(any(is.na(as.vector(mat1))) | any(is.na(as.vector(mat2)))){
+    mat1[is.na(mat1)] <- 0
+    mat2[is.na(mat2)] <- 0
+  }
+
+  ccfMat <- filterViaFFT(mat1,mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
+
+  return(Re(ccfMat))
+}
+
+#' Plots the CCF map between two matrices
+#'
+#' @name ccfMapPlot
+#'
+#' @description Uses the gridExtra::arrangeGrob function to put 3 plots and a
+#'   table on the same grob object.
+#'
+#' @param mat1 a matrix
+#' @param mat2 another matrix
+#' @param theta *(OPTIONAL)* if considering multiple cell/region pairs over
+#'   various rotation values, it may be useful to include the rotation value in
+#'   the fft.ccf summary. If a value of theta is supplied to this argument, it
+#'   will be included in the summary table. Otherwise, theta will be NA
+#' @param type dictates whether the CCF map is created using geom_raster (type =
+#'   "raster") or geom_contour_filled (type = "contour")
+#' @param returnGrob if TRUE, then function will return the gridExtra grob
+#'   object
+#'
+#' @examples
+#'  mat1 <- imager::imfill(x = 100,y = 100) %>%
+#'  imager::draw_rect(x0 = 40,y0 = 40,x1 = 60,y1 = 60,color = 255) %>%
+#'  as.matrix()
+#'
+#'  mat2 <- imager::imfill(x = 100,y = 100) %>%
+#'  imager::draw_rect(x0 = 15,y0 = 30,x1 = 35,y1 = 50,color = 255) %>%
+#'  as.matrix()
+#'
+#'  ccfMapPlot(mat1,mat2)
+#'
+#' @importFrom gridExtra tableGrob arrangeGrob grid.arrange
+#' @importFrom colorspace divergingx_hcl
+#' @importFrom scales rescale
+#' @importFrom stats quantile
+#'
+#' @export
+
+utils::globalVariables(c("x","y","value","fft.ccf","dx","dy"))
+
+ccfMapPlot <- function(mat1,
+                       mat2,
+                       theta = NA,
+                       returnGrob = FALSE,
+                       type = "raster"){
+
+  ccfMat <- ccfMap(mat1,mat2)
+
+  ccfDF <- ccfMat %>%
+    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
+    imager::as.cimg() %>%
+    as.data.frame() %>%
+    dplyr::mutate(dx = x - max(x)/2,
+                  dy = y - max(y)/2) %>%
+    dplyr::rename(fft.ccf = value)
+
+  ccfMaxInfo <- ccfDF %>%
+    dplyr::filter(fft.ccf == max(fft.ccf)) %>%
+    dplyr::mutate(fft.ccf = round(fft.ccf,3))
+
+  # mat1 <- (mat1 - mean(mat1,na.rm = TRUE))/(sd(mat1,na.rm = TRUE))
+  # mat2 <- (mat2 - mean(mat2,na.rm = TRUE))/(sd(mat2,na.rm = TRUE))
+
+  mat1Plot <- mat1 %>%
+    t() %>%
+    imager::as.cimg() %>%
+    as.data.frame() %>%
+    # mutate(x = x + floor(max(nrow(mat1),nrow(mat2))/4),
+    #        y = y + floor(max(ncol(mat1),ncol(mat2))/4)) %>%
+    ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+    ggplot2::scale_fill_gradient2(low = "grey0",
+                                  mid = "grey50",
+                                  high = "grey100") +
+    ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
+                         ylim = c(0,max(ncol(mat1),ncol(mat2))),
+                         expand = FALSE) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   legend.position = "none",
+                   axis.title.x = ggplot2::element_blank(),
+                   axis.title.y = ggplot2::element_blank())
+
+  mat2Plot <- mat2 %>%
+    t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
+    imager::as.cimg() %>%
+    as.data.frame() %>%
+    ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+    ggplot2::scale_fill_gradient2(low = "grey0",
+                                  mid = "grey50",
+                                  high = "grey100",
+                                  midpoint = 0) +
+    ggplot2::coord_fixed(xlim = c(0,max(nrow(mat1),nrow(mat2))),
+                         ylim = c(0,max(ncol(mat1),ncol(mat2))),
+                         expand = FALSE) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   legend.position = "none",
+                   axis.title.x = ggplot2::element_blank(),
+                   axis.title.y = ggplot2::element_blank()) +
+    ggplot2::geom_tile(ggplot2::aes(
+      x = max(x)/2 - ccfMaxInfo$dx,
+      y = max(y)/2 - ccfMaxInfo$dy,
+      width = ncol(mat1),
+      height = nrow(mat1)),
+      alpha = 0,
+      colour = "orange")
+
+  if(type == "raster"){
+    ccfPlot <- ccfDF %>%
+      dplyr::mutate(dx = rev(dx),
+                    dy = rev(dy)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
+      ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
+      ggplot2::geom_point(data = ccfDF %>%
+                            dplyr::mutate(dx = rev(dx),
+                                          dy = rev(dy)) %>%
+                            dplyr::filter(fft.ccf == max(fft.ccf)) %>%
+                            dplyr::mutate(type = "Maximum"),
+                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          # shape = 4,
+                          colour = "white",
+                          fill = "white") +
+      # ggplot2::geom_contour(aes(z = fft.ccf),
+      #                       breaks = quantile(ccfDF$fft.ccf,seq(0,1,length.out = 5)),
+      # colour = "black") +
+      ggplot2::coord_fixed(expand = FALSE) +
+      ggplot2::theme_bw() +
+      ggplot2::scale_fill_gradientn(colours = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                                    values = rescale(c(min(ccfDF$fft.ccf),0,max(ccfDF$fft.ccf))),
+                                    guide = "colourbar",
+                                    limits = c(min(ccfDF$fft.ccf),max(ccfDF$fft.ccf))) +
+      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank()) +
+      ggplot2::scale_shape_manual(values = 1,
+                                  labels = expression("CCF"[max])) +
+      ggplot2::guides(fill = ggplot2::guide_colourbar(title = "CCF",
+                                                      barheight = grid::unit(1,"in"),
+                                                      label.theme = ggplot2::element_text(size = 8),
+                                                      frame.colour = "black",
+                                                      ticks.colour = "black"),
+                      shape = ggplot2::guide_legend(title = NULL,
+                                                    override.aes = list(colour = "black")))
+
+    layoutMat <- matrix(c(1,2,4,3),ncol = 2,byrow = TRUE)
+  }
+  if(type == "contour"){
+    ccfPlot <- ccfDF %>%
+      dplyr::mutate(dx = rev(dx),
+                    dy = rev(dy)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
+      ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
+                                   breaks = c(quantile(as.vector(ccfDF$fft.ccf)[(as.vector(ccfDF$fft.ccf) <= 0)],
+                                                       prob = seq(0,1,length.out = 6)),
+                                              0,
+                                              quantile(as.vector(ccfDF$fft.ccf)[as.vector((ccfDF$fft.ccf) > 0)],
+                                                       prob = seq(0,1,length.out = 6))),
+      ) +
+      ggplot2::geom_point(data = ccfDF %>%
+                            dplyr::mutate(dx = rev(dx),
+                                          dy = rev(dy)) %>%
+                            dplyr::filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
+                            dplyr::arrange(fft.ccf) %>%
+                            dplyr::mutate(type = factor(c("Minimum","Maximum"))),
+                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          # shape = 4,
+                          colour = "white") +
+      ggplot2::scale_shape_manual(values = c(1,4)) +
+      ggplot2::coord_fixed(expand = FALSE) +
+      ggplot2::scale_fill_manual(values = divergingx_hcl(n = 13,
+                                                         palette = "PuOr",
+                                                         rev = TRUE),
+                                 drop = FALSE) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+                     panel.grid.minor = ggplot2::element_blank(),
+                     legend.title = ggplot2::element_text(size = 7),
+                     legend.text = ggplot2::element_text(size = 5)) +
+      ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE,ncol = 3),
+                      shape = ggplot2::guide_legend(direction = "horizontal",override.aes = list(colour = c("#312A56","#492900"))))
+
+    layoutMat <- matrix(c(1,2,3,4,4,4),ncol = 3,byrow = TRUE)
+  }
+
+  ccfMaxSummary <- ccfMaxInfo %>%
+    dplyr::select(-c(x,y)) %>%
+    dplyr::mutate(dx = -dx,
+                  dy = -dy,
+                  theta = theta) %>%
+    t() %>%
+    tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
+              cols = "Summary")
+
+  gridPlot <- arrangeGrob(mat1Plot,
+                          mat2Plot,
+                          ccfMaxSummary,
+                          ccfPlot,
+                          layout_matrix = layoutMat)
+
+  grid.arrange(gridPlot)
+
+  if(returnGrob){
+    return(gridPlot)
+  }
 }
