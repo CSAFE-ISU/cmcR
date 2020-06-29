@@ -496,7 +496,7 @@ arrangeCMCPlot <- function(x3p1,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("red","black")) +
+      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                                  x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
@@ -530,7 +530,7 @@ arrangeCMCPlot <- function(x3p1,
                                        angle = 3*pi/2,
                                        radius = lastRow - firstRow,
                                        colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("red","black")) +
+      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
       ggplot2::geom_text(data = x3p1_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
@@ -563,7 +563,7 @@ arrangeCMCPlot <- function(x3p1,
                                        y = topRightCorner_row,
                                        angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
                                        radius = lastRow - firstRow,colour = cmc)) +
-      ggplot2::scale_colour_manual(values = c("black","red")) +
+      ggplot2::scale_colour_manual(values = c("#a50026","#313695")) +
       # ggplot2::guides(colour = FALSE) +
       ggplot2::geom_text(data = x3p2_cellGrid,
                          ggplot2::aes(x = midCol,

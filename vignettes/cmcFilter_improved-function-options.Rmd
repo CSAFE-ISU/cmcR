@@ -27,7 +27,7 @@ library(dplyr)
 
 To illustrate the usage of the various options available in the `cmcFilter_improved` function, we will use cartridge case data available from the [NIST Ballisitics and Toolmarks Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search). Note that `fadul1.1` and `fadul1.2` are a known match pair (i.e., were fired from the same firearm) while `fadul2.1` was fired from a different firearm (and is thus classified as a non-match). The following will perform the pre-processing procedures (again, described in the [Reproducible Example](https://jzemmels.github.io/cmcR/articles/reproducibleExample.html#pre-processing-1) vignette) for these three cartridge cases.
 
-```{r cache=TRUE}
+```{r }
 set.seed(4132020)
 
 fadul1.1 <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d",
@@ -56,7 +56,7 @@ fadul2.1 <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NR
 
 Next, `fadul1.1` is compared to `fadul1.2` and `fadul2.1` using the correlation cell comparison procedure outlined in [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193).
 
-```{r cache=TRUE}
+```{r }
 kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
                                              x3p2 = fadul1.2$x3p,
                                              cellNumHoriz = 8,
