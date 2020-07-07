@@ -30,7 +30,8 @@ Imports:
     utils,
     colorspace,
     gridExtra,
-    scales
+    scales,
+    ggnewscale
 Suggests: 
     knitr,
     rmarkdown,

@@ -18,6 +18,7 @@
 #'   that dictates the height value colorscale
 #' @param na.value color to be used for NA values (passed to
 #'   scale_fill_gradientn)
+#' @param guide internal usage
 #' @examples
 #' \dontrun{
 #'  x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
@@ -33,7 +34,8 @@ x3pListPlot <- function(x3pList,
                         rotate = 0,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                        na.value = "gray80"){
+                        na.value = "gray80",
+                        guide = "colorbar"){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
@@ -69,7 +71,8 @@ x3pListPlot <- function(x3pList,
 
                                       return(dat)
                                     },
-                                    na.value = na.value) +
+                                    na.value = na.value,
+                                    guide = guide) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_minimal() +
       ggplot2::theme(axis.title.x = ggplot2::element_blank(),
@@ -119,7 +122,8 @@ x3pListPlot <- function(x3pList,
 
                                                             return(dat)
                                                           },
-                                                          na.value = na.value) +
+                                                          na.value = na.value,
+                                                          guide = guide) +
                             ggplot2::theme_minimal() +
                             ggplot2::coord_fixed(expand = FALSE) +
                             ggplot2::theme(axis.title.x = ggplot2::element_blank(),
@@ -174,6 +178,7 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #' @keywords internal
 #'
 #' @importFrom stats median setNames
+#' @importFrom ggnewscale new_scale_fill
 
 utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","dx","dy","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
 
@@ -192,6 +197,17 @@ arrangeCMCPlot <- function(x3p1,
                   lastRow = (x3p1$header.info$incrementY*1e6)*(lastRow),
                   firstCol = (x3p1$header.info$incrementY*1e6)*(firstCol),
                   lastCol = (x3p1$header.info$incrementY*1e6)*(lastCol)) %>%
+    dplyr::mutate(x_1 = firstCol,
+                  y_1 = firstRow,
+                  x_2 = lastCol,
+                  y_2 = firstRow,
+                  x_3 = lastCol,
+                  y_3 = lastRow,
+                  x_4 = firstCol,
+                  y_4 = lastRow) %>%
+    tidyr::pivot_longer(cols = tidyr::starts_with(c("x","y")),
+                        names_to = c(".value","order"),
+                        names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (lastCol + firstCol)/2,
                   midRow = (lastRow + firstRow)/2,
                   cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
@@ -211,10 +227,27 @@ arrangeCMCPlot <- function(x3p1,
                   lastRowCentered = lastRow - max(lastRow)/2,
                   firstColCentered = firstCol - max(lastCol)/2,
                   lastColCentered = lastCol - max(lastCol)/2) %>%
-    dplyr::mutate(bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
+    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
+                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
                   topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy) %>%
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
+                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
+                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
+                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy) %>%
+    #this is redundant, but is how the x and y columns are set-up down below, so
+    #I won't change it
+    dplyr::mutate(x_1 = topLeftCorner_col,
+                  y_1 = topLeftCorner_row,
+                  x_2 = topRightCorner_col,
+                  y_2 = topRightCorner_row,
+                  x_3 = bottomRightCorner_col,
+                  y_3 = bottomRightCorner_row,
+                  x_4 = bottomLeftCorner_col,
+                  y_4 = bottomLeftCorner_row) %>%
+    tidyr::pivot_longer(cols = tidyr::starts_with(c("x","y")),
+                        names_to = c(".value","order"),
+                        names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                   midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
                   cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
@@ -226,7 +259,7 @@ arrangeCMCPlot <- function(x3p1,
                   theta = theta - median(theta))
 
   x3p1_rotate <- 90 - median(allCells %>%
-                               dplyr::filter(cmc == "yes") %>%
+                               dplyr::filter(cmc != "non-CMC") %>%
                                dplyr::pull(theta))
 
   x3pPlt <- x3pListPlot(x3pList = list(x3p1,x3p2) %>%
@@ -236,65 +269,27 @@ arrangeCMCPlot <- function(x3p1,
                                    90),
                         legend.quantiles = legend.quantiles,
                         height.colors = height.colors,
-                        na.value = na.value)
+                        na.value = na.value,
+                        guide = "none")
 
   if(pltType == "faceted"){
 
     x3pPlt <- x3pPlt +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = firstCol,
-                                       y = firstRow,angle = 0,
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = firstCol,
-                                       y = firstRow,
-                                       angle = pi/2,
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = lastCol,
-                                       y = lastRow,angle = pi,
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = lastCol,
-                                       y = lastRow,
-                                       angle = 3*pi/2,
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2)  +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = bottomLeftCorner_col,
-                                       y = bottomLeftCorner_row,
-                                       angle = (theta - median(theta))*(pi/180),
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = bottomLeftCorner_col,
-                                       y = bottomLeftCorner_row,
-                                       angle = (pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = topRightCorner_col,
-                                       y = topRightCorner_row,
-                                       angle = (pi + (theta - median(theta))*(pi/180)),
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = topRightCorner_col,
-                                       y = topRightCorner_row,
-                                       angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastRow - firstRow,colour = cmc),
-                          size = .2) +
-      ggplot2::scale_colour_manual(values = cell.colors) +
+      ggnewscale::new_scale_fill() +
+      ggplot2::geom_polygon(data = x3p1_cellGrid,
+                            mapping = ggplot2::aes(x = x,
+                                                   y = y,
+                                                   group = cellNum,
+                                                   fill = cmc),
+                            alpha = .3,
+                            size = 2) +
+      ggplot2::geom_polygon(data = x3p2_cellGrid,
+                            mapping = ggplot2::aes(x = x,
+                                                   y = y,
+                                                   group = cellNum,
+                                                   fill = cmc),
+                            alpha = .3,
+                            size = 2) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                                  x3p2_cellGrid),
                          ggplot2::aes(x = midCol,
@@ -302,82 +297,51 @@ arrangeCMCPlot <- function(x3p1,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3)
+                         size = 3) +
+      ggplot2::scale_colour_manual(values = cell.colors,
+                                   aesthetics = c("fill","colour")) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type"))
   }
   else if(pltType == "list"){
     x3pPlt[[1]] <- x3pPlt[[1]] +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = firstCol,
-                                       y = firstRow,angle = 0,
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = firstCol,
-                                       y = firstRow,
-                                       angle = pi/2,
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = lastCol,
-                                       y = lastRow,angle = pi,
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p1_cellGrid,
-                          ggplot2::aes(x = lastCol,
-                                       y = lastRow,
-                                       angle = 3*pi/2,
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::scale_colour_manual(values = cell.colors) +
+      ggnewscale::new_scale_fill() +
+      ggplot2::geom_polygon(data = x3p1_cellGrid,
+                            mapping = ggplot2::aes(x = x,
+                                                   y = y,
+                                                   group = cellNum,
+                                                   fill = cmc),
+                            alpha = .3,
+                            size = 2) +
+      ggplot2::scale_colour_manual(values = cell.colors,
+                                   aesthetics = c("fill","colour")) +
       ggplot2::geom_text(data = x3p1_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3)
+                         size = 3) +
+      ggplot2::guides(colour = "legend")
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = bottomLeftCorner_col,
-                                       y = bottomLeftCorner_row,
-                                       angle = (theta - median(theta))*(pi/180),
-                                       radius = lastRow - firstRow,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = bottomLeftCorner_col,
-                                       y = bottomLeftCorner_row,
-                                       angle = (pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = topRightCorner_col,
-                                       y = topRightCorner_row,
-                                       angle = (pi + (theta - median(theta))*(pi/180)),
-                                       radius = lastCol - firstCol,
-                                       colour = cmc),
-                          size = .2) +
-      ggplot2::geom_spoke(data = x3p2_cellGrid,
-                          ggplot2::aes(x = topRightCorner_col,
-                                       y = topRightCorner_row,
-                                       angle = (3*pi/2 + (theta - median(theta))*(pi/180)),
-                                       radius = lastRow - firstRow,colour = cmc),
-                          size = .2) +
-      ggplot2::scale_colour_manual(values = cell.colors) +
-      # ggplot2::guides(colour = FALSE) +
+      ggnewscale::new_scale_fill() +
+      ggplot2::geom_polygon(data = x3p2_cellGrid,
+                            mapping = ggplot2::aes(x = x,
+                                                   y = y,
+                                                   group = cellNum,
+                                                   fill = cmc),
+                            alpha = .3,
+                            size = 2) +
+      ggplot2::scale_colour_manual(values = cell.colors,
+                                   aesthetics = c("fill","colour")) +
       ggplot2::geom_text(data = x3p2_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3)
+                         size = 3) +
+      ggplot2::guides(colour = "legend")
   }
 
   return(x3pPlt)
@@ -436,16 +400,16 @@ cmcPlot <- function(x3p1,
 
 
   initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
-    dplyr::mutate(cmc = rep("yes",times = nrow(.)))
+    dplyr::mutate(cmc = rep("Top Vote CMC",times = nrow(.)))
 
   nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     topResultsPerCell() %>%
     dplyr::anti_join(initialCMC,by = "cellNum") %>%
     dplyr::ungroup() %>%
-    dplyr::mutate(cmc = rep("no",times = nrow(.)))
+    dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)))
 
   allInitialCells <- dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
-    dplyr::mutate(cmc = factor(cmc,levels = c("no","yes"))) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Top Vote CMC"))) %>%
     dplyr::left_join(dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
@@ -503,7 +467,7 @@ cmcPlot <- function(x3p1,
       dplyr::select(-cellID) %>%
       dplyr::left_join(x3p1_allCellIDs,by = "cellNum") %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(cmc = rep("yes",times = nrow(.)),
+      dplyr::mutate(cmc = rep("High CMC",times = nrow(.)),
                     cellID = as.character(cellID))
 
     nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
@@ -511,11 +475,11 @@ cmcPlot <- function(x3p1,
       dplyr::anti_join(highCMCs_directionCorrected,
                        by = "cellNum") %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(cmc = rep("no",times = nrow(.)),
+      dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)),
                     cellID = as.character(cellID))
 
     allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
-      dplyr::mutate(cmc = factor(cmc,levels = c("no","yes"))) %>%
+      dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","High CMC"))) %>%
       dplyr::left_join(dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
                          purrr::pmap_dfr(~ {
                            idNum <- ..8 %>%
