@@ -8,23 +8,31 @@
 #' @name preProcess_ransac
 #'
 #' @param surfaceMat a surface matrix representing a breech face impression scan
-#' @param inlierThreshold threshold to declare an observed value close to the
+#' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier". A smaller value will yield a more stable
 #'   estimate.
-#' @param finalSelectionThreshold once the RANSAC plane is fitted based on the
-#'   inlierThreshold, this argument dictates which observations are selected as
+#' @param ransacFinalSelectThresh once the RANSAC plane is fitted based on the
+#'   ransacInlierThresh, this argument dictates which observations are selected as
 #'   the final breech face estimate.
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
 #'
+#' @return List object containing fitted plane (as an lm object) and selected
+#'   breechface marks (matrix of same size as original matrix containing all
+#'   inliers close to fitted plane).
+#'
+#' @note The function will throw an error if the final plane estimate is
+#'   rank-deficient (which is relatively unlikely, but theoretically possible).
+#'   Re-run the function (possibly setting a different seed) if this occurs.
+
 #' @examples
 #' \dontrun{
 #' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
 #'   x3ptools::sample_x3p(m = 2)
 #'
 #' fittedPlane <- raw_x3p$surface.matrix %>%
-#'   preProcess_ransac(inlierThreshold = 10^(-5),
-#'                     finalSelectionThreshold = 2*10^(-5),
+#'   preProcess_ransac(ransacInlierThresh = 10^(-5),
+#'                     ransacFinalSelectThresh = 2*10^(-5),
 #'                     iters = 150)
 #' }
 #'
@@ -35,9 +43,9 @@
 #' @importFrom stats lm predict
 
 preProcess_ransac <- function(surfaceMat,
-                              inlierThreshold = 1e-5,
-                              finalSelectionThreshold = 2*(1e-5),
-                              iters = 150) {
+                              ransacInlierThresh = 1e-6,
+                              ransacFinalSelectThresh = 2e-5,
+                              iters = 300) {
   inlierCount <- 0
 
   # sample from this
@@ -58,7 +66,7 @@ preProcess_ransac <- function(surfaceMat,
     )
 
     errors <- abs(preds - observedPixelLocations$depth)
-    inlierBool <- errors < inlierThreshold
+    inlierBool <- errors < ransacInlierThresh
 
     if (sum(inlierBool) > inlierCount) { #if candidate plane is closer to more observed values, make this the new fitted plane
       finalPlaneErrors <- errors
@@ -72,7 +80,7 @@ preProcess_ransac <- function(surfaceMat,
                          data = observedPixelLocations[inliers, ]) #fit the plane based on what we've identified to be inliers
 
   #Once the plane is fitted based on the inliers identified, we want to take a potentially larger band of observations around the fitted plane than just the inlier threshold:
-  finalInliers <- finalPlaneErrors < finalSelectionThreshold
+  finalInliers <- finalPlaneErrors < ransacFinalSelectThresh
 
   inlierLocations <- cbind(observedPixelLocations$row[finalInliers],
                            observedPixelLocations$col[finalInliers])
@@ -195,17 +203,20 @@ preProcess_cropWS <- function(surfaceMat,
   return(surfaceMatCropped)
 }
 
-#' Detect the radius and center of a firing pin impression circle in a breech face
-#' impression scan using a circular Hough transform.
+#' Detect the radius and center of a firing pin impression circle in a breech
+#' face impression scan using a circular Hough transform.
 #'
 #' @name preProcess_detectFPCircle
 #'
 #' @param surfaceMat a surface matrix representing a breech face impression scan
 #' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
-#' @param aggregation_function function to select initial radius estimate from
-#'   those calculated using fpRadiusGridSearch
-#' @param meshSize size of radius mesh to be used for further refinement of the
-#'   radius estimate obtained from fpRadiusGridSearch
+#'   used to determine where the non-NA pixel count-per-row series attains a
+#'   mode.
+#' @param aggregationFunction function to aggregate all 12 radius estimates
+#'   determined under the initial radius estimation procedure those calculated
+#'   using fpRadiusGridSearch
+#' @param gridGranularity granularity of radius grid used to determine the best
+#'   fitting circle to the surface matrix via the Hough transform method
 #' @param houghScoreQuant quantile cut-off to be used when determining a final
 #'   radius estimate using the score values returned by the imager::hough_circle
 #'   function
@@ -216,11 +227,11 @@ preProcess_cropWS <- function(surfaceMat,
 #'   more robust, multiple radii estimates are considered by rotating the image
 #'   15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
 #'   non-NA pixel count by row/col. Based on the argument passed to
-#'   aggregation_function, these radii estimates are reduced to a single, rough
+#'   aggregationFunction, these radii estimates are reduced to a single, rough
 #'   radius estimate (e.g., minimum was determined to be an effective
 #'   aggregation function in preliminary tests). A grid of radii values centered
 #'   on this estimate are then tested to determine which a final estimate. The
-#'   grid mesh size is determined by the argument meshSize. A hough transform is
+#'   grid mesh size is determined by the argument gridGranularity. A hough transform is
 #'   applied to the breech face impression scan for each radius value in the
 #'   grid. A final estimate is determined by finding the longest consecutive
 #'   sequence of radii values with high associated hough scores. How we
@@ -236,18 +247,19 @@ preProcess_cropWS <- function(surfaceMat,
 utils::globalVariables(c(".","value","x","y","r"))
 
 preProcess_detectFPCircle <- function(surfaceMat,
-                                      aggregation_function = mean,
+                                      aggregationFunction = mean,
                                       smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-                                      meshSize = 1,
+                                      gridSize = 40,
+                                      gridGranularity = 1,
                                       houghScoreQuant = .9){
 
   firingPinRadiusEstimate <- fpRadiusGridSearch(surfaceMat = surfaceMat,smootherSize = smootherSize,
-                                                aggregation_function = aggregation_function) %>%
+                                                aggregationFunction = aggregationFunction) %>%
     .$radiusEstim
 
-  firingPinRadiusGrid <- seq(from = firingPinRadiusEstimate - 20,
-                             to = firingPinRadiusEstimate + 20,
-                             by = meshSize)
+  firingPinRadiusGrid <- seq(from = firingPinRadiusEstimate - floor(gridSize/2),
+                             to = firingPinRadiusEstimate + floor(gridSize/2),
+                             by = gridGranularity)
 
   surfaceMat_cannyEdges <- surfaceMat %>%
     is.na() %>%
@@ -271,7 +283,7 @@ preProcess_detectFPCircle <- function(surfaceMat,
     quantile(houghScoreQuant)
 
   highValue_radii <- surfaceMat_houghCircleLocations$r[which(surfaceMat_houghCircleLocations$value >= q3_htValue)]
-  breaks <- c(0,which(diff(highValue_radii) > meshSize),length(highValue_radii))
+  breaks <- c(0,which(diff(highValue_radii) > gridGranularity),length(highValue_radii))
 
   consecutiveRadii <- sapply(seq(length(breaks) - 1),
                              function(i) highValue_radii[(breaks[i] + 1):breaks[i+1]])
@@ -297,10 +309,13 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'
 #' @param surfaceMat a surface matrix representing a breech face impression scan
 #' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
-#' @param aggregation_function function to select initial radius estimate from
+#' @param aggregationFunction function to select initial radius estimate from
 #'   those calculated using fpRadiusGridSearch
-#' @param meshSize size of radius mesh to be used for further refinement of the
-#'   radius estimate obtained from fpRadiusGridSearch
+#' @param gridSize size of grid, centered on the initial radius estimate, to be
+#'   used to determine the best fitting circle to the surface matrix via the
+#'   Hough transform method
+#' @param gridGranularity granularity of radius grid used to determine the best
+#'   fitting circle to the surface matrix via the Hough transform method
 #' @param houghScoreQuant quantile cut-off to be used when determining a final
 #'   radius estimate using the score values returned by the imager::hough_circle
 #'
@@ -319,25 +334,27 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'   cmcR::preProcess_ransac() %>%
 #'   cmcR::preProcess_levelBF() %>%
 #'   cmcR::preProcess_cropWS() %>%
-#'   cmcR::preProcess_removeFPCircle(aggregation_function = mean,
+#'   cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
 #'                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-#'                                   meshSize = 1,
+#'                                   gridGranularity = 1,
 #'                                   houghScoreQuant = .9)
 #' }
 #'
 #' @export
 
 preProcess_removeFPCircle <- function(surfaceMat,
-                                      aggregation_function = mean,
+                                      aggregationFunction = mean,
                                       smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-                                      meshSize = 1,
+                                      gridSize = 40,
+                                      gridGranularity = 1,
                                       houghScoreQuant = .9){
 
 
   fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = surfaceMat,
-                                                  aggregation_function = aggregation_function,
+                                                  aggregationFunction = aggregationFunction,
                                                   smootherSize = smootherSize,
-                                                  meshSize = meshSize,
+                                                  gridSize = gridSize,
+                                                  gridGranularity = gridGranularity,
                                                   houghScoreQuant = houghScoreQuant)
 
   breechFace_firingPinFiltered <- surfaceMat %>%
@@ -376,7 +393,7 @@ preProcess_removeFPCircle <- function(surfaceMat,
 #'   cmcR::preProcess_cropWS() %>%
 #'   cmcR::preProcess_removeFPCircle() %>%
 #'   cmcR::preProcess_gaussFilter(res = raw_x3p$header.info$incrementY,
-#'                                wavelength = c(16,250),
+#'                                wavelength = c(16,500),
 #'                                filtertype = "bp")
 #' }
 #'
@@ -387,7 +404,7 @@ preProcess_removeFPCircle <- function(surfaceMat,
 
 preProcess_gaussFilter <- function(surfaceMat,
                                    res,
-                                   wavelength = c(16,250),
+                                   wavelength = c(16,500),
                                    filtertype = "bp"){
 
   if(res < .0001){ #rescale surface matrix for intermediate calculations

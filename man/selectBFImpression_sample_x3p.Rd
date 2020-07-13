@@ -11,7 +11,7 @@ x3ptools::sample_x3p to downsample the scan.}
 fitted plane an "inlier" for the RANSAC method}
 
 \item{ransacFinalSelectThresh}{once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
+ransacInlierThreshold, this argument dictates which observations are selected as
 the final breech face estimate.}
 
 \item{ransacIters}{number of candidate planes to fit for the RANSAC method

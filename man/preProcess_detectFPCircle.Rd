@@ -2,18 +2,21 @@
 % Please edit documentation in R/preProcessFunctions_modularized.R
 \name{preProcess_detectFPCircle}
 \alias{preProcess_detectFPCircle}
-\title{Detect the radius and center of a firing pin impression circle in a breech face
-impression scan using a circular Hough transform.}
+\title{Detect the radius and center of a firing pin impression circle in a breech
+face impression scan using a circular Hough transform.}
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
-\item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
+\item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)
+used to determine where the non-NA pixel count-per-row series attains a
+mode.}
 
-\item{aggregation_function}{function to select initial radius estimate from
-those calculated using fpRadiusGridSearch}
+\item{aggregationFunction}{function to aggregate all 12 radius estimates
+determined under the initial radius estimation procedure those calculated
+using fpRadiusGridSearch}
 
-\item{meshSize}{size of radius mesh to be used for further refinement of the
-radius estimate obtained from fpRadiusGridSearch}
+\item{gridGranularity}{granularity of radius grid used to determine the best
+fitting circle to the surface matrix via the Hough transform method}
 
 \item{houghScoreQuant}{quantile cut-off to be used when determining a final
 radius estimate using the score values returned by the imager::hough_circle
@@ -26,11 +29,11 @@ in the non-NA pixel count by row/col within the scan. To make the algorithm
 more robust, multiple radii estimates are considered by rotating the image
 15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
 non-NA pixel count by row/col. Based on the argument passed to
-aggregation_function, these radii estimates are reduced to a single, rough
+aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument meshSize. A hough transform is
+grid mesh size is determined by the argument gridGranularity. A hough transform is
 applied to the breech face impression scan for each radius value in the
 grid. A final estimate is determined by finding the longest consecutive
 sequence of radii values with high associated hough scores. How we

@@ -7,7 +7,7 @@
 findPlaneRansac(
   surfaceMat,
   inlierTreshold = 1e-05,
-  finalSelectionThreshold = 2 * 1e-05,
+  ransacFinalSelectThresh = 2e-05,
   iters = 150,
   ...
 )
@@ -15,14 +15,14 @@ findPlaneRansac(
 \arguments{
 \item{surfaceMat}{matrix of input depths in microns.}
 
-\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
+\item{ransacFinalSelectThresh}{once the RANSAC plane is fitted based on the
+ransacInlierThreshold, this argument dictates which observations are selected as
 the final breech face estimate.}
 
 \item{iters}{number of candidate planes to fit (higher value yields more
 stable breech face estimate)}
 
-\item{inlierThreshold}{threshold to declare an observed value close to the
+\item{ransacInlierThreshold}{threshold to declare an observed value close to the
 fitted plane an "inlier". A smaller value will yield a more stable
 estimate.}
 }

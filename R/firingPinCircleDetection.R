@@ -84,14 +84,14 @@ fpRadiusEstimation <- function(surfaceMat,
 #'
 #' @param surfaceMat a surface matrix representing a breech face impression scan
 #' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
-#' @param aggregation_function function to select initial radius estimate from
+#' @param aggregationFunction function to select initial radius estimate from
 #'   those calculated using fpRadiusGridSearch
 #'
 #' @description This function effectively just repeatedly calls the
 #'   fpRadiusEstimation function to obtain multiple estimates
 #'   of the firing pin radius. It calculates row/col-wise radius estimates for 6
 #'   different rotations of the surface matrix (0, 15, 30, 45, 60, and 75
-#'   degrees). Based on the argument passed to aggregation_function, these 12
+#'   degrees). Based on the argument passed to aggregationFunction, these 12
 #'   radii estimates are reduced to a single, rough radius estimate (e.g.,
 #'   minimum was determined to be an effective aggregation function in
 #'   preliminary tests).
@@ -102,7 +102,7 @@ fpRadiusEstimation <- function(surfaceMat,
 
 fpRadiusGridSearch <- function(surfaceMat,
                                smootherSize,
-                               aggregation_function){
+                               aggregationFunction){
   if(!is.matrix(surfaceMat)){
     surfaceMat <- as.matrix(surfaceMat)
   }
@@ -134,7 +134,7 @@ fpRadiusGridSearch <- function(surfaceMat,
 
   radiusEstim <- estim_rotated %>%
     unlist() %>%
-    aggregation_function(na.rm = TRUE) %>%
+    aggregationFunction(na.rm = TRUE) %>%
     floor()
 
   return(list("radiusEstim" = radiusEstim,

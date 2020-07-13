@@ -22,6 +22,8 @@ that dictates the height value colorscale}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
+
+\item{guide}{internal usage}
 }
 \description{
 Plots the surface matrices in a list of x3p objects. Either

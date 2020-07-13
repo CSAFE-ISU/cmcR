@@ -8,7 +8,7 @@ particular cut-off wavelength.}
 preProcess_gaussFilter(
   surfaceMat,
   res,
-  wavelength = c(16, 250),
+  wavelength = c(16, 500),
   filtertype = "bp"
 )
 }
@@ -40,7 +40,7 @@ raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
   cmcR::preProcess_cropWS() \%>\%
   cmcR::preProcess_removeFPCircle() \%>\%
   cmcR::preProcess_gaussFilter(res = raw_x3p$header.info$incrementY,
-                               wavelength = c(16,250),
+                               wavelength = c(16,500),
                                filtertype = "bp")
 }
 

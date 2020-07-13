@@ -6,11 +6,11 @@
 #' GitHub.
 #'
 #' @param surfaceMat matrix of input depths in microns.
-#' @param inlierThreshold threshold to declare an observed value close to the
+#' @param ransacInlierThreshold threshold to declare an observed value close to the
 #'   fitted plane an "inlier". A smaller value will yield a more stable
 #'   estimate.
-#' @param finalSelectionThreshold once the RANSAC plane is fitted based on the
-#'   inlierThreshold, this argument dictates which observations are selected as
+#' @param ransacFinalSelectThresh once the RANSAC plane is fitted based on the
+#'   ransacInlierThreshold, this argument dictates which observations are selected as
 #'   the final breech face estimate.
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
@@ -36,14 +36,14 @@
 
 findPlaneRansac <- function(surfaceMat,
                             inlierTreshold = 1e-5, # 1 micron
-                            finalSelectionThreshold = 2*1e-5, # 2 micron
+                            ransacFinalSelectThresh = 2e-5, # 2 micron
                             iters = 150,...) {
   assertthat::not_empty(surfaceMat)
   testthat::expect_true(is.matrix(surfaceMat))
   assertthat::is.number(inlierTreshold)
   testthat::expect_gt(inlierTreshold,0)
-  assertthat::is.number(finalSelectionThreshold)
-  testthat::expect_gt(finalSelectionThreshold,0)
+  assertthat::is.number(ransacFinalSelectThresh)
+  testthat::expect_gt(ransacFinalSelectThresh,0)
   assertthat::is.number(iters)
   testthat::expect_gt(iters,0)
 
@@ -88,7 +88,7 @@ findPlaneRansac <- function(surfaceMat,
   #Once the plane is fitted based on the inliers identified, we want to take a
   #potentially larger band of observations around the fitted plane than just the
   #inlier threshold:
-  finalInliers <- finalPlaneErrors < finalSelectionThreshold
+  finalInliers <- finalPlaneErrors < ransacFinalSelectThresh
 
   inlierLocations <- cbind(observedPixelLocations$row[finalInliers],
                            observedPixelLocations$col[finalInliers])
@@ -226,7 +226,7 @@ removeFPImpressionCircle <- function(bfImpression,fpImpressionCircle){
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
 #' @param ransacFinalSelectThresh once the RANSAC plane is fitted based on the
-#'   inlierThreshold, this argument dictates which observations are selected as
+#'   ransacInlierThreshold, this argument dictates which observations are selected as
 #'   the final breech face estimate.
 #' @param ransacIters number of candidate planes to fit for the RANSAC method
 #'   (higher value yields more stable breech face estimate)
@@ -264,13 +264,13 @@ utils::globalVariables("preProcess")
 
 selectBFImpression <- function(x3p_path,
                                ransacInlierThresh = 1e-6,
-                               ransacFinalSelectThresh = 2*1e-5,
+                               ransacFinalSelectThresh = 2e-5,
                                ransacIters = 300,
                                useResiduals = TRUE,
                                croppingThresh = 1,
                                standardizeBF = FALSE,
                                gaussFilterRes = NULL,
-                               gaussFilterWavelength = c(16,250),
+                               gaussFilterWavelength = c(16,500),
                                gaussFilterType = "bp"){
 
   x3p <- x3ptools::read_x3p(x3p_path)
@@ -280,12 +280,12 @@ selectBFImpression <- function(x3p_path,
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ceiling(ransacIters/2)) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #do it again, but with more restrictive thresholds:
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
@@ -305,9 +305,8 @@ selectBFImpression <- function(x3p_path,
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
   fpImpressionCircle <-  preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
-                                                   aggregation_function = mean,
+                                                   aggregationFunction = mean,
                                                    smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                                   meshSize = 1,
                                                    houghScoreQuant = .9)
 
   stopifnot(is.data.frame(fpImpressionCircle), nrow(fpImpressionCircle) == 1)
@@ -360,7 +359,7 @@ selectBFImpression <- function(x3p_path,
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier" for the RANSAC method
 #' @param ransacFinalSelectThresh once the RANSAC plane is fitted based on the
-#'   inlierThreshold, this argument dictates which observations are selected as
+#'   ransacInlierThreshold, this argument dictates which observations are selected as
 #'   the final breech face estimate.
 #' @param ransacIters number of candidate planes to fit for the RANSAC method
 #'   (higher value yields more stable breech face estimate)
@@ -411,7 +410,7 @@ utils::globalVariables(".")
 
 selectBFImpression_sample_x3p <- function(x3p_path,
                                           ransacInlierThresh = 1e-6,
-                                          ransacFinalSelectThresh = 2*1e-5,
+                                          ransacFinalSelectThresh = 2e-5,
                                           ransacIters = 300,
                                           useResiduals = TRUE,
                                           croppingThresh = 1,
@@ -421,7 +420,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
                                           offset = 0,
                                           offsetY = offset,
                                           gaussFilterRes = NULL,
-                                          gaussFilterWavelength = c(16,250),
+                                          gaussFilterWavelength = c(16,500),
                                           gaussFilterType = "bp"){
 
   x3p <- x3p_path %>%
@@ -437,7 +436,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ceiling(ransacIters/2)) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
@@ -445,7 +444,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
     levelBFImpression(useResiduals = useResiduals) %>%
     #do it again, but with more restrictive thresholds:
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #also crop out whitespace on exterior of cartridge case scan
@@ -462,9 +461,8 @@ selectBFImpression_sample_x3p <- function(x3p_path,
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
   fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
-                                                  aggregation_function = mean,
+                                                  aggregationFunction = mean,
                                                   smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                                  meshSize = 1,
                                                   houghScoreQuant = .9)
 
   stopifnot(is.data.frame(fpImpressionCircle),
@@ -581,7 +579,7 @@ selectBFImpression_sample_x3p <- function(x3p_path,
 
 selectBFImpression_resize <- function(x3p_path,
                                       ransacInlierThresh = 1e-6,
-                                      ransacFinalSelectThresh = 2*1e-5,
+                                      ransacFinalSelectThresh = 2e-5,
                                       ransacIters = 300,
                                       useResiduals = TRUE,
                                       croppingThresh = 1,
@@ -591,7 +589,7 @@ selectBFImpression_resize <- function(x3p_path,
                                       interpolation_type = 1,
                                       boundary_conditions = 0,
                                       gaussFilterRes = NULL,
-                                      gaussFilterWavelength = c(16,250),
+                                      gaussFilterWavelength = c(16,500),
                                       gaussFilterType = "bp"){
 
   x3p <- x3p_path %>%
@@ -610,12 +608,12 @@ selectBFImpression_resize <- function(x3p_path,
   #method
   bfImpression_ransacSelected <- x3p$surface.matrix %>%
     findPlaneRansac(inlierTreshold = 10*ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ceiling(ransacIters/2)) %>%
     levelBFImpression(useResiduals = useResiduals) %>%
     #do it again, but with more restrictive thresholds:
     findPlaneRansac(inlierTreshold = ransacInlierThresh,
-                    finalSelectionThreshold = ransacFinalSelectThresh,
+                    ransacFinalSelectThresh = ransacFinalSelectThresh,
                     iters = ransacIters) %>%
     #either returns residuals between fitted RANSAC plane and observed cartridge
     #case scan values or just returns the raw values of the estimated bf
@@ -635,9 +633,8 @@ selectBFImpression_resize <- function(x3p_path,
   #circle. The following returns the estimated center and radius of the firing
   #pin impression circle:
   fpImpressionCircle <- preProcess_detectFPCircle(surfaceMat = bfImpression_ransacSelected,
-                                                  aggregation_function = mean,
+                                                  aggregationFunction = mean,
                                                   smootherSize = 2*round((.1*nrow(bfImpression_ransacSelected)/2)) + 1,
-                                                  meshSize = 1,
                                                   houghScoreQuant = .9)
 
   stopifnot(is.data.frame(fpImpressionCircle),

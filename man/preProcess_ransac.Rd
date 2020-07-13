@@ -6,24 +6,29 @@
 \usage{
 preProcess_ransac(
   surfaceMat,
-  inlierThreshold = 1e-05,
-  finalSelectionThreshold = 2 * (1e-05),
-  iters = 150
+  ransacInlierThresh = 1e-06,
+  ransacFinalSelectThresh = 2e-05,
+  iters = 300
 )
 }
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
-\item{inlierThreshold}{threshold to declare an observed value close to the
+\item{ransacInlierThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier". A smaller value will yield a more stable
 estimate.}
 
-\item{finalSelectionThreshold}{once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
+\item{ransacFinalSelectThresh}{once the RANSAC plane is fitted based on the
+ransacInlierThresh, this argument dictates which observations are selected as
 the final breech face estimate.}
 
 \item{iters}{number of candidate planes to fit (higher value yields more
 stable breech face estimate)}
+}
+\value{
+List object containing fitted plane (as an lm object) and selected
+breechface marks (matrix of same size as original matrix containing all
+inliers close to fitted plane).
 }
 \description{
 Given input depths (in microns), find best-fitting plane using
@@ -31,14 +36,19 @@ RANSAC. This should be the plane that the breechface marks are on. Adapted
 from cartridges3D::findPlaneRansac function. This a modified version of the
 findPlaneRansac function available in the cartridges3D package on GitHub.
 }
+\note{
+The function will throw an error if the final plane estimate is
+rank-deficient (which is relatively unlikely, but theoretically possible).
+Re-run the function (possibly setting a different seed) if this occurs.
+}
 \examples{
 \dontrun{
 raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
   x3ptools::sample_x3p(m = 2)
 
 fittedPlane <- raw_x3p$surface.matrix \%>\%
-  preProcess_ransac(inlierThreshold = 10^(-5),
-                    finalSelectionThreshold = 2*10^(-5),
+  preProcess_ransac(ransacInlierThresh = 10^(-5),
+                    ransacFinalSelectThresh = 2*10^(-5),
                     iters = 150)
 }
 

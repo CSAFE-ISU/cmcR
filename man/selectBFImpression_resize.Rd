@@ -8,7 +8,7 @@ imager::resize to resize the scan.}
 selectBFImpression_resize(
   x3p_path,
   ransacInlierThresh = 1e-06,
-  ransacFinalSelectThresh = 2 * 1e-05,
+  ransacFinalSelectThresh = 2e-05,
   ransacIters = 300,
   useResiduals = TRUE,
   croppingThresh = 1,
@@ -18,7 +18,7 @@ selectBFImpression_resize(
   interpolation_type = 1,
   boundary_conditions = 0,
   gaussFilterRes = NULL,
-  gaussFilterWavelength = c(16, 250),
+  gaussFilterWavelength = c(16, 500),
   gaussFilterType = "bp"
 )
 }

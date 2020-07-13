@@ -7,22 +7,27 @@ firing pin impression circle}
 \usage{
 preProcess_removeFPCircle(
   surfaceMat,
-  aggregation_function = mean,
+  aggregationFunction = mean,
   smootherSize = 2 * round((0.1 * nrow(surfaceMat)/2)) + 1,
-  meshSize = 1,
+  gridSize = 40,
+  gridGranularity = 1,
   houghScoreQuant = 0.9
 )
 }
 \arguments{
 \item{surfaceMat}{a surface matrix representing a breech face impression scan}
 
-\item{aggregation_function}{function to select initial radius estimate from
+\item{aggregationFunction}{function to select initial radius estimate from
 those calculated using fpRadiusGridSearch}
 
 \item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)}
 
-\item{meshSize}{size of radius mesh to be used for further refinement of the
-radius estimate obtained from fpRadiusGridSearch}
+\item{gridSize}{size of grid, centered on the initial radius estimate, to be
+used to determine the best fitting circle to the surface matrix via the
+Hough transform method}
+
+\item{gridGranularity}{granularity of radius grid used to determine the best
+fitting circle to the surface matrix via the Hough transform method}
 
 \item{houghScoreQuant}{quantile cut-off to be used when determining a final
 radius estimate using the score values returned by the imager::hough_circle}
@@ -47,9 +52,9 @@ raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
   cmcR::preProcess_ransac() \%>\%
   cmcR::preProcess_levelBF() \%>\%
   cmcR::preProcess_cropWS() \%>\%
-  cmcR::preProcess_removeFPCircle(aggregation_function = mean,
+  cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-                                  meshSize = 1,
+                                  gridGranularity = 1,
                                   houghScoreQuant = .9)
 }
 
