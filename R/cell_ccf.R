@@ -297,16 +297,22 @@ calcRawCorr <- function(cell,
   cell <- (cell - m1)/sd1
   region <- (region - m2)/sd2
 
-  regionCenter <- floor(dim(region)/2)
+  #pad the region as it was when the CCF was calculated using the FFT method:
+  regionPadded <- matrix(NA,
+                         nrow = nrow(cell) + nrow(region) - 1,
+                         ncol = ncol(cell) + ncol(region) - 1)
+  regionPadded[1:nrow(region),1:ncol(region)] <- region
 
-  alignedCenter <- regionCenter - c(dy,dx)
+  regionCenter <- floor(dim(regionPadded)/2)
+
+  alignedCenter <- regionCenter - c(dy + floor(nrow(cell)/2) + 1,dx + floor(ncol(cell)/2) + 1)
 
   alignedRows <- c((alignedCenter[1] - floor(dim(cell)[1]/2)),(alignedCenter[1] + floor(dim(cell)[1]/2)))
 
   alignedCols <- c((alignedCenter[2] - floor(dim(cell)[2]/2)),(alignedCenter[2] + floor(dim(cell)[2]/2)))
 
-  regionCroppedInitial <- region[max(1,alignedRows[1]):min(nrow(region),alignedRows[2]),
-                                 max(1,alignedCols[1]):min(ncol(region),alignedCols[2])]
+  regionCroppedInitial <- regionPadded[max(1,alignedRows[1]):min(nrow(region),alignedRows[2]),
+                                       max(1,alignedCols[1]):min(ncol(region),alignedCols[2])]
 
   #build-in some contingencies in case the regionCropped isn't same size as
   #the cell. If the dimensions don't agree, then we need to consider copies
@@ -321,25 +327,33 @@ calcRawCorr <- function(cell,
       rowsToPad <- -1*alignedRows[1] + 1
 
       regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
-                                    regionCroppedInitial)
+                                         regionCroppedInitial)
+
+      regionCroppedList$initial <- regionCroppedInitial
     }
     if(alignedRows[2] > nrow(region)){
       rowsToPad <- alignedRows[2] - nrow(region)
 
       regionCroppedInitial <- rbind(regionCroppedInitial,
-                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
+                                         matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
+
+      regionCroppedList$initial <- regionCroppedInitial
     }
     if(alignedCols[1] < 1){
       colsToPad <- -1*alignedCols[1] + 1
 
       regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
-                                    regionCroppedInitial)
+                                         regionCroppedInitial)
+
+      regionCroppedList$initial <- regionCroppedInitial
     }
     if(alignedCols[2] > ncol(region)){
       colsToPad <- alignedCols[2] - ncol(region)
 
       regionCroppedInitial <- cbind(regionCroppedInitial,
-                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
+                                         matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
+
+      regionCroppedList$initial <- regionCroppedInitial
     }
 
     #two copies if rows are off
@@ -400,7 +414,7 @@ calcRawCorr <- function(cell,
       regionCroppedList$colPost <- regionCroppedColPost
     }
 
-    #4 different copies if both dimensions are off
+    #4 different copies if both dimensions are too large
     if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) > nrow(cell)){
       colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
 
@@ -419,9 +433,9 @@ calcRawCorr <- function(cell,
                                                     -(ncol(regionCroppedInitial) - colsToCrop)]
 
       regionCroppedList$bothPre <- regionCroppedBothPre
-      regionCroppedList$RowPost <- regionCroppedRowPost
+      regionCroppedList$rowPost <- regionCroppedRowPost
       regionCroppedList$colPost <- regionCroppedColPost
-      regionCroppedList$BothPost <- regionCroppedBothPost
+      regionCroppedList$bothPost <- regionCroppedBothPost
     }
 
     #4 different copies if both dimensions are too small
@@ -471,9 +485,9 @@ calcRawCorr <- function(cell,
                                             ncol = ncol(regionCroppedBothPost)))
 
       regionCroppedList$bothPre <- regionCroppedBothPre
-      regionCroppedList$RowPost <- regionCroppedRowPost
+      regionCroppedList$rowPost <- regionCroppedRowPost
       regionCroppedList$colPost <- regionCroppedColPost
-      regionCroppedList$BothPost <- regionCroppedBothPost
+      regionCroppedList$bothPost <- regionCroppedBothPost
     }
   }
 
@@ -782,13 +796,15 @@ cellCCF <- function(x3p1,
                                                              sd2 = ..8,
                                                              tieBreaker = rawCorrTieBreaker,
                                                              use = use)),
-                    theta = rep(theta,times = nrow(.)))
+                    theta = rep(theta,times = nrow(.)),
+                    nonMissingProportion = purrr::map_dbl(mat1_splitFiltered,
+                                                          .f = ~ (sum(!is.na(.)))/prod(dim(.))))
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy,theta)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy,theta,nonMissingProportion)) #rearrange columns in allResults
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -895,28 +911,28 @@ cellCCF_bothDirections <- function(x3p1,
 
 
   comparison_1to2 <- cellCCF(x3p1 = x3p1,
-                                   x3p2 = x3p2,
-                                   thetas = thetas,
-                                   cellNumHoriz = cellNumHoriz,
-                                   cellNumVert = cellNumVert,
-                                   regionToCellProp = regionToCellProp,
-                                   minObservedProp = minObservedProp,
-                                   rawCorrTieBreaker = rawCorrTieBreaker,
-                                   use = use,
-                                   centerCell = centerCell,
-                                   scaleCell = scaleCell)
+                             x3p2 = x3p2,
+                             thetas = thetas,
+                             cellNumHoriz = cellNumHoriz,
+                             cellNumVert = cellNumVert,
+                             regionToCellProp = regionToCellProp,
+                             minObservedProp = minObservedProp,
+                             rawCorrTieBreaker = rawCorrTieBreaker,
+                             use = use,
+                             centerCell = centerCell,
+                             scaleCell = scaleCell)
 
   comparison_2to1 <- cellCCF(x3p1 = x3p2,
-                                   x3p2 = x3p1,
-                                   thetas = thetas,
-                                   cellNumHoriz = cellNumHoriz,
-                                   cellNumVert = cellNumVert,
-                                   regionToCellProp = regionToCellProp,
-                                   minObservedProp = minObservedProp,
-                                   rawCorrTieBreaker = rawCorrTieBreaker,
-                                   use = use,
-                                   centerCell = centerCell,
-                                   scaleCell = scaleCell)
+                             x3p2 = x3p1,
+                             thetas = thetas,
+                             cellNumHoriz = cellNumHoriz,
+                             cellNumVert = cellNumVert,
+                             regionToCellProp = regionToCellProp,
+                             minObservedProp = minObservedProp,
+                             rawCorrTieBreaker = rawCorrTieBreaker,
+                             use = use,
+                             centerCell = centerCell,
+                             scaleCell = scaleCell)
 
   return(list("comparison_1to2" = comparison_1to2,
               "comparison_2to1" = comparison_2to1))

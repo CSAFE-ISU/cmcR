@@ -439,7 +439,7 @@ cmcPlot <- function(x3p1,
 
   highCMCPlt <- NULL #missing by default unless high CMCs exist:
 
-  if(!purrr::is_empty(cmcFilter_improved_output$highCMC)){
+  if(nrow(cmcFilter_improved_output$highCMCs) > 0){
 
     x3p1_allCellIDs <- cellDivision(x3p1$surface.matrix,
                                     cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
@@ -464,14 +464,15 @@ cmcPlot <- function(x3p1,
                                    yes = -theta,
                                    no = theta)) %>%
       dplyr::arrange(cellNum) %>%
-      dplyr::select(-cellID) %>%
+      dplyr::select(-c(cellID,nonMissingProportion)) %>%
       dplyr::left_join(x3p1_allCellIDs,by = "cellNum") %>%
       dplyr::ungroup() %>%
       dplyr::mutate(cmc = rep("High CMC",times = nrow(.)),
                     cellID = as.character(cellID))
 
-    nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults %>%
+    nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults  %>%
       topResultsPerCell() %>%
+      dplyr::select(-nonMissingProportion) %>%
       dplyr::anti_join(highCMCs_directionCorrected,
                        by = "cellNum") %>%
       dplyr::ungroup() %>%

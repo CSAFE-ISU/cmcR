@@ -36,8 +36,8 @@ filterViaFFT <- function(A, B) {
 
   C <- circshift(fftshift(C), round2((n - m)/2, 0))
 
-  half_n <- round2(n/2, 0)
-  C <- C[half_n[1]:(half_n[1] + m[1] - 1), half_n[2]:(half_n[2] + m[2] - 1)]
+  half_m <- round2(m/2, 0)
+  C <- C[half_m[1]:(half_m[1] + n[1] - 1), half_m[2]:(half_m[2] + n[2] - 1)]
   if (all.equal(c(Im(C)), rep(0, prod(dim(C)))) == FALSE) {
     stop("Non-zero imaginary part")
   }
@@ -124,7 +124,7 @@ ccfComparison <- function(im1, im2) {
   resp <- filterViaFFT(im1, im2) / (sqrt(sum(im1^2)) * sqrt(sum(im2^2)))
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]
-  d_offset <- floor(dim(im1)/2)
+  d_offset <- floor(dim(im2)/2)
 
   # dx <- tmp[["col"]] - d_offset[2] - 1
   # dy <- -(tmp[["row"]] - d_offset[1] - 1)
