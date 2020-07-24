@@ -128,7 +128,7 @@ rotateSurfaceMatrix <- function(surfaceMat,
 #' @keywords internal
 
 checkForBreechface <- function(cell,
-                               minObservedProp = .15){
+                               minObservedProp = .1){
   containsBreechfaceBool <- (sum(!is.na(cell)) > minObservedProp*length(as.vector(cell)))
   return(containsBreechfaceBool)
 }
@@ -327,7 +327,7 @@ calcRawCorr <- function(cell,
       rowsToPad <- -1*alignedRows[1] + 1
 
       regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
-                                         regionCroppedInitial)
+                                    regionCroppedInitial)
 
       regionCroppedList$initial <- regionCroppedInitial
     }
@@ -335,7 +335,7 @@ calcRawCorr <- function(cell,
       rowsToPad <- alignedRows[2] - nrow(region)
 
       regionCroppedInitial <- rbind(regionCroppedInitial,
-                                         matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
+                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
 
       regionCroppedList$initial <- regionCroppedInitial
     }
@@ -343,7 +343,7 @@ calcRawCorr <- function(cell,
       colsToPad <- -1*alignedCols[1] + 1
 
       regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
-                                         regionCroppedInitial)
+                                    regionCroppedInitial)
 
       regionCroppedList$initial <- regionCroppedInitial
     }
@@ -351,7 +351,7 @@ calcRawCorr <- function(cell,
       colsToPad <- alignedCols[2] - ncol(region)
 
       regionCroppedInitial <- cbind(regionCroppedInitial,
-                                         matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
+                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
 
       regionCroppedList$initial <- regionCroppedInitial
     }
@@ -505,7 +505,7 @@ calcRawCorr <- function(cell,
 
   maxCorr <- as.numeric(corrVals[tieBreaker(corrVals)])
   if(length(maxCorr) == 0){
-    return(NA)
+    return(numeric(0))
   }
   else(return(maxCorr))
 }
@@ -534,17 +534,6 @@ calcRawCorr <- function(cell,
 #' @param minObservedProp the minimum proportion of a cell that needs to contain
 #'   observed (i.e., non-NA) values for it to be included in the CCF calculation
 #'   procedure.
-#' @param rawCorrTieBreaker the way in which the "raw" correlation (see
-#'   description) is calculated may require slight padding/cropping of the
-#'   mat1-sized matrix extracted from mat2 to make their dimensions equal. This
-#'   padding/cropping can occur to the initial or final rows/cols in the matrix,
-#'   without a clear way to determine which is "correct." As such, all possible
-#'   combinations of pre/post padding/cropping are considered (only if
-#'   necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
-#'   be used to determine which yields the lowest/highest correlation with matt1
-#'   (using rawCorrTieBreaker = which.min or which.max, respectively).
-#' @param use argument to be passed to the cor function. Dictates how NAs are
-#'   dealt with in computing the correlation.
 #' @param centerCell  dictates if cell is to be shifted prior to CCF
 #'   calculation. Default is that no shifting is performed. If set to
 #'   "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
@@ -555,6 +544,33 @@ calcRawCorr <- function(cell,
 #'   cell is divided by the standard deviation of the whole matrix. If set to
 #'   "individualCell", then each cell is divided by its particular standard
 #'   deviation.
+#' @param ccfMethod dictates which of 3 different methods are used to calculate
+#'   a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+#'   optimal translation values to align each cell within in its associated
+#'   region by using Cross-Correlation theorem + FFT algorithm and then
+#'   calculates the pairwise-complete correlation between the cell and a
+#'   cell-sized matrix extracted from the paired region. "imager" uses the
+#'   normalized imager::correlate function and uses the max CCF value
+#'   calculated. "bruteForceReweighted" calculates the pairwise-complete
+#'   correlation between a cell and every possible cell-sized matrix that could
+#'   be extracted from its paired region (and is thus computationally very
+#'   costly). For each cell/region pair, these correlation values are
+#'   re-weighted based on the number of non-missing values used to calculate
+#'   them by the following: nonMissingCount*cor/max(nonMissingCount).
+#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fftThenPairwise".
+#'   The way in which the CCF (see ccfMethod) is calculated may require slight
+#'   padding/cropping of the mat1-sized matrix extracted from mat2 to make their
+#'   dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
+#'   4 pixels). This padding/cropping can occur to the initial or final
+#'   rows/cols in the matrix, without a clear way to determine which is
+#'   "correct." As such, all possible combinations of pre/post padding/cropping
+#'   are considered (only if necessary). To determine a final mat1-sized matrix,
+#'   rawCorrTieBreaker can be used to determine which yields the lowest/highest
+#'   correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
+#'   respectively).
+#' @param use Only applicable if ccfMethod == "fftThenPairwise". argument to be
+#'   passed to the cor function. Dictates how NAs are dealt with in computing
+#'   the correlation.
 #'
 #' @return The list allResults contains the CCF values, horizontal, and vertical
 #'   translations calculated for each cell, for each rotation value. The data
@@ -570,24 +586,11 @@ calcRawCorr <- function(cell,
 #'   into pairwise disjoint cells. mat2, the surface matrix of a breech face
 #'   impression scan to be compared to mat1, is also broken up into cells
 #'   centered at the same location as those in mat1. However, the cells in mat2
-#'   are larger than those in mat1 (typically 4 times the size except on the
-#'   border of mat2).
+#'   are larger than those in mat1 (typically 9 times the size except on the
+#'   border of mat2). See ccfMethod argument details for information regarding
+#'   how the CCF is calculated.
 #'
-#'   The cross-correlation function (CCF) is then calculated between each cell
-#'   in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
-#'   For each mat1, mat2 cell pair, the maximum CCF value as well as the
-#'   necessary horizontal and vertical translations to align the mat1 cell with
-#'   the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
-#'   max CCF values aren't necessarily reliable estimates of the true similarity
-#'   between mat1 and mat2 (since NAs need to be replaced prior to calculation).
-#'   As such, a "raw" correlation is calculated by extracting from mat2 a
-#'   mat1-sized matrix based on the dx, dy translation values obtained from the
-#'   FFT-based CCF method. Rather than replacing NA values, these two matrices
-#'   of equivalent dimension are turned into vectors and the pairwise-complete
-#'   observation correlation (in which only non-NA pairs are considered) is
-#'   calculated.
-#'
-#'   mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+#'   mat2 is then rotated by some amount (say, 3 degrees) and the process of
 #'   dividing mat2 into cells and calculating the max CCF for each cell in mat1
 #'   is repeated. The rotations performed on mat2 are dictated by the value(s)
 #'   passed to the theta argument.
@@ -607,11 +610,12 @@ cellCCF <- function(x3p1,
                     cellNumHoriz = 8,
                     cellNumVert = cellNumHoriz,
                     regionToCellProp = 4,
-                    minObservedProp = .15,
-                    rawCorrTieBreaker = which.max,
-                    use = "pairwise.complete.obs",
+                    minObservedProp = .1,
                     centerCell = "individualCell",
-                    scaleCell = "individualCell"){
+                    scaleCell = "individualCell",
+                    ccfMethod = "fftThenPairwise",
+                    rawCorrTieBreaker = which.max,
+                    use = "pairwise.complete.obs"){
   #Needed tests: mat1 and mat2 must be matrices thetas, cellNumHoriz, and
   #cellNumVert should be integers (cellNumHoriz and cellNumVert would optimally be
   #equal - maybe print a warning if not?)
@@ -776,35 +780,41 @@ cellCCF <- function(x3p1,
     #calculate the correlation of each cell pair
     ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
                                  .y = mat2_splitShifted,
-                                 .f = ~ data.frame(purrr::flatten(ccfComparison(.x,.y)))) %>% #returns a nested list of ccf,dx,dy values
+                                 .f = ~ data.frame(purrr::flatten(ccfComparison(.x,.y,ccfMethod = ccfMethod)))) %>% #returns a nested list of ccf,dx,dy values
       dplyr::bind_cols(cellIDdf_filtered,.) %>%
-      dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
-                                                    mat2_splitFiltered,
-                                                    .$dx,
-                                                    .$dy,
-                                                    m1,
-                                                    m2,
-                                                    sd1,
-                                                    sd2),
-                                          .f = ~ calcRawCorr(cell = ..1,
-                                                             region = ..2,
-                                                             dx = ..3,
-                                                             dy = ..4,
-                                                             m1 = ..5,
-                                                             m2 = ..6,
-                                                             sd1 = ..7,
-                                                             sd2 = ..8,
-                                                             tieBreaker = rawCorrTieBreaker,
-                                                             use = use)),
-                    theta = rep(theta,times = nrow(.)),
+      dplyr::mutate(theta = rep(theta,times = nrow(.)),
                     nonMissingProportion = purrr::map_dbl(mat1_splitFiltered,
                                                           .f = ~ (sum(!is.na(.)))/prod(dim(.))))
+
+    if(ccfMethod == "fftThenPairwise"){
+      ccfValues <- ccfValues %>%
+        dplyr::rename(fft.ccf = ccf) %>%
+        dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
+                                                                   mat2_splitFiltered,
+                                                                   .$dx,
+                                                                   .$dy,
+                                                                   m1,
+                                                                   m2,
+                                                                   sd1,
+                                                                   sd2),
+                                                         .f = ~ calcRawCorr(cell = ..1,
+                                                                            region = ..2,
+                                                                            dx = ..3,
+                                                                            dy = ..4,
+                                                                            m1 = ..5,
+                                                                            m2 = ..6,
+                                                                            sd1 = ..7,
+                                                                            sd2 = ..8,
+                                                                            tieBreaker = rawCorrTieBreaker,
+                                                                            use = use)))
+    }
 
     allResults[paste0(theta)][[1]] <- ccfValues
   }
 
+  #rearrange columns in allResults for readability
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,ccf,fft.ccf,dx,dy,theta,nonMissingProportion)) #rearrange columns in allResults
+    purrr::map(~ dplyr::select(.,cellNum,cellID,dplyr::everything()))
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -826,7 +836,8 @@ cellCCF <- function(x3p1,
                     "rawCorrTieBreaker" = rawCorrTieBreaker,
                     "use" = use,
                     "mat1ScaleFactor" = sd1,
-                    "mat2ScaleFactor" = sd2),
+                    "mat2ScaleFactor" = sd2,
+                    "ccfMethod" = ccfMethod),
     "ccfResults" = allResults
   ))
 }
@@ -856,17 +867,6 @@ cellCCF <- function(x3p1,
 #' @param minObservedProp the minimum proportion of a cell that needs to contain
 #'   observed (i.e., non-NA) values for it to be included in the CCF calculation
 #'   procedure.
-#' @param rawCorrTieBreaker the way in which the "raw" correlation (see
-#'   description) is calculated may require slight padding/cropping of the
-#'   mat1-sized matrix extracted from mat2 to make their dimensions equal. This
-#'   padding/cropping can occur to the initial or final rows/cols in the matrix,
-#'   without a clear way to determine which is "correct." As such, all possible
-#'   combinations of pre/post padding/cropping are considered (only if
-#'   necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
-#'   be used to determine which yields the lowest/highest correlation with matt1
-#'   (using rawCorrTieBreaker = which.min or which.max, respectively).
-#' @param use argument to be passed to the cor function. Dictates how NAs are
-#'   dealt with in computing the correlation.
 #' @param centerCell  dictates if cell is to be shifted prior to CCF
 #'   calculation. Default is that no shifting is performed. If set to
 #'   "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
@@ -877,6 +877,33 @@ cellCCF <- function(x3p1,
 #'   cell is divided by the standard deviation of the whole matrix. If set to
 #'   "individualCell", then each cell is divided by its particular standard
 #'   deviation.
+#' @param ccfMethod dictates which of 3 different methods are used to calculate
+#'   a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+#'   optimal translation values to align each cell within in its associated
+#'   region by using Cross-Correlation theorem + FFT algorithm and then
+#'   calculates the pairwise-complete correlation between the cell and a
+#'   cell-sized matrix extracted from the paired region. "imager" uses the
+#'   normalized imager::correlate function and uses the max CCF value
+#'   calculated. "bruteForceReweighted" calculates the pairwise-complete
+#'   correlation between a cell and every possible cell-sized matrix that could
+#'   be extracted from its paired region (and is thus computationally very
+#'   costly). For each cell/region pair, these correlation values are
+#'   re-weighted based on the number of non-missing values used to calculate
+#'   them by the following: nonMissingCount*cor/max(nonMissingCount).
+#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fftThenPairwise".
+#'   The way in which the CCF (see ccfMethod) is calculated may require slight
+#'   padding/cropping of the mat1-sized matrix extracted from mat2 to make their
+#'   dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
+#'   4 pixels). This padding/cropping can occur to the initial or final
+#'   rows/cols in the matrix, without a clear way to determine which is
+#'   "correct." As such, all possible combinations of pre/post padding/cropping
+#'   are considered (only if necessary). To determine a final mat1-sized matrix,
+#'   rawCorrTieBreaker can be used to determine which yields the lowest/highest
+#'   correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
+#'   respectively).
+#' @param use Only applicable if ccfMethod == "fftThenPairwise". argument to be
+#'   passed to the cor function. Dictates how NAs are dealt with in computing
+#'   the correlation.
 #'
 #' @examples
 #' \dontrun{
@@ -902,11 +929,12 @@ cellCCF_bothDirections <- function(x3p1,
                                    cellNumHoriz = 8,
                                    cellNumVert = cellNumHoriz,
                                    regionToCellProp = 4,
-                                   minObservedProp = .15,
-                                   rawCorrTieBreaker = which.max,
-                                   use = "pairwise.complete.obs",
+                                   minObservedProp = .1,
                                    centerCell = "individualCell",
-                                   scaleCell = "individualCell"){
+                                   scaleCell = "individualCell",
+                                   ccfMethod = "fftThemPairwise",
+                                   rawCorrTieBreaker = which.max,
+                                   use = "pairwise.complete.obs"){
 
 
 
@@ -920,7 +948,8 @@ cellCCF_bothDirections <- function(x3p1,
                              rawCorrTieBreaker = rawCorrTieBreaker,
                              use = use,
                              centerCell = centerCell,
-                             scaleCell = scaleCell)
+                             scaleCell = scaleCell,
+                             ccfMethod = ccfMethod)
 
   comparison_2to1 <- cellCCF(x3p1 = x3p2,
                              x3p2 = x3p1,
@@ -932,7 +961,8 @@ cellCCF_bothDirections <- function(x3p1,
                              rawCorrTieBreaker = rawCorrTieBreaker,
                              use = use,
                              centerCell = centerCell,
-                             scaleCell = scaleCell)
+                             scaleCell = scaleCell,
+                             ccfMethod = ccfMethod)
 
   return(list("comparison_1to2" = comparison_1to2,
               "comparison_2to1" = comparison_2to1))

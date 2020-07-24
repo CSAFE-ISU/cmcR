@@ -11,11 +11,12 @@ cellCCF_bothDirections(
   cellNumHoriz = 8,
   cellNumVert = cellNumHoriz,
   regionToCellProp = 4,
-  minObservedProp = 0.15,
-  rawCorrTieBreaker = which.max,
-  use = "pairwise.complete.obs",
+  minObservedProp = 0.1,
   centerCell = "individualCell",
-  scaleCell = "individualCell"
+  scaleCell = "individualCell",
+  ccfMethod = "fftThemPairwise",
+  rawCorrTieBreaker = which.max,
+  use = "pairwise.complete.obs"
 )
 }
 \arguments{
@@ -43,19 +44,6 @@ the x3p2 regions will be 4 times times larger (sidelengths multiplied by
 observed (i.e., non-NA) values for it to be included in the CCF calculation
 procedure.}
 
-\item{rawCorrTieBreaker}{the way in which the "raw" correlation (see
-description) is calculated may require slight padding/cropping of the
-mat1-sized matrix extracted from mat2 to make their dimensions equal. This
-padding/cropping can occur to the initial or final rows/cols in the matrix,
-without a clear way to determine which is "correct." As such, all possible
-combinations of pre/post padding/cropping are considered (only if
-necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
-be used to determine which yields the lowest/highest correlation with matt1
-(using rawCorrTieBreaker = which.min or which.max, respectively).}
-
-\item{use}{argument to be passed to the cor function. Dictates how NAs are
-dealt with in computing the correlation.}
-
 \item{centerCell}{dictates if cell is to be shifted prior to CCF
 calculation. Default is that no shifting is performed. If set to
 "wholeMatrix", then each cell is subracted by the mean of the whole matrix.
@@ -67,6 +55,36 @@ Default is that no scaling is performed. If set to "wholeMatrix", then each
 cell is divided by the standard deviation of the whole matrix. If set to
 "individualCell", then each cell is divided by its particular standard
 deviation.}
+
+\item{ccfMethod}{dictates which of 3 different methods are used to calculate
+a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+optimal translation values to align each cell within in its associated
+region by using Cross-Correlation theorem + FFT algorithm and then
+calculates the pairwise-complete correlation between the cell and a
+cell-sized matrix extracted from the paired region. "imager" uses the
+normalized imager::correlate function and uses the max CCF value
+calculated. "bruteForceReweighted" calculates the pairwise-complete
+correlation between a cell and every possible cell-sized matrix that could
+be extracted from its paired region (and is thus computationally very
+costly). For each cell/region pair, these correlation values are
+re-weighted based on the number of non-missing values used to calculate
+them by the following: nonMissingCount*cor/max(nonMissingCount).}
+
+\item{rawCorrTieBreaker}{Only applicable if ccfMethod == "fftThenPairwise".
+The way in which the CCF (see ccfMethod) is calculated may require slight
+padding/cropping of the mat1-sized matrix extracted from mat2 to make their
+dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
+4 pixels). This padding/cropping can occur to the initial or final
+rows/cols in the matrix, without a clear way to determine which is
+"correct." As such, all possible combinations of pre/post padding/cropping
+are considered (only if necessary). To determine a final mat1-sized matrix,
+rawCorrTieBreaker can be used to determine which yields the lowest/highest
+correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
+respectively).}
+
+\item{use}{Only applicable if ccfMethod == "fftThenPairwise". argument to be
+passed to the cor function. Dictates how NAs are dealt with in computing
+the correlation.}
 }
 \description{
 Wrapper for applying the cmcR::cellCCF function to x3p1 vs. x3p2
