@@ -14,7 +14,7 @@ cellCCF_bothDirections(
   minObservedProp = 0.1,
   centerCell = "individualCell",
   scaleCell = "individualCell",
-  ccfMethod = "fftThemPairwise",
+  ccfMethod = "fftThenPairwise",
   rawCorrTieBreaker = which.max,
   use = "pairwise.complete.obs"
 )

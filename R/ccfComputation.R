@@ -162,6 +162,8 @@ pairwise_ccf <- function(a, b, offsetx = 0, offsety = 0) {
 #' @keywords internal
 
 ccfComparison <- function(im1, im2, ccfMethod = "fftThenPairwise") {
+  stopifnot(ccfMethod %in% c("bruteForceReweighted","imager","fftThenPairwise"))
+
   if(ccfMethod == "bruteForceReweighted"){
     resp <- expand.grid(offsetx = 1:(max(ncol(im1),ncol(im2))),
                         offsety = 1:(max(nrow(im1),nrow(im2)))) %>%
@@ -173,12 +175,12 @@ ccfComparison <- function(im1, im2, ccfMethod = "fftThenPairwise") {
                    ccf = pwiseCCF$ccf,
                    nonMissing = pwiseCCF$nonMissing)
       }) %>%
-      dplyr::mutate(ccfReNorm = nonMissing*ccf/max(nonMissing),
+      dplyr::mutate(ccfReweighted = nonMissing*ccf/max(nonMissing),
                     offsetx = offsetx - max(offsetx)/2 - ncol(im1)/2,
                     offsety = offsety - max(offsety)/2 - nrow(im1)/2) %>%
-      dplyr::filter(ccfReNorm == max(ccfReNorm,na.rm = TRUE))
+      dplyr::filter(ccfReweighted == max(ccfReweighted,na.rm = TRUE))
 
-    return(list("ccf" = resp$ccfReNorm,"dx" = resp$offsetx,"dy" = resp$offsety))
+    return(list("ccf" = resp$ccfReweighted,"dx" = resp$offsetx,"dy" = resp$offsety))
   }
 
   else if(ccfMethod == "imager"){

@@ -190,6 +190,7 @@ arrangeCMCPlot <- function(x3p1,
                            legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                            height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            cell.colors = c("#a50026","#313695"),
+                           cell.alpha = .2,
                            na.value = "gray80"){
 
   x3p1_cellGrid <- allCells %>%
@@ -281,14 +282,14 @@ arrangeCMCPlot <- function(x3p1,
                                                    y = y,
                                                    group = cellNum,
                                                    fill = cmc),
-                            alpha = .3,
+                            alpha = cell.alpha,
                             size = 2) +
       ggplot2::geom_polygon(data = x3p2_cellGrid,
                             mapping = ggplot2::aes(x = x,
                                                    y = y,
                                                    group = cellNum,
                                                    fill = cmc),
-                            alpha = .3,
+                            alpha = cell.alpha,
                             size = 2) +
       ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
                                                  x3p2_cellGrid),
@@ -310,7 +311,7 @@ arrangeCMCPlot <- function(x3p1,
                                                    y = y,
                                                    group = cellNum,
                                                    fill = cmc),
-                            alpha = .3,
+                            alpha = cell.alpha,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
@@ -330,7 +331,7 @@ arrangeCMCPlot <- function(x3p1,
                                                    y = y,
                                                    group = cellNum,
                                                    fill = cmc),
-                            alpha = .3,
+                            alpha = cell.alpha,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
@@ -393,6 +394,7 @@ cmcPlot <- function(x3p1,
                     legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                     height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                     cell.colors = c("#a50026","#313695"),
+                    cell.alpha = .2,
                     na.value = "gray80"){
 
   directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
@@ -435,6 +437,7 @@ cmcPlot <- function(x3p1,
                                   legend.quantiles = legend.quantiles,
                                   height.colors = height.colors,
                                   cell.colors = cell.colors,
+                                  cell.alpha = cell.alpha,
                                   na.value = na.value)
 
   highCMCPlt <- NULL #missing by default unless high CMCs exist:
@@ -506,6 +509,7 @@ cmcPlot <- function(x3p1,
                                  legend.quantiles = legend.quantiles,
                                  height.colors = height.colors,
                                  cell.colors = cell.colors,
+                                 cell.alpha = cell.alpha,
                                  na.value = na.value)
   }
 
@@ -815,7 +819,11 @@ ccfMap <- function(mat1,mat2){
 #' @name ccfMapPlot
 #'
 #' @description Uses the gridExtra::arrangeGrob function to put 3 plots and a
-#'   table on the same grob object.
+#'   table on the same grob object. The table contains summary statistics
+#'   including the rotation value used (if specified in the theta argument), the
+#'   estimated maximum CCF value calculated using the Cross-Correlation theorem,
+#'   and the estimated optimal translation values based on the location of the
+#'   maximum CCF value.
 #'
 #' @param mat1 a matrix
 #' @param mat2 another matrix
@@ -1001,7 +1009,7 @@ ccfMapPlot <- function(mat1,
                   dy = -dy,
                   theta = theta) %>%
     t() %>%
-    tableGrob(rows = c(expression("CCF"[max]),"dx","dy",expression(theta)),
+    tableGrob(rows = c(expression("FFT CCF"[max]),"dx","dy",expression(theta)),
               cols = "Summary")
 
   gridPlot <- arrangeGrob(mat1Plot,

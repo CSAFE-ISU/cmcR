@@ -21,7 +21,11 @@ object}
 }
 \description{
 Uses the gridExtra::arrangeGrob function to put 3 plots and a
-table on the same grob object.
+table on the same grob object. The table contains summary statistics
+including the rotation value used (if specified in the theta argument), the
+estimated maximum CCF value calculated using the Cross-Correlation theorem,
+and the estimated optimal translation values based on the location of the
+maximum CCF value.
 }
 \examples{
  mat1 <- imager::imfill(x = 100,y = 100) \%>\%

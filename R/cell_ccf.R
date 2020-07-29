@@ -685,8 +685,8 @@ cellCCF <- function(x3p1,
       rotateSurfaceMatrix(theta)
 
     #Now that we've rotated image B, we want to create a list consisting of the
-    #cells that we are to compare to image A's cells. These will be 4 times
-    #larger than Image A's cells (up to image B's boundary) and defined by the
+    #cells that we are to compare to image A's cells. These will be larger than
+    #Image A's cells (up to image B's boundary) and defined by the
     #expandedCellCorners x,y pairs calculated above. mat2_splitRotated contains
     #regions that lie on the edge of mat2. The getMat2SplitLoctaions function
     #ensures that the way in which we define these regions doesn't extend past
@@ -932,7 +932,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    minObservedProp = .1,
                                    centerCell = "individualCell",
                                    scaleCell = "individualCell",
-                                   ccfMethod = "fftThemPairwise",
+                                   ccfMethod = "fftThenPairwise",
                                    rawCorrTieBreaker = which.max,
                                    use = "pairwise.complete.obs"){
 
