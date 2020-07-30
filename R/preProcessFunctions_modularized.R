@@ -293,8 +293,9 @@ preProcess_detectFPCircle <- function(surfaceMat,
 
   finalRadiusEstimate <- consecutiveRadii[which(consecSeqLengths == max(consecSeqLengths))] %>%
     unlist() %>%
-    mean() %>%
-    floor()
+    mean()
+
+  finalRadiusEstimate <- floor(finalRadiusEstimate)
 
   houghCircleLoc <- surfaceMat_houghCircleLocations %>%
     dplyr::filter(r == finalRadiusEstimate)

@@ -134,8 +134,9 @@ fpRadiusGridSearch <- function(surfaceMat,
 
   radiusEstim <- estim_rotated %>%
     unlist() %>%
-    aggregationFunction(na.rm = TRUE) %>%
-    floor()
+    aggregationFunction(na.rm = TRUE)
+
+  radiusEstim <-floor(radiusEstim)
 
   return(list("radiusEstim" = radiusEstim,
               "individualEstims" = unlist(estim_rotated)))
