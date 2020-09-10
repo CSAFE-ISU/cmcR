@@ -496,10 +496,16 @@ calcRawCorr <- function(cell,
 
   corrVals <- purrr::map_dbl(regionCroppedList,function(croppedRegion){
 
+    #Very infrequently (like once per 100,000 cell/region comparisons) the
+    #standard deviation is zero -- for example, in cases where a the two
+    #matrices only overlap by one non-NA value. cor() will return NA in such
+    #cases which we handle later on in the processing procedures. We'll suppress
+    #the warnings.
+    suppressWarnings(
     corVal <- corSafe(as.vector(cell),
                       as.vector(croppedRegion),
                       use = use)
-
+    )
     as.numeric(corVal[1])
   })
 

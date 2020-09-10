@@ -397,22 +397,22 @@ cmcPlot <- function(x3p1,
                     cell.alpha = .2,
                     na.value = "gray80"){
 
-  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$initialCMC[[1]]),
-                                nrow(cmcFilter_improved_output$initialCMC[[2]])))
+  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$topVoteCMCs[[1]]),
+                                nrow(cmcFilter_improved_output$topVoteCMCs[[2]])))
 
 
-  initialCMC <- cmcFilter_improved_output$initialCMC[[directionIndic]] %>%
+  topVoteCMCs <- cmcFilter_improved_output$topVoteCMCs[[directionIndic]] %>%
     dplyr::mutate(cmc = rep("Top Vote CMC",times = nrow(.)))
 
-  nonInitialCMC <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
+  nontopVoteCMCs <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     topResultsPerCell() %>%
-    dplyr::anti_join(initialCMC,by = "cellNum") %>%
+    dplyr::anti_join(topVoteCMCs,by = "cellNum") %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)))
 
-  allInitialCells <- dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
+  allInitialCells <- dplyr::bind_rows(topVoteCMCs,nontopVoteCMCs) %>%
     dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Top Vote CMC"))) %>%
-    dplyr::left_join(dplyr::bind_rows(initialCMC,nonInitialCMC) %>%
+    dplyr::left_join(dplyr::bind_rows(topVoteCMCs,nontopVoteCMCs) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
                            stringr::str_extract_all(string = ..2,
@@ -429,7 +429,7 @@ cmcPlot <- function(x3p1,
                        }),
                      by = "cellID")
 
-  initialCMCPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+  topVoteCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
                                   x3p2 = list(x3p2,x3p1)[[directionIndic]],
                                   allCells = allInitialCells,
                                   x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
@@ -513,8 +513,8 @@ cmcPlot <- function(x3p1,
                                  na.value = na.value)
   }
 
-  return(list("initialCMC" = initialCMCPlt,
-              "highCMC" = highCMCPlt))
+  return(list("topVoteCMCs" = topVoteCMCsPlt,
+              "highCMCs" = highCMCPlt))
 }
 
 #' Create a bar plot of congruent matching cells per rotation value
