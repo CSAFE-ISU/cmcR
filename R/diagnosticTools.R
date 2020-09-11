@@ -228,16 +228,16 @@ arrangeCMCPlot <- function(x3p1,
                   lastRowCentered = lastRow - max(lastRow)/2,
                   firstColCentered = firstCol - max(lastCol)/2,
                   lastColCentered = lastCol - max(lastCol)/2) %>%
-    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
-                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
-                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy,
-                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx,
-                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy) %>%
-    #this is redundant, but is how the x and y columns are set-up down below, so
-    #I won't change it
+    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
+                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
+                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
+                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
+                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
+                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2) %>%
+    #this is redundant, but are the names attributed to the x and y columns are
+    #set-up down below, so I won't change it
     dplyr::mutate(x_1 = topLeftCorner_col,
                   y_1 = topLeftCorner_row,
                   x_2 = topRightCorner_col,
@@ -430,15 +430,15 @@ cmcPlot <- function(x3p1,
                      by = "cellID")
 
   topVoteCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
-                                  x3p2 = list(x3p2,x3p1)[[directionIndic]],
-                                  allCells = allInitialCells,
-                                  x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
-                                  pltType = type,
-                                  legend.quantiles = legend.quantiles,
-                                  height.colors = height.colors,
-                                  cell.colors = cell.colors,
-                                  cell.alpha = cell.alpha,
-                                  na.value = na.value)
+                                   x3p2 = list(x3p2,x3p1)[[directionIndic]],
+                                   allCells = allInitialCells,
+                                   x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
+                                   pltType = type,
+                                   legend.quantiles = legend.quantiles,
+                                   height.colors = height.colors,
+                                   cell.colors = cell.colors,
+                                   cell.alpha = cell.alpha,
+                                   na.value = na.value)
 
   highCMCPlt <- NULL #missing by default unless high CMCs exist:
 
@@ -608,8 +608,18 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                        cmcHigh = max(n) - highCMCThresh)
 
     cmcDat %>%
+      dplyr::group_by(comparison) %>%
+      dplyr::group_split() %>%
+      purrr::map2_dfr(.x = .,
+                      .y = highCMCDat$cmcHigh,
+                      function(comparisonDat = .x,cmcHigh = .y){
+                        comparisonDat %>%
+                          mutate(`Above Thresh.` = ifelse(n >= cmcHigh,TRUE,FALSE))
+                      }) %>%
       ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
-      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
+                        stat = "identity") +
+      ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
       ggplot2::theme_bw()  +
       ggplot2::xlab(expression(theta*" (degree)")) +
       ggplot2::ylab("CMC number") +
@@ -624,7 +634,11 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                                       y = y,
                                       label = paste0("High CMC = ",cmcHigh)),
                          fontface = "plain",
-                         family = "sans")
+                         family = "sans")  +
+      ggplot2::theme(legend.position = c(1, 1),
+                     legend.justification = c(1, 1),
+                     legend.direction = "horizontal",
+                     legend.background = ggplot2::element_blank())
   }
   else{
     cellCCF_output$ccfResults  %>%
@@ -636,11 +650,15 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
       dplyr::group_by(theta) %>%
       dplyr::tally() %>%
       dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%
-      ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
-      ggplot2::geom_bar(stat = "identity") +
+      dplyr::mutate(`Above Thresh.` = ifelse(n >= cmcHigh,"TRUE","FALSE")) %>%
+      ggplot2::ggplot(ggplot2::aes(x = theta,
+                                   y = n)) +
+      ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
+                        stat = "identity") +
+      ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
       ggplot2::theme_bw()  +
       ggplot2::xlab(expression(theta*" (degree)")) +
-      ggplot2::ylab("CMC number") +
+      ggplot2::ylab("CMC count") +
       ggplot2::ylim(c(NA,25)) +
       ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
                           colour = "black",
@@ -650,7 +668,11 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                                       label = paste0("High CMC = ",cmcHigh)),
                          nudge_y = 1,
                          fontface = "plain",
-                         family = "sans")
+                         family = "sans") +
+      ggplot2::theme(legend.position = c(1, 1),
+                     legend.justification = c(1, 1),
+                     legend.direction = "horizontal",
+                     legend.background = ggplot2::element_blank())
   }
 
 }
