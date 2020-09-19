@@ -6,8 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle — preProcess_removeFPCircle • cmcR</title>
+<title>Level a breech face impression surface matrix by a conditional statistics — levelByConditionalStatistic • cmcR</title>
 
 
 <!-- jquery -->
@@ -40,10 +39,8 @@ firing pin impression circle — preProcess_removeFPCircle • cmcR</title>
 
 
 
-<meta property="og:title" content="Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle — preProcess_removeFPCircle" />
-<meta property="og:description" content="Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle" />
+<meta property="og:title" content="Level a breech face impression surface matrix by a conditional statistics — levelByConditionalStatistic" />
+<meta property="og:description" content="Level a breech face impression surface matrix by a conditional statistics" />
 
 
 
@@ -124,82 +121,51 @@ firing pin impression circle" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle</h1>
+    <h1>Level a breech face impression surface matrix by a conditional statistics</h1>
     
-    <div class="hidden name"><code>preProcess_removeFPCircle.Rd</code></div>
+    <div class="hidden name"><code>levelByConditionalStatistic.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle</p>
+    <p>Level a breech face impression surface matrix by a conditional statistics</p>
     </div>
 
-    <pre class="usage"><span class='fu'>preProcess_removeFPCircle</span>(
-  <span class='no'>surfaceMat</span>,
-  <span class='kw'>aggregationFunction</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-  <span class='kw'>smootherSize</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>((<span class='fl'>0.1</span> * <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>surfaceMat</span>)/<span class='fl'>2</span>)) + <span class='fl'>1</span>,
-  <span class='kw'>gridSize</span> <span class='kw'>=</span> <span class='fl'>40</span>,
-  <span class='kw'>gridGranularity</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>houghScoreQuant</span> <span class='kw'>=</span> <span class='fl'>0.9</span>
-)</pre>
+    <pre class="usage"><span class='fu'>levelByConditionalStatistic</span>(<span class='no'>x3p</span>, <span class='kw'>statistic</span> <span class='kw'>=</span> <span class='st'>"mean"</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>surfaceMat</th>
-      <td><p>a surface matrix representing a breech face impression scan</p></td>
+      <th>x3p</th>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan</p></td>
     </tr>
     <tr>
-      <th>aggregationFunction</th>
-      <td><p>function to select initial radius estimate from
-those calculated using fpRadiusGridSearch</p></td>
+      <th>statistic</th>
+      <td><p>either "mean" or "quantile"</p></td>
     </tr>
     <tr>
-      <th>smootherSize</th>
-      <td><p>size of average smoother (to be passed to zoo::roll_mean)</p></td>
-    </tr>
-    <tr>
-      <th>gridSize</th>
-      <td><p>size of grid, centered on the initial radius estimate, to be
-used to determine the best fitting circle to the surface matrix via the
-Hough transform method</p></td>
-    </tr>
-    <tr>
-      <th>gridGranularity</th>
-      <td><p>granularity of radius grid used to determine the best
-fitting circle to the surface matrix via the Hough transform method</p></td>
-    </tr>
-    <tr>
-      <th>houghScoreQuant</th>
-      <td><p>quantile cut-off to be used when determining a final
-radius estimate using the score values returned by the imager::hough_circle</p></td>
+      <th>...</th>
+      <td><p>arguments to be set in the quantreg::rq function if statistic =
+"quantile" is set. In this case, tau = .5 and method = "fn" are recommended</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>imager treats a matrix as its transpose (i.e., x and y axes are
-swapped). As such, relative to the original surface matrix, the x and y
-columns in the data frame fpImpressionCircle actually correspond to the row
-and column indices at which the center of the firing pin impression circle
-is estiamted to be.</p>
+    <p>an x3p object containing the leveled cartridge case scan surface
+matrix.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='no'>raw_x3p</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span>(<span class='st'>"path/to/file.x3p"</span>) <span class='kw'>%&gt;%</span>
-<span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>sample_x3p</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+    <pre class="examples"><div class='input'><span class='no'>fadul1.1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span>(<span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
 
-<span class='no'>raw_x3p</span>$<span class='no'>surface.matrix</span> <span class='kw'>&lt;-</span> <span class='no'>raw_x3p</span>$<span class='no'>surface.matrix</span> <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_ransac.html'>preProcess_ransac</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_levelBF.html'>preProcess_levelBF</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_cropWS.html'>preProcess_cropWS</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>preProcess_removeFPCircle</span>(<span class='kw'>aggregationFunction</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-                                  <span class='kw'>smootherSize</span> <span class='kw'>=</span> <span class='fl'>2</span>*<span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>((<span class='fl'>.1</span>*<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>surfaceMat</span>)/<span class='fl'>2</span>)) + <span class='fl'>1</span>,
-                                  <span class='kw'>gridGranularity</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-                                  <span class='kw'>houghScoreQuant</span> <span class='kw'>=</span> <span class='fl'>.9</span>)
-}</div></pre>
+<span class='no'>fadul1.1_cropped</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cropBFExterior.html'>cropBFExterior</a></span>(<span class='kw'>x3p</span> <span class='kw'>=</span> <span class='no'>fadul1.1</span>,<span class='kw'>radiusOffset</span> <span class='kw'>=</span> -<span class='fl'>20</span>)
+
+<span class='no'>fadul1.1_filtered</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='filterBFInterior.html'>filterBFInterior</a></span>(<span class='kw'>x3p</span> <span class='kw'>=</span> <span class='no'>fadul1.1_cropped</span>, <span class='kw'>radiusOffset</span> <span class='kw'>=</span> <span class='fl'>200</span>)
+
+<span class='no'>fadul1.1_leveled</span> <span class='kw'>&lt;-</span> <span class='fu'>levelByConditionalStatistic</span>(<span class='kw'>x3p</span> <span class='kw'>=</span> <span class='no'>fadul1.1_filtered</span>,<span class='kw'>statistic</span> <span class='kw'>=</span> <span class='st'>"quantile"</span>,<span class='kw'>tau</span> <span class='kw'>=</span> <span class='fl'>.5</span>,<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"fn"</span>)
+
+<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"Original"</span> <span class='kw'>=</span> <span class='no'>fadul1.1</span>,<span class='st'>"Cropped"</span> <span class='kw'>=</span> <span class='no'>fadul1.1_cropped</span>,<span class='st'>"Cropped &amp; Filtered"</span> <span class='kw'>=</span> <span class='no'>fadul1.1_filtered</span>,<span class='st'>"Cropped, Filtered, and Leveled"</span> <span class='kw'>=</span> <span class='no'>fadul1.1_leveled</span>))</div><div class='img'><img src='levelByConditionalStatistic-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

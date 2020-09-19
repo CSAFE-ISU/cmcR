@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Detect the radius and center of a firing pin impression circle in a breech face
-impression scan using a circular Hough transform. — preProcess_detectFPCircle • cmcR</title>
+<title>Detect the radius and center of a firing pin impression circle in a breech
+face impression scan using a circular Hough transform. — preProcess_detectFPCircle • cmcR</title>
 
 
 <!-- jquery -->
@@ -40,19 +40,19 @@ impression scan using a circular Hough transform. — preProcess_detectFPCircle 
 
 
 
-<meta property="og:title" content="Detect the radius and center of a firing pin impression circle in a breech face
-impression scan using a circular Hough transform. — preProcess_detectFPCircle" />
+<meta property="og:title" content="Detect the radius and center of a firing pin impression circle in a breech
+face impression scan using a circular Hough transform. — preProcess_detectFPCircle" />
 <meta property="og:description" content="This function estimates the radius of a firing pin impression
 within a breech face impression scan. It does so by detecting local maxima
 in the non-NA pixel count by row/col within the scan. To make the algorithm
 more robust, multiple radii estimates are considered by rotating the image
 15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
 non-NA pixel count by row/col. Based on the argument passed to
-aggregation_function, these radii estimates are reduced to a single, rough
+aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument meshSize. A hough transform is
+grid mesh size is determined by the argument gridGranularity. A hough transform is
 applied to the breech face impression scan for each radius value in the
 grid. A final estimate is determined by finding the longest consecutive
 sequence of radii values with high associated hough scores. How we
@@ -140,8 +140,8 @@ estimate." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Detect the radius and center of a firing pin impression circle in a breech face
-impression scan using a circular Hough transform.</h1>
+    <h1>Detect the radius and center of a firing pin impression circle in a breech
+face impression scan using a circular Hough transform.</h1>
     
     <div class="hidden name"><code>preProcess_detectFPCircle.Rd</code></div>
     </div>
@@ -153,11 +153,11 @@ in the non-NA pixel count by row/col within the scan. To make the algorithm
 more robust, multiple radii estimates are considered by rotating the image
 15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
 non-NA pixel count by row/col. Based on the argument passed to
-aggregation_function, these radii estimates are reduced to a single, rough
+aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument meshSize. A hough transform is
+grid mesh size is determined by the argument gridGranularity. A hough transform is
 applied to the breech face impression scan for each radius value in the
 grid. A final estimate is determined by finding the longest consecutive
 sequence of radii values with high associated hough scores. How we
@@ -177,17 +177,20 @@ estimate.</p>
     </tr>
     <tr>
       <th>smootherSize</th>
-      <td><p>size of average smoother (to be passed to zoo::roll_mean)</p></td>
+      <td><p>size of average smoother (to be passed to zoo::roll_mean)
+used to determine where the non-NA pixel count-per-row series attains a
+mode.</p></td>
     </tr>
     <tr>
-      <th>aggregation_function</th>
-      <td><p>function to select initial radius estimate from
-those calculated using fpRadiusGridSearch</p></td>
+      <th>aggregationFunction</th>
+      <td><p>function to aggregate all 12 radius estimates
+determined under the initial radius estimation procedure those calculated
+using fpRadiusGridSearch</p></td>
     </tr>
     <tr>
-      <th>meshSize</th>
-      <td><p>size of radius mesh to be used for further refinement of the
-radius estimate obtained from fpRadiusGridSearch</p></td>
+      <th>gridGranularity</th>
+      <td><p>granularity of radius grid used to determine the best
+fitting circle to the surface matrix via the Hough transform method</p></td>
     </tr>
     <tr>
       <th>houghScoreQuant</th>

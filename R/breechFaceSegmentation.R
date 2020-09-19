@@ -8,7 +8,7 @@ estimateBFRadius <- function(mat,
                              angle = 0,
                              interpolation = 0,
                              boundary = 0,
-                             agg.function = median){
+                             agg_function = median){
   # print(angle)
   # if(angle == -100){
   # browser()
@@ -72,11 +72,11 @@ estimateBFRadius <- function(mat,
     dplyr::mutate(x_lag = c(x[2:(nrow(.))],NA)) %>%
     dplyr::mutate(x_diff = abs(x - x_lag)) %>%
     dplyr::top_n(n = 1,wt = x_diff) %>%
-    dplyr::summarise(x_lag = agg.function(x_lag),
-                     x = agg.function(x)) %>%
+    dplyr::summarise(x_lag = agg_function(x_lag),
+                     x = agg_function(x)) %>%
     dplyr::summarise(radEstimate = round((x_lag - x)/2)) %>%
     dplyr::pull(radEstimate) %>%
-    agg.function(na.rm = TRUE)
+    agg_function(na.rm = TRUE)
 
   if(all(2*mat_radiusEstimate < max(nrow(mat)/2,ncol(mat)/2))){
     return(NA)
@@ -85,13 +85,39 @@ estimateBFRadius <- function(mat,
   return(mat_radiusEstimate)
 }
 
+#' Crop the exterior of a breech face impression surface matrix
+#'
 #' @name cropBFExterior
+#'
+#' @param x3p an x3p object containing the surface matrix of a cartridge case
+#'   scan
+#' @param scheme argument for imager::imgradient
+#' @param high_connectivity argument for imager::label
+#' @param tolerance argument for imager::label
+#' @param radiusOffset number of pixels to add to estimated breech face radius.
+#'   This is commonly a negative value (e.g., -20) to trim the cartridge case
+#'   primer roll-off from the returned, cropped surface matrix.
+#' @param croppingThresh argument for cmcR::preProcess_cropWS
+#' @param agg_function the breech face radius estimation procedure returns
+#'   numerous radius estimates. This argument dictates the function used to
+#'   aggregate these into a final estimate.
+#'
+#' @return An x3p object containing the surface matrix of a breech face
+#'   impression scan where the rows/columns on the exterior of the breech face
+#'   impression have been cropped-out.
+#'
 #' @export
 #' @description The radius estimation procedure tends to over-estimate the
 #'   desired radius values. As such, a lot of the breech face impression
 #'   "roll-off" is included in the final scan. Excessive roll-off can bias the
 #'   calculation of the CCF. As such, we can manually shrink the radius estimate
 #'   so that little to no roll-off is included in the final processed scan.
+#' @examples
+#' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+#'
+#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#'
+#' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped))
 
 cropBFExterior <- function(x3p,
                            scheme = 3,
@@ -99,7 +125,7 @@ cropBFExterior <- function(x3p,
                            tolerance = 0,
                            radiusOffset = 0,
                            croppingThresh = 1,
-                           agg.function = median){
+                           agg_function = median){
   mat <- x3p$surface.matrix
 
   mat_radiusEstimate <- estimateBFRadius(mat = mat,
@@ -107,7 +133,7 @@ cropBFExterior <- function(x3p,
                                          high_connectivity = high_connectivity,
                                          tolerance = tolerance,
                                          angle = 0,
-                                         agg.function = agg.function) %>%
+                                         agg_function = agg_function) %>%
     magrittr::add(radiusOffset)
 
   #the edges of some cartridge case scans aren't prominent, so the radius
@@ -125,8 +151,8 @@ cropBFExterior <- function(x3p,
                                                             high_connectivity = high_connectivity,
                                                             tolerance = tolerance,
                                                             angle = .,
-                                                            agg.function = agg.function)) %>%
-      agg.function(na.rm = TRUE) %>%
+                                                            agg_function = agg_function)) %>%
+      agg_function(na.rm = TRUE) %>%
       magrittr::add(radiusOffset)
   }
 
@@ -149,8 +175,42 @@ cropBFExterior <- function(x3p,
   return(x3p_clone)
 }
 
+#' Filter-out the firing pin impression region of a breech face impression scan
+#'
 #' @name filterBFInterior
+#'
+#' @param x3p an x3p object containing the surface matrix of a cartridge case
+#'   scan
+#' @param scheme argument for imager::imgradient
+#' @param high_connectivity argument for imager::label
+#' @param tolerance argument for imager::label
+#' @param radiusOffset number of pixels to add to estimated firing pin hole
+#'   radius. This is commonly a positive value (e.g., 200) to not only remove
+#'   observations within the firing pin impression hole, but also the plateaued
+#'   region surrounding the hole that does not come into contact with the breech
+#'   face.
+#'
+#' @return An x3p object containing the surface matrix of a breech face
+#'   impression scan where the observations on the interior of the firing pin
+#'   impression hole have been filtered out.
+#'
 #' @export
+#' @description The radius estimation procedure effectively estimates the radius
+#'   of the firing pin hole. Unfortunately, it is often desired that more than
+#'   just observations in firing pin hole are removed. In particular, the
+#'   plateaued region surrounding the firing pin impression hole does not come
+#'   into contact with the breech face of a firearm and is thus unwanted in the
+#'   final, processed scan. The radiusOffset argument must be tuned (around 200
+#'   seems to work well for the Fadul cartridge cases) to remove these unwanted
+#'   observations.
+#' @examples
+#' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+#'
+#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#'
+#' fadul1.1_filtered <- filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#'
+#' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered))
 
 filterBFInterior <- function(x3p,
                              scheme = 3,
@@ -203,8 +263,27 @@ filterBFInterior <- function(x3p,
   return(x3p_clone)
 }
 
+#' Level a breech face impression surface matrix by a conditional statistics
+#'
 #' @name levelByConditionalStatistic
-#' @description For statistic = "quantile," tau = .5 and method = "fn" recommended by default
+#' @param x3p an x3p object containing the surface matrix of a cartridge case
+#'   scan
+#' @param statistic either "mean" or "quantile"
+#' @param ... arguments to be set in the quantreg::rq function if statistic =
+#'   "quantile" is set. In this case, tau = .5 and method = "fn" are recommended
+#' @return an x3p object containing the leveled cartridge case scan surface
+#'   matrix.
+#'
+#' @examples
+#' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+#'
+#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#'
+#' fadul1.1_filtered <- filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#'
+#' fadul1.1_leveled <- levelByConditionalStatistic(x3p = fadul1.1_filtered,statistic = "quantile",tau = .5,method = "fn")
+#'
+#' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered,"Cropped, Filtered, and Leveled" = fadul1.1_leveled))
 #' @export
 
 levelByConditionalStatistic <- function(x3p,
@@ -218,7 +297,7 @@ levelByConditionalStatistic <- function(x3p,
 
     x3p_fit <- quantreg::rq(data = expand.grid(y = 1:nrow(x3p$surface.matrix),
                                                x = 1:ncol(x3p$surface.matrix)) %>%
-                              mutate(value = as.numeric(x3p$surface.matrix)),
+                              dplyr::mutate(value = as.numeric(x3p$surface.matrix)),
                             formula = value ~ x + y,
                             tau = rqArgs$tau,
                             method = rqArgs$method)
@@ -227,7 +306,7 @@ levelByConditionalStatistic <- function(x3p,
   else if(statistic == "mean"){
     x3p_fit <- lm(data = expand.grid(y = 1:nrow(x3p$surface.matrix),
                                      x = 1:ncol(x3p$surface.matrix)) %>%
-                    mutate(value = as.numeric(x3p$surface.matrix)),
+                    dplyr::mutate(value = as.numeric(x3p$surface.matrix)),
                   formula = value ~ x + y)
   }
 

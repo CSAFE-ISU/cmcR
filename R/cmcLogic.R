@@ -378,7 +378,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                compareInitialAndHighThetas = FALSE,
                                consensus_function_theta = consensus_function){
 
-  topVoteCMCs <- cellCCF_bothDirections_output %>%
+  originalMethodCMCs <- cellCCF_bothDirections_output %>%
     purrr::map(~ topResultsPerCell(.$ccfResults) %>%
                  cmcFilter(consensus_function = consensus_function,
                            ccf_thresh = ccf_thresh,
@@ -418,7 +418,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
-                "topVoteCMCs" = topVoteCMCs,
+                "originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = data.frame(cellNum = integer(0),
                                         cellID = character(0),
                                         ccf = double(0),
@@ -442,7 +442,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
     #the initial CMCs defined for that direction
     else if(missingTheta_decision == "dismiss"){
       #the direction that didn't pass gets assigned initial CMCs:
-      highCMCs1 <- topVoteCMCs[[which(is.na(thetaMax))]] %>%
+      highCMCs1 <- originalMethodCMCs[[which(is.na(thetaMax))]] %>%
         dplyr::ungroup() %>%
         dplyr::mutate(comparison = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
 
@@ -484,7 +484,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                     dy_thresh = dy_thresh,
                                     theta_thresh = theta_thresh,
                                     consensus_function_theta = consensus_function_theta),
-                    "topVoteCMCs" = topVoteCMCs,
+                    "originalMethodCMCs" = originalMethodCMCs,
                     "highCMCs" = highCMCs))
       }
 
@@ -519,7 +519,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                       dy_thresh = dy_thresh,
                                       theta_thresh = theta_thresh,
                                       consensus_function_theta = consensus_function_theta),
-                      "topVoteCMCs" = topVoteCMCs,
+                      "originalMethodCMCs" = originalMethodCMCs,
                       "highCMCs" = data.frame(cellNum = integer(0),
                                               cellID = character(0),
                                               ccf = double(0),
@@ -549,7 +549,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
         if(compareInitialAndHighThetas){
 
-          intitialCMCs_nonMissingDirection <- topVoteCMCs[[which(names(topVoteCMCs) == thetaMax_dismissed$comparison)]]
+          intitialCMCs_nonMissingDirection <- originalMethodCMCs[[which(names(originalMethodCMCs) == thetaMax_dismissed$comparison)]]
 
           thetaCompareBool_dismissed <- abs(thetaMax_dismissed$theta - median(intitialCMCs_nonMissingDirection$theta,na.rm = TRUE)) > theta_thresh
 
@@ -560,7 +560,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                         dy_thresh = dy_thresh,
                                         theta_thresh = theta_thresh,
                                         consensus_function_theta = consensus_function_theta),
-                        "topVoteCMCs" = topVoteCMCs,
+                        "originalMethodCMCs" = originalMethodCMCs,
                         "highCMCs" = data.frame(cellNum = integer(0),
                                                 cellID = character(0),
                                                 ccf = double(0),
@@ -578,7 +578,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                         dy_thresh = dy_thresh,
                                         theta_thresh = theta_thresh,
                                         consensus_function_theta = consensus_function_theta),
-                        "topVoteCMCs" = topVoteCMCs,
+                        "originalMethodCMCs" = originalMethodCMCs,
                         "highCMCs" = highCMCs))
           }
         }
@@ -589,14 +589,14 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                       dy_thresh = dy_thresh,
                                       theta_thresh = theta_thresh,
                                       consensus_function_theta = consensus_function_theta),
-                      "topVoteCMCs" = topVoteCMCs,
+                      "originalMethodCMCs" = originalMethodCMCs,
                       "highCMCs" = highCMCs))
         }
       }
 
       if(compareInitialAndHighThetas){
-        thetaCompareBool_dismissed <- (((abs((thetaMax_dismissed[1,"theta"] - median(topVoteCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
-                                         (abs((thetaMax_dismissed[2,"theta"] - median(topVoteCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
+        thetaCompareBool_dismissed <- (((abs((thetaMax_dismissed[1,"theta"] - median(originalMethodCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
+                                         (abs((thetaMax_dismissed[2,"theta"] - median(originalMethodCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
 
         if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
           return(list("params" = list(consensus_function = consensus_function,
@@ -605,7 +605,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                       dy_thresh = dy_thresh,
                                       theta_thresh = theta_thresh,
                                       consensus_function_theta = consensus_function_theta),
-                      "topVoteCMCs" = topVoteCMCs,
+                      "originalMethodCMCs" = originalMethodCMCs,
                       "highCMCs" = data.frame(cellNum = integer(0),
                                               cellID = character(0),
                                               ccf = double(0),
@@ -627,7 +627,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                     dy_thresh = dy_thresh,
                                     theta_thresh = theta_thresh,
                                     consensus_function_theta = consensus_function_theta),
-                    "topVoteCMCs" = topVoteCMCs,
+                    "originalMethodCMCs" = originalMethodCMCs,
                     "highCMCs" = data.frame(cellNum = integer(0),
                                             cellID = character(0),
                                             ccf = double(0),
@@ -646,7 +646,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
         #                             dy_thresh = dy_thresh,
         #                             theta_thresh = theta_thresh,
         #                             consensus_function_theta = consensus_function_theta),
-        #             "topVoteCMCs" = topVoteCMCs,
+        #             "originalMethodCMCs" = originalMethodCMCs,
         #             "highCMCs" = data.frame(cellNum = integer(0),
         #                                     cellID = character(0),
         #                                     ccf = double(0),
@@ -663,7 +663,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       #                               dy_thresh = dy_thresh,
       #                               theta_thresh = theta_thresh,
       #                               consensus_function_theta = consensus_function_theta),
-      #               "topVoteCMCs" = topVoteCMCs,
+      #               "originalMethodCMCs" = originalMethodCMCs,
       #               "highCMCs" = data.frame(cellNum = integer(0),
       #                                       cellID = character(0),
       #                                       ccf = double(0),
@@ -683,7 +683,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                     dy_thresh = dy_thresh,
                                     theta_thresh = theta_thresh,
                                     consensus_function_theta = consensus_function_theta),
-                    "topVoteCMCs" = topVoteCMCs,
+                    "originalMethodCMCs" = originalMethodCMCs,
                     "highCMCs" = highCMCs))
       }
     }
@@ -697,7 +697,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                   dy_thresh = dy_thresh,
                                   theta_thresh = theta_thresh,
                                   consensus_function_theta = consensus_function_theta),
-                  "topVoteCMCs" = topVoteCMCs,
+                  "originalMethodCMCs" = originalMethodCMCs,
                   "highCMCs" = data.frame(cellNum = integer(0),
                                           cellID = character(0),
                                           ccf = double(0),
@@ -726,8 +726,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
   if(compareInitialAndHighThetas){
 
-    thetaCompareBool <- (((abs((thetaMax$comparison_1to2 - median(topVoteCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
-                           (abs((thetaMax$comparison_2to1 - median(topVoteCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
+    thetaCompareBool <- (((abs((thetaMax$comparison_1to2 - median(originalMethodCMCs$comparison_1to2$theta,na.rm = TRUE)))) > theta_thresh) |
+                           (abs((thetaMax$comparison_2to1 - median(originalMethodCMCs$comparison_2to1$theta,na.rm = TRUE))) > theta_thresh))
 
     if(thetaCompareBool | is.na(thetaCompareBool) | purrr::is_empty(thetaCompareBool)){
       return(list("params" = list(consensus_function = consensus_function,
@@ -736,7 +736,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                   dy_thresh = dy_thresh,
                                   theta_thresh = theta_thresh,
                                   consensus_function_theta = consensus_function_theta),
-                  "topVoteCMCs" = topVoteCMCs,
+                  "originalMethodCMCs" = originalMethodCMCs,
                   "highCMCs" = data.frame(cellNum = integer(0),
                                           cellID = character(0),
                                           ccf = double(0),
@@ -767,7 +767,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
-                "topVoteCMCs" = topVoteCMCs,
+                "originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = data.frame(cellNum = integer(0),
                                         cellID = character(0),
                                         ccf = double(0),
@@ -788,7 +788,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
-                "topVoteCMCs" = topVoteCMCs,
+                "originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = data.frame(cellNum = integer(0),
                                         cellID = character(0),
                                         ccf = double(0),
@@ -818,7 +818,7 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                 dy_thresh = dy_thresh,
                                 theta_thresh = theta_thresh,
                                 consensus_function_theta = consensus_function_theta),
-                "topVoteCMCs" = topVoteCMCs,
+                "originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = highCMCs))
   }
 }

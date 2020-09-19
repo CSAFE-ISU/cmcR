@@ -301,7 +301,8 @@ arrangeCMCPlot <- function(x3p1,
                          size = 3) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
-      ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type"))
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
+      ggplot2::theme(legend.position = "bottom")
   }
   else if(pltType == "list"){
     x3pPlt[[1]] <- x3pPlt[[1]] +
@@ -322,7 +323,8 @@ arrangeCMCPlot <- function(x3p1,
                                       colour = cmc,
                                       angle = theta),
                          size = 3) +
-      ggplot2::guides(colour = "legend")
+      ggplot2::guides(colour = "legend") +
+      ggplot2::theme(legend.position = "bottom")
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
       ggnewscale::new_scale_fill() +
@@ -342,7 +344,8 @@ arrangeCMCPlot <- function(x3p1,
                                       colour = cmc,
                                       angle = theta),
                          size = 3) +
-      ggplot2::guides(colour = "legend")
+      ggplot2::guides(colour = "legend") +
+      ggplot2::theme(legend.position = "bottom")
   }
 
   return(x3pPlt)
@@ -397,22 +400,22 @@ cmcPlot <- function(x3p1,
                     cell.alpha = .2,
                     na.value = "gray80"){
 
-  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$topVoteCMCs[[1]]),
-                                nrow(cmcFilter_improved_output$topVoteCMCs[[2]])))
+  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$originalMethodCMCs[[1]]),
+                                nrow(cmcFilter_improved_output$originalMethodCMCs[[2]])))
 
 
-  topVoteCMCs <- cmcFilter_improved_output$topVoteCMCs[[directionIndic]] %>%
+  originalMethodCMCs <- cmcFilter_improved_output$originalMethodCMCs[[directionIndic]] %>%
     dplyr::mutate(cmc = rep("Top Vote CMC",times = nrow(.)))
 
-  nontopVoteCMCs <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
+  nonoriginalMethodCMCs <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     topResultsPerCell() %>%
-    dplyr::anti_join(topVoteCMCs,by = "cellNum") %>%
+    dplyr::anti_join(originalMethodCMCs,by = "cellNum") %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)))
 
-  allInitialCells <- dplyr::bind_rows(topVoteCMCs,nontopVoteCMCs) %>%
+  allInitialCells <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
     dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Top Vote CMC"))) %>%
-    dplyr::left_join(dplyr::bind_rows(topVoteCMCs,nontopVoteCMCs) %>%
+    dplyr::left_join(dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
                            stringr::str_extract_all(string = ..2,
@@ -429,7 +432,7 @@ cmcPlot <- function(x3p1,
                        }),
                      by = "cellID")
 
-  topVoteCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
+  originalMethodCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
                                    x3p2 = list(x3p2,x3p1)[[directionIndic]],
                                    allCells = allInitialCells,
                                    x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
@@ -513,7 +516,7 @@ cmcPlot <- function(x3p1,
                                  na.value = na.value)
   }
 
-  return(list("topVoteCMCs" = topVoteCMCsPlt,
+  return(list("originalMethodCMCs" = originalMethodCMCsPlt,
               "highCMCs" = highCMCPlt))
 }
 

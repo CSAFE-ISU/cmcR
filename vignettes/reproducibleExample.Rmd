@@ -67,12 +67,12 @@ km1_residuals <- km1_raw %>%
   x3ptools::sample_x3p(m = 2) #down-sampled copy of km1_raw
 
 km1_residuals$surface.matrix <- km1_residuals$surface.matrix %>%
-  preProcess_ransac(inlierThreshold = 1e-5,
-                    finalSelectionThreshold = 2*(1e-5),
+  preProcess_ransac(ransacInlierThresh = 1e-5,
+                    ransacFinalSelectThresh = 2*(1e-5),
                     iters = 150) %>%
   preProcess_levelBF() %>%
-  preProcess_ransac(inlierThreshold = (1e-6),
-                    finalSelectionThreshold = 2*(1e-5),
+  preProcess_ransac(ransacInlierThresh = (1e-6),
+                    ransacFinalSelectThresh = 2*(1e-5),
                     iters = 300) %>%
   preProcess_levelBF()  %>%
   preProcess_cropWS() %>%
@@ -280,14 +280,14 @@ km1_unknown2_cmcs <- cmcR::cmcFilter_improved(km1_unknown2_comparison,
 The comparison between km1 and unknown1 yields 0 CMCs under both the initially proposed method (in either direction) and the High CMC method. This provides considerable evidence that the pair is non-matching.
 
 ```{r}
-any(c(nrow(km1_unknown1_cmcs$initialCMCs$comparison_1to2) > 0,
-      nrow(km1_unknown1_cmcs$initialCMCs$comparison_2to1) > 0,
+any(c(nrow(km1_unknown1_cmcs$originalMethodCMCs$comparison_1to2) > 0,
+      nrow(km1_unknown1_cmcs$originalMethodCMCs$comparison_2to1) > 0,
       nrow(km1_unknown1_cmcs$highCMCs) > 0))
 ```
 
 ```{r echo=FALSE,eval=FALSE}
-km1_unknown1_cmcs$initialCMCs[[which.min(c(nrow(km1_unknown1_cmcs$initialCMCs[[1]]),
-                                                nrow(km1_unknown1_cmcs$initialCMCs[[2]])))]] %>%
+km1_unknown1_cmcs$originalMethodCMCs[[which.min(c(nrow(km1_unknown1_cmcs$originalMethodCMCs[[1]]),
+                                                nrow(km1_unknown1_cmcs$originalMethodCMCs[[2]])))]] %>%
   DT::datatable()
 ```
 
@@ -337,8 +337,8 @@ km2_unknown2_cmcs <- cmcR::cmcFilter_improved(km2_unknown2_comparison,
 The comparison between km2 and unknown1 also yielded 0 CMCs under both methods.
 
 ```{r}
-any(c(nrow(km2_unknown1_cmcs$initialCMCs$comparison_1to2) > 0,
-      nrow(km2_unknown1_cmcs$initialCMCs$comparison_2to1) > 0,
+any(c(nrow(km2_unknown1_cmcs$originalMethodCMCs$comparison_1to2) > 0,
+      nrow(km2_unknown1_cmcs$originalMethodCMCs$comparison_2to1) > 0,
       nrow(km2_unknown1_cmcs$highCMCs) > 0))
 ```
 
@@ -369,9 +369,24 @@ km1_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
                                        x3p2 = unknown1_residuals$x3p,
                                        cellCCF_bothDirections_output = km1_unknown1_comparison,
                                        cmcFilter_improved_output = km1_unknown1_cmcs,
-                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                       height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                                '#b35806',
+                                                                                '#e08214',
+                                                                                '#fdb863',
+                                                                                '#fee0b6',
+                                                                                '#f7f7f7',
+                                                                                '#d8daeb',
+                                                                                '#b2abd2',
+                                                                                '#8073ac',
+                                                                                '#542788',
+                                                                                '#2d004b'),
+                                                                              amount = .75),
+                                       cell.colors = c("#a60b00","#1b03a3"),
+                                       cell.alpha = .15,
+                                       na.value = "gray80")
 
-km1_unknown1_cmcPlots$initialCMC
+km1_unknown1_cmcPlots$originalMethodCMCs
 ```
 
 In contrast, the initial and CMCs between km1 and unknown2 are shown in black below. Red cells again represent the translations/rotations at which the CCF$_{\max}$ values occurred for the respective cell/region pairs. We can see that the black cells indeed appear to align as we might expect for a truly matching pair of cartridge cases.
@@ -381,9 +396,24 @@ km1_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km1_residuals,
               x3p2 = unknown2_residuals$x3p,
               cellCCF_bothDirections_output = km1_unknown2_comparison,
               cmcFilter_improved_output = km1_unknown2_cmcs,
-              legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+              legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+              height.colors = colorspace::desaturate(c('#7f3b08',
+                                                       '#b35806',
+                                                       '#e08214',
+                                                       '#fdb863',
+                                                       '#fee0b6',
+                                                       '#f7f7f7',
+                                                       '#d8daeb',
+                                                       '#b2abd2',
+                                                       '#8073ac',
+                                                       '#542788',
+                                                       '#2d004b'),
+                                                     amount = .75),
+              cell.colors = c("#a60b00","#1b03a3"),
+              cell.alpha = .15,
+              na.value = "gray80")
 
-km1_unknown2_cmcPlots$initialCMC
+km1_unknown2_cmcPlots$originalMethodCMCs
 ```
 The high CMCs between km1 and unknown2 are shown below. As we've already concluded, there are more cell/region pairs declared CMCs under the high CMC method than the initially proposed method.
 
@@ -398,9 +428,24 @@ km2_unknown1_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
                                        x3p2 = unknown1_residuals$x3p,
                                        cellCCF_bothDirections_output = km2_unknown1_comparison,
                                        cmcFilter_improved_output = km2_unknown1_cmcs,
-                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                       height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                                '#b35806',
+                                                                                '#e08214',
+                                                                                '#fdb863',
+                                                                                '#fee0b6',
+                                                                                '#f7f7f7',
+                                                                                '#d8daeb',
+                                                                                '#b2abd2',
+                                                                                '#8073ac',
+                                                                                '#542788',
+                                                                                '#2d004b'),
+                                                                              amount = .75),
+                                       cell.colors = c("#a60b00","#1b03a3"),
+                                       cell.alpha = .15,
+                                       na.value = "gray80")
 
-km2_unknown1_cmcPlots$initialCMC
+km2_unknown1_cmcPlots$originalMethodCMCs
 ```
 
 And the CMCs for the comparison between km2 and unknown2 are shown below. Note that the initial CMCs are defined based on a particular comparison "direction" (while the High CMC method combines information from both directions). The surface matrices shown on the left and right are those of km2_residuals and unknown2_residuals, respectively.
@@ -410,9 +455,24 @@ km2_unknown2_cmcPlots <- cmcR::cmcPlot(x3p1 = km2_residuals$x3p,
                                        x3p2 = unknown2_residuals$x3p,
                                        cellCCF_bothDirections_output = km2_unknown2_comparison,
                                        cmcFilter_improved_output = km2_unknown2_cmcs,
-                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                                       legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                       height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                                '#b35806',
+                                                                                '#e08214',
+                                                                                '#fdb863',
+                                                                                '#fee0b6',
+                                                                                '#f7f7f7',
+                                                                                '#d8daeb',
+                                                                                '#b2abd2',
+                                                                                '#8073ac',
+                                                                                '#542788',
+                                                                                '#2d004b'),
+                                                                              amount = .75),
+                                       cell.colors = c("#a60b00","#1b03a3"),
+                                       cell.alpha = .15,
+                                       na.value = "gray80")
 
-km2_unknown2_cmcPlots$initialCMC
+km2_unknown2_cmcPlots$originalMethodCMCs
 ```
 
 ```{r}

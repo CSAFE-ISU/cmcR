@@ -50,22 +50,10 @@ representing the height values of a breech face impression microscopy scan,
 into pairwise disjoint cells. mat2, the surface matrix of a breech face
 impression scan to be compared to mat1, is also broken up into cells
 centered at the same location as those in mat1. However, the cells in mat2
-are larger than those in mat1 (typically 4 times the size except on the
-border of mat2).
-The cross-correlation function (CCF) is then calculated between each cell
-in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
-For each mat1, mat2 cell pair, the maximum CCF value as well as the
-necessary horizontal and vertical translations to align the mat1 cell with
-the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
-max CCF values aren't necessarily reliable estimates of the true similarity
-between mat1 and mat2 (since NAs need to be replaced prior to calculation).
-As such, a &quot;raw&quot; correlation is calculated by extracting from mat2 a
-mat1-sized matrix based on the dx, dy translation values obtained from the
-FFT-based CCF method. Rather than replacing NA values, these two matrices
-of equivalent dimension are turned into vectors and the pairwise-complete
-observation correlation (in which only non-NA pairs are considered) is
-calculated.
-mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+are larger than those in mat1 (typically 9 times the size except on the
+border of mat2). See ccfMethod argument details for information regarding
+how the CCF is calculated.
+mat2 is then rotated by some amount (say, 3 degrees) and the process of
 dividing mat2 into cells and calculating the max CCF for each cell in mat1
 is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument." />
@@ -164,22 +152,10 @@ representing the height values of a breech face impression microscopy scan,
 into pairwise disjoint cells. mat2, the surface matrix of a breech face
 impression scan to be compared to mat1, is also broken up into cells
 centered at the same location as those in mat1. However, the cells in mat2
-are larger than those in mat1 (typically 4 times the size except on the
-border of mat2).</p>
-<p>The cross-correlation function (CCF) is then calculated between each cell
-in mat1 and its larger, paired cell in mat2 using a Fast Fourier Transform.
-For each mat1, mat2 cell pair, the maximum CCF value as well as the
-necessary horizontal and vertical translations to align the mat1 cell with
-the mat2 cell to achieve this max CCF are recorded. Note that the FFT-based
-max CCF values aren't necessarily reliable estimates of the true similarity
-between mat1 and mat2 (since NAs need to be replaced prior to calculation).
-As such, a "raw" correlation is calculated by extracting from mat2 a
-mat1-sized matrix based on the dx, dy translation values obtained from the
-FFT-based CCF method. Rather than replacing NA values, these two matrices
-of equivalent dimension are turned into vectors and the pairwise-complete
-observation correlation (in which only non-NA pairs are considered) is
-calculated.</p>
-<p>mat2 is then rotated by some amount (say, 2.5 degrees) and the process of
+are larger than those in mat1 (typically 9 times the size except on the
+border of mat2). See ccfMethod argument details for information regarding
+how the CCF is calculated.</p>
+<p>mat2 is then rotated by some amount (say, 3 degrees) and the process of
 dividing mat2 into cells and calculating the max CCF for each cell in mat1
 is repeated. The rotations performed on mat2 are dictated by the value(s)
 passed to the theta argument.</p>
@@ -228,23 +204,6 @@ observed (i.e., non-NA) values for it to be included in the CCF calculation
 procedure.</p></td>
     </tr>
     <tr>
-      <th>rawCorrTieBreaker</th>
-      <td><p>the way in which the "raw" correlation (see
-description) is calculated may require slight padding/cropping of the
-mat1-sized matrix extracted from mat2 to make their dimensions equal. This
-padding/cropping can occur to the initial or final rows/cols in the matrix,
-without a clear way to determine which is "correct." As such, all possible
-combinations of pre/post padding/cropping are considered (only if
-necessary). To determine a final mat1-sized matrix, rawCorrTieBreaker can
-be used to determine which yields the lowest/highest correlation with matt1
-(using rawCorrTieBreaker = which.min or which.max, respectively).</p></td>
-    </tr>
-    <tr>
-      <th>use</th>
-      <td><p>argument to be passed to the cor function. Dictates how NAs are
-dealt with in computing the correlation.</p></td>
-    </tr>
-    <tr>
       <th>centerCell</th>
       <td><p>dictates if cell is to be shifted prior to CCF
 calculation. Default is that no shifting is performed. If set to
@@ -259,6 +218,42 @@ Default is that no scaling is performed. If set to "wholeMatrix", then each
 cell is divided by the standard deviation of the whole matrix. If set to
 "individualCell", then each cell is divided by its particular standard
 deviation.</p></td>
+    </tr>
+    <tr>
+      <th>ccfMethod</th>
+      <td><p>dictates which of 3 different methods are used to calculate
+a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+optimal translation values to align each cell within in its associated
+region by using Cross-Correlation theorem + FFT algorithm and then
+calculates the pairwise-complete correlation between the cell and a
+cell-sized matrix extracted from the paired region. "imager" uses the
+normalized imager::correlate function and uses the max CCF value
+calculated. "bruteForceReweighted" calculates the pairwise-complete
+correlation between a cell and every possible cell-sized matrix that could
+be extracted from its paired region (and is thus computationally very
+costly). For each cell/region pair, these correlation values are
+re-weighted based on the number of non-missing values used to calculate
+them by the following: nonMissingCount*cor/max(nonMissingCount).</p></td>
+    </tr>
+    <tr>
+      <th>rawCorrTieBreaker</th>
+      <td><p>Only applicable if ccfMethod == "fftThenPairwise".
+The way in which the CCF (see ccfMethod) is calculated may require slight
+padding/cropping of the mat1-sized matrix extracted from mat2 to make their
+dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
+4 pixels). This padding/cropping can occur to the initial or final
+rows/cols in the matrix, without a clear way to determine which is
+"correct." As such, all possible combinations of pre/post padding/cropping
+are considered (only if necessary). To determine a final mat1-sized matrix,
+rawCorrTieBreaker can be used to determine which yields the lowest/highest
+correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
+respectively).</p></td>
+    </tr>
+    <tr>
+      <th>use</th>
+      <td><p>Only applicable if ccfMethod == "fftThenPairwise". argument to be
+passed to the cor function. Dictates how NAs are dealt with in computing
+the correlation.</p></td>
     </tr>
     </table>
 

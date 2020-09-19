@@ -216,7 +216,22 @@ kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                         cellCCF_bothDirections_output = kmComparison,
                         cmcFilter_improved_output = kmCMC,
                         type = "faceted",
-                        legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                        legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                        height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                 '#b35806',
+                                                                 '#e08214',
+                                                                 '#fdb863',
+                                                                 '#fee0b6',
+                                                                 '#f7f7f7',
+                                                                 '#d8daeb',
+                                                                 '#b2abd2',
+                                                                 '#8073ac',
+                                                                 '#542788',
+                                                                 '#2d004b'),
+                                                               amount = .75),
+                        cell.colors = c("#a60b00","#1b03a3"),
+                        cell.alpha = .15,
+                        na.value = "gray80")
 kmPlts$highCMC
 ```
 
@@ -227,25 +242,43 @@ knmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
                          x3p2 = fadul2.1$x3p,
                          cellCCF_bothDirections_output = knmComparison,
                          cmcFilter_improved_output = knmCMC,
-                         legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                         legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                         height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                  '#b35806',
+                                                                  '#e08214',
+                                                                  '#fdb863',
+                                                                  '#fee0b6',
+                                                                  '#f7f7f7',
+                                                                  '#d8daeb',
+                                                                  '#b2abd2',
+                                                                  '#8073ac',
+                                                                  '#542788',
+                                                                  '#2d004b'),
+                                                                amount = .75),
+                         cell.colors = c("#a60b00","#1b03a3"),
+                         cell.alpha = .15,
+                         na.value = "gray80")
 
-knmPlts$initialCMC
+knmPlts$originalMethodCMCs
 ```
 
 ## Bonus: CCF "Map"
 
 ```{r}
-kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,fadul1.2$x3p,ccfDF = kmCMC$highCMCs,cellCCF_params = kmComparison$comparison_1to2$params)
+kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,
+                                              fadul1.2$x3p,
+                                              ccfDF = kmCMC$highCMCs,
+                                              cellCCF_params = kmComparison$comparison_1to2$params)
 
 kmCellRegionPairs[3] %>%
   map2(.x = .,
        .y = names(.), 
        function(set,theta){
-         map(set[9], ~ ccfMapPlot(mat1 = .[[1]],
-                          mat2 = .[[2]],
-                          theta = theta,
-                          type = "raster"))
-         })
+         map(set[2], ~ ccfMapPlot(mat1 = .[[1]],
+                                  mat2 = .[[2]],
+                                  theta = theta,
+                                  type = "raster"))
+       })
 ```
 
 <!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
@@ -428,7 +461,7 @@ kmCellRegionPairs[3] %>%
 
 <!-- ```{r} -->
 <!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = knmCMCs$`1.1_2.1`$initialCMCs[[1]]$comparison_1to2) -->
+<!--               cmcDF = knmCMCs$`1.1_2.1`$originalMethodCMCs[[1]]$comparison_1to2) -->
 <!-- ``` -->
 
 
@@ -453,7 +486,7 @@ kmCellRegionPairs[3] %>%
 <!--                               comparisonType = "known non-match")) -->
 <!--                        } -->
 <!--                        else{ -->
-<!--                          cmcs$initialCMCs[[1]][[which.min(c(nrow(cmcs$initialCMCs[[1]]$comparison_1to2),nrow(cmcs$initialCMCs[[1]]$comparison_2to1)))]] %>% -->
+<!--                          cmcs$originalMethodCMCs[[1]][[which.min(c(nrow(cmcs$originalMethodCMCs[[1]]$comparison_1to2),nrow(cmcs$originalMethodCMCs[[1]]$comparison_2to1)))]] %>% -->
 <!--                            mutate(pair = rep(name,times = nrow(.)), -->
 <!--                               comparisonType = "known non-match") %>% -->
 <!--                            return() -->

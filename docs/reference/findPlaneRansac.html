@@ -139,7 +139,7 @@ GitHub.</p>
     <pre class="usage"><span class='fu'>findPlaneRansac</span>(
   <span class='no'>surfaceMat</span>,
   <span class='kw'>inlierTreshold</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>,
-  <span class='kw'>finalSelectionThreshold</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fl'>1e-05</span>,
+  <span class='kw'>ransacFinalSelectThresh</span> <span class='kw'>=</span> <span class='fl'>2e-05</span>,
   <span class='kw'>iters</span> <span class='kw'>=</span> <span class='fl'>150</span>,
   <span class='no'>...</span>
 )</pre>
@@ -152,9 +152,9 @@ GitHub.</p>
       <td><p>matrix of input depths in microns.</p></td>
     </tr>
     <tr>
-      <th>finalSelectionThreshold</th>
+      <th>ransacFinalSelectThresh</th>
       <td><p>once the RANSAC plane is fitted based on the
-inlierThreshold, this argument dictates which observations are selected as
+ransacInlierThreshold, this argument dictates which observations are selected as
 the final breech face estimate.</p></td>
     </tr>
     <tr>
@@ -163,7 +163,7 @@ the final breech face estimate.</p></td>
 stable breech face estimate)</p></td>
     </tr>
     <tr>
-      <th>inlierThreshold</th>
+      <th>ransacInlierThreshold</th>
       <td><p>threshold to declare an observed value close to the
 fitted plane an "inlier". A smaller value will yield a more stable
 estimate.</p></td>

@@ -27,7 +27,7 @@ library(dplyr)
 
 To illustrate the usage of the various options available in the `cmcFilter_improved` function, we will use cartridge case data available from the [NIST Ballisitics and Toolmarks Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search). Note that `fadul1.1` and `fadul1.2` are a known match pair (i.e., were fired from the same firearm) while `fadul2.1` was fired from a different firearm (and is thus classified as a non-match). The following will perform the pre-processing procedures (again, described in the [Reproducible Example](https://jzemmels.github.io/cmcR/articles/reproducibleExample.html#pre-processing-1) vignette) for these three cartridge cases.
 
-```{r }
+```{r}
 set.seed(4132020)
 
 fadul1.1 <- selectBFImpression_sample_x3p(x3p_path = "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d",
@@ -83,8 +83,7 @@ cmcPerThetaBarPlot(kmComparison,
                    ccf_thresh = .5,
                    dx_thresh = 25,
                    highCMCThresh = 1,
-                   x3pNames = c("Fadul 1-1","Fadul 1-2")) +
-  ylim(c(NA,40))
+                   x3pNames = c("Fadul 1-1","Fadul 1-2"))
 ```
 
 The convention used in the \pkg{cmcR} package is to take the median of consecutive, tied $\theta$ values and treat that as the modal $\theta$ value. Thus, $\theta = 22.5$ degrees would be used as the $\theta$ mode value in this example. This seems to "agree" with $\theta = -24$ identified as the mode in the other direction (i.e., they're within an allowable threshold of each other, up to a sign). However, an obvious question is: "how many consecutive $\theta$ values is too many?" Additionally,  [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) don't say what to do if both directions pass the High CMC criterion (as they do in this example), but the $\theta$ modes identified disagree with each other (e.g., the mode occurs at $\theta = -24$ degrees in one direction but $\theta = 9$ degrees in the other). The `cmcFilter_improved` function contains internal logic that determines whether the modal $\theta$ values agree with each other (specifically, that they are within `theta_thresh` of each other, up to a sign).
@@ -101,9 +100,25 @@ kmCMC_plt <- cmcPlot(x3p1 = fadul1.1$x3p,
                      x3p2 = fadul1.2$x3p,
                      cellCCF_bothDirections_output = kmComparison,
                      cmcFilter_improved_output = kmCMC,
-                     x3pNames = c("Fadul 1-1","Fadul 1-2"))
+                     x3pNames = c("Fadul 1-1","Fadul 1-2"),
+                     legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                     height.colors = colorspace::desaturate(c('#7f3b08',
+                                                              '#b35806',
+                                                              '#e08214',
+                                                              '#fdb863',
+                                                              '#fee0b6',
+                                                              '#f7f7f7',
+                                                              '#d8daeb',
+                                                              '#b2abd2',
+                                                              '#8073ac',
+                                                              '#542788',
+                                                              '#2d004b'),
+                                                            amount = .75),
+                     cell.colors = c("#a60b00","#1b03a3"),
+                     cell.alpha = .15,
+                     na.value = "gray80")
 
-kmCMC_plt$highCMC
+kmCMC_plt$originalMethodCMCs
 ```
 
 # The `missingTheta_decision` argument
@@ -133,9 +148,24 @@ knmCMC_replace_plt <- cmcPlot(x3p1 = fadul1.1$x3p,
                               x3p2 = fadul2.1$x3p,
                               cellCCF_bothDirections_output = knmComparison,
                               cmcFilter_improved_output = knmCMC_replace,
-                              legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                              legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                              height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                       '#b35806',
+                                                                       '#e08214',
+                                                                       '#fdb863',
+                                                                       '#fee0b6',
+                                                                       '#f7f7f7',
+                                                                       '#d8daeb',
+                                                                       '#b2abd2',
+                                                                       '#8073ac',
+                                                                       '#542788',
+                                                                       '#2d004b'),
+                                                                     amount = .75),
+                              cell.colors = c("#a60b00","#1b03a3"),
+                              cell.alpha = .15,
+                              na.value = "gray80")
 
-knmCMC_replace_plt$highCMC
+knmCMC_replace_plt$originalMethodCMCs
 ```
 
 A slightly more "conservative" option would be to only count the High CMCs in the direction that passed the High CMC criterion and only count the initial CMCs (i.e., CMCs identified under the initially proposed method) in the other. That is, we "dismiss" the one direction that failed the High CMC criterion. Doing so for the currently considered non-match pair reduces the High CMC count from 32 to 28, which are visualized below.
@@ -151,9 +181,24 @@ knmCMC_dismiss_plt <- cmcPlot(x3p1 = fadul1.1$x3p,
                               x3p2 = fadul2.1$x3p,
                               cellCCF_bothDirections_output = knmComparison,
                               cmcFilter_improved_output = knmCMC_dismiss,
-                              legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                              legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                              height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                       '#b35806',
+                                                                       '#e08214',
+                                                                       '#fdb863',
+                                                                       '#fee0b6',
+                                                                       '#f7f7f7',
+                                                                       '#d8daeb',
+                                                                       '#b2abd2',
+                                                                       '#8073ac',
+                                                                       '#542788',
+                                                                       '#2d004b'),
+                                                                     amount = .75),
+                              cell.colors = c("#a60b00","#1b03a3"),
+                              cell.alpha = .15,
+                              na.value = "gray80")
 
-knmCMC_dismiss_plt$highCMC
+knmCMC_dismiss_plt$originalMethodCMCs
 ```
 
 Finally, the most "conservative" option would be to only count High CMCs for cartridge case pairs that pass the High CMC criterion in *both* directions. That is, the pair would "fail" the High CMC criterion if either direction fails. In the event that a cartridge case pair fails the High CMC criterion for any reason, [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) proposes using the minimum of the initial CMC counts determined in both directions. For the current non-match example, there were 5 initial CMCs for the "Fadul 1-1 vs. Fadul 2-1" direction and 4 initial CMCs for the "Fadul 2-1 vs. Fadul 1-1" direction. Thus, the official initial CMC count would be 4, which are visualized below.
@@ -169,9 +214,24 @@ knmCMC_fail_plt <- cmcPlot(x3p1 = fadul1.1$x3p,
                            x3p2 = fadul2.1$x3p,
                            cellCCF_bothDirections_output = knmComparison,
                            cmcFilter_improved_output = knmCMC_fail,
-                           legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+                           legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                           height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                    '#b35806',
+                                                                    '#e08214',
+                                                                    '#fdb863',
+                                                                    '#fee0b6',
+                                                                    '#f7f7f7',
+                                                                    '#d8daeb',
+                                                                    '#b2abd2',
+                                                                    '#8073ac',
+                                                                    '#542788',
+                                                                    '#2d004b'),
+                                                                  amount = .75),
+                           cell.colors = c("#a60b00","#1b03a3"),
+                           cell.alpha = .15,
+                           na.value = "gray80")
 
-knmCMC_fail_plt$initialCMC
+knmCMC_fail_plt$originalMethodCMCs
 ```
 
 # The `compareInitialAndHighThetas` argument
@@ -186,9 +246,9 @@ knmCMC_transThresh20 <- cmcFilter_improved(knmComparison,
                                            missingTheta_decision = "replace")
 
 #Initially proposed method median theta values:
-bind_rows(knmCMC_transThresh20$initialCMCs) %>%
-  mutate(comparison = c(rep("comparison_1to2",nrow(knmCMC_transThresh20$initialCMCs$comparison_1to2)),
-                        rep("comparison_2to1",nrow(knmCMC_transThresh20$initialCMCs$comparison_2to1)))) %>%
+bind_rows(knmCMC_transThresh20$originalMethodCMCs) %>%
+  mutate(comparison = c(rep("comparison_1to2",nrow(knmCMC_transThresh20$originalMethodCMCs$comparison_1to2)),
+                        rep("comparison_2to1",nrow(knmCMC_transThresh20$originalMethodCMCs$comparison_2to1)))) %>%
   group_by(comparison) %>%
   summarize(theta = median(theta))
 ```

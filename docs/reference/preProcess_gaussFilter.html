@@ -138,7 +138,7 @@ particular cut-off wavelength.</p>
     <pre class="usage"><span class='fu'>preProcess_gaussFilter</span>(
   <span class='no'>surfaceMat</span>,
   <span class='no'>res</span>,
-  <span class='kw'>wavelength</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>16</span>, <span class='fl'>250</span>),
+  <span class='kw'>wavelength</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>16</span>, <span class='fl'>500</span>),
   <span class='kw'>filtertype</span> <span class='kw'>=</span> <span class='st'>"bp"</span>
 )</pre>
 
@@ -182,7 +182,7 @@ low pass filter.</p></td>
   <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_cropWS.html'>preProcess_cropWS</a></span>() <span class='kw'>%&gt;%</span>
   <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_removeFPCircle.html'>preProcess_removeFPCircle</a></span>() <span class='kw'>%&gt;%</span>
   <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>preProcess_gaussFilter</span>(<span class='kw'>res</span> <span class='kw'>=</span> <span class='no'>raw_x3p</span>$<span class='no'>header.info</span>$<span class='no'>incrementY</span>,
-                               <span class='kw'>wavelength</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>16</span>,<span class='fl'>250</span>),
+                               <span class='kw'>wavelength</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>16</span>,<span class='fl'>500</span>),
                                <span class='kw'>filtertype</span> <span class='kw'>=</span> <span class='st'>"bp"</span>)
 }</div></pre>
   </div>

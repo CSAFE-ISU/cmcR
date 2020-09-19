@@ -6,8 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle — preProcess_removeFPCircle • cmcR</title>
+<title>Crop the exterior of a breech face impression surface matrix — cropBFExterior • cmcR</title>
 
 
 <!-- jquery -->
@@ -40,10 +39,12 @@ firing pin impression circle — preProcess_removeFPCircle • cmcR</title>
 
 
 
-<meta property="og:title" content="Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle — preProcess_removeFPCircle" />
-<meta property="og:description" content="Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle" />
+<meta property="og:title" content="Crop the exterior of a breech face impression surface matrix — cropBFExterior" />
+<meta property="og:description" content="The radius estimation procedure tends to over-estimate the
+desired radius values. As such, a lot of the breech face impression
+&quot;roll-off&quot; is included in the final scan. Excessive roll-off can bias the
+calculation of the CCF. As such, we can manually shrink the radius estimate
+so that little to no roll-off is included in the final processed scan." />
 
 
 
@@ -124,82 +125,79 @@ firing pin impression circle" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle</h1>
+    <h1>Crop the exterior of a breech face impression surface matrix</h1>
     
-    <div class="hidden name"><code>preProcess_removeFPCircle.Rd</code></div>
+    <div class="hidden name"><code>cropBFExterior.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Given a surface matrix, estimates and filters any pixels within the estimated
-firing pin impression circle</p>
+    <p>The radius estimation procedure tends to over-estimate the
+desired radius values. As such, a lot of the breech face impression
+"roll-off" is included in the final scan. Excessive roll-off can bias the
+calculation of the CCF. As such, we can manually shrink the radius estimate
+so that little to no roll-off is included in the final processed scan.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>preProcess_removeFPCircle</span>(
-  <span class='no'>surfaceMat</span>,
-  <span class='kw'>aggregationFunction</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-  <span class='kw'>smootherSize</span> <span class='kw'>=</span> <span class='fl'>2</span> * <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>((<span class='fl'>0.1</span> * <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>surfaceMat</span>)/<span class='fl'>2</span>)) + <span class='fl'>1</span>,
-  <span class='kw'>gridSize</span> <span class='kw'>=</span> <span class='fl'>40</span>,
-  <span class='kw'>gridGranularity</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>houghScoreQuant</span> <span class='kw'>=</span> <span class='fl'>0.9</span>
+    <pre class="usage"><span class='fu'>cropBFExterior</span>(
+  <span class='no'>x3p</span>,
+  <span class='kw'>scheme</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>high_connectivity</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>radiusOffset</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>croppingThresh</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>agg_function</span> <span class='kw'>=</span> <span class='no'>median</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>surfaceMat</th>
-      <td><p>a surface matrix representing a breech face impression scan</p></td>
+      <th>x3p</th>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan</p></td>
     </tr>
     <tr>
-      <th>aggregationFunction</th>
-      <td><p>function to select initial radius estimate from
-those calculated using fpRadiusGridSearch</p></td>
+      <th>scheme</th>
+      <td><p>argument for imager::imgradient</p></td>
     </tr>
     <tr>
-      <th>smootherSize</th>
-      <td><p>size of average smoother (to be passed to zoo::roll_mean)</p></td>
+      <th>high_connectivity</th>
+      <td><p>argument for imager::label</p></td>
     </tr>
     <tr>
-      <th>gridSize</th>
-      <td><p>size of grid, centered on the initial radius estimate, to be
-used to determine the best fitting circle to the surface matrix via the
-Hough transform method</p></td>
+      <th>tolerance</th>
+      <td><p>argument for imager::label</p></td>
     </tr>
     <tr>
-      <th>gridGranularity</th>
-      <td><p>granularity of radius grid used to determine the best
-fitting circle to the surface matrix via the Hough transform method</p></td>
+      <th>radiusOffset</th>
+      <td><p>number of pixels to add to estimated breech face radius.
+This is commonly a negative value (e.g., -20) to trim the cartridge case
+primer roll-off from the returned, cropped surface matrix.</p></td>
     </tr>
     <tr>
-      <th>houghScoreQuant</th>
-      <td><p>quantile cut-off to be used when determining a final
-radius estimate using the score values returned by the imager::hough_circle</p></td>
+      <th>croppingThresh</th>
+      <td><p>argument for cmcR::preProcess_cropWS</p></td>
+    </tr>
+    <tr>
+      <th>agg_function</th>
+      <td><p>the breech face radius estimation procedure returns
+numerous radius estimates. This argument dictates the function used to
+aggregate these into a final estimate.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>imager treats a matrix as its transpose (i.e., x and y axes are
-swapped). As such, relative to the original surface matrix, the x and y
-columns in the data frame fpImpressionCircle actually correspond to the row
-and column indices at which the center of the firing pin impression circle
-is estiamted to be.</p>
+    <p>An x3p object containing the surface matrix of a breech face
+impression scan where the rows/columns on the exterior of the breech face
+impression have been cropped-out.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='no'>raw_x3p</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span>(<span class='st'>"path/to/file.x3p"</span>) <span class='kw'>%&gt;%</span>
-<span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>sample_x3p</a></span>(<span class='kw'>m</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+    <pre class="examples"><div class='input'><span class='no'>fadul1.1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>x3ptools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span>(<span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
 
-<span class='no'>raw_x3p</span>$<span class='no'>surface.matrix</span> <span class='kw'>&lt;-</span> <span class='no'>raw_x3p</span>$<span class='no'>surface.matrix</span> <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_ransac.html'>preProcess_ransac</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_levelBF.html'>preProcess_levelBF</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'><a href='preProcess_cropWS.html'>preProcess_cropWS</a></span>() <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>preProcess_removeFPCircle</span>(<span class='kw'>aggregationFunction</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-                                  <span class='kw'>smootherSize</span> <span class='kw'>=</span> <span class='fl'>2</span>*<span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span>((<span class='fl'>.1</span>*<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span>(<span class='no'>surfaceMat</span>)/<span class='fl'>2</span>)) + <span class='fl'>1</span>,
-                                  <span class='kw'>gridGranularity</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-                                  <span class='kw'>houghScoreQuant</span> <span class='kw'>=</span> <span class='fl'>.9</span>)
-}</div></pre>
+<span class='no'>fadul1.1_cropped</span> <span class='kw'>&lt;-</span> <span class='fu'>cropBFExterior</span>(<span class='kw'>x3p</span> <span class='kw'>=</span> <span class='no'>fadul1.1</span>,<span class='kw'>radiusOffset</span> <span class='kw'>=</span> -<span class='fl'>20</span>)
+
+<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='st'>"Original"</span> <span class='kw'>=</span> <span class='no'>fadul1.1</span>,<span class='st'>"Cropped"</span> <span class='kw'>=</span> <span class='no'>fadul1.1_cropped</span>))</div><div class='img'><img src='cropBFExterior-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
