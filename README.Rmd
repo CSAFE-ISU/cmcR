@@ -37,3 +37,138 @@ Install the development version from [GitHub](https://github.com/jzemmels/cmcR) 
 devtools::install_github("jzemmels/cmcR")
 ```
 Cartridge case scan data can be accessed at the [NIST Ballisitics and Toolmarks Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
+
+## Example
+
+We will illustrate the package functionality here. This intended to be a concise demonstration, so please refer to the package vignettes available under the "Articles" tab of the [package website](https://csafe-isu.github.io/cmcR/index.html) for more detailed information.
+
+```{r}
+library(cmcR)
+library(magrittr)
+set.seed(4132020)
+```
+
+Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2. The `read_x3p` function from the [x3ptools](https://github.com/heike/x3ptools) package can read scans from the [NBTRD](https://tsapps.nist.gov/NRBTD/Studies/Search) given the appropriate address. The two scans are read below and visualized using the [`x3pListPlot`](https://csafe-isu.github.io/cmcR/reference/x3pListPlot.html) function.
+
+```{r}
+fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+
+fadul1.2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8")
+
+cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
+                       "Fadul 1-2" = fadul1.2),
+                  type = "faceted")
+```
+
+### Preprocessing
+
+To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans, caused by the staging area in which the scans are taken, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Consider the [funtion reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we first downsample each scan (by a factor of 4, selecting every other row/column) using the `sample_x3p` function.
+
+```{r}
+fadul1.1_processed <- x3ptools::sample_x3p(fadul1.1)
+
+fadul1.1_processed$surface.matrix<- fadul1.1_processed$surface.matrix %>%
+  cmcR::preProcess_ransac() %>%
+  cmcR::preProcess_levelBF() %>%
+  cmcR::preProcess_cropWS() %>%
+  cmcR::preProcess_removeFPCircle() %>%
+  cmcR::preProcess_gaussFilter(res = fadul1.1_processed$header.info$incrementY)
+
+fadul1.2_processed <- x3ptools::sample_x3p(fadul1.2)
+
+fadul1.2_processed$surface.matrix<- fadul1.2_processed$surface.matrix %>%
+  cmcR::preProcess_ransac() %>%
+  cmcR::preProcess_levelBF() %>%
+  cmcR::preProcess_cropWS() %>%
+  cmcR::preProcess_removeFPCircle() %>%
+  cmcR::preProcess_gaussFilter(res = fadul1.2_processed$header.info$incrementY)
+
+#manually update scan metadata processing
+fadul1.1_processed$header.info$sizeY <- ncol(fadul1.1_processed$surface.matrix)
+fadul1.1_processed$header.info$sizeX <- nrow(fadul1.1_processed$surface.matrix)
+
+fadul1.2_processed$header.info$sizeY <- ncol(fadul1.2_processed$surface.matrix)
+fadul1.2_processed$header.info$sizeX <- nrow(fadul1.2_processed$surface.matrix)
+
+cmcR::x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
+                       "Processed Fadul1-2" = fadul1.2_processed),
+                  type = "faceted")
+```
+
+### Cell-based comparison procedure
+
+The scans are now ready to be compared using the cell-based comparison procedure. This is performed using the [`cellCCF_bothDirections`](https://csafe-isu.github.io/cmcR/reference/cellCCF_bothDirections.html) function.
+
+```{r}
+kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1_processed,
+                                             x3p2 = fadul1.2_processed,
+                                             thetas = seq(-30, 30, by = 3))
+```
+
+We may be interested in phase ($x$,$y$, and $\theta$) at which each cell/region pair attained the maximum cross-correlation (for example, this information is used to define matches vs. non-matches under the original method of Song (2013)). The `topResultsPerCell` function calculates this information from a list of CCF results (as returned by the `cellCCF_bothDirections` function) and returns it as a data frame. As the name implies, `cellCCF_bothDirections` performs the cell-based comparison procedures in both directions (i.e., Fadul 1-1 is partitioned into a grid of cells and compared to regions in Fadul 1-2 and vice versa), hence the `$` extraction of the `kmComparison` list object below. A sample of the output is given below.
+
+```{r}
+kmComparison$comparison_1to2$ccfResults %>%
+  cmcR::topResultsPerCell() %>%
+  head()
+```
+
+### Decision rule
+
+The final step in the CMC methodology is to apply a decision rule to the features extracted from the cell-based comparison procedure to declare a cell/region pair "congruent" or not. The number of "congruent" cell/region pairs is used as a similarity score between the two cartridge cases considered; the higher the number of congruent cell/region pairs, the more evidence there is that the cartridge case pair is a match. The various proposed CMC methods (two of which are implemented in the cmcR package) differ principally on the decision rule used to classify "congruent" cells. The [`cmcFilter_improved`](https://csafe-isu.github.io/cmcR/reference/cmcFilter_improved.html) function applies the decision rules from the original method of Song (2013) and the High CMC method of Tong et al. (2015) to the output of the `cellCCF_bothDirections` function. Phase an correlation thresholds need to be set by the user.
+
+```{r}
+kmCMC <- cmcR::cmcFilter_improved(cellCCF_bothDirections_output = kmComparison,
+                                  ccf_thresh = .5,
+                                  dx_thresh = 20,
+                                  theta_thresh = 6)
+```
+
+The decision rule of the original method of Song (2013) only considers one of the two possible comparison directions. As such, we obtain a congruent matching cell count for both directions. The `comparison_1to2` direction refers to the case where Fadul 1-1 is partitioned into a grid of cells and compared to regions in Fadul 1-2.
+
+```{r}
+nrow(kmCMC$originalMethodCMCs$comparison_1to2)
+head(kmCMC$originalMethodCMCs$comparison_1to2)
+```
+
+Conversely, the `comparison_2to1` direction refers to Fadul 1-2 is partitioned into a grid of cells and compared to regions in Fadul 1-1. The CMC counts we obtain are similar for both directions.
+
+```{r}
+nrow(kmCMC$originalMethodCMCs$comparison_2to1)
+head(kmCMC$originalMethodCMCs$comparison_2to1)
+```
+
+The High CMC method of Tong et al. (2015) applies more stringent criteria to classify congruent vs. non-congruent matching cells. However, it also tends to assign a higher CMC count than original method of Song (2013). Such is the case in the example considered.
+
+```{r}
+nrow(kmCMC$highCMCs)
+head(kmCMC$highCMCs)
+```
+
+We can visualize the congruent matching cells for the comparison considered using the [cmcPlot](https://csafe-isu.github.io/cmcR/reference/cmcPlot.html) function. Tong et al. (2015) recommend using the minimum of the two CMC counts determined under the original method of Song (2013) as the "initial" CMC count before applying the High CMC method criteria. This is what is visualized below.
+
+```{r}
+cmcPlots <- cmcR::cmcPlot(x3p1 = fadul1.1_processed,
+                          x3p2 = fadul1.2_processed,
+                          cellCCF_bothDirections_output = kmComparison,
+                          cmcFilter_improved_output = kmCMC,
+                          #arguments dictating output colors:
+                          height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
+                                                                   '#e08214','#fdb863',
+                                                                   '#fee0b6','#f7f7f7',
+                                                                   '#d8daeb','#b2abd2',
+                                                                   '#8073ac','#542788',
+                                                                   '#2d004b'),
+                                                                 amount = .75),
+                          cell.colors = c("#a60b00","#1b03a3"),
+                          cell.alpha = .15,
+                          na.value = "gray80")
+
+cmcPlots$originalMethodCMCs
+```
+
+
+```{r}
+cmcPlots$highCMCs
+```
+
