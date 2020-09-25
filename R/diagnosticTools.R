@@ -621,7 +621,8 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
                       }) %>%
       ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
       ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
-                        stat = "identity") +
+                        stat = "identity",
+                        alpha = .7) +
       ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
       ggplot2::theme_bw()  +
       ggplot2::xlab(expression(theta*" (degree)")) +
@@ -657,7 +658,8 @@ cmcPerThetaBarPlot <- function(cellCCF_output,
       ggplot2::ggplot(ggplot2::aes(x = theta,
                                    y = n)) +
       ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
-                        stat = "identity") +
+                        stat = "identity",
+                        alpha = .7) +
       ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
       ggplot2::theme_bw()  +
       ggplot2::xlab(expression(theta*" (degree)")) +

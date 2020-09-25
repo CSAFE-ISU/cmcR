@@ -42,8 +42,8 @@ Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
 ## Example
 
-We will illustrate the package functionality here. This intended to be a
-concise demonstration, so please refer to the package vignettes
+We will illustrate the package’s functionality here. This is intended to
+be a concise demonstration, so please refer to the package vignettes
 available under the “Articles” tab of the [package
 website](https://csafe-isu.github.io/cmcR/index.html) for more detailed
 information.
@@ -212,7 +212,6 @@ head(kmCMC$originalMethodCMCs$comparison_1to2)
 
 Conversely, the `comparison_2to1` direction refers to Fadul 1-2 is
 partitioned into a grid of cells and compared to regions in Fadul 1-1.
-The CMC counts we obtain are similar for both directions.
 
 ``` r
 nrow(kmCMC$originalMethodCMCs$comparison_2to1)
@@ -262,6 +261,7 @@ cmcPlots <- cmcR::cmcPlot(x3p1 = fadul1.1_processed,
                           x3p2 = fadul1.2_processed,
                           cellCCF_bothDirections_output = kmComparison,
                           cmcFilter_improved_output = kmCMC,
+                          x3pNames = c("Fadul 1-1","Fadul 1-2"),
                           #arguments dictating output colors:
                           height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
                                                                    '#e08214','#fdb863',

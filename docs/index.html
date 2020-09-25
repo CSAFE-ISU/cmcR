@@ -103,7 +103,7 @@
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
-<p>We will illustrate the package functionality here. This intended to be a concise demonstration, so please refer to the package vignettes available under the “Articles” tab of the <a href="https://csafe-isu.github.io/cmcR/index.html">package website</a> for more detailed information.</p>
+<p>We will illustrate the package’s functionality here. This is intended to be a concise demonstration, so please refer to the package vignettes available under the “Articles” tab of the <a href="https://csafe-isu.github.io/cmcR/index.html">package website</a> for more detailed information.</p>
 <div class="sourceCode" id="cb2"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">cmcR</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">magrittr</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">4132020</span>)</pre></div>
@@ -194,7 +194,7 @@
 <span class="co">#&gt; 4      33 y = 291 - 362, x =~   0.335    -6     0   -21              0.916 0.722</span>
 <span class="co">#&gt; 5      34 y = 291 - 362, x =~   0.314   -10    -1   -21              0.377 0.661</span>
 <span class="co">#&gt; 6      46 y = 363 - 435, x =~   0.308   -14    17   -21              0.481 0.860</span></pre></div>
-<p>Conversely, the <code>comparison_2to1</code> direction refers to Fadul 1-2 is partitioned into a grid of cells and compared to regions in Fadul 1-1. The CMC counts we obtain are similar for both directions.</p>
+<p>Conversely, the <code>comparison_2to1</code> direction refers to Fadul 1-2 is partitioned into a grid of cells and compared to regions in Fadul 1-1.</p>
 <div class="sourceCode" id="cb9"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">kmCMC</span>$<span class="no">originalMethodCMCs</span>$<span class="no">comparison_2to1</span>)
 <span class="co">#&gt; [1] 8</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">kmCMC</span>$<span class="no">originalMethodCMCs</span>$<span class="no">comparison_2to1</span>)
@@ -225,6 +225,7 @@
                           <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2_processed</span>,
                           <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
                           <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>,
+                          <span class="kw">x3pNames</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Fadul 1-1"</span>,<span class="st">"Fadul 1-2"</span>),
                           <span class="co">#arguments dictating output colors:</span>
                           <span class="kw">height.colors</span> <span class="kw">=</span> <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu"><a href="http://colorspace.R-Forge.R-project.org//reference/desaturate.html">desaturate</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'#7f3b08'</span>,<span class="st">'#b35806'</span>,
                                                                    <span class="st">'#e08214'</span>,<span class="st">'#fdb863'</span>,
