@@ -134,7 +134,9 @@ x3pListPlot <- function(x3pList,
                                            axis.ticks.y = ggplot2::element_blank(),
                                            panel.grid.major = ggplot2::element_blank(),
                                            panel.grid.minor = ggplot2::element_blank(),
-                                           panel.background = ggplot2::element_blank()) +
+                                           panel.background = ggplot2::element_blank(),
+                                           plot.title = ggplot2::element_text(hjust = .5,
+                                                                              size = 11)) +
                             ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(3,"in"),
                                                                             label.theme = ggplot2::element_text(size = 8),
                                                                             title.theme = ggplot2::element_text(size = 10),
@@ -191,6 +193,7 @@ arrangeCMCPlot <- function(x3p1,
                            height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            cell.colors = c("#a50026","#313695"),
                            cell.alpha = .2,
+                           cell.text.size = 3,
                            na.value = "gray80"){
 
   x3p1_cellGrid <- allCells %>%
@@ -298,7 +301,7 @@ arrangeCMCPlot <- function(x3p1,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3) +
+                         size = cell.text.size) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
       ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
@@ -322,8 +325,8 @@ arrangeCMCPlot <- function(x3p1,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3) +
-      ggplot2::guides(colour = "legend") +
+                         size = cell.text.size) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
       ggplot2::theme(legend.position = "bottom")
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
@@ -343,8 +346,8 @@ arrangeCMCPlot <- function(x3p1,
                                       label = cellInd,
                                       colour = cmc,
                                       angle = theta),
-                         size = 3) +
-      ggplot2::guides(colour = "legend") +
+                         size = cell.text.size) +
+      ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
       ggplot2::theme(legend.position = "bottom")
   }
 
@@ -373,6 +376,7 @@ arrangeCMCPlot <- function(x3p1,
 #'  that dictates the height value colorscale
 #'@param cell.colors vector of 2 colors for plotting non-matching and matching
 #'  (in that order) cells
+#'@param cell.text.size size of cell label (passed to ggplot::geom_text)
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'
@@ -398,6 +402,7 @@ cmcPlot <- function(x3p1,
                     height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                     cell.colors = c("#a50026","#313695"),
                     cell.alpha = .2,
+                    cell.text.size = 3,
                     na.value = "gray80"){
 
   directionIndic <- which.min(c(nrow(cmcFilter_improved_output$originalMethodCMCs[[1]]),
@@ -405,7 +410,7 @@ cmcPlot <- function(x3p1,
 
 
   originalMethodCMCs <- cmcFilter_improved_output$originalMethodCMCs[[directionIndic]] %>%
-    dplyr::mutate(cmc = rep("Top Vote CMC",times = nrow(.)))
+    dplyr::mutate(cmc = rep("Original Method CMC",times = nrow(.)))
 
   nonoriginalMethodCMCs <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
     topResultsPerCell() %>%
@@ -414,7 +419,7 @@ cmcPlot <- function(x3p1,
     dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)))
 
   allInitialCells <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
-    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Top Vote CMC"))) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Original Method CMC"))) %>%
     dplyr::left_join(dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
                        purrr::pmap_dfr(~ {
                          idNum <- ..2 %>%
