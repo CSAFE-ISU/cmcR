@@ -1,0 +1,1315 @@
+---
+title: "CMC Decision Rule Description"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CMC Decision Rule Description}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the study performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [National Ballistics & Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`cellCCF_bothDirections`](https://csafe-isu.github.io/cmcR/reference/cellCCF_bothDirections.html) function on the **cmcR** website for information regarding this procedure.
+
+```{r setup,message=FALSE,warning=FALSE}
+library(cmcR)
+library(tidyverse)
+```
+
+We will consider comparisons between three cartridge case scans. Fadul 1-1 and Fadul 1-2 are known matches (i.e., were fired from the same firearm) while Fadul 2-1 is a non-match. The comparisons considered are Fadul 1-1 vs. Fadul 1-2 and Fadul 1-1 vs. Fadul 2-1.
+
+```{r}
+data("fadul1.1_processed")
+data("fadul1.2_processed")
+data("fadul2.1_processed")
+```
+
+The three processed cartridge cases are shown below.
+
+```{r, include=FALSE,fig.width = 7, fig.align = 'center'}
+cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
+                       "Fadul 1-2" = fadul1.2_processed,
+                       "Fadul 2-1" = fadul2.1_processed))
+```
+
+
+```{r,cache=T,include=FALSE}
+kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1_processed,
+                                             x3p2 = fadul1.2_processed,
+                                             cellNumHoriz = 8,
+                                             minObservedProp = .1,
+                                             regionToCellProp = 9,
+                                             ccfMethod = "fftThenPairwise")
+
+kmCMC <- cmcR::cmcFilter_improved(kmComparison,
+                                    ccf_thresh = .5,
+                                    dx_thresh = 20,
+                                    theta_thresh = 6,
+                                    missingTheta_decision = "fail")
+
+knmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1_processed,
+                                              x3p2 = fadul2.1_processed,
+                                              #x3p1 = fadul1.2_processed$x3p,
+                                              #x3p2 = fadul2.1_processed$x3p,
+                                              cellNumHoriz = 8,
+                                              minObservedProp = .1,
+                                              regionToCellProp = 9,
+                                              ccfMethod = "fftThenPairwise")
+
+knmCMC <- cmcR::cmcFilter_improved(knmComparison,
+                                   ccf_thresh = .5,
+                                   dx_thresh = 20,
+                                   theta_thresh = 6,
+                                   missingTheta_decision = "fail")
+```
+
+
+```{r,include=FALSE}
+knmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
+              fadul2.1_processed,
+              cellCCF_bothDirections_output = knmComparison,
+              cmcFilter_improved_output = knmCMC,
+              type = "faceted",
+              x3pNames = c("Fadul 1-1","Fadul 2-1"),
+              legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+              height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
+                                                       '#e08214','#fdb863',
+                                                       '#fee0b6','#f7f7f7',
+                                                       '#d8daeb','#b2abd2',
+                                                       '#8073ac','#542788',
+                                                       '#2d004b'),
+                                                     amount = .75),
+              cell.colors = c("#a60b00","#1b03a3"),
+              cell.alpha = .15,
+              na.value = "gray80")
+
+#We want Fadul 1-1 to be the reference cartridge case for all 3 of these plots
+#to enforce visual consistency. The original CMC method applied to Fadul 1-1 and
+#Fadul 1-2 results in two CMC counts (one for each comparison direction), the
+#minimum of which is associated with Fadul 1-2 being the reference cartridge
+#case. Unless changed, the cmcPlot function (by design) will then create a Top
+#Vote CMC plot with Fadul 1-2 as the reference cartridge case (which we don't
+#want). Since we desire Fadul 1-1 to be the reference for this particular
+#illustrative example, we will artificially inflate the number CMCs in the Fadul
+#1-2 vs. Fadul 1-1 direction (i.e., with Fadul 1-2 as the reference) so as to
+#force Fadul 1-1 to be plotted as the reference.
+
+kmCMC_fake <- kmCMC
+
+kmCMC_fake$originalMethodCMCs$comparison_2to1 <- bind_rows(kmCMC_fake$originalMethodCMCs$comparison_2to1,
+                                                    kmCMC_fake$originalMethodCMCs$comparison_2to1)
+
+kmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
+                          fadul1.2_processed,
+                          # fadul1.2_processed$x3p,
+                          # fadul1.1_processed$x3p,
+                          cellCCF_bothDirections_output = kmComparison,
+                          cmcFilter_improved_output = kmCMC_fake,
+                          # cellCCF_bothDirections_output = kmComparison_swapped,
+                          # cmcFilter_improved_output = kmCMC_swapped,
+                          x3pNames = c("Fadul 1-1","Fadul 1-2"),
+                          legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                          height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                   '#b35806',
+                                                                   '#e08214',
+                                                                   '#fdb863',
+                                                                   '#fee0b6',
+                                                                   '#f7f7f7',
+                                                                   '#d8daeb',
+                                                                   '#b2abd2',
+                                                                   '#8073ac',
+                                                                   '#542788',
+                                                                   '#2d004b'),
+                                                                 amount = .75),
+        cell.colors = c("#a60b00","#1b03a3"),
+        cell.alpha = .15,
+        na.value = "gray80")
+
+knmCMCPlot_list_comparison1to2 <- cmcR::cmcPlot(fadul1.1_processed,
+                                 fadul2.1_processed,
+                                 cellCCF_bothDirections_output = knmComparison,
+                                 cmcFilter_improved_output = knmCMC,
+                                 type = "list",
+                                 x3pNames = c("Fadul 1-1","Fadul 2-1"),
+                                 legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                 height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
+                                                                          '#e08214','#fdb863',
+                                                                          '#fee0b6','#f7f7f7',
+                                                                          '#d8daeb','#b2abd2',
+                                                                          '#8073ac','#542788',
+                                                                          '#2d004b'),
+                                                                        amount = .75),
+                                 cell.colors = c("black","black"),
+                                 cell.alpha = .15,
+                                 cell.text.size = 7,
+                                 na.value = "gray90")
+
+kmCMCPlot_list_comparison1to2 <- cmcR::cmcPlot(fadul1.1_processed,
+                                fadul1.2_processed,
+                                # fadul1.2_processed$x3p,
+                                # fadul1.1_processed$x3p,
+                                cellCCF_bothDirections_output = kmComparison,
+                                cmcFilter_improved_output = kmCMC_fake,
+                                # cellCCF_bothDirections_output = kmComparison_swapped,
+                                # cmcFilter_improved_output = kmCMC_swapped,
+                                x3pNames = c("Fadul 1-1","Fadul 1-2"),
+                                legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                         '#b35806',
+                                                                         '#e08214',
+                                                                         '#fdb863',
+                                                                         '#fee0b6',
+                                                                         '#f7f7f7',
+                                                                         '#d8daeb',
+                                                                         '#b2abd2',
+                                                                         '#8073ac',
+                                                                         '#542788',
+                                                                         '#2d004b'),
+                                                                       amount = .75),
+                                cell.colors = c("black","black"),
+                                cell.alpha = .15,
+                                cell.text.size = 7,
+                                na.value = "gray90",
+                                type = "list")
+```
+
+To illustrate the assumptions underlying the CMC method, compare the results of the cell-based comparison procedure for the comparison between the known match pair Fadul 1-1 and Fadul 1-2 and the known non-match pair Fadul 1-1 and Fadul 2-1. 
+\autoref{fig:translationVotes} shows the distributions of the $\{(x_i, y_i)\}_{i = 1,...,n}$ values which produce the highest CCF for the alignment of each cell/region pair.
+The squares in \autoref{fig:translationVotes} are centered on the comparisons' respective $(x_{\text{ref}},y_{\text{ref}})$ values and represent the maximum distance an $(x_i,y_i)$ estimated translation value can be from $(x_{\text{ref}},y_{\text{ref}})$ to be classified as "congruent" based on thresholds $T_{x} = T_{y} = 20$ pixels. 
+Of the 29 cell/region pairs considered in the known match comparison between Fadul 1-1 and Fadul 1-2, 19 $(x_i,y_i)$ values are within 20 pixels of $(x_{\text{ref}},y_{\text{ref}})$. 
+In contrast, 3 out of 35 $(x_i,y_i)$ are within 20 pixels of $(x_{\text{ref}},y_{\text{ref}})$ for the known non-match comparison between Fadul 1-1 and Fadul 2-1. These plots exhibit similar behavior to Figures 1 and 2 in \citet{chen_convergence_2017} which show the estimated translation values for various rotation values for the same cartridge case pairs.
+<!-- \svp{XXX I think some points are missing in the KM plot at least - how many points were excluded for not having enough area? I count 39 points (27 inside, I'm taking your word on that).} -->
+
+Turning our attention to the estimated rotation values, \autoref{fig:rotationVotes} shows the distribution of the $\theta_i$ values which produce the highest CCF for the comparisons of Fadul 1-1 vs. Fadul 1-2 and Fadul 1-1 vs. Fadul 2-1. A vertical line is drawn at the comparisons' respective $\theta_{\text{ref}}$ value and a threshold of $T_{\theta} = 6$ degrees is used to classify $\theta_i$ values as "congruent." 25 of 29 known match and 2 of 34 known non-match $\theta_i$ values are classified as congruent under these conditions.
+
+```{r include=FALSE}
+kmComparison_dxData <- kmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_dx = median(dx),
+         med_dy = median(dy)) %>%
+  mutate(dx_threshMinus = med_dx - 20,
+         dx_threshPlus = med_dx + 20,
+         dy_threshMinus = med_dy - 20,
+         dy_threshPlus = med_dy + 20) %>%
+  mutate(Classification = factor(ifelse(abs(dx - med_dx) <= 20,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+kmComparison_dyData <- kmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_dx = median(dx),
+         med_dy = median(dy)) %>%
+  mutate(dx_threshMinus = med_dx - 20,
+         dx_threshPlus = med_dx + 20,
+         dy_threshMinus = med_dy - 20,
+         dy_threshPlus = med_dy + 20) %>%
+  mutate(Classification = factor(ifelse(abs(dy - med_dy) <= 20,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+kmComparison_ccfData <- kmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(ccf_thresh = .5) %>%
+  mutate(Classification = factor(ifelse(ccf >= .5,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+kmComparison_thetaData <- kmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_theta = median(theta)) %>%
+  mutate(theta_threshMinus = med_theta - 6,
+         theta_threshPlus = med_theta + 6) %>%
+  mutate(Classification = ifelse(abs(theta - med_theta) <= 6, "Congruent","Not Congruent")) %>%
+  mutate(Classification = factor(Classification,levels = c("Not Congruent","Congruent")))
+
+knmComparison_dxData <- knmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_dx = median(dx),
+         med_dy = median(dy)) %>%
+  mutate(dx_threshMinus = med_dx - 20,
+         dx_threshPlus = med_dx + 20,
+         dy_threshMinus = med_dy - 20,
+         dy_threshPlus = med_dy + 20) %>%
+  mutate(Classification = factor(ifelse(abs(dx - med_dx) <= 20,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+knmComparison_dyData <- knmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_dx = median(dx),
+         med_dy = median(dy)) %>%
+  mutate(dx_threshMinus = med_dx - 20,
+         dx_threshPlus = med_dx + 20,
+         dy_threshMinus = med_dy - 20,
+         dy_threshPlus = med_dy + 20) %>%
+  mutate(Classification = factor(ifelse(abs(dy - med_dy) <= 20,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+knmComparison_ccfData <- knmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(ccf_thresh = .5) %>%
+  mutate(Classification = factor(ifelse(ccf >= .5,"Congruent","Not Congruent"),
+                                 levels = c("Not Congruent","Congruent")))
+
+knmComparison_thetaData <- knmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  mutate(med_theta = median(theta)) %>%
+  mutate(theta_threshMinus = med_theta - 6,
+         theta_threshPlus = med_theta + 6) %>%
+  mutate(Classification = ifelse(abs(theta - med_theta) <= 6, "Congruent","Not Congruent")) %>%
+  mutate(Classification = factor(Classification,levels = c("Not Congruent","Congruent")))
+```
+
+```{r include=FALSE,fig.height=1}
+kmComparison_dxData_plot <- kmComparison_dxData %>%
+  ggplot() +
+  geom_histogram(aes(x = dx, 
+                     fill = Classification),
+                 alpha = .7,
+                 binwidth = 1
+                 # ,colour = "white"
+                 ) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_dx),
+  #            colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 31),
+                            xmin = kmComparison_dxData$med_dx - 20.5,
+                            xmax = kmComparison_dxData$med_dx + 20.5),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"x")), 
+                     breaks = seq(-100,100,by = 50),
+                     limits = c(-101,101)
+                     ) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = 11) +
+  scale_y_continuous(limits = c(0,3.5)) +
+  ylab("# Cell Pairs") +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1, 1),
+        legend.direction = "horizontal",
+        legend.background = element_blank(),
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 7),
+        axis.text = element_text(size = 4),       
+        axis.title.x = element_text(size = 6), 
+        axis.title.y = element_text(size = 4),  
+        plot.margin=unit(c(0,.1,0,.1), "cm"),
+        legend.key.size = unit(0.3, "cm"))
+
+pltLegend_horizontal <- cowplot::get_legend(kmComparison_dxData_plot)
+
+kmComparison_dxData_plot <- kmComparison_dxData_plot +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1, 1),
+        legend.direction = "vertical",
+        legend.background = element_blank(),
+        legend.text = element_text(size = 7),
+        legend.title = element_blank(),
+        axis.text = element_text(size = 4),       
+        axis.title.x = element_text(size = 6), 
+        axis.title.y = element_text(size = 4),  
+        plot.margin=unit(c(0,.1,0,.1), "cm"),
+        legend.key.size = unit(0.3, "cm"))
+
+pltLegend_vertical_leftAligned <- cowplot::get_legend(kmComparison_dxData_plot)
+
+kmComparison_dxData_plot <- kmComparison_dxData_plot +
+  theme(legend.position = c(1, 1),
+        legend.justification = c(1, 1),
+        legend.direction = "vertical",
+        legend.background = element_blank(),
+        legend.text = element_text(size = 7),
+        legend.title = element_blank(),
+        axis.text = element_text(size = 4),       
+        axis.title.x = element_text(size = 6), 
+        axis.title.y = element_text(size = 4),  
+        plot.margin=unit(c(0,.1,0,.1), "cm"),
+        legend.key.size = unit(0.3, "cm")) +
+  guides(fill = guide_legend(label.position = "left",label.hjust = 1))
+
+pltLegend_vertical_rightAligned <- cowplot::get_legend(kmComparison_dxData_plot)
+
+kmComparison_dxData_plot <- kmComparison_dxData_plot + 
+  theme(legend.position = "none")
+
+knmComparison_dxData_plot <- knmComparison_dxData %>%
+  ggplot() +
+  geom_histogram(aes(x = dx, 
+                     fill = Classification),
+                 alpha = .7,
+                 binwidth = 1
+                 # ,colour = "white"
+                 ) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_dx),
+  #            colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 32),
+                            xmin = knmComparison_dxData$med_dx - 20,
+                            xmax = knmComparison_dxData$med_dx + 20),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"x")), 
+                     breaks = seq(-100,100,by = 50),
+                     limits = c(-101,101)
+                     ) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = 11) +
+  scale_y_continuous(limits = c(0,3.5)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+kmComparison_dyData_plot <- kmComparison_dyData %>% 
+  ggplot() +
+  geom_histogram(aes(x = dy, 
+                     fill = Classification),
+                 alpha = .7,
+                 binwidth = 1
+                 # ,colour = "white"
+                 ) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_dy),
+  #            colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 31),
+                            xmin = kmComparison_dxData$med_dy - 20,
+                            xmax = kmComparison_dxData$med_dy + 20),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"y")), 
+                     breaks = seq(-100,100,by = 50),
+                     limits = c(-101,101)
+                     ) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = 10) +
+  scale_y_continuous(limits = c(0,3.5)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+knmComparison_dyData_plot <- knmComparison_dyData %>% 
+  ggplot() +
+  geom_histogram(aes(x = dy, 
+                     fill = Classification),
+                 alpha = .7,
+                 binwidth = 1
+                 # ,colour = "white"
+                 ) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_dy),
+  #            colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 32),
+                            xmin = knmComparison_dxData$med_dy - 20.5,
+                            xmax = knmComparison_dxData$med_dy + 20.5),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"y")), 
+                     breaks = seq(-100,100,by = 50),
+                     limits = c(-101,101)
+                     ) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = 10) +
+  scale_y_continuous(limits = c(0,3.5)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+kmComparison_thetaData_plot <- kmComparison_thetaData %>%
+  ggplot() +
+  geom_bar(aes(x = theta, 
+               fill = Classification),
+           alpha = .7) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_theta),
+  #            colour = "#7570b3") +
+  geom_ribbon(aes(y = seq(0,12,length.out = 31),
+                  xmin = kmComparison_thetaData$med_theta - 7.5,
+                  xmax = kmComparison_thetaData$med_theta + 7.5),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  # coord_fixed(expand = FALSE,
+  #             ratio = .95) +
+  scale_x_continuous(expression(paste("Estimated rotation angle ", theta)), 
+                     breaks = seq(-30,30,by = 15),
+                     limits = c(-32,32)) +
+  scale_y_continuous(limits = c(0,12),
+                     breaks = seq(0,12,by = 2)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+knmComparison_thetaData_plot <- knmComparison_thetaData %>%
+  ggplot() +
+  geom_bar(aes(x = theta, 
+               fill = Classification),
+           alpha = .7) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  # geom_vline(aes(xintercept = med_theta),
+  #            colour = "#7570b3") +
+  geom_ribbon(aes(y = seq(0,12,length.out = 32),
+                  xmin = knmComparison_thetaData$med_theta - 6,
+                  xmax = knmComparison_thetaData$med_theta + 6),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  # coord_fixed(expand = FALSE,
+  #             ratio = .95) +
+  scale_x_continuous(expression(paste("Estimated rotation angle ", theta)), 
+                     breaks = seq(-30,30,by = 15),
+                     limits = c(-32,32)) +
+  scale_y_continuous(limits = c(0,12),
+                     breaks = seq(0,12,by = 2)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+kmComparison_ccfData_plot <- kmComparison_ccfData %>%
+  ggplot(aes(x = ccf,fill = Classification)) +
+  geom_histogram(
+    # colour = "white",
+    binwidth = .01) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  geom_vline(aes(xintercept = ccf_thresh),
+             colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(-1,4,length.out = 31),
+                            xmin = ccf_thresh,
+                            xmax = 1),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated cross-correlation CCF"[max])), 
+                     breaks = seq(0,1,by = .5),
+                     limits = c(0,1)) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = .045) +
+  scale_y_continuous(limits = c(0,4)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+
+knmComparison_ccfData_plot <- knmComparison_ccfData %>%
+  ggplot(aes(x = ccf,fill = Classification)) +
+  geom_histogram(
+    # colour = "white",
+    binwidth = .01) +
+  scale_fill_manual(values = c("#a60b00","#1b03a3")) +
+  geom_vline(aes(xintercept = ccf_thresh),
+             colour = "#7570b3") +
+  geom_ribbon(mapping = aes(y = seq(0,4,length.out = 32),
+                            xmin = ccf_thresh,
+                            xmax = 1),
+              fill = "#7570b3",
+              alpha = .3) +
+  theme_bw() +
+  scale_x_continuous(expression(paste("Estimated cross-correlation CCF"[max])), 
+                     breaks = seq(0,1,by = .5),
+                     limits = c(0,1)
+                     ) +
+  # coord_fixed(expand = FALSE,
+  #             ratio = .045) +
+  scale_y_continuous(limits = c(0,4)) +
+  ylab("# Cell Pairs") +
+  # theme(legend.position = "none",
+  #       axis.text = element_text(size = 14),         axis.title = element_text(size = 14), plot.margin=unit(c(.4,.4,.4,.4), "cm"))
+  theme(legend.position = "none",
+        axis.text = element_text(size = 4),        
+        axis.title.x = element_text(size = 6), axis.title.y = element_text(size = 4)
+        ,plot.margin=unit(c(0,.1,0,.1), "cm")
+        )
+```
+
+```{r include=FALSE}
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1`$layers <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1`$layers[-3]
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2`$layers <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2`$layers[-3]
+knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1`$layers <- knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1`$layers[-3]
+
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1` +
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-1",size = 4)
+
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2` +
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-2",size = 4)
+
+knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1` <- knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1` +
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 2-1",size = 4)
+```
+
+
+```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
+#problem with cowplot is that it's trying to force each square of the grid to be the same size -- not sure how to fix this
+
+
+horizontalTranslation_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 2,label = "  Horizontal \n Translation") +
+  theme_void()
+
+verticalTranslation_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 2,label = "  Vertical \n Translation") +
+  theme_void()
+
+rotation_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 2,label = "Rotation") +
+  theme_void()
+
+ccf_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 2,label = expression(paste("CCF"[max]))) +
+  theme_void()
+
+blank_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 2,label = " ") +
+  theme_void() 
+
+gridExtra::grid.arrange(kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1`,
+                        kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2`,
+                        knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1`,
+                        horizontalTranslation_label,
+                        kmComparison_dxData_plot,
+                        knmComparison_dxData_plot,
+                        verticalTranslation_label,
+                        kmComparison_dyData_plot,
+                        knmComparison_dyData_plot,
+                        rotation_label,
+                        kmComparison_thetaData_plot,
+                        knmComparison_thetaData_plot,
+                        ccf_label,
+                        kmComparison_ccfData_plot,
+                        knmComparison_ccfData_plot,
+                        blank_label,
+                        blank_label,
+                        pltLegend_horizontal,
+                        heights = unit(c(7,4,4,4,4,2),units = "null"),
+                        widths = unit(c(1,1.5,1.5),"null"))
+
+```
+
+```{r include=FALSE}
+medianData_comparison1to2 <- kmComparison$comparison_1to2$ccfResults %>%
+              topResultsPerCell() %>%
+              ungroup() %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              summarise(dx = median(dx),
+                        dy = median(dy),
+                        theta = median(theta),
+                        ccf = .75,
+                        cellNum = 100)
+
+yminData_comparison1to2 <- medianData_comparison1to2 %>%
+  mutate(dx = dx - 20,
+         dy = dy - 20,
+         theta = theta - 6,
+         ccf = .5,
+         cellNum = 99)
+
+ymaxData_comparison1to2 <- medianData_comparison1to2 %>%
+  mutate(dx = dx + 20,
+         dy = dy + 20,
+         theta = theta + 6,
+         ccf = 1,
+         cellNum = 101)
+
+congruentData_comparison1to2 <- kmComparison$comparison_1to2$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+  bind_rows(yminData_comparison1to2,
+            medianData_comparison1to2,
+            ymaxData_comparison1to2) %>% 
+  select(-ccf) %>%
+  pivot_longer(cols = c(dx,dy,theta),
+               names_to = "parameter") %>%
+  group_by(parameter) %>%
+  mutate(value = scales::rescale(value)) %>%
+  bind_rows(kmComparison$comparison_1to2$ccfResults %>%
+              topResultsPerCell() %>%
+              ungroup() %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              bind_rows(yminData_comparison1to2,
+                        medianData_comparison1to2,
+                        ymaxData_comparison1to2) %>%
+              select(-c(dx,dy,theta)) %>%
+              mutate(parameter = "ccf") %>%
+              rename(value = ccf)) %>%
+  arrange(cellNum)
+
+extremaData_comparison1to2 <- congruentData_comparison1to2 %>%
+  filter(cellNum %in% c(99,100,101)) %>%
+  ungroup()  %>%
+  select(-c(cellNum)) %>%
+  mutate(name = rep(c("ymin","ymed","ymax"),each = 4)) %>%
+  pivot_wider(id_cols = parameter,
+              names_from = name,
+              values_from = value)
+
+medianData_comparison2to1 <- kmComparison$comparison_2to1$ccfResults %>%
+              topResultsPerCell() %>%
+              ungroup() %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              summarise(dx = median(dx),
+                        dy = median(dy),
+                        theta = median(theta),
+                        ccf = .75,
+                        cellNum = 100)
+
+yminData_comparison2to1 <- medianData_comparison2to1 %>%
+  mutate(dx = dx - 20,
+         dy = dy - 20,
+         theta = theta - 6,
+         ccf = .5,
+         cellNum = 99)
+
+ymaxData_comparison2to1 <- medianData_comparison2to1 %>%
+  mutate(dx = dx + 20,
+         dy = dy + 20,
+         theta = theta + 6,
+         ccf = 1,
+         cellNum = 101)
+
+congruentData_comparison2to1 <- kmComparison$comparison_2to1$ccfResults %>%
+  topResultsPerCell() %>%
+  ungroup() %>%
+  select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+  bind_rows(yminData_comparison2to1,
+            medianData_comparison2to1,
+            ymaxData_comparison2to1) %>% 
+  select(-ccf) %>%
+  pivot_longer(cols = c(dx,dy,theta),
+               names_to = "parameter") %>%
+  group_by(parameter) %>%
+  mutate(value = scales::rescale(value)) %>%
+  bind_rows(kmComparison$comparison_2to1$ccfResults %>%
+              topResultsPerCell() %>%
+              ungroup() %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              bind_rows(yminData_comparison2to1,
+                        medianData_comparison2to1,
+                        ymaxData_comparison2to1) %>%
+              select(-c(dx,dy,theta)) %>%
+              mutate(parameter = "ccf") %>%
+              rename(value = ccf)) %>%
+  arrange(cellNum)
+
+extremaData_comparison2to1 <- congruentData_comparison2to1 %>%
+  filter(cellNum %in% c(99,100,101)) %>%
+  ungroup()  %>%
+  select(-c(cellNum)) %>%
+  mutate(name = rep(c("ymin","ymed","ymax"),each = 4)) %>%
+  pivot_wider(id_cols = parameter,
+              names_from = name,
+              values_from = value)
+```
+
+```{r, include=FALSE}
+originalMethod_comparison1to2_pcp <- congruentData_comparison1to2 %>%
+   filter(cellNum < 90) %>%
+  ungroup() %>%
+  pivot_wider(id_cols = c(cellNum,parameter),
+              names_from = parameter,
+              values_from = value) %>%
+  mutate(Classification = case_when(dx >= extremaData_comparison1to2[1,"ymin"][[1]] & dx <= extremaData_comparison1to2[1,"ymax"][[1]] & 
+                                      dy >= extremaData_comparison1to2[2,"ymin"][[1]] & dy <= extremaData_comparison1to2[2,"ymax"][[1]] & 
+                                      theta >= extremaData_comparison1to2[3,"ymin"][[1]] & theta <= extremaData_comparison1to2[3,"ymax"][[1]] & 
+                                      ccf >= extremaData_comparison1to2[4,"ymin"][[1]] & ccf <= extremaData_comparison1to2[4,"ymax"][[1]] ~ "Congruent",
+                                    TRUE ~ "Not Congruent"))  %>%
+  pivot_longer(cols = c(dx,dy,theta,ccf),
+               names_to = "parameter") %>%
+  mutate(parameter = factor(parameter,c("dx","dy","theta","ccf")),
+         Classification = factor(Classification,levels = c("Congruent","Not Congruent"))) %>%
+  ggplot() +
+  scale_colour_manual(values = c("#1b03a3","#a60b00")) +
+  geom_line(aes(x = parameter,y = value,group = cellNum,colour = Classification),
+            size = .1) +
+  geom_tile(data = extremaData_comparison1to2,
+            aes(x = parameter,
+                y = ymed,
+                width = .25,
+                height = ymax - ymin),
+            fill = "#7570b3",
+            colour = "black",
+            alpha = .4) +
+  theme_bw() +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        plot.margin = unit(c(.55,0,0,0), "cm")) +
+  scale_x_discrete(labels = c(expression(paste(Delta, "x")),
+                              expression(paste(Delta, "y")),
+                              expression(theta),
+                              expression("CCF"[max])))
+
+originalMethod_comparison2to1_pcp <- congruentData_comparison2to1 %>%
+  filter(cellNum < 90) %>%
+  ungroup() %>%
+  pivot_wider(id_cols = c(cellNum,parameter),
+              names_from = parameter,
+              values_from = value) %>%
+  mutate(Classification = case_when(dx >= extremaData_comparison2to1[1,"ymin"][[1]] & dx <= extremaData_comparison2to1[1,"ymax"][[1]] & 
+                                      dy >= extremaData_comparison2to1[2,"ymin"][[1]] & dy <= extremaData_comparison2to1[2,"ymax"][[1]] & 
+                                      theta >= extremaData_comparison2to1[3,"ymin"][[1]] & theta <= extremaData_comparison2to1[3,"ymax"][[1]] & 
+                                      ccf >= extremaData_comparison2to1[4,"ymin"][[1]] & ccf <= extremaData_comparison2to1[4,"ymax"][[1]] ~ "Congruent",
+                                    TRUE ~ "Not Congruent"))  %>%
+  pivot_longer(cols = c(dx,dy,theta,ccf),
+               names_to = "parameter") %>%
+  mutate(parameter = factor(parameter,c("dx","dy","theta","ccf")),
+         Classification = factor(Classification,levels = c("Congruent","Not Congruent"))) %>%
+  ggplot() +
+  scale_colour_manual(values = c("#1b03a3","#a60b00")) +
+  geom_line(aes(x = parameter,y = value,group = cellNum,colour = Classification),
+            size = .1) +
+  geom_tile(data = extremaData_comparison2to1,
+            aes(x = parameter,
+                y = ymed,
+                width = .25,
+                height = ymax - ymin),
+            fill = "#7570b3",
+            colour = "black",
+            alpha = .4) +
+  theme_bw() +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        plot.margin = unit(c(.55,0,0,0), "cm")) +
+  scale_x_discrete(labels = c(expression(paste(Delta, "x")),
+                              expression(paste(Delta, "y")),
+                              expression(theta),
+                              expression("CCF"[max])))
+```
+
+```{r, include=FALSE}
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1` +
+  ggplot2::theme(plot.margin=unit(c(0,-.5,0,-.5), "cm"))
+
+kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2` +
+  ggplot2::theme(plot.margin=unit(c(0,-.5,0,-.5), "cm"))
+
+knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1` <- knmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 2-1` +
+  ggplot2::theme(plot.margin=unit(c(0,-.5,0,-.5), "cm"))
+
+knmCMC_fake <- knmCMC
+
+knmCMC_fake$originalMethodCMCs$comparison_1to2 <- bind_rows(knmCMC_fake$originalMethodCMCs$comparison_1to2,
+                                                            knmCMC_fake$originalMethodCMCs$comparison_1to2)
+
+knmCMCPlot_list_comparison2to1 <- cmcR::cmcPlot(fadul2.1_processed,
+                                                fadul1.1_processed,
+                                                cellCCF_bothDirections_output = knmComparison,
+                                                cmcFilter_improved_output = knmCMC_fake,
+                                                type = "list",
+                                                x3pNames = c("Fadul 2-1","Fadul 1-1"),
+                                                legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                                height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
+                                                                                         '#e08214','#fdb863',
+                                                                                         '#fee0b6','#f7f7f7',
+                                                                                         '#d8daeb','#b2abd2',
+                                                                                         '#8073ac','#542788',
+                                                                                         '#2d004b'),
+                                                                                       amount = .75),
+                                                cell.colors = c("black","black"),
+                                                cell.alpha = .15,
+                                                cell.text.size = 7,
+                                                na.value = "gray90")
+
+kmCMCPlot_list_comparison2to1 <- cmcR::cmcPlot(fadul1.1_processed,
+                                               fadul1.2_processed,
+                                               cellCCF_bothDirections_output = kmComparison,
+                                               cmcFilter_improved_output = kmCMC,
+                                               x3pNames = c("Fadul 1-1","Fadul 1-2"),
+                                               legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                                               height.colors = colorspace::desaturate(c('#7f3b08',
+                                                                                        '#b35806',
+                                                                                        '#e08214',
+                                                                                        '#fdb863',
+                                                                                        '#fee0b6',
+                                                                                        '#f7f7f7',
+                                                                                        '#d8daeb',
+                                                                                        '#b2abd2',
+                                                                                        '#8073ac',
+                                                                                        '#542788',
+                                                                                        '#2d004b'),
+                                                                                      amount = .75),
+                                               cell.colors = c("black","black"),
+                                               cell.alpha = .15,
+                                               cell.text.size = 7,
+                                               na.value = "gray90",
+                                               type = "list")
+
+kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-1`$layers <- kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-1`$layers[-3]
+kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-2`$layers <- kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-2`$layers[-3]
+knmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 2-1`$layers <- knmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 2-1`$layers[-3]
+
+kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-1` <- kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-1` +
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-1",size = 4)
+
+kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-2` <- kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-2`+
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-2",size = 4)
+
+knmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 2-1` <- knmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 2-1` +
+  ggplot2::theme(legend.position = "none",
+                 plot.margin=unit(c(0,-.5,0,-.5), "cm"),
+                 plot.title = element_blank()) +
+  coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
+  annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 2-1",size = 4)
+```
+
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
+
+reference_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("Reference")))) +
+  theme_void()
+
+target_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("Target")))) +
+  theme_void()
+
+originalMethod_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("Original Method Classif.")))) +
+  theme_void()
+
+originalCMC_count_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("CMC Count")))) +
+  theme_void()
+
+originalCMC_comparison1to2_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4,label = "19 CMCs") +
+  theme_void()
+
+originalCMC_comparison2to1_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4,label = "18 CMCs") +
+  theme_void()
+
+
+gridExtra::grid.arrange(reference_label,
+                        target_label,
+                        originalMethod_label,
+                        originalCMC_count_label,
+                        kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-1`,
+                        kmCMCPlot_list_comparison1to2$originalMethodCMCs$`Fadul 1-2`,
+                        originalMethod_comparison1to2_pcp,
+                        originalCMC_comparison1to2_label,
+                        kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-2`,
+                        kmCMCPlot_list_comparison2to1$originalMethodCMCs$`Fadul 1-1`,
+                        originalMethod_comparison2to1_pcp,
+                        originalCMC_comparison2to1_label,
+                        blank_label,
+                        blank_label,
+                        pltLegend_horizontal,
+                        blank_label,
+                        heights = unit(c(2,9,9,2),units = "null"),
+                        widths = unit(c(2,2,2,1),"null")
+                        )
+```
+
+```{r include=FALSE}
+theta_rescaled <- bind_rows(kmComparison$comparison_1to2$ccfResults) %>%
+  select(theta) %>%
+  distinct() %>%
+  mutate(thetaScaled = scales::rescale(theta))
+
+highCMC_medianData_comparison1to2 <- bind_rows(kmComparison$comparison_1to2$ccfResults$`-27`,
+                                               kmComparison$comparison_1to2$ccfResults$`-24`) %>%
+  group_by(theta) %>%
+  summarise(dx = median(dx),
+            dy = median(dy)) %>%
+  ungroup() %>%
+  mutate(ccf = c(.75,.75),
+         cellNum = c(100,103))
+
+highCMC_yminData_comparison1to2 <- highCMC_medianData_comparison1to2 %>%
+  mutate(dx = dx - 20,
+         dy = dy - 20,
+         ccf = c(.5,.5),
+         cellNum = c(99,102))
+
+highCMC_ymaxData_comparison1to2 <- highCMC_medianData_comparison1to2 %>%
+  mutate(dx = dx + 20,
+         dy = dy + 20,
+         ccf = c(1,1),
+         cellNum = c(101,103))
+
+highCMC_congruentData_comparison1to2 <- bind_rows(kmComparison$comparison_1to2$ccfResults$`-27`,
+                                                  kmComparison$comparison_1to2$ccfResults$`-24`) %>%
+  select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+  bind_rows(highCMC_yminData_comparison1to2,
+            highCMC_medianData_comparison1to2,
+            highCMC_ymaxData_comparison1to2) %>% 
+  select(-ccf) %>%
+  pivot_longer(cols = c(dx,dy),
+               names_to = "parameter") %>%
+  group_by(parameter) %>%
+  mutate(scaledValue = scales::rescale(value)) %>%
+  bind_rows(bind_rows(kmComparison$comparison_1to2$ccfResults$`-27`,
+                      kmComparison$comparison_1to2$ccfResults$`-24`) %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              bind_rows(highCMC_yminData_comparison1to2,
+                        highCMC_medianData_comparison1to2,
+                        highCMC_ymaxData_comparison1to2) %>%
+              select(-c(dx,dy)) %>%
+              mutate(parameter = "ccf") %>%
+              rename(value = ccf) %>%
+              mutate(scaledValue = value)) %>%
+  arrange(cellNum)
+
+highCMC_extremaData_comparison1to2 <- highCMC_congruentData_comparison1to2  %>%
+  filter(cellNum > 90) %>%
+  select(-c(cellNum,value)) %>%
+  arrange(theta,parameter) %>%
+  ungroup() %>%
+  mutate(name = rep(c("ymin","ymed","ymax"),times = 6)) %>%
+  pivot_wider(id_cols = c(parameter,theta,scaledValue),
+              names_from = name,
+              values_from = scaledValue)
+
+highCMC_comparison1to2_congruentCells <- highCMC_congruentData_comparison1to2 %>%
+  filter(cellNum < 90) %>%
+  left_join(highCMC_extremaData_comparison1to2,by = c("parameter","theta")) %>%
+  mutate(Classification = ifelse(scaledValue >= ymin & scaledValue <= ymax,"Congruent","Not Congruent")) %>%
+  group_by(cellNum,theta) %>%
+  summarise(Classification = ifelse(all(Classification == "Congruent"),"Congruent","Not Congruent"))
+```
+
+```{r, include=FALSE}
+highCMC_medianData_comparison1to2_lowCMC <- bind_rows(kmComparison$comparison_1to2$ccfResults$`30`,
+                                               kmComparison$comparison_1to2$ccfResults$`27`) %>%
+  group_by(theta) %>%
+  summarise(dx = median(dx),
+            dy = median(dy)) %>%
+  ungroup() %>%
+  mutate(ccf = c(.75,.75),
+         cellNum = c(100,103))
+
+highCMC_yminData_comparison1to2_lowCMC <- highCMC_medianData_comparison1to2_lowCMC %>%
+  mutate(dx = dx - 20,
+         dy = dy - 20,
+         ccf = c(.5,.5),
+         cellNum = c(99,102))
+
+highCMC_ymaxData_comparison1to2_lowCMC <- highCMC_medianData_comparison1to2_lowCMC %>%
+  mutate(dx = dx + 20,
+         dy = dy + 20,
+         ccf = c(1,1),
+         cellNum = c(101,103))
+
+highCMC_congruentData_comparison1to2_lowCMC <- bind_rows(kmComparison$comparison_1to2$ccfResults$`30`,
+                                                  kmComparison$comparison_1to2$ccfResults$`27`) %>%
+  select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+  bind_rows(highCMC_yminData_comparison1to2_lowCMC,
+            highCMC_medianData_comparison1to2_lowCMC,
+            highCMC_ymaxData_comparison1to2_lowCMC) %>% 
+  select(-ccf) %>%
+  pivot_longer(cols = c(dx,dy),
+               names_to = "parameter") %>%
+  group_by(parameter) %>%
+  mutate(scaledValue = scales::rescale(value)) %>%
+  bind_rows(bind_rows(kmComparison$comparison_1to2$ccfResults$`30`,
+                      kmComparison$comparison_1to2$ccfResults$`27`) %>%
+              select(-c(cellID,fft.ccf,nonMissingProportion)) %>%
+              bind_rows(highCMC_yminData_comparison1to2_lowCMC,
+                        highCMC_medianData_comparison1to2_lowCMC,
+                        highCMC_ymaxData_comparison1to2_lowCMC) %>%
+              select(-c(dx,dy)) %>%
+              mutate(parameter = "ccf") %>%
+              rename(value = ccf) %>%
+              mutate(scaledValue = value)) %>%
+  arrange(cellNum)
+
+highCMC_extremaData_comparison1to2_lowCMC <- highCMC_congruentData_comparison1to2_lowCMC  %>%
+  filter(cellNum > 90) %>%
+  select(-c(cellNum,value)) %>%
+  arrange(theta,parameter) %>%
+  ungroup() %>%
+  mutate(name = rep(c("ymin","ymed","ymax"),times = 6)) %>%
+  pivot_wider(id_cols = c(parameter,theta,scaledValue),
+              names_from = name,
+              values_from = scaledValue)
+
+highCMC_comparison1to2_congruentCells_lowCMC <- highCMC_congruentData_comparison1to2_lowCMC %>%
+  filter(cellNum < 90) %>%
+  left_join(highCMC_extremaData_comparison1to2_lowCMC,by = c("parameter","theta")) %>%
+  mutate(Classification = ifelse(scaledValue >= ymin & scaledValue <= ymax,"Congruent","Not Congruent"),
+         theta = factor(theta,levels = c(27,30))) %>%
+  group_by(cellNum,theta) %>%
+  summarise(Classification = ifelse(all(Classification == "Congruent"),"Congruent","Not Congruent"))
+```
+
+```{r, include=FALSE}
+highCMC_comparison1to2_thetaNeg24 <- highCMC_congruentData_comparison1to2 %>%
+  filter(cellNum < 90 & theta == -24) %>%
+  left_join(theta_rescaled,by = "theta") %>%
+  pivot_wider(id_cols = c(cellNum,theta,parameter,thetaScaled),names_from = parameter,values_from = scaledValue) %>%
+  pivot_longer(cols = c(dx,dy,ccf,thetaScaled),
+               names_to = "parameter",
+               values_to = "scaledValue") %>%
+  left_join(highCMC_comparison1to2_congruentCells,by = c("cellNum","theta")) %>%
+  mutate(group = paste0(cellNum,theta),
+         parameter = factor(parameter,c("dx","dy","thetaScaled","ccf")),
+         Classification = factor(Classification,levels = c("Congruent","Not Congruent")),
+         theta = factor(theta,levels = c(-27,-24))) %>%
+  filter(parameter != "thetaScaled") %>%
+  ggplot() +
+  scale_colour_manual(values = c("#1b03a3","#a60b00")) +
+  geom_line(aes(x = parameter,
+                y = scaledValue,
+                group = group,
+                colour = Classification
+                # linetype = Classification,
+                # colour = theta
+                ),
+            size = .1) +
+  geom_tile(data = highCMC_extremaData_comparison1to2 %>%
+              filter(theta == -24),
+            aes(x = parameter,
+                y = ymed,
+                width = .25,
+                height = ymax - ymin
+                # ,fill = theta
+                ),
+            fill = "#7570b3",
+            colour = "black",
+            alpha = .4) +
+  theme_bw() +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        plot.margin = unit(c(.55,0,0,0), "cm")) +
+  scale_x_discrete(labels = c(expression(paste(Delta, "x")),
+                              expression(paste(Delta, "y")),
+                              # expression(theta),
+                              expression("CCF"[max])))
+
+highCMC_comparison1to2_theta30 <- highCMC_congruentData_comparison1to2_lowCMC %>%
+  filter(cellNum < 90 & theta == 30) %>%
+  left_join(theta_rescaled,by = "theta") %>%
+  pivot_wider(id_cols = c(cellNum,theta,parameter,thetaScaled),names_from = parameter,values_from = scaledValue) %>%
+  pivot_longer(cols = c(dx,dy,ccf,thetaScaled),
+               names_to = "parameter",
+               values_to = "scaledValue") %>%
+  mutate(theta = factor(theta,levels = c(27,30))) %>%
+  left_join(highCMC_comparison1to2_congruentCells_lowCMC %>%
+              mutate(theta = factor(theta,levels = c(27,30))),
+            by = c("cellNum","theta")) %>%
+  mutate(group = paste0(cellNum,theta),
+         parameter = factor(parameter,c("dx","dy","thetaScaled","ccf")),
+         Classification = factor(Classification,levels = c("Congruent","Not Congruent"))) %>%
+  filter(parameter != "thetaScaled") %>%
+  ggplot() +
+  scale_colour_manual(values = c("#1b03a3","#a60b00")) +
+  geom_line(aes(x = parameter,
+                y = scaledValue,
+                group = group,
+                colour = Classification
+                # linetype = Classification,
+                # colour = theta
+                ),
+            size = .1) +
+  geom_tile(data = highCMC_extremaData_comparison1to2_lowCMC %>%
+              filter(theta == 30),
+            aes(x = parameter,
+                y = ymed,
+                width = .25,
+                height = ymax - ymin
+                # ,fill = theta
+                ),
+            fill = "#7570b3",
+            colour = "black",
+            alpha = .4) +
+  theme_bw() +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        plot.margin = unit(c(.55,0,0,0), "cm")) +
+  scale_x_discrete(labels = c(expression(paste(Delta, "x")),
+                              expression(paste(Delta, "y")),
+                              # expression(theta),
+                              expression("CCF"[max])))
+```
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
+highCMC_comparison1to2_cmcTheta <- cmcR::cmcPerThetaBarPlot(kmComparison$comparison_1to2,
+                         ccf_thresh = .5,
+                         dx_thresh = 20,
+                         theta_thresh = 6,
+                         x3pNames = c("Fadul 1-1","Fadul 1-2")) +
+  coord_cartesian(xlim = c(-30,30),
+                  ylim = c(0,20)) +
+  ggplot2::scale_fill_manual(values = c("gray50","black")) +
+  scale_x_continuous(expression(paste("Rotation angle ", theta)), 
+                     breaks = seq(-30,30,by = 15),
+                     limits = c(-32,32))
+
+highCMC_comparison1to2_cmcTheta <- highCMC_comparison1to2_cmcTheta %>%
+  ggedit::remove_geom("text") %>%
+  ggedit::remove_geom("hline")
+
+thetaNeg24_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4,label = expression(paste(theta," = -24"))) +
+  theme_void()
+
+theta30_label <- ggplot() +
+  annotate("text",x = 1,y = 1,size = 4,label = expression(paste(theta," = 30"))) +
+  theme_void()
+
+ggplot(data.frame(a = 1)) +
+  theme_void() +
+  coord_cartesian(xlim = c(1,30),
+                  ylim = c(1,30),
+                  expand = FALSE) +
+  annotation_custom(ggplotGrob(highCMC_comparison1to2_cmcTheta),xmin = 6,xmax = 24,ymin = 1,ymax = 30) +
+  annotation_custom(ggplotGrob(highCMC_comparison1to2_thetaNeg24),xmin = 1,xmax = 6,ymin = 4,ymax = 14) +
+  annotation_custom(ggplotGrob(thetaNeg24_label),xmin = 1,xmax = 6,ymin = 10.5,ymax = 16) +
+  annotation_custom(pltLegend_vertical_leftAligned,xmin = 2.5,xmax = 3,ymin = 2,ymax = 3) +
+  annotation_custom(ggplotGrob(highCMC_comparison1to2_theta30),xmin = 24,xmax = 29,ymin = 4,ymax = 14) +
+  annotation_custom(ggplotGrob(theta30_label),xmin = 24,xmax = 29,ymin = 10.5,ymax = 16) +
+  annotation_custom(pltLegend_vertical_rightAligned,xmin = 27,xmax = 27.75,ymin = 2,ymax = 3) +
+  geom_path(data = data.frame(x = c(6,10),y = c(9,9)),
+            aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed")) +
+  geom_path(data = data.frame(x = c(23,24.1),y = c(9,9)),
+            aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed",ends = "first"))
+```
+
+An analogy is useful for understanding the difference between the decision rules of the original method of \citet{song_proposed_2013} and the High CMC method. Consider the decision rules as a voting system by which each cell in the reference scan votes for what it considers to be the true registration phase (translations and rotation) of the overall scans. The "votes" of each cell are ranked based on the associated CCF$_{\max}$ value. The original method of \citet{song_proposed_2013} might be viewed as a single-choice voting system similar to the system used in U.S. presidential elections. That is, every cell is allowed to submit one vote corresponding to the registration phase with the highest CCF$_{\max}$ value. Some of these votes are discarded if the associated CCF$_{\max}$ are below the $T_{\text{CCF}}$ threshold. A consensus is determined by counting the number of votes that are close to the reference values $x_{\text{ref}}, y_{\text{ref}}, \theta_{\text{ref}}$ (which is dyadically defined based on the $T_x,T_y,T_{\theta}$ thresholds). By considering only the "top vote" of each cell, information is lost regarding other registration phases for which a cell might also rank highly. As \citet{tong_improved_2015} observe:
+
+> some of the valid cell pairs may be mistakenly excluded from the CMC count because by chance their correlation yields a higher CCF value at a rotation angle outside the threshold range $T_\theta$.
+
+The High CMC method lifts the single-choice restriction by allowing cells to cast a vote for the translation phase at every $\theta$ value for which it has a sufficiently large associated CCF$_{\max}$ value. 
+Under this system, each vote represents the translation phase that the cell considers to be the true translation phase of the overall scans conditional on a particular $\theta$ value.
+In this way, the High CMC method might be viewed as an approval voting system in which an individual may cast a vote for all of the candidates that they would like.
+For each $\theta$ value, the number of translation phase votes that are close to the $\theta$-specific reference values $x_{\text{ref},\theta}, y_{\text{ref},\theta}$ are counted (now defined based only on the $T_x,T_y$ thresholds).
+This yields what \citet{tong_improved_2015} refer to as a "CMC-$\theta$" distribution representing, as they consider it, the number of "congruent cells" per $\theta$ value. 
+Thus, there may be more than one $\theta$ value for which a single cell/region pair is considered congruent.
+While seemingly contradictory (as there should be only one "true" $\theta$ alignment value), \citet{tong_improved_2015} justify their method by the empirical observation:
+
+> [i]f two images are truly matching, the CMC-$\theta$ distribution of matching image pairs should have a prominent peak located near the initial phase angle $\Theta_0$, while non-matching image pairs may have a relatively flat and random CMC-$\theta$ distribution pattern.
+
+The assumption underlying the High CMC method is that the number of cells classified as congruent should be larger near the true $\theta$ value (the "initial phase angle $\Theta_0$", as they call it) than for other $\theta$ values if the cartridge case pair is indeed a match.
+These phenomena are illustrated in Figures \ref{fig:kmCMCPerTheta} and \ref{fig:knmCMCPerTheta}. 
+\autoref{fig:kmCMCPerTheta} shows the CMC counts per rotation value in both directions for the known match pair Fadul 1-1 and Fadul 1-2 from \citet{fadul_empirical_nodate}. 
+We can clearly see a CMC mode around $\theta = -24$ in one direction and $21$ in the other, which is to be expected for a known match pair. 
+\autoref{fig:knmCMCPerTheta}, on the other hand, shows the CMC counts for the known non-match pair Fadul 1-1 and Fadul 2-1; in this comparison, no such CMC count mode is achieved.
+
+Based on this observation, \citet{tong_improved_2015} outline the following procedure for the High CMC method:
+
+> Conduct both forward and backward correlations at each rotation and record the registration based on CCF$_{\max}$, $x$, and $y$ for each cell at each rotation. These data will be used in the next two steps separately.
+
+> At every rotation angle, each cell in the reference image finds a registration position in the compared image with a maximum CCF value. By selecting the registration with the maximum CCF value for each cell, the two CMC numbers determined by the four thresholds can be obtained based on the original algorithm [\citet{tong_fired_2014}]. The lower CMC number is used as the initial result.
+
+> Build CMC-$\theta$ distributions using the data generated in step 1, by counting the number of cells that have congruent positions at each individual rotation angle. Calculate the angular range of “high CMCs” using both the forward and backward CMC-$\theta$ distributions, as illustrated in Figs. 2 and 3.
+
+> If the angular range of the “high CMCs” is within the range $T_\theta$, identify the CMCs for each rotation angle in this range and combine them to give the number of CMCs for this comparison in place of the original CMC number. In this step, if the range is narrower than $T_\theta$, the nearby angles are included to make the range equal to $T_\theta$; CMCs with same index in each rotation are only counted once.
+
+\citet{tong_improved_2015} introduce an additional criterion to identify a mode in the CMC count per $\theta$ distribution.
+Let $\{\text{CMC}_{\theta} : \theta \in \Theta \}$ denote the CMC-$\theta$ distribution where $\Theta$ is the set of rotation values considered for the comparison. 
+Define CMC$_{\max} \equiv \max_{\theta} \{\text{CMC}_{\theta} : \theta \in \Theta\}$.
+\citet{tong_improved_2015} \svp{define} a "high" CMC threshold as CMC$_{\text{high}} \equiv$ CMC$_{\max} - \tau$ for some constant $\tau$ (they choose $\tau = 1$).
+Now let $\Theta_{\text{high}} \equiv \{\theta : \text{CMC}_{\theta} \geq \text{CMC}_{\text{high}}\}$.
+That is, $\Theta_{\text{high}}$ consists of the $\theta$ values with "high" CMC counts.
+\citet{tong_improved_2015} propose calculating $R = \max_{\theta} \Theta_{\text{high}} - \min_{\theta} \Theta_{\text{high}}$.
+If $R \leq T_{\theta}$, then there is evidence that a single mode exists in the CMC-$\theta$ distribution (and thus that the cartridge case pair is a match).
+Otherwise, no such mode exists (by their definition) and the cartridge case pair is likely not a match.
+The horizontal dashed lines in Figures \ref{fig:kmCMCPerTheta} and \ref{fig:knmCMCPerTheta} represent the CMC$_{\text{high}}$ thresholds. 
+The $\theta \in \Theta_{\text{high}}$ are represented by blue bars.
+For the matching pair shown in \ref{fig:kmCMCPerTheta}, the range of $\Theta_{\text{high}}$ is less than the threshold $T_{\theta} = 6$ degrees, so this pair would "pass" the High CMC criterion.
+In contrast, the range of $\Theta_{\text{high}}$ is larger than $T_{\theta} = 6$ degrees for the non-match pair shown in \autoref{fig:knmCMCPerTheta}. 
+Thus, the non-match pair would "fail" the High CMC criterion.
+
+The "prominent peak" empirical observation upon which the High CMC method is based does seem to hold for many known match and known non-match pairs in our experience.
+However, we've observed that the behavior of the CMC-$\theta$ distributions depend heavily on the preprocessing procedures used and thresholds set. 
+In particular, the CMC-$\theta$ distributions for some KNM pairs exhibit the prominent peak behavior for a wide range of threshold values making them difficult to distinguish from KM pairs.
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE,cache = F,fig.cap='\\label{fig:kmCMCPerTheta} CMC count per rotation value in both directions for the comparison between Fadul 1-1 and Fadul 1-2. The High CMC threshold is defined to be the max CMC count observed across all rotation values minus some constant ($\\tau = 1$ in this example). A clear CMC count mode is observed in both directions at opposite $\\theta$ values. The only $\\theta$ values with associated CMC counts greater than or equal to the High CMC threshold are adjacent (in particular, within $T_{\\theta} = 6$ degrees of each other). \\citet{tong_improved_2015} propose using this as evidence that the cartridge case pair are matches.', fig.align='center',fig.pos='h',fig.width = 7}
+cmcR::cmcPerThetaBarPlot(kmComparison,
+                         ccf_thresh = .5,
+                         dx_thresh = 20,
+                         theta_thresh = 6,
+                         x3pNames = c("Fadul 1-1","Fadul 1-2")) +
+  coord_cartesian(xlim = c(-30,30),
+                  ylim = c(0,25)) +
+  ggplot2::scale_fill_manual(values = c("gray50","black")) +
+  scale_x_continuous(expression(paste("Rotation angle ", theta)), 
+                     breaks = seq(-30,30,by = 15),
+                     limits = c(-32,32))
+```
+
+```{r,echo=FALSE,cache = F,fig.align='center',fig.pos='h',fig.width = 7}
+cmcR::cmcPerThetaBarPlot(knmComparison,
+                         ccf_thresh = .5,
+                         dx_thresh = 20,
+                         theta_thresh = 6,
+                         x3pNames = c("Fadul 1-1","Fadul 2-1"))+
+  coord_cartesian(xlim = c(-30,30),
+                  ylim = c(0,25)) +
+  ggplot2::scale_fill_manual(values = c("gray50","black")) +
+  scale_x_continuous(expression(paste("Rotation angle ", theta)), 
+                     breaks = seq(-30,30,by = 15),
+                     limits = c(-32,32))
+```

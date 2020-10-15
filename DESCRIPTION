@@ -14,14 +14,13 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Imports: 
     magrittr,
     x3ptools,
     dplyr,
     ggplot2,
     imager,
-    cartridges3D,
     purrr,
     zoo,
     stringr,
@@ -31,7 +30,8 @@ Imports:
     colorspace,
     gridExtra,
     scales,
-    ggnewscale
+    ggnewscale,
+    quantreg
 Suggests: 
     knitr,
     rmarkdown,

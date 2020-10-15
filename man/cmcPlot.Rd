@@ -28,6 +28,8 @@ that dictates the height value colorscale}
 \item{cell.colors}{vector of 2 colors for plotting non-matching and matching
 (in that order) cells}
 
+\item{cell.text.size}{size of cell label (passed to ggplot::geom_text)}
+
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
 }
