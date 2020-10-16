@@ -5,6 +5,7 @@
 \alias{fadulData_processed}
 \alias{fadul1.1_processed}
 \alias{fadul1.2_processed}
+\alias{fadul2.1_processed}
 \title{Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
 functions from the cmcR package}
 \format{
@@ -26,6 +27,8 @@ capturing device}
 }
 
 An object of class \code{x3p} of length 5.
+
+An object of class \code{x3p} of length 5.
 }
 \source{
 \url{https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d}
@@ -34,6 +37,8 @@ An object of class \code{x3p} of length 5.
 fadul1.1_processed
 
 fadul1.2_processed
+
+fadul2.1_processed
 }
 \description{
 An x3p (XML 3D Surface Profile) object containing a processed version of the

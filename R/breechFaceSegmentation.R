@@ -87,7 +87,7 @@ estimateBFRadius <- function(mat,
 
 #' Crop the exterior of a breech face impression surface matrix
 #'
-#' @name cropBFExterior
+#' @name preProcess_cropBFExterior
 #'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
@@ -115,17 +115,17 @@ estimateBFRadius <- function(mat,
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped))
 
-cropBFExterior <- function(x3p,
-                           scheme = 3,
-                           high_connectivity = FALSE,
-                           tolerance = 0,
-                           radiusOffset = 0,
-                           croppingThresh = 1,
-                           agg_function = median){
+preProcess_cropBFExterior <- function(x3p,
+                                      scheme = 3,
+                                      high_connectivity = FALSE,
+                                      tolerance = 0,
+                                      radiusOffset = 0,
+                                      croppingThresh = 1,
+                                      agg_function = median){
   mat <- x3p$surface.matrix
 
   mat_radiusEstimate <- estimateBFRadius(mat = mat,
@@ -177,7 +177,7 @@ cropBFExterior <- function(x3p,
 
 #' Filter-out the firing pin impression region of a breech face impression scan
 #'
-#' @name filterBFInterior
+#' @name preProcess_filterBFInterior
 #'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
@@ -206,17 +206,17 @@ cropBFExterior <- function(x3p,
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
-#' fadul1.1_filtered <- filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#' fadul1.1_filtered <- preProcess_filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered))
 
-filterBFInterior <- function(x3p,
-                             scheme = 3,
-                             high_connectivity = FALSE,
-                             tolerance = 0,
-                             radiusOffset = 0){
+preProcess_filterBFInterior <- function(x3p,
+                                        scheme = 3,
+                                        high_connectivity = FALSE,
+                                        tolerance = 0,
+                                        radiusOffset = 0){
   mat <- x3p$surface.matrix
 
   mat_bfRegion <- mat
@@ -265,7 +265,7 @@ filterBFInterior <- function(x3p,
 
 #' Level a breech face impression surface matrix by a conditional statistics
 #'
-#' @name levelByConditionalStatistic
+#' @name preProcess_removeBFTrend
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
 #' @param statistic either "mean" or "quantile"
@@ -277,18 +277,18 @@ filterBFInterior <- function(x3p,
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
-#' fadul1.1_filtered <- filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#' fadul1.1_filtered <- preProcess_filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
 #'
-#' fadul1.1_leveled <- levelByConditionalStatistic(x3p = fadul1.1_filtered,statistic = "quantile",tau = .5,method = "fn")
+#' fadul1.1_leveled <- preProcess_removeBFTrend(x3p = fadul1.1_filtered,statistic = "quantile",tau = .5,method = "fn")
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered,"Cropped, Filtered, and Leveled" = fadul1.1_leveled))
 #' @export
 
-levelByConditionalStatistic <- function(x3p,
-                                        statistic = "mean",
-                                        ...){
+preProcess_removeBFTrend <- function(x3p,
+                                     statistic = "mean",
+                                     ...){
   stopifnot(statistic %in% c("quantile","mean"))
 
   if(statistic == "quantile"){

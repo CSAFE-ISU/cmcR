@@ -5,10 +5,10 @@
 \title{Crop out rows/columns outside of the breech face impression in a cartridge
 case scan.}
 \usage{
-preProcess_cropWS(surfaceMat, croppingThresh = 1)
+preProcess_cropWS(x3p, croppingThresh = 1)
 }
 \arguments{
-\item{surfaceMat}{a surface matrix representing a breech face impression scan}
+\item{x3p}{an x3p object containing a surface matrix}
 
 \item{croppingThresh}{minimum number of non-NA pixels that need to be in a
 row/column for it to not be cropped out of the surface matrix}
@@ -27,7 +27,7 @@ raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
   x3ptools::sample_x3p(m = 2)
 
 raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
-  cmcR::preProcess_ransac() \%>\%
+  cmcR::preProcess_ransacLevel() \%>\%
   cmcR::preProcess_levelBF() \%>\%
   cmcR::preProcess_cropWS(croppingThresh = 2)
 }

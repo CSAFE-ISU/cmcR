@@ -5,7 +5,7 @@
 \title{Detect the radius and center of a firing pin impression circle in a breech
 face impression scan using a circular Hough transform.}
 \arguments{
-\item{surfaceMat}{a surface matrix representing a breech face impression scan}
+\item{x3p}{an x3p object containing a surface matrix}
 
 \item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)
 used to determine where the non-NA pixel count-per-row series attains a

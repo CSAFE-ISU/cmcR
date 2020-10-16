@@ -5,17 +5,10 @@
 \title{Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
 particular cut-off wavelength.}
 \usage{
-preProcess_gaussFilter(
-  surfaceMat,
-  res,
-  wavelength = c(16, 500),
-  filtertype = "bp"
-)
+preProcess_gaussFilter(x3p, wavelength = c(16, 500), filtertype = "bp")
 }
 \arguments{
-\item{surfaceMat}{a surface matrix representing a breech face impression scan}
-
-\item{res}{sampling resolution of the surface matrix}
+\item{x3p}{an x3p object containing a surface matrix}
 
 \item{wavelength}{cut-off wavelength}
 
@@ -35,12 +28,11 @@ raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
 x3ptools::sample_x3p(m = 2)
 
 raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
-  cmcR::preProcess_ransac() \%>\%
+  cmcR::preProcess_ransacLevel() \%>\%
   cmcR::preProcess_levelBF() \%>\%
   cmcR::preProcess_cropWS() \%>\%
   cmcR::preProcess_removeFPCircle() \%>\%
-  cmcR::preProcess_gaussFilter(res = raw_x3p$header.info$incrementY,
-                               wavelength = c(16,500),
+  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
                                filtertype = "bp")
 }
 

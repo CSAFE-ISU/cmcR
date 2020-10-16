@@ -7,7 +7,7 @@
 preProcess_levelBF(ransacFit, useResiduals = TRUE)
 }
 \arguments{
-\item{ransacFit}{output from the cmcR::preProcess_ransac function.}
+\item{ransacFit}{output from the cmcR::preProcess_ransacLevel function.}
 
 \item{useResiduals}{dictates whether the difference between the estimated
 breech face and fitted plane are returned (residuals) or if the estimates
@@ -19,7 +19,7 @@ to the RANSAC-fitted plane or residuals between the fitted plane and
 observed values.
 }
 \description{
-Given the output of preProcess_ransac, extracts values (either
+Given the output of preProcess_ransacLevel, extracts values (either
 raw or residual) from the surface matrix to which the RANSAC plane was fit.
 Adapted from the cartridges3D::levelBF3D function. This ia modified version
 of the levelBF3D function available in the cartridges3D package on GitHub.
@@ -30,7 +30,7 @@ raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
   x3ptools::sample_x3p(m = 2)
 
 raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
- cmcR::preProcess_ransac() \%>\%
+ cmcR::preProcess_ransacLevel() \%>\%
  cmcR::preProcess_levelBF(useResiduals = TRUE)
 }
 
@@ -38,3 +38,4 @@ raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
 \seealso{
 https://github.com/xhtai/cartridges3D
 }
+\keyword{internal}

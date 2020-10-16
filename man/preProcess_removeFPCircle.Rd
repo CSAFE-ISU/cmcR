@@ -6,7 +6,7 @@
 firing pin impression circle}
 \usage{
 preProcess_removeFPCircle(
-  surfaceMat,
+  x3p,
   aggregationFunction = mean,
   smootherSize = 2 * round((0.1 * nrow(surfaceMat)/2)) + 1,
   gridSize = 40,
@@ -15,7 +15,7 @@ preProcess_removeFPCircle(
 )
 }
 \arguments{
-\item{surfaceMat}{a surface matrix representing a breech face impression scan}
+\item{x3p}{an x3p object containing a surface matrix}
 
 \item{aggregationFunction}{function to select initial radius estimate from
 those calculated using fpRadiusGridSearch}
@@ -49,7 +49,7 @@ raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
 x3ptools::sample_x3p(m = 2)
 
 raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
-  cmcR::preProcess_ransac() \%>\%
+  cmcR::preProcess_ransacLevel() \%>\%
   cmcR::preProcess_levelBF() \%>\%
   cmcR::preProcess_cropWS() \%>\%
   cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
