@@ -163,16 +163,11 @@ preProcess_cropBFExterior <- function(x3p,
   mat_interior <- mat
   mat_interior[exteriorIndices] <- NA
 
-  mat_cropped <- mat_interior %>%
-    cmcR::preProcess_cropWS(croppingThresh = croppingThresh)
+  x3p$surface.matrix <- mat_interior
 
-  x3p_clone <- x3p
-  x3p_clone$surface.matrix <- mat_cropped
-  x3p_clone$header.info$sizeY <- ncol(mat_cropped)
-  x3p_clone$header.info$sizeX <- nrow(mat_cropped)
+  x3p <- preProcess_cropWS(x3p,croppingThresh = croppingThresh)
 
-
-  return(x3p_clone)
+  return(x3p)
 }
 
 #' Filter-out the firing pin impression region of a breech face impression scan
