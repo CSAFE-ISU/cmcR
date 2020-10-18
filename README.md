@@ -223,8 +223,8 @@ performed in the `comparison_standardizeHeightValues` and
 `comparison_replacingMissingValues` functions.
 
 Then, the `comparison_fft.ccf` function estimates the translations
-required to align the cell and region using the
-[https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation%20Theorem).
+required to align the cell and region using the [Cross-Correlation
+Theorem](https://mathworld.wolfram.com/Cross-CorrelationTheorem.html).
 The `comparison_fft.ccf` function returns a data frame of 3 `x`, `y`,
 and `fft.ccf` values: the \(x,y\) estimated translation values at which
 the CCF\(_\max\) value is attained between the cell and region. The

@@ -123,7 +123,7 @@ cellTibble %>%
 
 We can standardize the surface matrix height values by centering/scaling by desired functions (e.g., mean and standard deviation). Also, to apply frequency-domain techniques in comparing each cell and region, the missing values in each scan need to be replaced. These operations are performed in the `comparison_standardizeHeightValues` and `comparison_replacingMissingValues` functions.
 
-Then, the `comparison_fft.ccf` function estimates the translations required to align the cell and region using the [https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation Theorem). The `comparison_fft.ccf` function returns a data frame of 3 `x`, `y`, and `fft.ccf` values: the $x,y$ estimated translation values at which the CCF$_\max$ value is attained between the cell and region. The `tidyr::unnest` function can unpack the data frame into 3 separate columns, if desired.
+Then, the `comparison_fft.ccf` function estimates the translations required to align the cell and region using the [Cross-Correlation Theorem](https://mathworld.wolfram.com/Cross-CorrelationTheorem.html). The `comparison_fft.ccf` function returns a data frame of 3 `x`, `y`, and `fft.ccf` values: the $x,y$ estimated translation values at which the CCF$_\max$ value is attained between the cell and region. The `tidyr::unnest` function can unpack the data frame into 3 separate columns, if desired.
 
 ```{r}
 cellTibble <- cellTibble  %>%
