@@ -51,7 +51,15 @@ information.
 ``` r
 library(cmcR)
 library(magrittr)
-set.seed(4132020)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
 ```
 
 Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2.
@@ -73,7 +81,7 @@ cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
                   type = "faceted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 ### Preprocessing
 
@@ -111,7 +119,7 @@ cmcR::x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
                   type = "faceted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 ### Cell-based comparison procedure
 
@@ -123,30 +131,29 @@ one row represents a single cell/region pairing.
 The `comparison_cellDivision` function divides a scan up into a grid of
 cells. The `cellIndex` column represents the `row,col` location in the
 original scan each cell inhabits. Each cell is stored as an `.x3p`
-object in the `cellHeightValues` column. The `propMissing` column
-indicates the proportion of missing values (`NA`s) in each cell. We will
-want to remove cells that contain too many missing values. The benefit
-of using a `tibble` structure is that processes such as removing rows
-can be accomplished using simple `dplyr` commands such as `filter`.
+object in the `cellHeightValues` column. We will want to remove cells
+that contain too many missing values. The benefit of using a `tibble`
+structure is that processes such as removing rows can be accomplished
+using simple `dplyr` commands such as `filter`.
 
 ``` r
 cellTibble <- fadul1.1_processed %>%
   comparison_cellDivision(numCells = 64)
 
 cellTibble
-#> # A tibble: 64 x 3
-#>    cellIndex cellHeightValues propMissing
-#>    <chr>     <list>                 <dbl>
-#>  1 1, 1      <x3p>                  1    
-#>  2 1, 2      <x3p>                  0.899
-#>  3 1, 3      <x3p>                  0.916
-#>  4 1, 4      <x3p>                  0.961
-#>  5 1, 5      <x3p>                  0.936
-#>  6 1, 6      <x3p>                  0.833
-#>  7 1, 7      <x3p>                  0.859
-#>  8 1, 8      <x3p>                  1    
-#>  9 2, 1      <x3p>                  0.835
-#> 10 2, 2      <x3p>                  0.815
+#> # A tibble: 64 x 2
+#>    cellIndex cellHeightValues
+#>    <chr>     <named list>    
+#>  1 1, 1      <x3p>           
+#>  2 1, 2      <x3p>           
+#>  3 1, 3      <x3p>           
+#>  4 1, 4      <x3p>           
+#>  5 1, 5      <x3p>           
+#>  6 1, 6      <x3p>           
+#>  7 1, 7      <x3p>           
+#>  8 1, 8      <x3p>           
+#>  9 2, 1      <x3p>           
+#> 10 2, 2      <x3p>           
 #> # ... with 54 more rows
 ```
 
@@ -158,231 +165,181 @@ boundaries of the target scan).
 
 ``` r
 cellTibble <- cellTibble %>%
-  dplyr::filter(propMissing <= .85) %>%
-  dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                                 target_x3p = fadul1.2_processed,
-                                                                 regionSizeMultiplier = 9))
+  mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                                          target_x3p = fadul1.2_processed,
+                                                          regionSizeMultiplier = 9))
+
+cellTibble
+#> # A tibble: 64 x 3
+#>    cellIndex cellHeightValues regionHeightValues
+#>    <chr>     <named list>     <named list>      
+#>  1 1, 1      <x3p>            <x3p>             
+#>  2 1, 2      <x3p>            <x3p>             
+#>  3 1, 3      <x3p>            <x3p>             
+#>  4 1, 4      <x3p>            <x3p>             
+#>  5 1, 5      <x3p>            <x3p>             
+#>  6 1, 6      <x3p>            <x3p>             
+#>  7 1, 7      <x3p>            <x3p>             
+#>  8 1, 8      <x3p>            <x3p>             
+#>  9 2, 1      <x3p>            <x3p>             
+#> 10 2, 2      <x3p>            <x3p>             
+#> # ... with 54 more rows
+```
+
+We will want to exclude cells and regions that contain few observations.
+The `comparison_calcPropMissing` function calculates the proportion of
+missing values in a surface matrix.
+
+``` r
+cellTibble <- cellTibble %>%
+  mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
+         regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
+  filter(cellPropMissing <= .85 & regionPropMissing <= .85)
+
+cellTibble %>%
+  select(cellIndex,cellPropMissing,regionPropMissing)
+#> # A tibble: 25 x 3
+#>    cellIndex cellPropMissing regionPropMissing
+#>    <chr>               <dbl>             <dbl>
+#>  1 1, 6               0.833              0.808
+#>  2 2, 7               0.657              0.700
+#>  3 2, 8               0.834              0.757
+#>  4 3, 8               0.353              0.638
+#>  5 4, 8               0.153              0.576
+#>  6 5, 1               0.117              0.767
+#>  7 5, 8               0.0441             0.511
+#>  8 6, 1               0.305              0.687
+#>  9 6, 2               0.368              0.605
+#> 10 6, 7               0.243              0.390
+#> # ... with 15 more rows
 ```
 
 We can also standardize the surface matrix height values by
 centering/scaling by desired statistics. Also, to apply frequency-domain
 techniques in comparing each cell and region, the missing values in each
-scan need to be replaced. Both of these operations are performed in the
-`comparison_standardizeHeightValues` function. If the replacement of
-missing values is desired (i.e., `replaceMissingValues` argument is set
-to `TRUE`), then all missing values are replaced with 0 after
-centering/scaling. Then, the `comparison_fft.ccf` function estimates the
-translations required to align the cell and region using the
-[https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation%20Theorem).
+scan need to be replaced. These operations are performed in the
+`comparison_standardizeHeightValues` and
+`comparison_replacingMissingValues` functions.
 
-(Future note: I want the `comparison_fft.ccf` function to create 3 new
-columns, corresponding to the x, y, and CCF\(_\max\) values, but I don’t
-know how to create 3 columns from a single function call. It’s common in
-other languages like Python that if a function returns multiple values
-you can declare multiple variable assignments on the same line. I would
-like to do something like this with declaring columns, but in a mutate
-statement to keep with the tibble theme.)
+Then, the `comparison_fft.ccf` function estimates the translations
+required to align the cell and region using the
+[https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation%20Theorem).
+The `comparison_fft.ccf` function returns a data frame of 3 `x`, `y`,
+and `fft.ccf` values: the \(x,y\) estimated translation values at which
+the CCF\(_\max\) value is attained between the cell and region. The
+`tidyr::unnest` function can unpack the data frame into 3 separate
+columns, if desired.
 
 ``` r
 cellTibble <- cellTibble  %>%
-  dplyr::mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues,
-                                                                      replaceMissingValues = TRUE),
-                regionHeightValues = comparison_standardizeHeightValues(regionHeightValues,
-                                                                        replaceMissingValues = TRUE)) %>%
-  dplyr::mutate(fft.ccf = comparison_fft.ccf(cellHeightValues = cellHeightValues,
-                                             regionHeightValues = regionHeightValues))
+  mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues),
+         regionHeightValues = comparison_standardizeHeightValues(regionHeightValues)) %>%
+  mutate(cellHeightValues_replaced = comparison_replacingMissingValues(cellHeightValues),
+         regionHeightValues_replaced = comparison_replacingMissingValues(regionHeightValues)) %>%
+  mutate(fft.ccf_df = comparison_fft.ccf(cellHeightValues = cellHeightValues_replaced,
+                                         regionHeightValues = regionHeightValues_replaced))
 
-cellTibble$fft.ccf[1:3]
-#> [[1]]
-#> [[1]]$ccf
-#> [1] 0.2444739
-#> 
-#> [[1]]$dx
-#> [1] -7
-#> 
-#> [[1]]$dy
-#> [1] -23
-#> 
-#> 
-#> [[2]]
-#> [[2]]$ccf
-#> [1] 0.2579381
-#> 
-#> [[2]]$dx
-#> [1] 33
-#> 
-#> [[2]]$dy
-#> [1] -54
-#> 
-#> 
-#> [[3]]
-#> [[3]]$ccf
-#> [1] 0.2658087
-#> 
-#> [[3]]$dx
-#> [1] 37
-#> 
-#> [[3]]$dy
-#> [1] -43
+cellTibble %>%
+  tidyr::unnest(cols = fft.ccf_df) %>%
+  select(cellIndex,fft.ccf,x,y)
+#> # A tibble: 25 x 4
+#>    cellIndex fft.ccf     x     y
+#>    <chr>       <dbl> <dbl> <dbl>
+#>  1 1, 6        0.244    -7   -23
+#>  2 2, 7        0.190    55    31
+#>  3 2, 8        0.189    53    53
+#>  4 3, 8        0.168   -23   -60
+#>  5 4, 8        0.164    -3    13
+#>  6 5, 1        0.213   -14   -49
+#>  7 5, 8        0.139     7   -48
+#>  8 6, 1        0.327   -53   -79
+#>  9 6, 2        0.283     8   -45
+#> 10 6, 7        0.169    13   -85
+#> # ... with 15 more rows
 ```
 
-### (OLD) Cell-based comparison procedure
-
-The scans are now ready to be compared using the cell-based comparison
-procedure. This is performed using the
-[`cellCCF_bothDirections`](https://csafe-isu.github.io/cmcR/reference/cellCCF_bothDirections.html)
-function.
+Because so many missing values need to be replaced, the CCF\(_{\max}\)
+value calculated in the `fft.ccf` column using frequency-domain
+techniques is not a very good similarity score (doesn’t differentiate
+matches from non-matches well). However, the `x` and `y` estimated
+translations are good estimates of the “true” translation values needed
+to align the cell and region. To calculate a more accurate similarity
+score, we can use the pairwise-complete correlation in which only pairs
+of non-missing pixels are considered in the correlation calculation.
+This provides a better similarity metric. The pairwise-complete
+correlation can be calculated with the `comparison_cor` function.
 
 ``` r
-kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1_processed,
-                                             x3p2 = fadul1.2_processed,
-                                             thetas = seq(-30, 30, by = 3))
+cellTibble %>%
+  mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft.ccf_df)) %>%
+  tidyr::unnest(fft.ccf_df) %>%
+  select(cellIndex,x,y,pairwiseCompCor)
+#> # A tibble: 25 x 4
+#>    cellIndex     x     y pairwiseCompCor
+#>    <chr>     <dbl> <dbl>           <dbl>
+#>  1 1, 6         -7   -23           0.510
+#>  2 2, 7         55    31           0.336
+#>  3 2, 8         53    53           0.474
+#>  4 3, 8        -23   -60           0.344
+#>  5 4, 8         -3    13           0.336
+#>  6 5, 1        -14   -49           0.430
+#>  7 5, 8          7   -48           0.271
+#>  8 6, 1        -53   -79           0.616
+#>  9 6, 2          8   -45           0.581
+#> 10 6, 7         13   -85           0.453
+#> # ... with 15 more rows
 ```
 
-We may be interested in phase (\(x\),\(y\), and \(\theta\)) at which
-each cell/region pair attained the maximum cross-correlation (for
-example, this information is used to define matches vs. non-matches
-under the original method of Song (2013)). The `topResultsPerCell`
-function calculates this information from a list of CCF results (as
-returned by the `cellCCF_bothDirections` function) and returns it as a
-data frame. As the name implies, `cellCCF_bothDirections` performs the
-cell-based comparison procedures in both directions (i.e., Fadul 1-1 is
-partitioned into a grid of cells and compared to regions in Fadul 1-2
-and vice versa), hence the `$` extraction of the `kmComparison` list
-object below. A sample of the output is given below.
+Finally, this entire comparison procedure is to be repeated over a
+number of rotations of the target scan. The resulting data frame below
+contains the features that are used in the decision-rule procedure
 
 ``` r
-kmComparison$comparison_1to2$ccfResults %>%
-  cmcR::topResultsPerCell() %>%
-  head()
-#> # A tibble: 6 x 8
-#> # Groups:   cellRange [6]
-#>   cellNum cellRange            fft.ccf    dx    dy theta nonMissingPropor~   ccf
-#>     <int> <chr>                  <dbl> <dbl> <dbl> <dbl>             <dbl> <dbl>
-#> 1       6 rows: 1 - 69, cols:~   0.262    -7     1   -24             0.167 0.619
-#> 2       7 rows: 1 - 69, cols:~   0.245    41    28    27             0.141 0.728
-#> 3       2 rows: 1 - 69, cols:~   0.315   -30    22   -30             0.101 0.729
-#> 4      17 rows: 138 - 205, co~   0.596    10   -22   -15             0.493 0.818
-#> 5      24 rows: 138 - 205, co~   0.323    -8     4   -24             0.647 0.616
-#> 6      25 rows: 206 - 273, co~   0.443    -7    23   -27             0.676 0.722
+cellTibble <- fadul1.1_processed %>%
+  comparison_cellDivision(numCells = 64)
+
+comparison_allTogether <- function(theta){
+  
+  cellTibble %>%
+  mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                                          target_x3p = fadul1.2_processed,
+                                                          regionSizeMultiplier = 9,
+                                                          rotation = theta)) %>%
+    mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
+           regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
+    filter(cellPropMissing <= .85 & regionPropMissing <= .85) %>%
+    mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues),
+           regionHeightValues = comparison_standardizeHeightValues(regionHeightValues)) %>%
+    mutate(cellHeightValues_replaced = comparison_replacingMissingValues(cellHeightValues),
+           regionHeightValues_replaced = comparison_replacingMissingValues(regionHeightValues)) %>%
+    mutate(fft.ccf_df = comparison_fft.ccf(cellHeightValues = cellHeightValues_replaced,
+                                           regionHeightValues = regionHeightValues_replaced)) %>%
+    mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft.ccf_df)) %>%
+    tidyr::unnest(fft.ccf_df) %>%
+    select(cellIndex,x,y,pairwiseCompCor) %>%
+    mutate(theta = theta)
+  
+}
+
+kmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),comparison_allTogether)
+
+kmComparisonFeatures
+#> # A tibble: 527 x 5
+#>    cellIndex     x     y pairwiseCompCor theta
+#>    <chr>     <dbl> <dbl>           <dbl> <dbl>
+#>  1 2, 7        -28   -54           0.336   -30
+#>  2 3, 1        -21    37           0.732   -30
+#>  3 3, 8        -17   -22           0.503   -30
+#>  4 4, 1         -9    35           0.675   -30
+#>  5 4, 8         -8   -26           0.529   -30
+#>  6 5, 1          1    34           0.561   -30
+#>  7 5, 8          0   -22           0.499   -30
+#>  8 6, 1          8    33           0.765   -30
+#>  9 6, 2         65    66           0.524   -30
+#> 10 6, 7          7   -12           0.328   -30
+#> # ... with 517 more rows
 ```
 
 ### Decision rule
 
-The final step in the CMC methodology is to apply a decision rule to the
-features extracted from the cell-based comparison procedure to declare a
-cell/region pair “congruent” or not. The number of “congruent”
-cell/region pairs is used as a similarity score between the two
-cartridge cases considered; the higher the number of congruent
-cell/region pairs, the more evidence there is that the cartridge case
-pair is a match. The various proposed CMC methods (two of which are
-implemented in the cmcR package) differ principally on the decision rule
-used to classify “congruent” cells. The
-[`cmcFilter_improved`](https://csafe-isu.github.io/cmcR/reference/cmcFilter_improved.html)
-function applies the decision rules from the original method of Song
-(2013) and the High CMC method of Tong et al. (2015) to the output of
-the `cellCCF_bothDirections` function. Phase an correlation thresholds
-need to be set by the user.
-
-``` r
-kmCMC <- cmcR::cmcFilter_improved(cellCCF_bothDirections_output = kmComparison,
-                                  ccf_thresh = .5,
-                                  dx_thresh = 20,
-                                  theta_thresh = 6)
-```
-
-The decision rule of the original method of Song (2013) only considers
-one of the two possible comparison directions. As such, we obtain a
-congruent matching cell count for both directions. The `comparison_1to2`
-direction refers to the case where Fadul 1-1 is partitioned into a grid
-of cells and compared to regions in Fadul 1-2.
-
-``` r
-nrow(kmCMC$originalMethodCMCs$comparison_1to2)
-#> [1] 19
-head(kmCMC$originalMethodCMCs$comparison_1to2)
-#> # A tibble: 6 x 8
-#>   cellNum cellRange            fft.ccf    dx    dy theta nonMissingPropor~   ccf
-#>     <int> <chr>                  <dbl> <dbl> <dbl> <dbl>             <dbl> <dbl>
-#> 1       6 rows: 1 - 69, cols:~   0.262    -7     1   -24             0.167 0.619
-#> 2      24 rows: 138 - 205, co~   0.323    -8     4   -24             0.647 0.616
-#> 3      25 rows: 206 - 273, co~   0.443    -7    23   -27             0.676 0.722
-#> 4      32 rows: 206 - 273, co~   0.319    -8   -12   -27             0.847 0.600
-#> 5      33 rows: 274 - 341, co~   0.431    -5    -2   -21             0.883 0.733
-#> 6      40 rows: 274 - 341, co~   0.313    -7    14   -21             0.956 0.631
-```
-
-Conversely, the `comparison_2to1` direction refers to Fadul 1-2 is
-partitioned into a grid of cells and compared to regions in Fadul 1-1.
-
-``` r
-nrow(kmCMC$originalMethodCMCs$comparison_2to1)
-#> [1] 20
-head(kmCMC$originalMethodCMCs$comparison_2to1)
-#> # A tibble: 6 x 8
-#>   cellNum cellRange            fft.ccf    dx    dy theta nonMissingPropor~   ccf
-#>     <int> <chr>                  <dbl> <dbl> <dbl> <dbl>             <dbl> <dbl>
-#> 1       7 rows: 1 - 69, cols:~   0.219    -5   -15    21             0.160 0.695
-#> 2      17 rows: 138 - 205, co~   0.396     9   -23    27             0.241 0.762
-#> 3      24 rows: 138 - 205, co~   0.388     4    -4    24             0.695 0.637
-#> 4      32 rows: 206 - 273, co~   0.487     2    -6    24             0.958 0.754
-#> 5      33 rows: 274 - 342, co~   0.459     2    -1    21             0.639 0.810
-#> 6      40 rows: 274 - 342, co~   0.476     6   -19    21             0.958 0.644
-```
-
-The High CMC method of Tong et al. (2015) applies more stringent
-criteria to classify congruent vs. non-congruent matching cells.
-However, it also tends to assign a higher CMC count than original method
-of Song (2013). Such is the case in the example considered.
-
-``` r
-nrow(kmCMC$highCMCs)
-#> [1] 29
-head(kmCMC$highCMCs)
-#> # A tibble: 6 x 9
-#>   cellNum cellRange  fft.ccf    dx    dy nonMissingPropo~   ccf theta comparison
-#>     <int> <chr>        <dbl> <dbl> <dbl>            <dbl> <dbl> <dbl> <chr>     
-#> 1      55 rows: 410~   0.451     6    -7            0.940 0.718   -27 compariso~
-#> 2       6 rows: 1 -~   0.262    -7     1            0.167 0.619   -24 compariso~
-#> 3       9 rows: 70 ~   0.540    -7     9            0.165 0.900   -24 compariso~
-#> 4      56 rows: 410~   0.420    -3     3            0.162 0.785   -24 compariso~
-#> 5      59 rows: 478~   0.408    -1    11            0.701 0.671   -24 compariso~
-#> 6      63 rows: 478~   0.506    -1     0            0.162 0.879   -24 compariso~
-```
-
-We can visualize the congruent matching cells for the comparison
-considered using the
-[cmcPlot](https://csafe-isu.github.io/cmcR/reference/cmcPlot.html)
-function. Tong et al. (2015) recommend using the minimum of the two CMC
-counts determined under the original method of Song (2013) as the
-“initial” CMC count before applying the High CMC method criteria. This
-is what is visualized below.
-
-``` r
-cmcPlots <- cmcR::cmcPlot(x3p1 = fadul1.1_processed,
-                          x3p2 = fadul1.2_processed,
-                          cellCCF_bothDirections_output = kmComparison,
-                          cmcFilter_improved_output = kmCMC,
-                          x3pNames = c("Fadul 1-1","Fadul 1-2"),
-                          #arguments dictating output colors:
-                          height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
-                                                                   '#e08214','#fdb863',
-                                                                   '#fee0b6','#f7f7f7',
-                                                                   '#d8daeb','#b2abd2',
-                                                                   '#8073ac','#542788',
-                                                                   '#2d004b'),
-                                                                 amount = .75),
-                          cell.colors = c("#a60b00","#1b03a3"),
-                          cell.alpha = .15,
-                          na.value = "gray80")
-
-cmcPlots$originalMethodCMCs
-```
-
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
-
-``` r
-cmcPlots$highCMCs
-```
-
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+Under construction…

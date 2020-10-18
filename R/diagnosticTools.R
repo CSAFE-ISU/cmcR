@@ -182,7 +182,7 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #' @importFrom stats median setNames
 #' @importFrom ggnewscale new_scale_fill
 
-utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","dx","dy","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
+utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","x","y","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
 
 arrangeCMCPlot <- function(x3p1,
                            x3p2,
@@ -231,14 +231,14 @@ arrangeCMCPlot <- function(x3p1,
                   lastRowCentered = lastRow - max(lastRow)/2,
                   firstColCentered = firstCol - max(lastCol)/2,
                   lastColCentered = lastCol - max(lastCol)/2) %>%
-    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
-                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
-                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
-                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
-                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
-                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2,
-                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*dx/2,
-                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*dy/2) %>%
+    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
+                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
+                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
+                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
+                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
+                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2) %>%
     #this is redundant, but are the names attributed to the x and y columns are
     #set-up down below, so I won't change it
     dplyr::mutate(x_1 = topLeftCorner_col,
@@ -390,7 +390,7 @@ arrangeCMCPlot <- function(x3p1,
 #'
 #'@export
 
-utils::globalVariables(c(".","cmc","comparison","dx","dy","theta","cellNum","cellRange"))
+utils::globalVariables(c(".","cmc","comparison","x","y","theta","cellNum","cellRange"))
 
 cmcPlot <- function(x3p1,
                     x3p2,
@@ -465,12 +465,12 @@ cmcPlot <- function(x3p1,
       dplyr::mutate(cellNum = 1:nrow(.))
 
     highCMCs_directionCorrected <- cmcFilter_improved_output$highCMCs %>%
-      dplyr::mutate(dx = ifelse(comparison == "comparison_2to1",
-                                yes = -dx,
-                                no = dx),
-                    dy = ifelse(comparison == "comparison_2to1",
-                                yes = -dy,
-                                no = dy),
+      dplyr::mutate(x = ifelse(comparison == "comparison_2to1",
+                                yes = -x,
+                                no = x),
+                    y = ifelse(comparison == "comparison_2to1",
+                                yes = -y,
+                                no = y),
                     theta = ifelse(comparison == "comparison_2to1",
                                    yes = -theta,
                                    no = theta)) %>%
@@ -533,14 +533,14 @@ cmcPlot <- function(x3p1,
 #'   function. If from the cellCCF_bothDirections, then the ggplot will be
 #'   faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
 #'   played the role as the "questioned" cartridge case scan)
-#' @param consensus_function function to aggregate the translation (dx and dy)
+#' @param consensus_function function to aggregate the translation (x and y)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
 #' @param ccf_thresh minimum correlation threshold to call a cell pair
 #'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#' @param dx_thresh maximum distance from the consensus x value that a cell
 #'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#' @param dy_thresh  maximum distance from the consensus y value that a cell
 #'   pair can be to be called "congruent matching"
 #' @param theta_thresh maximum distance from the consensus theta value that a
 #'   cell pair can be to be called "congruent matching"
@@ -754,7 +754,7 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
 
   sidelengthMultiplier <- floor(sqrt(cellCCF_params$regionToCellProp))
 
-  mat2_splitCorners <- getMat2SplitLocations(cellRanges = mat1_split$cellRanges,
+  mat2_splitCorners <- getMat2SplitIndices(cellRanges = mat1_split$cellRanges,
                                              cellSideLengths = mat1_split$cellSideLengths,
                                              mat2Dim = dim(mat2),
                                              sidelengthMultiplier = sidelengthMultiplier)
@@ -886,7 +886,7 @@ ccfMap <- function(mat1,mat2){
 #'
 #' @export
 
-utils::globalVariables(c("x","y","value","fft.ccf","dx","dy"))
+utils::globalVariables(c("x","y","value","fft.ccf","x","y"))
 
 ccfMapPlot <- function(mat1,
                        mat2,
@@ -900,8 +900,8 @@ ccfMapPlot <- function(mat1,
     t() %>% #imager treats a matrix as its transpose ("x" axis in imager refers to rows "y" to cols)
     imager::as.cimg() %>%
     as.data.frame() %>%
-    dplyr::mutate(dx = x - max(x)/2,
-                  dy = y - max(y)/2) %>%
+    dplyr::mutate(x = x - max(x)/2,
+                  y = y - max(y)/2) %>%
     dplyr::rename(fft.ccf = value)
 
   ccfMaxInfo <- ccfDF %>%
@@ -952,8 +952,8 @@ ccfMapPlot <- function(mat1,
                    axis.title.x = ggplot2::element_blank(),
                    axis.title.y = ggplot2::element_blank()) +
     ggplot2::geom_tile(ggplot2::aes(
-      x = max(x)/2 - ccfMaxInfo$dx,
-      y = max(y)/2 - ccfMaxInfo$dy,
+      x = max(x)/2 - ccfMaxInfo$x,
+      y = max(y)/2 - ccfMaxInfo$y,
       width = ncol(mat1),
       height = nrow(mat1)),
       alpha = 0,
@@ -961,16 +961,16 @@ ccfMapPlot <- function(mat1,
 
   if(type == "raster"){
     ccfPlot <- ccfDF %>%
-      dplyr::mutate(dx = rev(dx),
-                    dy = rev(dy)) %>%
-      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
+      dplyr::mutate(x = rev(x),
+                    y = rev(y)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
       ggplot2::geom_raster(ggplot2::aes(fill = fft.ccf)) +
       ggplot2::geom_point(data = ccfDF %>%
-                            dplyr::mutate(dx = rev(dx),
-                                          dy = rev(dy)) %>%
+                            dplyr::mutate(x = rev(x),
+                                          y = rev(y)) %>%
                             dplyr::filter(fft.ccf == max(fft.ccf)) %>%
                             dplyr::mutate(type = "Maximum"),
-                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          ggplot2::aes(x = x,y = y,shape = type),
                           # shape = 4,
                           colour = "white",
                           fill = "white") +
@@ -999,9 +999,9 @@ ccfMapPlot <- function(mat1,
   }
   if(type == "contour"){
     ccfPlot <- ccfDF %>%
-      dplyr::mutate(dx = rev(dx),
-                    dy = rev(dy)) %>%
-      ggplot2::ggplot(ggplot2::aes(x = dx,y = dy)) +
+      dplyr::mutate(x = rev(x),
+                    y = rev(y)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = x,y = y)) +
       ggplot2::geom_contour_filled(ggplot2::aes(z = fft.ccf),
                                    breaks = c(quantile(as.vector(ccfDF$fft.ccf)[(as.vector(ccfDF$fft.ccf) <= 0)],
                                                        prob = seq(0,1,length.out = 6)),
@@ -1010,12 +1010,12 @@ ccfMapPlot <- function(mat1,
                                                        prob = seq(0,1,length.out = 6))),
       ) +
       ggplot2::geom_point(data = ccfDF %>%
-                            dplyr::mutate(dx = rev(dx),
-                                          dy = rev(dy)) %>%
+                            dplyr::mutate(x = rev(x),
+                                          y = rev(y)) %>%
                             dplyr::filter(fft.ccf == min(fft.ccf) | fft.ccf == max(fft.ccf)) %>%
                             dplyr::arrange(fft.ccf) %>%
                             dplyr::mutate(type = factor(c("Minimum","Maximum"))),
-                          ggplot2::aes(x = dx,y = dy,shape = type),
+                          ggplot2::aes(x = x,y = y,shape = type),
                           # shape = 4,
                           colour = "white") +
       ggplot2::scale_shape_manual(values = c(1,4)) +
@@ -1037,11 +1037,11 @@ ccfMapPlot <- function(mat1,
 
   ccfMaxSummary <- ccfMaxInfo %>%
     dplyr::select(-c(x,y)) %>%
-    dplyr::mutate(dx = -dx,
-                  dy = -dy,
+    dplyr::mutate(x = -x,
+                  y = -y,
                   theta = theta) %>%
     t() %>%
-    tableGrob(rows = c(expression("FFT CCF"[max]),"dx","dy",expression(theta)),
+    tableGrob(rows = c(expression("FFT CCF"[max]),"x","y",expression(theta)),
               cols = "Summary")
 
   gridPlot <- arrangeGrob(mat1Plot,

@@ -9,11 +9,15 @@ comparison_standardizeHeightValues(
   heightValues,
   withRespectTo = "individualCell",
   centerBy = mean,
-  scaleBy = sd,
-  replaceMissingValues = TRUE
+  scaleBy = sd
 )
 }
 \description{
 Standardize height values of a scan by centering/scaling by desired
 statistics and replacing missing values
+}
+\note{
+this function adds information to the metainformation of the x3p scan
+it is given that is required for calculating, for example, the
+pairwise-complete correlation using the comparison_cor function.
 }

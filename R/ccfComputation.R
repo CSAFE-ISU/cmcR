@@ -180,7 +180,7 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
                     offsety = offsety - max(offsety)/2 - nrow(mat1)/2) %>%
       dplyr::filter(ccfReweighted == max(ccfReweighted,na.rm = TRUE))
 
-    return(list("ccf" = resp$ccfReweighted,"dx" = resp$offsetx,"dy" = resp$offsety))
+    return(data.frame("ccf" = resp$ccfReweighted,"x" = resp$offsetx,"y" = resp$offsety))
   }
 
   else if(ccfMethod == "imager"){
@@ -201,7 +201,7 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   dx <- tmp[["col"]] - d_offset[2] - 1
   dy <- tmp[["row"]] - d_offset[1] - 1
 
-  ret <- list("ccf" = corr, "dx" = dx, "dy" = dy)
+  ret <- data.frame("fft.ccf" = corr, "x" = dx, "y" = dy)
   return(ret)
 }
 
@@ -219,9 +219,10 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
 #'   there may be a slight mis-match (like one row/col) between the dimensions
 #'   of "cell" and of the matrix extracted from "region," typically because
 #'   "region" has an odd dimension while "cell" has an even dimension or vice
-#'   versa. Thus, additional padding/cropping needs to be performed in the
-#'   "cell"-sized matrix extracted from "region." However, we don't know whether
-#'   these rows/cols should pre/post padded/cropped, so all possible
+#'   versa. Thus, the "center" of one of the matrices might not be well-defined
+#'   as a single index. Thus, additional padding/cropping needs to be performed
+#'   in the "cell"-sized matrix extracted from "region." However, we don't know
+#'   whether these rows/cols should pre/post padded/cropped, so all possible
 #'   combinations of padding/cropping are considered. To determine which of
 #'   these these combinations should be ultimately chosen as the final
 #'   "cell"-sized matrix, the tieBreaker argument can be used to determine, for
@@ -235,12 +236,12 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
 
 calcRawCorr <- function(cell,
                         region,
-                        dx,
-                        dy,
-                        m1,
-                        m2,
-                        sd1,
-                        sd2,
+                        dx = 0,
+                        dy = 0,
+                        m1 = 0,
+                        m2 = 0,
+                        sd1 = 1,
+                        sd2 = 1,
                         tieBreaker = which.max,
                         use = "pairwise.complete.obs"){
   cell <- (cell - m1)/sd1

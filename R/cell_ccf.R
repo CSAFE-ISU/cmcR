@@ -163,10 +163,10 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 
   #create a cell ID column based on x,y location in image:
   cellRanges <- purrr::map(names(surfaceMat_split),
-                        function(horizCell){
-                          purrr::map(.x = names(surfaceMat_split[[1]]),
-                                     function(vertCell) paste(horizCell,vertCell,sep = ","))
-                        }) %>%
+                           function(horizCell){
+                             purrr::map(.x = names(surfaceMat_split[[1]]),
+                                        function(vertCell) paste(horizCell,vertCell,sep = ","))
+                           }) %>%
     unlist() #unlist to make it a character vector to be added to a df
 
   cellSideLengths <- surfaceMat_split %>%
@@ -198,10 +198,10 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 utils::globalVariables(c("."))
 
 getMat2SplitIndices <- function(cellRanges,
-                                  cellSideLengths,
-                                  mat2Dim,
-                                  sidelengthMultiplier,
-                                  ...){
+                                cellSideLengths,
+                                mat2Dim,
+                                sidelengthMultiplier,
+                                ...){
   mat2_splitCorners <- cellRanges %>%
     #pull all numbers from cellRange strings:
     purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
@@ -411,7 +411,7 @@ cellCCF <- function(x3p1,
   #positions between two comparisons (since their "cellRange" may differ since
   #the scans aren't the same size)
   cellRangedf <- data.frame(cellNum = seq_along(mat1_split$cellRanges),
-                         cellRange = mat1_split$cellRanges)
+                            cellRange = mat1_split$cellRanges)
 
   #Now we want to split image B into cells with the same centers as those in
   #image A, but with twice the side length (these wider cells will intersect
@@ -420,9 +420,9 @@ cellCCF <- function(x3p1,
   sidelengthMultiplier <- floor(sqrt(regionToCellProp))
 
   mat2_splitCorners <- getMat2SplitIndices(cellRanges = mat1_split$cellRanges,
-                                             cellSideLengths = mat1_split$cellSideLengths,
-                                             mat2Dim = dim(mat2),
-                                             sidelengthMultiplier = sidelengthMultiplier)
+                                           cellSideLengths = mat1_split$cellSideLengths,
+                                           mat2Dim = dim(mat2),
+                                           sidelengthMultiplier = sidelengthMultiplier)
 
   for(theta in thetas){
     #rotate image 2 and split into cells:
@@ -534,25 +534,24 @@ cellCCF <- function(x3p1,
 
     if(ccfMethod == "fft"){
       ccfValues <- ccfValues %>%
-        dplyr::rename(fft.ccf = ccf) %>%
         dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
-                                                                   mat2_splitFiltered,
-                                                                   .$dx,
-                                                                   .$dy,
-                                                                   m1,
-                                                                   m2,
-                                                                   sd1,
-                                                                   sd2),
-                                                         .f = ~ calcRawCorr(cell = ..1,
-                                                                            region = ..2,
-                                                                            dx = ..3,
-                                                                            dy = ..4,
-                                                                            m1 = ..5,
-                                                                            m2 = ..6,
-                                                                            sd1 = ..7,
-                                                                            sd2 = ..8,
-                                                                            tieBreaker = rawCorrTieBreaker,
-                                                                            use = use)))
+                                                      mat2_splitFiltered,
+                                                      .$x,
+                                                      .$y,
+                                                      m1,
+                                                      m2,
+                                                      sd1,
+                                                      sd2),
+                                            .f = ~ calcRawCorr(cell = ..1,
+                                                               region = ..2,
+                                                               dx = ..3,
+                                                               dy = ..4,
+                                                               m1 = ..5,
+                                                               m2 = ..6,
+                                                               sd1 = ..7,
+                                                               sd2 = ..8,
+                                                               tieBreaker = rawCorrTieBreaker,
+                                                               use = use)))
     }
 
     allResults[paste0(theta)][[1]] <- ccfValues
@@ -735,46 +734,54 @@ comparison_cellDivision <- function(x3p,numCells = 64){
                                       axis = "y",
                                       nb = sqrt(numCells))) %>%
     purrr::map_depth(.depth = 2,
-                     .f = as.matrix)
+                     .f = ~ set_names(as.matrix(.),NULL))
 
   cellRanges <- purrr::map(names(splitSurfaceMat),
-                          function(horizCell){
-                            purrr::map(.x = names(splitSurfaceMat[[1]]),
-                                       function(vertCell) cmcR:::swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
-                          }) %>%
+                           function(horizCell){
+                             purrr::map(.x = names(splitSurfaceMat[[1]]),
+                                        function(vertCell) cmcR:::swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
+                           }) %>%
     unlist()
 
   splitSurfaceMat <- splitSurfaceMat %>%
     purrr::flatten() %>%
-    set_names(NULL) %>%
     purrr::map2(.x = .,
                 .y = cellRanges,
                 function(cellMatrix = .x,cellRange = .y){
-      cell_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
+                  cell_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
 
-      cell_x3p$surface.matrix <- cellMatrix
+                  cell_x3p$surface.matrix <- cellMatrix
 
-      #update metainformation
-      cell_x3p$header.info <- x3p$header.info
-      cell_x3p$header.info$sizeY <- ncol(cellMatrix)
-      cell_x3p$header.info$sizeX <- nrow(cellMatrix)
+                  #update metainformation
+                  cell_x3p$header.info <- x3p$header.info
+                  cell_x3p$header.info$sizeY <- ncol(cellMatrix)
+                  cell_x3p$header.info$sizeX <- nrow(cellMatrix)
 
-      #include which rows/column in the original scan each cell was taken from
-      cell_x3p$header.info$cellRange <- cellRange
+                  #include which rows/column in the original scan each cell was taken from
+                  cell_x3p$cmcR.info$cellRange <- cellRange
 
-      return(cell_x3p)
-    })
+                  return(cell_x3p)
+                })
 
   cellTibble <- tibble::tibble(cellNum = 1:numCells,
                                cellHeightValues = splitSurfaceMat) %>%
     dplyr::mutate(cellIndex = cmcR:::linear_to_matrix(index = cellNum,
                                                       nrow = ceiling(sqrt(max(cellNum))),
-                                                      byrow = TRUE),
-                  propMissing = cellHeightValues %>%
-                    purrr::map_dbl(~ sum(is.na(.$surface.matrix))/length(.$surface.matrix))) %>%
-    dplyr::select(cellIndex,cellHeightValues,propMissing)
+                                                      byrow = TRUE)) %>%
+    dplyr::select(cellIndex,cellHeightValues)
 
   return(cellTibble)
+}
+
+#' Calculate the proportion of missing values in a surface matrix
+#'
+#' @name comparison_calcPropMissing
+#'
+#' @export
+
+comparison_calcPropMissing <- function(heightValues){
+  heightValues %>%
+    purrr::map_dbl(~ sum(is.na(.$surface.matrix))/length(.$surface.matrix))
 }
 
 #' Extract regions from a target scan based on associated cells in reference
@@ -794,7 +801,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
                    "col" = ncol(.$surface.matrix)))
 
   cellRange <- cellHeightValues %>%
-    purrr::map_chr(~ .$header.info$cellRange)
+    purrr::map_chr(~ .$cmcR.info$cellRange)
 
   target_x3p_regionIndices <- cmcR:::getMat2SplitIndices(cellRanges = cellRange,
                                                          cellSideLengths = cellSideLengths,
@@ -830,30 +837,50 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'
 #' @name comparison_standardizeHeightValues
 #'
+#' @note this function adds information to the metainformation of the x3p scan
+#'   it is given that is required for calculating, for example, the
+#'   pairwise-complete correlation using the comparison_cor function.
+#'
 #' @export
 
 comparison_standardizeHeightValues <- function(heightValues,
                                                withRespectTo = "individualCell",
                                                centerBy = mean,
-                                               scaleBy = sd,
-                                               replaceMissingValues = TRUE){
-
-  #Expand functionality of replaceMissingValues -- i.e., with Gaussian noise,
-  #imputation, etc.
+                                               scaleBy = sd){
 
   heightValues <- heightValues %>%
     purrr::map(function(x3p){
 
-      x3p$surface.matrix <- (x3p$surface.matrix - centerBy(x3p$surface.matrix,na.rm = TRUE))/scaleBy(x3p$surface.matrix,na.rm = TRUE)
+      x3p$cmcR.info$centerBy <- centerBy
+      x3p$cmcR.info$centerByVal <- centerBy(x3p$surface.matrix,na.rm = TRUE)
 
-      if(replaceMissingValues){
-        x3p$surface.matrix[is.na(x3p$surface.matrix)] <- 0
-      }
+      x3p$cmcR.info$scaleBy <- scaleBy
+      x3p$cmcR.info$scaleByVal <- scaleBy(x3p$surface.matrix,na.rm = TRUE)
+
+      x3p$surface.matrix <- (x3p$surface.matrix - centerBy(x3p$surface.matrix,na.rm = TRUE))/scaleBy(x3p$surface.matrix,na.rm = TRUE)
 
       return(x3p)
     })
 
   return(heightValues)
+}
+
+#' Replace missing values in a scan
+#'
+#' @name comparison_replacingMissingValues
+#'
+#' @export
+
+comparison_replacingMissingValues <- function(heightValues,
+                                              replacement = 0){
+  replacedHeightValues <- heightValues %>%
+    purrr::map(function(x3p){
+      x3p$surface.matrix[is.na(x3p$surface.matrix)] <- 0
+
+      return(x3p)
+    })
+
+  return(replacedHeightValues)
 }
 
 #' Estimate translation alignment between a cell/region pair based on the
@@ -874,4 +901,37 @@ comparison_fft.ccf <- function(cellHeightValues,regionHeightValues){
                          ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,mat2 = .y$surface.matrix,ccfMethod = "fft"))
 
   return(ccfList)
+}
+
+#' Calculates correlation between a cell and a matrix of the same dimensions
+#' extracted from the cell's associated region.
+#'
+#' @name comparison_cor
+#'
+#'
+#' @export
+
+comparison_cor <- function(cellHeightValues,
+                           regionHeightValues,
+                           fft.ccf_df,
+                           use = "pairwise.complete.obs"){
+
+  rawCors <- purrr::pmap_dbl(.l = list(cellHeightValues,
+                                       regionHeightValues,
+                                       fft.ccf_df),
+                             function(cell,region,translations){
+                               rawCor <- calcRawCorr(cell = cell$surface.matrix,
+                                                     region = region$surface.matrix,
+                                                     dx = translations$x,
+                                                     dy = translations$y,
+                                                     m1 = cell$cmcR.info$centerByVal,
+                                                     sd1 = cell$cmcR.info$scaleByVal,
+                                                     m2 = region$cmcR.info$centerByVal,
+                                                     sd2 = region$cmcR.info$scaleByVal,
+                                                     use = use)
+
+                               return(rawCor)
+                             })
+
+  return(rawCors)
 }

@@ -1,11 +1,11 @@
-#' Calculate dx, dy, theta values at which top similarity is achieved in a cell
+#' Calculate x, y, theta values at which top similarity is achieved in a cell
 #' pair.
 #'
 #' @name topResultsPerCell
 #'
 #' @description Given a list of data frames like the one returned in the
 #'   `ccfResults` element of the list returned from cmcR::cellCCF, returns a
-#'   data frame of the theta, dx, dy, ccf, and ccf values at which each cell
+#'   data frame of the theta, x, y, ccf, and ccf values at which each cell
 #'   pair attains maximum ccf.
 #'
 #' @param ccfResults list of data frames, like the one returned by
@@ -48,14 +48,14 @@ topResultsPerCell <- function(ccfResults){
 #'
 #' @param ccfDF data frame containing ccf results from a comparison between two
 #'   cartridge case scans
-#' @param consensus_function function to aggregate the translation (dx and dy)
+#' @param consensus_function function to aggregate the translation (x and y)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
 #' @param ccf_thresh minimum correlation threshold to call a cell pair
 #'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#' @param dx_thresh maximum distance from the consensus x value that a cell
 #'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#' @param dy_thresh  maximum distance from the consensus y value that a cell
 #'   pair can be to be called "congruent matching"
 #' @param theta_thresh maximum distance from the consensus theta value that a
 #'   cell pair can be to be called "congruent matching"
@@ -88,7 +88,7 @@ topResultsPerCell <- function(ccfResults){
 #'
 #' @importFrom stats median
 
-utils::globalVariables(c("dx","dy","theta","ccf"))
+utils::globalVariables(c("x","y","theta","ccf"))
 
 cmcFilter <- function(ccfDF,
                       consensus_function = median,
@@ -98,19 +98,19 @@ cmcFilter <- function(ccfDF,
                       theta_thresh = 3,
                       consensus_function_theta = consensus_function,...){
   #Required tests:
-  # ccfResults needs to be a dataframe containing columns: ccf,theta,dx,dy
+  # ccfResults needs to be a dataframe containing columns: ccf,theta,x,y
   # ccf_thresh should be between 0 and 1
   # dx_thresh should positive
   # consensus_function and consensus_function_theta should be a function name that exists
 
-  consensus_dx <- consensus_function(ccfDF$dx,...)
-  consensus_dy <- consensus_function(ccfDF$dy,...)
+  consensus_dx <- consensus_function(ccfDF$x,...)
+  consensus_dy <- consensus_function(ccfDF$y,...)
   consensus_theta <- consensus_function_theta(ccfDF$theta,...)
 
   ccfDF %>%
     dplyr::filter(ccf >= ccf_thresh &
-                    dx >= consensus_dx - dx_thresh & dx <= consensus_dx + dx_thresh &
-                    dy >= consensus_dy - dy_thresh & dy <= consensus_dy + dy_thresh &
+                    x >= consensus_dx - dx_thresh & x <= consensus_dx + dx_thresh &
+                    y >= consensus_dy - dy_thresh & y <= consensus_dy + dy_thresh &
                     theta >= consensus_theta - theta_thresh & theta <= consensus_theta + theta_thresh)
 }
 
@@ -118,14 +118,14 @@ cmcFilter <- function(ccfDF,
 #'
 #' @param ccfResults list of data frames, like the one returned by
 #'   cmcR::cellCCF, containing breech face cell comparison results
-#' @param consensus_function function to aggregate the translation (dx and dy)
+#' @param consensus_function function to aggregate the translation (x and y)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
 #' @param ccf_thresh minimum correlation threshold to call a cell pair
 #'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#' @param dx_thresh maximum distance from the consensus x value that a cell
 #'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#' @param dy_thresh  maximum distance from the consensus y value that a cell
 #'   pair can be to be called "congruent matching"
 #' @param theta_thresh maximum distance from the consensus theta value that a
 #'   cell pair can be to be called "congruent matching"
@@ -316,14 +316,14 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #'
 #' @param cellCCF_bothDirections_output list returned by the function
 #'   cmcR::cellCCF_bothdirections
-#' @param consensus_function function to aggregate the translation (dx and dy)
+#' @param consensus_function function to aggregate the translation (x and y)
 #'   and rotation (theta) values in the ccfDF data frame to determine
 #'   "consensus" values
 #' @param ccf_thresh minimum correlation threshold to call a cell pair
 #'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus dx value that a cell
+#' @param dx_thresh maximum distance from the consensus x value that a cell
 #'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus dy value that a cell
+#' @param dy_thresh  maximum distance from the consensus y value that a cell
 #'   pair can be to be called "congruent matching"
 #' @param theta_thresh maximum distance from the consensus theta value that a
 #'   cell pair can be to be called "congruent matching"
@@ -423,8 +423,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                         cellRange = character(0),
                                         ccf = double(0),
                                         fft.ccf = double(0),
-                                        dx = integer(0),
-                                        dy = integer(0),
+                                        x = integer(0),
+                                        y = integer(0),
                                         theta = integer(0),
                                         comparison = character(0))))
   }
@@ -524,8 +524,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                               cellRange = character(0),
                                               ccf = double(0),
                                               fft.ccf = double(0),
-                                              dx = integer(0),
-                                              dy = integer(0),
+                                              x = integer(0),
+                                              y = integer(0),
                                               theta = integer(0),
                                               comparison = character(0))))
         }
@@ -565,8 +565,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                                 cellRange = character(0),
                                                 ccf = double(0),
                                                 fft.ccf = double(0),
-                                                dx = integer(0),
-                                                dy = integer(0),
+                                                x = integer(0),
+                                                y = integer(0),
                                                 theta = integer(0),
                                                 comparison = character(0))))
 
@@ -610,8 +610,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                               cellRange = character(0),
                                               ccf = double(0),
                                               fft.ccf = double(0),
-                                              dx = integer(0),
-                                              dy = integer(0),
+                                              x = integer(0),
+                                              y = integer(0),
                                               theta = integer(0),
                                               comparison = character(0))))
         }
@@ -632,8 +632,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                             cellRange = character(0),
                                             ccf = double(0),
                                             fft.ccf = double(0),
-                                            dx = integer(0),
-                                            dy = integer(0),
+                                            x = integer(0),
+                                            y = integer(0),
                                             theta = integer(0),
                                             comparison = character(0))))
       }
@@ -651,8 +651,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
         #                                     cellRange = character(0),
         #                                     ccf = double(0),
         #                                     fft.ccf = double(0),
-        #                                     dx = integer(0),
-        #                                     dy = integer(0),
+        #                                     x = integer(0),
+        #                                     y = integer(0),
         #                                     theta = integer(0),
         #                                     comparison = character(0))))
       # }
@@ -668,8 +668,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       #                                       cellRange = character(0),
       #                                       ccf = double(0),
       #                                       fft.ccf = double(0),
-      #                                       dx = integer(0),
-      #                                       dy = integer(0),
+      #                                       x = integer(0),
+      #                                       y = integer(0),
       #                                       theta = integer(0),
       #                                       comparison = character(0))))
       # }
@@ -702,8 +702,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                           cellRange = character(0),
                                           ccf = double(0),
                                           fft.ccf = double(0),
-                                          dx = integer(0),
-                                          dy = integer(0),
+                                          x = integer(0),
+                                          y = integer(0),
                                           theta = integer(0),
                                           comparison = character(0))))
     }
@@ -741,8 +741,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                           cellRange = character(0),
                                           ccf = double(0),
                                           fft.ccf = double(0),
-                                          dx = integer(0),
-                                          dy = integer(0),
+                                          x = integer(0),
+                                          y = integer(0),
                                           theta = integer(0),
                                           comparison = character(0))))
 
@@ -772,8 +772,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                         cellRange = character(0),
                                         ccf = double(0),
                                         fft.ccf = double(0),
-                                        dx = integer(0),
-                                        dy = integer(0),
+                                        x = integer(0),
+                                        y = integer(0),
                                         theta = integer(0),
                                         comparison = character(0))))
   }
@@ -793,8 +793,8 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                         cellRange = character(0),
                                         ccf = double(0),
                                         fft.ccf = double(0),
-                                        dx = integer(0),
-                                        dy = integer(0),
+                                        x = integer(0),
+                                        y = integer(0),
                                         theta = integer(0),
                                         comparison = character(0))))
   }

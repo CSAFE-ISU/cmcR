@@ -7,7 +7,6 @@ scan}
 \usage{
 comparison_getTargetRegions(
   cellHeightValues,
-  cellRange,
   target_x3p,
   rotation = 0,
   regionSizeMultiplier = 9
