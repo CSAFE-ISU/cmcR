@@ -62,7 +62,7 @@ cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
 
 ### Preprocessing
 
-To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans, caused by the staging area in which the scans are taken, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Consider the [funtion reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we first downsample each scan (by a factor of 4, selecting every other row/column) using the `sample_x3p` function.
+To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans, caused by the staging area in which the scans are taken, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Functions of the form `preProcess_*` perform the preprocessing procedures. Consider the [funtion reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we first downsample each scan (by a factor of 4, selecting every other row/column) using the `sample_x3p` function.
 
 ```{r}
 fadul1.1_processed <- fadul1.1 %>%
@@ -88,7 +88,7 @@ cmcR::x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
 
 Functions of the form `comparison_*` perform the steps of the cell-based comparison procedure. The data generated from the cell-based comparison procedure are kept in a [`tibble`](https://tibble.tidyverse.org/) where one row represents a single cell/region pairing.
 
-The `comparison_cellDivision` function divides a scan up into a grid of cells. The `cellIndex` column represents the `row,col` location in the original scan each cell inhabits. Each cell is stored as an `.x3p` object in the `cellHeightValues` column. We will want to remove cells that contain too many missing values. The benefit of using a `tibble` structure is that processes such as removing rows can be accomplished using simple `dplyr` commands such as `filter`.
+The `comparison_cellDivision` function divides a scan up into a grid of cells. The `cellIndex` column represents the `row,col` location in the original scan each cell inhabits. Each cell is stored as an `.x3p` object in the `cellHeightValues` column. The benefit of using a `tibble` structure is that processes such as removing rows can be accomplished using simple `dplyr` commands such as `filter`.
 
 ```{r}
 cellTibble <- fadul1.1_processed %>%
@@ -108,7 +108,7 @@ cellTibble <- cellTibble %>%
 cellTibble
 ```
 
-We will want to exclude cells and regions that contain few observations. The `comparison_calcPropMissing` function calculates the proportion of missing values in a surface matrix.
+We will want to exclude cells and regions that contain few observations. The `comparison_calcPropMissing` function calculates the proportion of missing values in a surface matrix. The call below excludes rows in which either the cell or region contain more that 85% missing values.
 
 ```{r}
 cellTibble <- cellTibble %>%
@@ -121,7 +121,7 @@ cellTibble %>%
 ```
 
 
-We can also standardize the surface matrix height values by centering/scaling by desired statistics. Also, to apply frequency-domain techniques in comparing each cell and region, the missing values in each scan need to be replaced. These operations are performed in the `comparison_standardizeHeightValues` and `comparison_replacingMissingValues` functions.
+We can standardize the surface matrix height values by centering/scaling by desired functions (e.g., mean and standard deviation). Also, to apply frequency-domain techniques in comparing each cell and region, the missing values in each scan need to be replaced. These operations are performed in the `comparison_standardizeHeightValues` and `comparison_replacingMissingValues` functions.
 
 Then, the `comparison_fft.ccf` function estimates the translations required to align the cell and region using the [https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation Theorem). The `comparison_fft.ccf` function returns a data frame of 3 `x`, `y`, and `fft.ccf` values: the $x,y$ estimated translation values at which the CCF$_\max$ value is attained between the cell and region. The `tidyr::unnest` function can unpack the data frame into 3 separate columns, if desired.
 

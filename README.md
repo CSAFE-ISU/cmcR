@@ -91,8 +91,9 @@ the breech face of the firearm. These include the small clusters of
 pixels in the corners of the two scans, caused by the staging area in
 which the scans are taken, and the plateaued region of points around the
 firing pin impression hole near the center of the scan. A variety of
-processing procedures are implemented in the cmcR package. Consider the
-[funtion
+processing procedures are implemented in the cmcR package. Functions of
+the form `preProcess_*` perform the preprocessing procedures. Consider
+the [funtion
 reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the
 cmcR package for more information regarding these procedures. As is
 commonly done when comparing cartridge cases, we first downsample each
@@ -131,8 +132,7 @@ one row represents a single cell/region pairing.
 The `comparison_cellDivision` function divides a scan up into a grid of
 cells. The `cellIndex` column represents the `row,col` location in the
 original scan each cell inhabits. Each cell is stored as an `.x3p`
-object in the `cellHeightValues` column. We will want to remove cells
-that contain too many missing values. The benefit of using a `tibble`
+object in the `cellHeightValues` column. The benefit of using a `tibble`
 structure is that processes such as removing rows can be accomplished
 using simple `dplyr` commands such as `filter`.
 
@@ -188,7 +188,8 @@ cellTibble
 
 We will want to exclude cells and regions that contain few observations.
 The `comparison_calcPropMissing` function calculates the proportion of
-missing values in a surface matrix.
+missing values in a surface matrix. The call below excludes rows in
+which either the cell or region contain more that 85% missing values.
 
 ``` r
 cellTibble <- cellTibble %>%
@@ -214,11 +215,11 @@ cellTibble %>%
 #> # ... with 15 more rows
 ```
 
-We can also standardize the surface matrix height values by
-centering/scaling by desired statistics. Also, to apply frequency-domain
-techniques in comparing each cell and region, the missing values in each
-scan need to be replaced. These operations are performed in the
-`comparison_standardizeHeightValues` and
+We can standardize the surface matrix height values by centering/scaling
+by desired functions (e.g., mean and standard deviation). Also, to apply
+frequency-domain techniques in comparing each cell and region, the
+missing values in each scan need to be replaced. These operations are
+performed in the `comparison_standardizeHeightValues` and
 `comparison_replacingMissingValues` functions.
 
 Then, the `comparison_fft.ccf` function estimates the translations
