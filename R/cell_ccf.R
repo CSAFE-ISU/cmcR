@@ -867,11 +867,11 @@ comparison_standardizeHeightValues <- function(heightValues,
 
 #' Replace missing values in a scan
 #'
-#' @name comparison_replacingMissingValues
+#' @name comparison_replaceMissingValues
 #'
 #' @export
 
-comparison_replacingMissingValues <- function(heightValues,
+comparison_replaceMissingValues <- function(heightValues,
                                               replacement = 0){
   replacedHeightValues <- heightValues %>%
     purrr::map(function(x3p){

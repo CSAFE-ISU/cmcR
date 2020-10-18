@@ -220,7 +220,7 @@ by desired functions (e.g., mean and standard deviation). Also, to apply
 frequency-domain techniques in comparing each cell and region, the
 missing values in each scan need to be replaced. These operations are
 performed in the `comparison_standardizeHeightValues` and
-`comparison_replacingMissingValues` functions.
+`comparison_replaceMissingValues` functions.
 
 Then, the `comparison_fft.ccf` function estimates the translations
 required to align the cell and region using the [Cross-Correlation
@@ -235,8 +235,8 @@ columns, if desired.
 cellTibble <- cellTibble  %>%
   mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues),
          regionHeightValues = comparison_standardizeHeightValues(regionHeightValues)) %>%
-  mutate(cellHeightValues_replaced = comparison_replacingMissingValues(cellHeightValues),
-         regionHeightValues_replaced = comparison_replacingMissingValues(regionHeightValues)) %>%
+  mutate(cellHeightValues_replaced = comparison_replaceMissingValues(cellHeightValues),
+         regionHeightValues_replaced = comparison_replaceMissingValues(regionHeightValues)) %>%
   mutate(fft.ccf_df = comparison_fft.ccf(cellHeightValues = cellHeightValues_replaced,
                                          regionHeightValues = regionHeightValues_replaced))
 
@@ -302,17 +302,17 @@ cellTibble <- fadul1.1_processed %>%
 comparison_allTogether <- function(theta){
   
   cellTibble %>%
-  mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                          target_x3p = fadul1.2_processed,
-                                                          regionSizeMultiplier = 9,
-                                                          rotation = theta)) %>%
+    mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                                            target_x3p = fadul1.2_processed,
+                                                            regionSizeMultiplier = 9,
+                                                            rotation = theta)) %>%
     mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
            regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
     filter(cellPropMissing <= .85 & regionPropMissing <= .85) %>%
     mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues),
            regionHeightValues = comparison_standardizeHeightValues(regionHeightValues)) %>%
-    mutate(cellHeightValues_replaced = comparison_replacingMissingValues(cellHeightValues),
-           regionHeightValues_replaced = comparison_replacingMissingValues(regionHeightValues)) %>%
+    mutate(cellHeightValues_replaced = comparison_replaceMissingValues(cellHeightValues),
+           regionHeightValues_replaced = comparison_replaceMissingValues(regionHeightValues)) %>%
     mutate(fft.ccf_df = comparison_fft.ccf(cellHeightValues = cellHeightValues_replaced,
                                            regionHeightValues = regionHeightValues_replaced)) %>%
     mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft.ccf_df)) %>%

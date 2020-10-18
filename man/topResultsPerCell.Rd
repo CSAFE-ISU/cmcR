@@ -2,7 +2,7 @@
 % Please edit documentation in R/cmcLogic.R
 \name{topResultsPerCell}
 \alias{topResultsPerCell}
-\title{Calculate dx, dy, theta values at which top similarity is achieved in a cell
+\title{Calculate x, y, theta values at which top similarity is achieved in a cell
 pair.}
 \arguments{
 \item{ccfResults}{list of data frames, like the one returned by
@@ -11,7 +11,7 @@ cmcR::cellCCF, containing breech face cell comparison results}
 \description{
 Given a list of data frames like the one returned in the
 \code{ccfResults} element of the list returned from cmcR::cellCCF, returns a
-data frame of the theta, dx, dy, ccf, and ccf values at which each cell
+data frame of the theta, x, y, ccf, and ccf values at which each cell
 pair attains maximum ccf.
 }
 \examples{

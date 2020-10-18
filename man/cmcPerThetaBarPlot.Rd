@@ -9,17 +9,17 @@ function. If from the cellCCF_bothDirections, then the ggplot will be
 faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
 played the role as the "questioned" cartridge case scan)}
 
-\item{consensus_function}{function to aggregate the translation (dx and dy)
+\item{consensus_function}{function to aggregate the translation (x and y)
 and rotation (theta) values in the ccfDF data frame to determine
 "consensus" values}
 
 \item{ccf_thresh}{minimum correlation threshold to call a cell pair
 "congruent matching"}
 
-\item{dx_thresh}{maximum distance from the consensus dx value that a cell
+\item{dx_thresh}{maximum distance from the consensus x value that a cell
 pair can be to be called "congruent matching"}
 
-\item{dy_thresh}{maximum distance from the consensus dy value that a cell
+\item{dy_thresh}{maximum distance from the consensus y value that a cell
 pair can be to be called "congruent matching"}
 
 \item{theta_thresh}{maximum distance from the consensus theta value that a
