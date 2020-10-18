@@ -31,4 +31,6 @@ raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
   cmcR::preProcess_levelBF() \%>\%
   cmcR::preProcess_cropWS(croppingThresh = 2)
 }
+
 }
+\keyword{internal}

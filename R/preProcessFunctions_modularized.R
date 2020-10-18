@@ -1,3 +1,33 @@
+#' Level breech face
+#'
+#' @name levelBreechFace
+#'
+#' @description Functions to level the breech face impression region.
+#'   preProcess_ransacLevel uses the Random Sample Consensus method to estimate
+#'   the breech face impression region and extracts from the scan all pixels
+#'   that are declared "inliers." The RANSAC procedure tends to be slow and, by
+#'   nature of the method, returns different surface matrices unless a seed is
+#'   set. preProcess_removeTrend estimates either the conditional mean (by lm)
+#'   or quantile (by quantreg::rq) of the scan and removes this estimated trend.
+#'   It is much faster than the RANSAC method, but works best if the firing pin
+#'   impression region in the center of a scan has first been removed (e.g., by
+#'   preProcess_filterInterior)
+NULL
+
+#' Remove firing pin
+#'
+#' @name removeFiringPin
+#'
+#' @description Functions to remove the firing pin circle in the center of a
+#'   breech face scan. preProcess_removeFPCircle is a slow yet fully automatic
+#'   function for removing the firing pin impression circle that uses the
+#'   circular Hough transform after estimating the firing pin circle radius.
+#'   preProcess_filterInterior is faster yet semi-automatic in that it estimates
+#'   the center and radius of the *hole* in the scan left by the firing pin. The
+#'   user must input a positive radiusOffset to remove the rest of the plateaued
+#'   firing pin impression region.
+NULL
+
 #' Levels a breech face impression matrix basedo on a RANSAC-fitted plane
 #'
 #' @name preProcess_levelBF
@@ -62,30 +92,25 @@ preProcess_levelBF <- function(ransacFit,
 
 #' Finds plane of breechface marks using the RANSAC method
 #'
-#' @description Given input depths (in microns), find best-fitting plane using
+#' @note Given input depths (in microns), find best-fitting plane using
 #'   RANSAC. This should be the plane that the breechface marks are on. Adapted
 #'   from cartridges3D::findPlaneRansac function. This a modified version of the
 #'   findPlaneRansac function available in the cartridges3D package on GitHub.
-#'
-#' @name preProcess_ransacLevel
 #'
 #' @param x3p an x3p object containing a surface matrix
 #' @param ransacInlierThresh threshold to declare an observed value close to the
 #'   fitted plane an "inlier". A smaller value will yield a more stable
 #'   estimate.
 #' @param ransacFinalSelectThresh once the RANSAC plane is fitted based on the
-#'   ransacInlierThresh, this argument dictates which observations are selected as
-#'   the final breech face estimate.
+#'   ransacInlierThresh, this argument dictates which observations are selected
+#'   as the final breech face estimate.
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
 #'
-#' @return List object containing fitted plane (as an lm object) and selected
-#'   breechface marks (matrix of same size as original matrix containing all
-#'   inliers close to fitted plane).
-#'
-#' @note The function will throw an error if the final plane estimate is
-#'   rank-deficient (which is relatively unlikely, but theoretically possible).
-#'   Re-run the function (possibly setting a different seed) if this occurs.
+#' @note The preProcess_ransacLevel function will throw an error if the final
+#'   plane estimate is rank-deficient (which is relatively unlikely, but
+#'   theoretically possible). Re-run the function (possibly setting a different
+#'   seed) if this occurs.
 
 #' @examples
 #' \dontrun{
@@ -101,7 +126,7 @@ preProcess_levelBF <- function(ransacFit,
 #' @seealso
 #'   https://github.com/xhtai/cartridges3D
 #' @export
-#'
+#' @rdname levelBreechFace
 #' @importFrom stats lm predict
 
 preProcess_ransacLevel <- function(x3p,
@@ -160,7 +185,7 @@ preProcess_ransacLevel <- function(x3p,
 
   #Level the surface either by considering residuals or returning the surface matrix vertically-shifted to mean 0
   ransacFit <- list("ransacPlane" = finalRansacPlane,
-                   "estimatedBreechFace" = estimatedBreechFace)
+                    "estimatedBreechFace" = estimatedBreechFace)
 
   estimatedBreechFace <- preProcess_levelBF(ransacFit = ransacFit,
                                             useResiduals = returnResiduals)
@@ -191,7 +216,8 @@ preProcess_ransacLevel <- function(x3p,
 #'   cmcR::preProcess_levelBF() %>%
 #'   cmcR::preProcess_cropWS(croppingThresh = 2)
 #' }
-#' @export
+#'
+#' @keywords internal
 
 preProcess_cropWS <- function(x3p,
                               croppingThresh = 1){
@@ -265,7 +291,6 @@ preProcess_cropWS <- function(x3p,
 #'   estimate.
 #'
 #' @keywords internal
-#'
 #' @importFrom stats quantile
 
 utils::globalVariables(c(".","value","x","y","r"))
@@ -358,13 +383,13 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
 #'   cmcR::preProcess_ransacLevel() %>%
 #'   cmcR::preProcess_levelBF() %>%
-#'   cmcR::preProcess_cropWS() %>%
+#'   cmcR::preProcess_cropExterior() %>%
 #'   cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
 #'                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
 #'                                   gridGranularity = 1,
 #'                                   houghScoreQuant = .9)
 #' }
-#'
+#' @rdname removeFiringPin
 #' @export
 
 preProcess_removeFPCircle <- function(x3p,
@@ -425,7 +450,6 @@ preProcess_removeFPCircle <- function(x3p,
 #'
 #' @seealso
 #' https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
-#'
 #' @export
 
 preProcess_gaussFilter <- function(x3p,
@@ -549,7 +573,7 @@ estimateBFRadius <- function(mat,
 
 #' Crop the exterior of a breech face impression surface matrix
 #'
-#' @name preProcess_cropBFExterior
+#' @name preProcess_cropExterior
 #'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
@@ -574,20 +598,21 @@ estimateBFRadius <- function(mat,
 #'   "roll-off" is included in the final scan. Excessive roll-off can bias the
 #'   calculation of the CCF. As such, we can manually shrink the radius estimate
 #'   so that little to no roll-off is included in the final processed scan.
+#'
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped))
 
-preProcess_cropBFExterior <- function(x3p,
-                                      scheme = 3,
-                                      high_connectivity = FALSE,
-                                      tolerance = 0,
-                                      radiusOffset = 0,
-                                      croppingThresh = 1,
-                                      agg_function = median){
+preProcess_cropExterior <- function(x3p,
+                                    scheme = 3,
+                                    high_connectivity = FALSE,
+                                    tolerance = 0,
+                                    radiusOffset = 0,
+                                    croppingThresh = 1,
+                                    agg_function = median){
   mat <- x3p$surface.matrix
 
   mat_radiusEstimate <- estimateBFRadius(mat = mat,
@@ -634,7 +659,7 @@ preProcess_cropBFExterior <- function(x3p,
 
 #' Filter-out the firing pin impression region of a breech face impression scan
 #'
-#' @name preProcess_filterBFInterior
+#' @name preProcess_filterInterior
 #'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
@@ -650,9 +675,9 @@ preProcess_cropBFExterior <- function(x3p,
 #' @return An x3p object containing the surface matrix of a breech face
 #'   impression scan where the observations on the interior of the firing pin
 #'   impression hole have been filtered out.
-#'
+#' @rdname removeFiringPin
 #' @export
-#' @description The radius estimation procedure effectively estimates the radius
+#' @note The radius estimation procedure effectively estimates the radius
 #'   of the firing pin hole. Unfortunately, it is often desired that more than
 #'   just observations in firing pin hole are removed. In particular, the
 #'   plateaued region surrounding the firing pin impression hole does not come
@@ -663,17 +688,17 @@ preProcess_cropBFExterior <- function(x3p,
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
-#' fadul1.1_filtered <- preProcess_filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#' fadul1.1_filtered <- preProcess_filterInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered))
 
-preProcess_filterBFInterior <- function(x3p,
-                                        scheme = 3,
-                                        high_connectivity = FALSE,
-                                        tolerance = 0,
-                                        radiusOffset = 0){
+preProcess_filterInterior <- function(x3p,
+                                      scheme = 3,
+                                      high_connectivity = FALSE,
+                                      tolerance = 0,
+                                      radiusOffset = 0){
   mat <- x3p$surface.matrix
 
   mat_bfRegion <- mat
@@ -722,7 +747,7 @@ preProcess_filterBFInterior <- function(x3p,
 
 #' Level a breech face impression surface matrix by a conditional statistics
 #'
-#' @name preProcess_removeBFTrend
+#' @name preProcess_removeTrend
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
 #' @param statistic either "mean" or "quantile"
@@ -730,22 +755,22 @@ preProcess_filterBFInterior <- function(x3p,
 #'   "quantile" is set. In this case, tau = .5 and method = "fn" are recommended
 #' @return an x3p object containing the leveled cartridge case scan surface
 #'   matrix.
-#'
+#' @rdname levelBreechFace
 #' @examples
 #' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
 #'
-#' fadul1.1_cropped <- preProcess_cropBFExterior(x3p = fadul1.1,radiusOffset = -20)
+#' fadul1.1_cropped <- preProcess_cropExterior(x3p = fadul1.1,radiusOffset = -20)
 #'
-#' fadul1.1_filtered <- preProcess_filterBFInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
+#' fadul1.1_filtered <- preProcess_filterInterior(x3p = fadul1.1_cropped, radiusOffset = 200)
 #'
-#' fadul1.1_leveled <- preProcess_removeBFTrend(x3p = fadul1.1_filtered,statistic = "quantile",tau = .5,method = "fn")
+#' fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_filtered,statistic = "quantile",tau = .5,method = "fn")
 #'
 #' x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered,"Cropped, Filtered, and Leveled" = fadul1.1_leveled))
 #' @export
 
-preProcess_removeBFTrend <- function(x3p,
-                                     statistic = "mean",
-                                     ...){
+preProcess_removeTrend <- function(x3p,
+                                   statistic = "mean",
+                                   ...){
   stopifnot(statistic %in% c("quantile","mean"))
 
   if(statistic == "quantile"){

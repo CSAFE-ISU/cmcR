@@ -8,11 +8,14 @@ extracted from the cell's associated region.}
 comparison_cor(
   cellHeightValues,
   regionHeightValues,
-  fft.ccf_df,
+  fft_ccf_df,
   use = "pairwise.complete.obs"
 )
 }
 \description{
 Calculates correlation between a cell and a matrix of the same dimensions
 extracted from the cell's associated region.
+}
+\seealso{
+\url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
 }

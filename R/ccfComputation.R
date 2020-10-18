@@ -201,7 +201,7 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   dx <- tmp[["col"]] - d_offset[2] - 1
   dy <- tmp[["row"]] - d_offset[1] - 1
 
-  ret <- data.frame("fft.ccf" = corr, "x" = dx, "y" = dy)
+  ret <- data.frame("fft_ccf" = corr, "x" = dx, "y" = dy)
   return(ret)
 }
 

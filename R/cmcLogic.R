@@ -1,3 +1,111 @@
+#' Apply CMC classification logic of the original method of Song (2013)
+#'
+#' @name decision_originalMethod
+#'
+#' @seealso \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}
+#'
+#' @export
+
+decision_originalMethod_classifyCMCs <- function(comparisonFeaturesDF,
+                                                 corColName = "pairwiseCompCor",
+                                                 xThresh = 20,
+                                                 yThresh = xThresh,
+                                                 thetaThresh = 6,
+                                                 corThresh = .5){
+
+  comparisonFeaturesDF %>%
+    dplyr::group_by(cellIndex) %>%
+    dplyr::top_n(n = 1,wt = (!!as.name(corColName))) %>%
+    dplyr::ungroup()  %>%
+    dplyr::mutate(originalMethodClassif = ifelse(abs(x - median(x)) <= xThresh &
+                                                   abs(y - median(y)) <= yThresh &
+                                                   abs(theta - median(theta)) <= thetaThresh &
+                                                   (!!as.name(corColName)) >= corThresh,"CMC","non-CMC")) %>%
+    dplyr::select(cellIndex,x,y,(!!as.name(corColName)),originalMethodClassif)
+}
+
+#' Compute CMC-theta distribution for a set of comparison features
+#'
+#' @name decision_highCMC_cmcThetaDistrib
+#'
+#' @export
+
+decision_highCMC_cmcThetaDistrib <- function(comparisonFeaturesDF,
+                                             corColName = "pairwiseCompCor",
+                                             xThresh = 20,
+                                             yThresh = xThresh,
+                                             corThresh = .5){
+
+  comparisonFeaturesDF %>%
+    dplyr::group_by(theta) %>%
+    dplyr::filter(abs(x - median(x)) <= xThresh &
+                    abs(y - median(y)) <= yThresh &
+                    (!!as.name(corColName)) >= corThresh) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(cellIndex,x,y,(!!as.name(corColName)),theta)
+
+}
+
+#' Classify theta values in CMC-theta distribution as having "High" or "Low" CMC
+#' candidate counts
+#'
+#' @name decision_highCMC_identifyHighCMCThetas
+#'
+#' @export
+
+decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
+                                                   tau = 1){
+
+  thetaClassifications <- cmcThetaDistrib %>%
+    dplyr::group_by(theta) %>%
+    dplyr::tally(name = "cmcCandidateCount") %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(thetaCMCIdentif = ifelse(cmcCandidateCount >= max(cmcCandidateCount) - tau,"High","Low"))
+
+  cmcThetaDistrib %>%
+    dplyr::left_join(thetaClassifications,by = "theta")
+}
+
+#' Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
+#' distribution returned by the decision_highCMC_cmcThetaDistrib function
+#'
+#' @name decision_highCMC_classifyCMCs
+#'
+#' @seealso
+#'   \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
+#'
+#'
+#' @export
+
+decision_highCMC_classifyCMCs <- function(cmcThetaDistrib,
+                                          tau = 1,
+                                          thetaThresh = 6){
+
+  cmcThetaDistrib_classified <- decision_highCMC_identifyHighCMCThetas(cmcThetaDistrib,
+                                                                       tau = tau)
+
+  passesHighCMCCriterion <- cmcThetaDistrib_classified %>%
+    dplyr::filter(thetaCMCIdentif == "High") %>%
+    dplyr::select(theta) %>%
+    dplyr::distinct() %>%
+    dplyr::summarise(distance = abs(max(theta) - min(theta))) %>%
+    dplyr::pull(distance) %>%
+    {. <= thetaThresh}
+
+  if(passesHighCMCCriterion){
+    highCMCs <- cmcThetaDistrib_classified %>%
+      dplyr::mutate(highCMCClassif = ifelse(thetaCMCIdentif == "High","CMC","non-CMC")) %>%
+      dplyr::select(-c(thetaCMCIdentif,cmcCandidateCount))
+  }
+  else{
+    highCMCs <- cmcThetaDistrib_classified %>%
+      dplyr::mutate(highCMCClassif = "non-CMC") %>%
+      dplyr::select(-c(thetaCMCIdentif,cmcCandidateCount))
+  }
+
+  return(highCMCs)
+}
+
 #' Calculate x, y, theta values at which top similarity is achieved in a cell
 #' pair.
 #'
@@ -640,21 +748,21 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
 
       # if(sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) &
       #     abs(thetaMax_dismissed[1,"theta"] - -1*thetaMax_dismissed[2,"theta"]) > theta_thresh){
-        # return(list("params" = list(consensus_function = consensus_function,
-        #                             ccf_thresh = ccf_thresh,
-        #                             dx_thresh = dx_thresh,
-        #                             dy_thresh = dy_thresh,
-        #                             theta_thresh = theta_thresh,
-        #                             consensus_function_theta = consensus_function_theta),
-        #             "originalMethodCMCs" = originalMethodCMCs,
-        #             "highCMCs" = data.frame(cellNum = integer(0),
-        #                                     cellRange = character(0),
-        #                                     ccf = double(0),
-        #                                     fft.ccf = double(0),
-        #                                     x = integer(0),
-        #                                     y = integer(0),
-        #                                     theta = integer(0),
-        #                                     comparison = character(0))))
+      # return(list("params" = list(consensus_function = consensus_function,
+      #                             ccf_thresh = ccf_thresh,
+      #                             dx_thresh = dx_thresh,
+      #                             dy_thresh = dy_thresh,
+      #                             theta_thresh = theta_thresh,
+      #                             consensus_function_theta = consensus_function_theta),
+      #             "originalMethodCMCs" = originalMethodCMCs,
+      #             "highCMCs" = data.frame(cellNum = integer(0),
+      #                                     cellRange = character(0),
+      #                                     ccf = double(0),
+      #                                     fft.ccf = double(0),
+      #                                     x = integer(0),
+      #                                     y = integer(0),
+      #                                     theta = integer(0),
+      #                                     comparison = character(0))))
       # }
       # else if((abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > theta_thresh)){
       #   return(list("params" = list(consensus_function = consensus_function,

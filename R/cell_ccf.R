@@ -757,7 +757,8 @@ comparison_cellDivision <- function(x3p,numCells = 64){
                   cell_x3p$header.info$sizeY <- ncol(cellMatrix)
                   cell_x3p$header.info$sizeX <- nrow(cellMatrix)
 
-                  #include which rows/column in the original scan each cell was taken from
+                  #include which rows/columns in the original scan each cell was
+                  #taken from
                   cell_x3p$cmcR.info$cellRange <- cellRange
 
                   return(cell_x3p)
@@ -835,7 +836,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #' Standardize height values of a scan by centering/scaling by desired
 #' statistics and replacing missing values
 #'
-#' @name comparison_standardizeHeightValues
+#' @name comparison_standardizeHeight
 #'
 #' @note this function adds information to the metainformation of the x3p scan
 #'   it is given that is required for calculating, for example, the
@@ -843,7 +844,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'
 #' @export
 
-comparison_standardizeHeightValues <- function(heightValues,
+comparison_standardizeHeights <- function(heightValues,
                                                withRespectTo = "individualCell",
                                                centerBy = mean,
                                                scaleBy = sd){
@@ -867,35 +868,34 @@ comparison_standardizeHeightValues <- function(heightValues,
 
 #' Replace missing values in a scan
 #'
-#' @name comparison_replaceMissingValues
+#' @name comparison_replaceMissing
 #'
 #' @export
 
-comparison_replaceMissingValues <- function(heightValues,
+comparison_replaceMissing <- function(heightValues,
                                               replacement = 0){
-  replacedHeightValues <- heightValues %>%
+  replacedHeights <- heightValues %>%
     purrr::map(function(x3p){
       x3p$surface.matrix[is.na(x3p$surface.matrix)] <- 0
 
       return(x3p)
     })
 
-  return(replacedHeightValues)
+  return(replacedHeights)
 }
 
 #' Estimate translation alignment between a cell/region pair based on the
-#' [Cross-Correlation
-#' Theorem](https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)
+#' Cross-Correlation Theorem.
 #'
-#' @name comparison_fft.ccf
+#' @name comparison_fft_ccf
 #'
 #' @note The FFT is not defined for matrices containing missing values. The
 #'   missing values in the cell and region need to be replaced before using this
-#'   function. See the \link[cmcR](comparison_standardizeHeightValues) function
+#'   function. See the \link[cmcR]{comparison_standardizeHeights} function
 #'   to replace missing values after standardization.
 #'
 #' @export
-comparison_fft.ccf <- function(cellHeightValues,regionHeightValues){
+comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
   ccfList <- purrr::map2(cellHeightValues,
                          regionHeightValues,
                          ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,mat2 = .y$surface.matrix,ccfMethod = "fft"))
@@ -908,17 +908,17 @@ comparison_fft.ccf <- function(cellHeightValues,regionHeightValues){
 #'
 #' @name comparison_cor
 #'
-#'
+#' @seealso \url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
 #' @export
 
 comparison_cor <- function(cellHeightValues,
                            regionHeightValues,
-                           fft.ccf_df,
+                           fft_ccf_df,
                            use = "pairwise.complete.obs"){
 
   rawCors <- purrr::pmap_dbl(.l = list(cellHeightValues,
                                        regionHeightValues,
-                                       fft.ccf_df),
+                                       fft_ccf_df),
                              function(cell,region,translations){
                                rawCor <- calcRawCorr(cell = cell$surface.matrix,
                                                      region = region$surface.matrix,
