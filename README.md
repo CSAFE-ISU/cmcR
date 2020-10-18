@@ -5,10 +5,10 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.com/jzemmels/cmcR.svg?branch=master)](https://travis-ci.com/jzemmels/cmcR)
 [![Codecov test
-coverage](https://codecov.io/gh/jzemmels/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/jzemmels/cmcR?branch=master)
+coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master)
+[![Travis build
+status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR)
 <!-- badges: end -->
 
 The cmcR package provides an open-source implementation of the Congruent
@@ -89,12 +89,11 @@ cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
 To perform a proper comparison of these two cartridge cases, we need to
 remove regions that do not come into uniform or consistent contact with
 the breech face of the firearm. These include the small clusters of
-pixels in the corners of the two scans, caused by the staging area in
-which the scans are taken, and the plateaued region of points around the
-firing pin impression hole near the center of the scan. A variety of
-processing procedures are implemented in the cmcR package. Functions of
-the form `preProcess_*` perform the preprocessing procedures. Consider
-the [funtion
+pixels in the corners of the two scans from the microscope staging area,
+and the plateaued region of points around the firing pin impression hole
+near the center of the scan. A variety of processing procedures are
+implemented in the cmcR package. Functions of the form `preProcess_*`
+perform the preprocessing procedures. See the [funtion
 reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the
 cmcR package for more information regarding these procedures. As is
 commonly done when comparing cartridge cases, we first downsample each
@@ -184,10 +183,11 @@ cellTibble
 #> # ... with 54 more rows
 ```
 
-We will want to exclude cells and regions that contain few observations.
-The `comparison_calcPropMissing` function calculates the proportion of
-missing values in a surface matrix. The call below excludes rows in
-which either the cell or region contain more that 85% missing values.
+We want to exclude cells and regions that are mostly missing from the
+scan. The `comparison_calcPropMissing` function calculates the
+proportion of missing values in a surface matrix. The call below
+excludes rows in which either the cell or region contain more that 85%
+missing values.
 
 ``` r
 cellTibble <- cellTibble %>%
