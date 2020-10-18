@@ -5,12 +5,7 @@
 \title{Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
 distribution returned by the decision_highCMC_cmcThetaDistrib function}
 \usage{
-decision_highCMC_classifyCMCs(
-  cmcThetaDistrib,
-  tau = 1,
-  thetaThresh = 6,
-  corColName = "pairwiseCompCor"
-)
+decision_highCMC_classifyCMCs(cmcThetaDistrib, tau = 1, thetaThresh = 6)
 }
 \description{
 Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
