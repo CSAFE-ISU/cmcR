@@ -88,7 +88,7 @@ cmcR::x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
 
 Functions of the form `comparison_*` perform the steps of the cell-based comparison procedure. The data generated from the cell-based comparison procedure are kept in a [`tibble`](https://tibble.tidyverse.org/) where one row represents a single cell/region pairing.
 
-The `comparison_cellDivision` function divides a scan up into a grid of cells. The `cellIndex`, `cellNum`, and `cellRange` detail the location in the original scan each cell inhabits. Each cell is stored as an `.x3p` object in the `cellHeightValues` column. The `propMissing` column indicates the proportion of missing values (`NA`s) in each cell. We will want to remove cells that contain too many missing values. The benefit of using a `tibble` structure is that processes such as removing rows can be accomplished using simple `dplyr` commands such as `filter`.
+The `comparison_cellDivision` function divides a scan up into a grid of cells. The `cellIndex` column represents the `row,col` location in the original scan each cell inhabits. Each cell is stored as an `.x3p` object in the `cellHeightValues` column. The `propMissing` column indicates the proportion of missing values (`NA`s) in each cell. We will want to remove cells that contain too many missing values. The benefit of using a `tibble` structure is that processes such as removing rows can be accomplished using simple `dplyr` commands such as `filter`.
 
 ```{r}
 cellTibble <- fadul1.1_processed %>%
@@ -103,11 +103,8 @@ The `comparison_getTargetRegions` function extracts a region from a target scan 
 cellTibble <- cellTibble %>%
   dplyr::filter(propMissing <= .85) %>%
   dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                                 cellRange = cellRange,
                                                                  target_x3p = fadul1.2_processed,
                                                                  regionSizeMultiplier = 9))
-
-cellTibble
 ```
 
 We can also standardize the surface matrix height values by centering/scaling by desired statistics. Also, to apply frequency-domain techniques in comparing each cell and region, the missing values in each scan need to be replaced. Both of these operations are performed in the `comparison_standardizeHeightValues` function. If the replacement of missing values is desired (i.e., `replaceMissingValues` argument is set to `TRUE`), then all missing values are replaced with 0 after centering/scaling. Then, the `comparison_fft.ccf` function estimates the translations required to align the cell and region using the [https://mathworld.wolfram.com/Cross-CorrelationTheorem.html](Cross-Correlation Theorem). 
@@ -115,12 +112,7 @@ We can also standardize the surface matrix height values by centering/scaling by
 (Future note: I want the `comparison_fft.ccf` function to create 3 new columns, corresponding to the x, y, and CCF$_\max$ values, but I don't know how to create 3 columns from a single function call. It's common in other languages like Python that if a function returns multiple values you can declare multiple variable assignments on the same line. I would like to do something like this with declaring columns, but in a mutate statement to keep with the tibble theme.)
 
 ```{r}
-cellTibble <- cellTibble %>%
-  dplyr::filter(propMissing <= .85) %>%
-  dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                                 cellRange = cellRange,
-                                                                 target_x3p = fadul1.2_processed,
-                                                                 regionSizeMultiplier = 9))  %>%
+cellTibble <- cellTibble  %>%
   dplyr::mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues,
                                                                       replaceMissingValues = TRUE),
                 regionHeightValues = comparison_standardizeHeightValues(regionHeightValues,
@@ -128,7 +120,7 @@ cellTibble <- cellTibble %>%
   dplyr::mutate(fft.ccf = comparison_fft.ccf(cellHeightValues = cellHeightValues,
                                              regionHeightValues = regionHeightValues))
 
-cellTibble
+cellTibble$fft.ccf[1:3]
 ```
 
 ### (OLD) Cell-based comparison procedure 

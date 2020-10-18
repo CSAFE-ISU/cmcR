@@ -737,7 +737,7 @@ comparison_cellDivision <- function(x3p,numCells = 64){
     purrr::map_depth(.depth = 2,
                      .f = as.matrix)
 
-  cellRange <- purrr::map(names(splitSurfaceMat),
+  cellRanges <- purrr::map(names(splitSurfaceMat),
                           function(horizCell){
                             purrr::map(.x = names(splitSurfaceMat[[1]]),
                                        function(vertCell) cmcR:::swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
@@ -747,7 +747,9 @@ comparison_cellDivision <- function(x3p,numCells = 64){
   splitSurfaceMat <- splitSurfaceMat %>%
     purrr::flatten() %>%
     set_names(NULL) %>%
-    purrr::map(function(cellMatrix){
+    purrr::map2(.x = .,
+                .y = cellRanges,
+                function(cellMatrix = .x,cellRange = .y){
       cell_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
 
       cell_x3p$surface.matrix <- cellMatrix
@@ -757,18 +759,20 @@ comparison_cellDivision <- function(x3p,numCells = 64){
       cell_x3p$header.info$sizeY <- ncol(cellMatrix)
       cell_x3p$header.info$sizeX <- nrow(cellMatrix)
 
+      #include which rows/column in the original scan each cell was taken from
+      cell_x3p$header.info$cellRange <- cellRange
+
       return(cell_x3p)
     })
 
   cellTibble <- tibble::tibble(cellNum = 1:numCells,
-                               cellRange = cellRange,
                                cellHeightValues = splitSurfaceMat) %>%
     dplyr::mutate(cellIndex = cmcR:::linear_to_matrix(index = cellNum,
                                                       nrow = ceiling(sqrt(max(cellNum))),
                                                       byrow = TRUE),
                   propMissing = cellHeightValues %>%
                     purrr::map_dbl(~ sum(is.na(.$surface.matrix))/length(.$surface.matrix))) %>%
-    dplyr::select(cellIndex,cellNum,cellRange,cellHeightValues,propMissing)
+    dplyr::select(cellIndex,cellHeightValues,propMissing)
 
   return(cellTibble)
 }
@@ -781,7 +785,6 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 #' @export
 
 comparison_getTargetRegions <- function(cellHeightValues,
-                                        cellRange,
                                         target_x3p,
                                         rotation = 0,
                                         regionSizeMultiplier = 9){
@@ -789,6 +792,9 @@ comparison_getTargetRegions <- function(cellHeightValues,
   cellSideLengths <- cellHeightValues %>%
     purrr::map(~ c("row" = nrow(.$surface.matrix),
                    "col" = ncol(.$surface.matrix)))
+
+  cellRange <- cellHeightValues %>%
+    purrr::map_chr(~ .$header.info$cellRange)
 
   target_x3p_regionIndices <- cmcR:::getMat2SplitIndices(cellRanges = cellRange,
                                                          cellSideLengths = cellSideLengths,

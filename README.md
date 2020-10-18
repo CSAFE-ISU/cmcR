@@ -121,9 +121,9 @@ procedure are kept in a [`tibble`](https://tibble.tidyverse.org/) where
 one row represents a single cell/region pairing.
 
 The `comparison_cellDivision` function divides a scan up into a grid of
-cells. The `cellIndex`, `cellNum`, and `cellRange` detail the location
-in the original scan each cell inhabits. Each cell is stored as an
-`.x3p` object in the `cellHeightValues` column. The `propMissing` column
+cells. The `cellIndex` column represents the `row,col` location in the
+original scan each cell inhabits. Each cell is stored as an `.x3p`
+object in the `cellHeightValues` column. The `propMissing` column
 indicates the proportion of missing values (`NA`s) in each cell. We will
 want to remove cells that contain too many missing values. The benefit
 of using a `tibble` structure is that processes such as removing rows
@@ -134,19 +134,19 @@ cellTibble <- fadul1.1_processed %>%
   comparison_cellDivision(numCells = 64)
 
 cellTibble
-#> # A tibble: 64 x 5
-#>    cellIndex cellNum cellRange                      cellHeightValues propMissing
-#>    <chr>       <int> <chr>                          <list>                 <dbl>
-#>  1 1, 1            1 rows: 1 - 69, cols: 1 - 69     <x3p>                  1    
-#>  2 1, 2            2 rows: 1 - 69, cols: 70 - 137   <x3p>                  0.899
-#>  3 1, 3            3 rows: 1 - 69, cols: 138 - 205  <x3p>                  0.916
-#>  4 1, 4            4 rows: 1 - 69, cols: 206 - 273  <x3p>                  0.961
-#>  5 1, 5            5 rows: 1 - 69, cols: 274 - 341  <x3p>                  0.936
-#>  6 1, 6            6 rows: 1 - 69, cols: 342 - 409  <x3p>                  0.833
-#>  7 1, 7            7 rows: 1 - 69, cols: 410 - 477  <x3p>                  0.859
-#>  8 1, 8            8 rows: 1 - 69, cols: 478 - 545  <x3p>                  1    
-#>  9 2, 1            9 rows: 70 - 137, cols: 1 - 69   <x3p>                  0.835
-#> 10 2, 2           10 rows: 70 - 137, cols: 70 - 137 <x3p>                  0.815
+#> # A tibble: 64 x 3
+#>    cellIndex cellHeightValues propMissing
+#>    <chr>     <list>                 <dbl>
+#>  1 1, 1      <x3p>                  1    
+#>  2 1, 2      <x3p>                  0.899
+#>  3 1, 3      <x3p>                  0.916
+#>  4 1, 4      <x3p>                  0.961
+#>  5 1, 5      <x3p>                  0.936
+#>  6 1, 6      <x3p>                  0.833
+#>  7 1, 7      <x3p>                  0.859
+#>  8 1, 8      <x3p>                  1    
+#>  9 2, 1      <x3p>                  0.835
+#> 10 2, 2      <x3p>                  0.815
 #> # ... with 54 more rows
 ```
 
@@ -160,25 +160,8 @@ boundaries of the target scan).
 cellTibble <- cellTibble %>%
   dplyr::filter(propMissing <= .85) %>%
   dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                                 cellRange = cellRange,
                                                                  target_x3p = fadul1.2_processed,
                                                                  regionSizeMultiplier = 9))
-
-cellTibble
-#> # A tibble: 29 x 6
-#>    cellIndex cellNum cellRange     cellHeightValues propMissing regionHeightVal~
-#>    <chr>       <int> <chr>         <list>                 <dbl> <named list>    
-#>  1 1, 6            6 rows: 1 - 69~ <x3p>                  0.833 <x3p>           
-#>  2 2, 1            9 rows: 70 - 1~ <x3p>                  0.835 <x3p>           
-#>  3 2, 2           10 rows: 70 - 1~ <x3p>                  0.815 <x3p>           
-#>  4 2, 7           15 rows: 70 - 1~ <x3p>                  0.657 <x3p>           
-#>  5 2, 8           16 rows: 70 - 1~ <x3p>                  0.834 <x3p>           
-#>  6 3, 1           17 rows: 138 - ~ <x3p>                  0.507 <x3p>           
-#>  7 3, 8           24 rows: 138 - ~ <x3p>                  0.353 <x3p>           
-#>  8 4, 1           25 rows: 206 - ~ <x3p>                  0.324 <x3p>           
-#>  9 4, 8           32 rows: 206 - ~ <x3p>                  0.153 <x3p>           
-#> 10 5, 1           33 rows: 274 - ~ <x3p>                  0.117 <x3p>           
-#> # ... with 19 more rows
 ```
 
 We can also standardize the surface matrix height values by
@@ -201,12 +184,7 @@ like to do something like this with declaring columns, but in a mutate
 statement to keep with the tibble theme.)
 
 ``` r
-cellTibble <- cellTibble %>%
-  dplyr::filter(propMissing <= .85) %>%
-  dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                                 cellRange = cellRange,
-                                                                 target_x3p = fadul1.2_processed,
-                                                                 regionSizeMultiplier = 9))  %>%
+cellTibble <- cellTibble  %>%
   dplyr::mutate(cellHeightValues = comparison_standardizeHeightValues(cellHeightValues,
                                                                       replaceMissingValues = TRUE),
                 regionHeightValues = comparison_standardizeHeightValues(regionHeightValues,
@@ -214,21 +192,38 @@ cellTibble <- cellTibble %>%
   dplyr::mutate(fft.ccf = comparison_fft.ccf(cellHeightValues = cellHeightValues,
                                              regionHeightValues = regionHeightValues))
 
-cellTibble
-#> # A tibble: 29 x 7
-#>    cellIndex cellNum cellRange cellHeightValues propMissing regionHeightVal~
-#>    <chr>       <int> <chr>     <list>                 <dbl> <named list>    
-#>  1 1, 6            6 rows: 1 ~ <x3p>                  0.833 <x3p>           
-#>  2 2, 1            9 rows: 70~ <x3p>                  0.835 <x3p>           
-#>  3 2, 2           10 rows: 70~ <x3p>                  0.815 <x3p>           
-#>  4 2, 7           15 rows: 70~ <x3p>                  0.657 <x3p>           
-#>  5 2, 8           16 rows: 70~ <x3p>                  0.834 <x3p>           
-#>  6 3, 1           17 rows: 13~ <x3p>                  0.507 <x3p>           
-#>  7 3, 8           24 rows: 13~ <x3p>                  0.353 <x3p>           
-#>  8 4, 1           25 rows: 20~ <x3p>                  0.324 <x3p>           
-#>  9 4, 8           32 rows: 20~ <x3p>                  0.153 <x3p>           
-#> 10 5, 1           33 rows: 27~ <x3p>                  0.117 <x3p>           
-#> # ... with 19 more rows, and 1 more variable: fft.ccf <list>
+cellTibble$fft.ccf[1:3]
+#> [[1]]
+#> [[1]]$ccf
+#> [1] 0.2444739
+#> 
+#> [[1]]$dx
+#> [1] -7
+#> 
+#> [[1]]$dy
+#> [1] -23
+#> 
+#> 
+#> [[2]]
+#> [[2]]$ccf
+#> [1] 0.2579381
+#> 
+#> [[2]]$dx
+#> [1] 33
+#> 
+#> [[2]]$dy
+#> [1] -54
+#> 
+#> 
+#> [[3]]
+#> [[3]]$ccf
+#> [1] 0.2658087
+#> 
+#> [[3]]$dx
+#> [1] 37
+#> 
+#> [[3]]$dy
+#> [1] -43
 ```
 
 ### (OLD) Cell-based comparison procedure
