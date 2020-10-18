@@ -42,7 +42,7 @@ cell is divided by the standard deviation of the whole matrix. If set to
 deviation.}
 
 \item{ccfMethod}{dictates which of 3 different methods are used to calculate
-a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+a final maximum cross-correlation estimate. "fft" estimates the
 optimal translation values to align each cell within in its associated
 region by using Cross-Correlation theorem + FFT algorithm and then
 calculates the pairwise-complete correlation between the cell and a
@@ -55,7 +55,7 @@ costly). For each cell/region pair, these correlation values are
 re-weighted based on the number of non-missing values used to calculate
 them by the following: nonMissingCount*cor/max(nonMissingCount).}
 
-\item{rawCorrTieBreaker}{Only applicable if ccfMethod == "fftThenPairwise".
+\item{rawCorrTieBreaker}{Only applicable if ccfMethod == "fft".
 The way in which the CCF (see ccfMethod) is calculated may require slight
 padding/cropping of the mat1-sized matrix extracted from mat2 to make their
 dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
@@ -67,7 +67,7 @@ rawCorrTieBreaker can be used to determine which yields the lowest/highest
 correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
 respectively).}
 
-\item{use}{Only applicable if ccfMethod == "fftThenPairwise". argument to be
+\item{use}{Only applicable if ccfMethod == "fft". argument to be
 passed to the cor function. Dictates how NAs are dealt with in computing
 the correlation.}
 }

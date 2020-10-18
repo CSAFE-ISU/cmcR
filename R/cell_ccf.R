@@ -162,7 +162,7 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
                                    cellNumVert = cellNumVert) #split image 1 into cells
 
   #create a cell ID column based on x,y location in image:
-  cellIDs <- purrr::map(names(surfaceMat_split),
+  cellRanges <- purrr::map(names(surfaceMat_split),
                         function(horizCell){
                           purrr::map(.x = names(surfaceMat_split[[1]]),
                                      function(vertCell) paste(horizCell,vertCell,sep = ","))
@@ -184,12 +184,12 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
     unlist()
 
   return(list(surfaceMat_split = surfaceMat_split,
-              cellIDs = cellIDs,
+              cellRanges = cellRanges,
               cellSideLengths = cellSideLengths,
               mat1PixCounts = matPixCounts))
 }
 
-#' @name getMat2SplitLocations
+#' @name getMat2SplitIndices
 #'
 #' @keywords internal
 #'
@@ -197,13 +197,13 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 
 utils::globalVariables(c("."))
 
-getMat2SplitLocations <- function(cellIDs,
+getMat2SplitIndices <- function(cellRanges,
                                   cellSideLengths,
                                   mat2Dim,
                                   sidelengthMultiplier,
                                   ...){
-  mat2_splitCorners <- cellIDs %>%
-    #pull all numbers from cellID strings:
+  mat2_splitCorners <- cellRanges %>%
+    #pull all numbers from cellRange strings:
     purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
     purrr::map(~ c(
       #y-position of each cell's center:
@@ -239,281 +239,21 @@ getMat2SplitLocations <- function(cellIDs,
 
                   return(expandedCellCorners)
                 }) %>%
-    setNames(cellIDs)
+    setNames(cellRanges)
 
   return(mat2_splitCorners)
 }
 
-#' @name swapCellIDAxes
+#' @name swapcellRangeAxes
 #'
 #' @keywords internal
 
-swapCellIDAxes <- function(cellID){
-  sSplit <- stringr::str_split(string = cellID,pattern = ",",n = 2)
+swapcellRangeAxes <- function(cellRange){
+  sSplit <- stringr::str_split(string = cellRange,pattern = ",",n = 2)
 
-  paste0(stringr::str_replace(string = sSplit[[1]][1],pattern = "x",replacement = "y"),
+  paste0(stringr::str_replace(string = sSplit[[1]][1],pattern = "x =",replacement = "rows:"),
          ", ",
-         stringr::str_replace(string = sSplit[[1]][2],pattern = "y",replacement = "x"))
-}
-
-#' @name calcRawCorr
-#'
-#' @description Given the dy,dx values at which CCF_max occurs, this function
-#'   extract from the larger "region" matrix a matrix of the same dimension as
-#'   "cell" with appropriate shifting/scaling relative to the center based on
-#'   the dx,dy arguments. It is possible that the "cell" shaped matrix, after
-#'   shifting by dx,dy, lies outside of the bounds of the region matrix (this is
-#'   because both "cell" and "region" are padded with 0s when calculating the
-#'   CCF). If this occurs, the "cell"-sized matrix that would be extracted from
-#'   "region" is padded with NAs to appropriately reflect the conditions under
-#'   which the CCF_max value was determined. Even with this padding, however,
-#'   there may be a slight mis-match (like one row/col) between the dimensions
-#'   of "cell" and of the matrix extracted from "region," typically because
-#'   "region" has an odd dimension while "cell" has an even dimension or vice
-#'   versa. Thus, additional padding/cropping needs to be performed in the
-#'   "cell"-sized matrix extracted from "region." However, we don't know whether
-#'   these rows/cols should pre/post padded/cropped, so all possible
-#'   combinations of padding/cropping are considered. To determine which of
-#'   these these combinations should be ultimately chosen as the final
-#'   "cell"-sized matrix, the tieBreaker argument can be used to determine, for
-#'   example, which "cell"-sized matrix has the highest correlation with "cell"
-#'   (tieBreaker = which.max).
-#'
-#'
-#' @keywords internal
-#'
-#' @importFrom stats cor
-
-calcRawCorr <- function(cell,
-                        region,
-                        dx,
-                        dy,
-                        m1,
-                        m2,
-                        sd1,
-                        sd2,
-                        tieBreaker = which.max,
-                        use = "pairwise.complete.obs"){
-  cell <- (cell - m1)/sd1
-  region <- (region - m2)/sd2
-
-  #pad the region as it was when the CCF was calculated using the FFT method:
-  regionPadded <- matrix(NA,
-                         nrow = nrow(cell) + nrow(region) - 1,
-                         ncol = ncol(cell) + ncol(region) - 1)
-  regionPadded[1:nrow(region),1:ncol(region)] <- region
-
-  regionCenter <- floor(dim(regionPadded)/2)
-
-  alignedCenter <- regionCenter - c(dy + floor(nrow(cell)/2) + 1,dx + floor(ncol(cell)/2) + 1)
-
-  alignedRows <- c((alignedCenter[1] - floor(dim(cell)[1]/2)),(alignedCenter[1] + floor(dim(cell)[1]/2)))
-
-  alignedCols <- c((alignedCenter[2] - floor(dim(cell)[2]/2)),(alignedCenter[2] + floor(dim(cell)[2]/2)))
-
-  regionCroppedInitial <- regionPadded[max(1,alignedRows[1]):min(nrow(region),alignedRows[2]),
-                                       max(1,alignedCols[1]):min(ncol(region),alignedCols[2])]
-
-  #build-in some contingencies in case the regionCropped isn't same size as
-  #the cell. If the dimensions don't agree, then we need to consider copies
-  #of regionCroppedInitial that have been had rows/cols (whichever
-  #applicable) cropped from the top/bottom or left/right
-  regionCroppedList <- list("initial" = regionCroppedInitial)
-
-  if(any(dim(regionCroppedInitial) != dim(cell))){
-    #these make sure that the indices that we've cropped the region by aren't
-    #less than 1 or larger than the dimension of the region
-    if(alignedRows[1] < 1){
-      rowsToPad <- -1*alignedRows[1] + 1
-
-      regionCroppedInitial <- rbind(matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)),
-                                    regionCroppedInitial)
-
-      regionCroppedList$initial <- regionCroppedInitial
-    }
-    if(alignedRows[2] > nrow(region)){
-      rowsToPad <- alignedRows[2] - nrow(region)
-
-      regionCroppedInitial <- rbind(regionCroppedInitial,
-                                    matrix(NA,nrow = rowsToPad,ncol = ncol(regionCroppedInitial)))
-
-      regionCroppedList$initial <- regionCroppedInitial
-    }
-    if(alignedCols[1] < 1){
-      colsToPad <- -1*alignedCols[1] + 1
-
-      regionCroppedInitial <- cbind(matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad),
-                                    regionCroppedInitial)
-
-      regionCroppedList$initial <- regionCroppedInitial
-    }
-    if(alignedCols[2] > ncol(region)){
-      colsToPad <- alignedCols[2] - ncol(region)
-
-      regionCroppedInitial <- cbind(regionCroppedInitial,
-                                    matrix(NA,nrow = nrow(regionCroppedInitial),ncol = colsToPad))
-
-      regionCroppedList$initial <- regionCroppedInitial
-    }
-
-    #two copies if rows are off
-    if(nrow(regionCroppedInitial) > nrow(cell) & ncol(regionCroppedInitial) == ncol(cell)){
-      rowsToCrop <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      regionCroppedRowPre <- regionCroppedInitial[-rowsToCrop,]
-      regionCroppedRowPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),]
-
-      regionCroppedList$rowPre <- regionCroppedRowPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-    }
-
-    #two copies if rows are off
-    if(nrow(regionCroppedInitial) < nrow(cell) & ncol(regionCroppedInitial) == ncol(cell)){
-      rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      regionCroppedRowPre <- rbind(matrix(NA,
-                                          nrow = rowsToPad,
-                                          ncol = ncol(regionCroppedInitial)),
-                                   regionCroppedInitial)
-
-      regionCroppedRowPost <- rbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedInitial)))
-
-      regionCroppedList$rowPre <- regionCroppedRowPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-    }
-
-    #2 copies if cols are off
-    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
-      colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      regionCroppedColPre <- regionCroppedInitial[,-colsToCrop]
-      regionCroppedColPost <- regionCroppedInitial[,-(ncol(regionCroppedInitial) - colsToCrop)]
-
-      regionCroppedList$colPre <- regionCroppedColPre
-      regionCroppedList$colPost <- regionCroppedColPost
-    }
-
-    #2 copies if cols are off
-    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
-      colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      regionCroppedColPre <- cbind(matrix(NA,
-                                          nrow = nrow(regionCroppedInitial),
-                                          ncol = colsToPad),
-                                   regionCroppedInitial)
-
-      regionCroppedColPost <- cbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad))
-
-      regionCroppedList$colPre <- regionCroppedColPre
-      regionCroppedList$colPost <- regionCroppedColPost
-    }
-
-    #4 different copies if both dimensions are too large
-    if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) > nrow(cell)){
-      colsToCrop <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      rowsToCrop <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      regionCroppedBothPre <- regionCroppedInitial[-rowsToCrop,
-                                                   -colsToCrop]
-
-      regionCroppedRowPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),
-                                                   -colsToCrop]
-
-      regionCroppedColPost <- regionCroppedInitial[-rowsToCrop,
-                                                   -(ncol(regionCroppedInitial) - colsToCrop)]
-
-      regionCroppedBothPost <- regionCroppedInitial[-(nrow(regionCroppedInitial) - rowsToCrop),
-                                                    -(ncol(regionCroppedInitial) - colsToCrop)]
-
-      regionCroppedList$bothPre <- regionCroppedBothPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-      regionCroppedList$colPost <- regionCroppedColPost
-      regionCroppedList$bothPost <- regionCroppedBothPost
-    }
-
-    #4 different copies if both dimensions are too small
-    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) < nrow(cell)){
-      colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      #both rows and cols pre-padded
-      regionCroppedBothPre <- cbind(matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad),
-                                    regionCroppedInitial)
-      regionCroppedBothPre <- rbind(matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedBothPre)),
-                                    regionCroppedBothPre)
-
-      #rows post-padded and cols pre-padded
-      regionCroppedRowPost <- cbind(matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad),
-                                    regionCroppedInitial)
-      regionCroppedRowPost <- rbind(regionCroppedRowPost,
-                                    matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedRowPost)))
-
-      #rows pre-padded and cols post-padded
-      regionCroppedColPost <- cbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad))
-      regionCroppedColPost <- rbind(matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedColPost)),
-                                    regionCroppedColPost)
-
-      #rows and cols both post-padded
-      regionCroppedBothPost <- cbind(regionCroppedInitial,
-                                     matrix(NA,
-                                            nrow = nrow(regionCroppedInitial),
-                                            ncol = colsToPad))
-      regionCroppedBothPost <- rbind(regionCroppedBothPost,
-                                     matrix(NA,
-                                            nrow = rowsToPad,
-                                            ncol = ncol(regionCroppedBothPost)))
-
-      regionCroppedList$bothPre <- regionCroppedBothPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-      regionCroppedList$colPost <- regionCroppedColPost
-      regionCroppedList$bothPost <- regionCroppedBothPost
-    }
-  }
-
-  #return NA if cor fails.
-  corSafe <- purrr::safely(cor,otherwise = NA,quiet = TRUE)
-
-  corrVals <- purrr::map_dbl(regionCroppedList,function(croppedRegion){
-
-    #Very infrequently (like once per 100,000 cell/region comparisons) the
-    #standard deviation is zero -- for example, in cases where a the two
-    #matrices only overlap by one non-NA value. cor() will return NA in such
-    #cases which we handle later on in the processing procedures. We'll suppress
-    #the warnings.
-    suppressWarnings(
-    corVal <- corSafe(as.vector(cell),
-                      as.vector(croppedRegion),
-                      use = use)
-    )
-    as.numeric(corVal[1])
-  })
-
-  maxCorr <- as.numeric(corrVals[tieBreaker(corrVals)])
-  if(length(maxCorr) == 0){
-    return(NA)
-  }
-  else(return(maxCorr))
+         stringr::str_replace(string = sSplit[[1]][2],pattern = "y =",replacement = "cols:"))
 }
 
 #' Calculates the cross-correlation function between cells in one matrix to
@@ -551,7 +291,7 @@ calcRawCorr <- function(cell,
 #'   "individualCell", then each cell is divided by its particular standard
 #'   deviation.
 #' @param ccfMethod dictates which of 3 different methods are used to calculate
-#'   a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+#'   a final maximum cross-correlation estimate. "fft" estimates the
 #'   optimal translation values to align each cell within in its associated
 #'   region by using Cross-Correlation theorem + FFT algorithm and then
 #'   calculates the pairwise-complete correlation between the cell and a
@@ -563,7 +303,7 @@ calcRawCorr <- function(cell,
 #'   costly). For each cell/region pair, these correlation values are
 #'   re-weighted based on the number of non-missing values used to calculate
 #'   them by the following: nonMissingCount*cor/max(nonMissingCount).
-#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fftThenPairwise".
+#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fft".
 #'   The way in which the CCF (see ccfMethod) is calculated may require slight
 #'   padding/cropping of the mat1-sized matrix extracted from mat2 to make their
 #'   dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
@@ -574,7 +314,7 @@ calcRawCorr <- function(cell,
 #'   rawCorrTieBreaker can be used to determine which yields the lowest/highest
 #'   correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
 #'   respectively).
-#' @param use Only applicable if ccfMethod == "fftThenPairwise". argument to be
+#' @param use Only applicable if ccfMethod == "fft". argument to be
 #'   passed to the cor function. Dictates how NAs are dealt with in computing
 #'   the correlation.
 #'
@@ -608,7 +348,7 @@ calcRawCorr <- function(cell,
 #' @importFrom stats sd setNames
 #'
 
-utils::globalVariables(c("cellID","."))
+utils::globalVariables(c("cellRange","."))
 
 cellCCF <- function(x3p1,
                     x3p2,
@@ -619,7 +359,7 @@ cellCCF <- function(x3p1,
                     minObservedProp = .1,
                     centerCell = "individualCell",
                     scaleCell = "individualCell",
-                    ccfMethod = "fftThenPairwise",
+                    ccfMethod = "fft",
                     rawCorrTieBreaker = which.max,
                     use = "pairwise.complete.obs"){
   #Needed tests: mat1 and mat2 must be matrices thetas, cellNumHoriz, and
@@ -668,10 +408,10 @@ cellCCF <- function(x3p1,
                                  minObservedProp = minObservedProp)
 
   #creating this df is necessary so that we can compare cells in similar
-  #positions between two comparisons (since their "cellID" may differ since
+  #positions between two comparisons (since their "cellRange" may differ since
   #the scans aren't the same size)
-  cellIDdf <- data.frame(cellNum = seq_along(mat1_split$cellIDs),
-                         cellID = mat1_split$cellIDs)
+  cellRangedf <- data.frame(cellNum = seq_along(mat1_split$cellRanges),
+                         cellRange = mat1_split$cellRanges)
 
   #Now we want to split image B into cells with the same centers as those in
   #image A, but with twice the side length (these wider cells will intersect
@@ -679,7 +419,7 @@ cellCCF <- function(x3p1,
   #cells' corners) of where each cell should be in image B.
   sidelengthMultiplier <- floor(sqrt(regionToCellProp))
 
-  mat2_splitCorners <- getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
+  mat2_splitCorners <- getMat2SplitIndices(cellRanges = mat1_split$cellRanges,
                                              cellSideLengths = mat1_split$cellSideLengths,
                                              mat2Dim = dim(mat2),
                                              sidelengthMultiplier = sidelengthMultiplier)
@@ -705,8 +445,8 @@ cellCCF <- function(x3p1,
     #and dy values). Thus, it is necessary to pad these edge images until they
     #are square. Through experimentation, it has been observed that padding the
     #matrices with constant values does not affect the CCF score. We determine
-    #which matrices need to be padded based on whether the associated cellID
-    #contains 1 or the maximum value of the cellIDs (containing either part of
+    #which matrices need to be padded based on whether the associated cellRange
+    #contains 1 or the maximum value of the cellRanges (containing either part of
     #the first row/col of the matrix or the last)
     mat2_splitRotated <-
       purrr::map(.x = mat2_splitCorners,
@@ -727,17 +467,17 @@ cellCCF <- function(x3p1,
 
     #grab the cell IDs for each cell not removed above. This is used to update
     #topResults below
-    filteredCellID <- mat1_split$cellIDs[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
+    filteredcellRange <- mat1_split$cellRanges[mat1_split$mat1PixCounts == TRUE & mat2PixCounts == TRUE]
 
     #creating this df is necessary so that we can compare cells in similar
-    #positions between two comparisons (since their "cellID" may differ since
+    #positions between two comparisons (since their "cellRange" may differ since
     #the scans aren't the same size, but their absolute position in the grid
     #(e.g., 4th from the left in the top row) will remain the same)
-    cellIDdf_filtered <- cellIDdf %>%
-      dplyr::filter(cellID %in% filteredCellID) %>%
+    cellRangedf_filtered <- cellRangedf %>%
+      dplyr::filter(cellRange %in% filteredcellRange) %>%
       #imager swaps x and y axes, so we need to swap them back to be more
       #interpretable:
-      dplyr::mutate(cellID = purrr::map_chr(cellID,swapCellIDAxes))
+      dplyr::mutate(cellRange = purrr::map_chr(cellRange,swapcellRangeAxes))
 
     #shift the pixel values in each image so that they both have 0 mean. Then
     #replace the NA values with 0 (FFTs can't deal with NAs)
@@ -745,11 +485,11 @@ cellCCF <- function(x3p1,
       if(centerCell == "individualCell"){
         m1 <- mat1_splitFiltered %>%
           purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
 
         m2 <-  mat2_splitFiltered %>%
           purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
       }
     }
 
@@ -757,11 +497,11 @@ cellCCF <- function(x3p1,
       if(scaleCell == "individualCell"){
         sd1 <-  mat1_splitFiltered %>%
           purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
 
         sd2 <-  mat2_splitFiltered %>%
           purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
       }
     }
 
@@ -771,7 +511,7 @@ cellCCF <- function(x3p1,
                                      ~ standardizeSurfaceMat(surfaceMat = ..1,
                                                              m = ..2,
                                                              s = ..3)) %>%
-      setNames(filteredCellID) #Need to set the names to avoid repeated list
+      setNames(filteredcellRange) #Need to set the names to avoid repeated list
     #labels
 
     #shift the pixel values in each image so that they both have 0 mean. Then
@@ -780,19 +520,19 @@ cellCCF <- function(x3p1,
                                      ~ standardizeSurfaceMat(surfaceMat = ..1,
                                                              m = ..2,
                                                              s = ..3)) %>%
-      setNames(filteredCellID) #Need to set the names to avoid repeated list
+      setNames(filteredcellRange) #Need to set the names to avoid repeated list
     #labels
 
     #calculate the correlation of each cell pair
     ccfValues <- purrr::map2_dfr(.x = mat1_splitShifted,
                                  .y = mat2_splitShifted,
                                  .f = ~ data.frame(purrr::flatten(ccfComparison(.x,.y,ccfMethod = ccfMethod)))) %>% #returns a nested list of ccf,dx,dy values
-      dplyr::bind_cols(cellIDdf_filtered,.) %>%
+      dplyr::bind_cols(cellRangedf_filtered,.) %>%
       dplyr::mutate(theta = rep(theta,times = nrow(.)),
                     nonMissingProportion = purrr::map_dbl(mat1_splitFiltered,
                                                           .f = ~ (sum(!is.na(.)))/prod(dim(.))))
 
-    if(ccfMethod == "fftThenPairwise"){
+    if(ccfMethod == "fft"){
       ccfValues <- ccfValues %>%
         dplyr::rename(fft.ccf = ccf) %>%
         dplyr::mutate(ccf = purrr::pmap_dbl(.l = list(mat1_splitFiltered,
@@ -820,7 +560,7 @@ cellCCF <- function(x3p1,
 
   #rearrange columns in allResults for readability
   allResults <- allResults %>%
-    purrr::map(~ dplyr::select(.,cellNum,cellID,dplyr::everything()))
+    purrr::map(~ dplyr::select(.,cellNum,cellRange,dplyr::everything()))
 
   if(missing(centerCell)){
     centerCell <- "none"
@@ -884,7 +624,7 @@ cellCCF <- function(x3p1,
 #'   "individualCell", then each cell is divided by its particular standard
 #'   deviation.
 #' @param ccfMethod dictates which of 3 different methods are used to calculate
-#'   a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+#'   a final maximum cross-correlation estimate. "fft" estimates the
 #'   optimal translation values to align each cell within in its associated
 #'   region by using Cross-Correlation theorem + FFT algorithm and then
 #'   calculates the pairwise-complete correlation between the cell and a
@@ -896,7 +636,7 @@ cellCCF <- function(x3p1,
 #'   costly). For each cell/region pair, these correlation values are
 #'   re-weighted based on the number of non-missing values used to calculate
 #'   them by the following: nonMissingCount*cor/max(nonMissingCount).
-#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fftThenPairwise".
+#' @param rawCorrTieBreaker Only applicable if ccfMethod == "fft".
 #'   The way in which the CCF (see ccfMethod) is calculated may require slight
 #'   padding/cropping of the mat1-sized matrix extracted from mat2 to make their
 #'   dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
@@ -907,7 +647,7 @@ cellCCF <- function(x3p1,
 #'   rawCorrTieBreaker can be used to determine which yields the lowest/highest
 #'   correlation with mat1 (using rawCorrTieBreaker = which.min or which.max,
 #'   respectively).
-#' @param use Only applicable if ccfMethod == "fftThenPairwise". argument to be
+#' @param use Only applicable if ccfMethod == "fft". argument to be
 #'   passed to the cor function. Dictates how NAs are dealt with in computing
 #'   the correlation.
 #'
@@ -938,7 +678,7 @@ cellCCF_bothDirections <- function(x3p1,
                                    minObservedProp = .1,
                                    centerCell = "individualCell",
                                    scaleCell = "individualCell",
-                                   ccfMethod = "fftThenPairwise",
+                                   ccfMethod = "fft",
                                    rawCorrTieBreaker = which.max,
                                    use = "pairwise.complete.obs"){
 
@@ -972,4 +712,160 @@ cellCCF_bothDirections <- function(x3p1,
 
   return(list("comparison_1to2" = comparison_1to2,
               "comparison_2to1" = comparison_2to1))
+}
+#' Split a reference scan into a grid of cells
+#'
+#' @name comparison_cellDivision
+#'
+#' @export
+
+comparison_cellDivision <- function(x3p,numCells = 64){
+
+  # Future note: put `cellRange` column information in each x3p's metadata?
+  # Would then need to change the getTargetRegions function below to look in the
+  # metadata rather than expecting the column cellRange
+
+  assertthat::are_equal(sqrt(numCells) %% 1, 0)
+
+  splitSurfaceMat <- x3p$surface.matrix %>%
+    imager::as.cimg() %>%
+    imager::imsplit(axis = "x",
+                    nb = sqrt(numCells)) %>%
+    purrr::map(.f = ~ imager::imsplit(.x,
+                                      axis = "y",
+                                      nb = sqrt(numCells))) %>%
+    purrr::map_depth(.depth = 2,
+                     .f = as.matrix)
+
+  cellRange <- purrr::map(names(splitSurfaceMat),
+                          function(horizCell){
+                            purrr::map(.x = names(splitSurfaceMat[[1]]),
+                                       function(vertCell) cmcR:::swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
+                          }) %>%
+    unlist()
+
+  splitSurfaceMat <- splitSurfaceMat %>%
+    purrr::flatten() %>%
+    set_names(NULL) %>%
+    purrr::map(function(cellMatrix){
+      cell_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
+
+      cell_x3p$surface.matrix <- cellMatrix
+
+      #update metainformation
+      cell_x3p$header.info <- x3p$header.info
+      cell_x3p$header.info$sizeY <- ncol(cellMatrix)
+      cell_x3p$header.info$sizeX <- nrow(cellMatrix)
+
+      return(cell_x3p)
+    })
+
+  cellTibble <- tibble::tibble(cellNum = 1:numCells,
+                               cellRange = cellRange,
+                               cellHeightValues = splitSurfaceMat) %>%
+    dplyr::mutate(cellIndex = cmcR:::linear_to_matrix(index = cellNum,
+                                                      nrow = ceiling(sqrt(max(cellNum))),
+                                                      byrow = TRUE),
+                  propMissing = cellHeightValues %>%
+                    purrr::map_dbl(~ sum(is.na(.$surface.matrix))/length(.$surface.matrix))) %>%
+    dplyr::select(cellIndex,cellNum,cellRange,cellHeightValues,propMissing)
+
+  return(cellTibble)
+}
+
+#' Extract regions from a target scan based on associated cells in reference
+#' scan
+#'
+#' @name comparison_getTargetRegions
+#'
+#' @export
+
+comparison_getTargetRegions <- function(cellHeightValues,
+                                        cellRange,
+                                        target_x3p,
+                                        rotation = 0,
+                                        regionSizeMultiplier = 9){
+
+  cellSideLengths <- cellHeightValues %>%
+    purrr::map(~ c("row" = nrow(.$surface.matrix),
+                   "col" = ncol(.$surface.matrix)))
+
+  target_x3p_regionIndices <- cmcR:::getMat2SplitIndices(cellRanges = cellRange,
+                                                         cellSideLengths = cellSideLengths,
+                                                         mat2Dim = dim(target_x3p$surface.matrix),
+                                                         sidelengthMultiplier = floor(sqrt(regionSizeMultiplier)))
+
+  target_surfaceMat_rotated <- cmcR:::rotateSurfaceMatrix(target_x3p$surface.matrix,
+                                                          theta = rotation)
+
+
+  target_x3p_splitRotated <-
+    purrr::map(.x = target_x3p_regionIndices,
+               function(cornerIndices){
+                 regionMatrix <- cmcR:::extractCellbyCornerLocs(cornerLocs = cornerIndices,
+                                                                rotatedSurfaceMat = target_surfaceMat_rotated,
+                                                                mat2Dim = dim(target_x3p$surface.matrix))
+
+                 region_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
+
+                 region_x3p$surface.matrix <- regionMatrix
+
+                 #update metainformation
+                 region_x3p$header.info <- target_x3p$header.info
+                 region_x3p$header.info$sizeY <- ncol(regionMatrix)
+                 region_x3p$header.info$sizeX <- nrow(regionMatrix)
+
+                 return(region_x3p)
+               } )
+}
+
+#' Standardize height values of a scan by centering/scaling by desired
+#' statistics and replacing missing values
+#'
+#' @name comparison_standardizeHeightValues
+#'
+#' @export
+
+comparison_standardizeHeightValues <- function(heightValues,
+                                               withRespectTo = "individualCell",
+                                               centerBy = mean,
+                                               scaleBy = sd,
+                                               replaceMissingValues = TRUE){
+
+  #Expand functionality of replaceMissingValues -- i.e., with Gaussian noise,
+  #imputation, etc.
+
+  heightValues <- heightValues %>%
+    purrr::map(function(x3p){
+
+      x3p$surface.matrix <- (x3p$surface.matrix - centerBy(x3p$surface.matrix,na.rm = TRUE))/scaleBy(x3p$surface.matrix,na.rm = TRUE)
+
+      if(replaceMissingValues){
+        x3p$surface.matrix[is.na(x3p$surface.matrix)] <- 0
+      }
+
+      return(x3p)
+    })
+
+  return(heightValues)
+}
+
+#' Estimate translation alignment between a cell/region pair based on the
+#' [Cross-Correlation
+#' Theorem](https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)
+#'
+#' @name comparison_fft.ccf
+#'
+#' @note The FFT is not defined for matrices containing missing values. The
+#'   missing values in the cell and region need to be replaced before using this
+#'   function. See the \link[cmcR](comparison_standardizeHeightValues) function
+#'   to replace missing values after standardization.
+#'
+#' @export
+comparison_fft.ccf <- function(cellHeightValues,regionHeightValues){
+  ccfList <- purrr::map2(cellHeightValues,
+                         regionHeightValues,
+                         ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,mat2 = .y$surface.matrix,ccfMethod = "fft"))
+
+  return(ccfList)
 }

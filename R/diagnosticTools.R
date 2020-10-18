@@ -390,7 +390,7 @@ arrangeCMCPlot <- function(x3p1,
 #'
 #'@export
 
-utils::globalVariables(c(".","cmc","comparison","dx","dy","theta","cellNum","cellID"))
+utils::globalVariables(c(".","cmc","comparison","dx","dy","theta","cellNum","cellRange"))
 
 cmcPlot <- function(x3p1,
                     x3p2,
@@ -428,14 +428,14 @@ cmcPlot <- function(x3p1,
                            unlist() %>%
                            as.numeric()
 
-                         data.frame(cellID = ..2,
+                         data.frame(cellRange = ..2,
                                     firstRow = idNum[1],
                                     lastRow = idNum[2],
                                     firstCol = idNum[3],
                                     lastCol = idNum[4],
                                     stringsAsFactors = FALSE)
                        }),
-                     by = "cellID")
+                     by = "cellRange")
 
   originalMethodCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
                                    x3p2 = list(x3p2,x3p1)[[directionIndic]],
@@ -452,16 +452,16 @@ cmcPlot <- function(x3p1,
 
   if(nrow(cmcFilter_improved_output$highCMCs) > 0){
 
-    x3p1_allCellIDs <- cellDivision(x3p1$surface.matrix,
+    x3p1_allcellRanges <- cellDivision(x3p1$surface.matrix,
                                     cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
                                     cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
       purrr::map2(names(.),
                   function(mat,horizCell){
                     purrr::map(.x = names(mat),
-                               function(vertCell) swapCellIDAxes(paste(horizCell,vertCell,sep = ",")))
+                               function(vertCell) swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
                   }) %>%
       unlist() %>%
-      data.frame(cellID = .) %>%
+      data.frame(cellRange = .) %>%
       dplyr::mutate(cellNum = 1:nrow(.))
 
     highCMCs_directionCorrected <- cmcFilter_improved_output$highCMCs %>%
@@ -475,11 +475,11 @@ cmcPlot <- function(x3p1,
                                    yes = -theta,
                                    no = theta)) %>%
       dplyr::arrange(cellNum) %>%
-      dplyr::select(-c(cellID,nonMissingProportion)) %>%
-      dplyr::left_join(x3p1_allCellIDs,by = "cellNum") %>%
+      dplyr::select(-c(cellRange,nonMissingProportion)) %>%
+      dplyr::left_join(x3p1_allcellRanges,by = "cellNum") %>%
       dplyr::ungroup() %>%
       dplyr::mutate(cmc = rep("High CMC",times = nrow(.)),
-                    cellID = as.character(cellID))
+                    cellRange = as.character(cellRange))
 
     nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults  %>%
       topResultsPerCell() %>%
@@ -488,7 +488,7 @@ cmcPlot <- function(x3p1,
                        by = "cellNum") %>%
       dplyr::ungroup() %>%
       dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)),
-                    cellID = as.character(cellID))
+                    cellRange = as.character(cellRange))
 
     allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
       dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","High CMC"))) %>%
@@ -500,14 +500,14 @@ cmcPlot <- function(x3p1,
                              unlist() %>%
                              as.numeric()
 
-                           data.frame(cellID = ..8,
+                           data.frame(cellRange = ..8,
                                       firstRow = idNum[1],
                                       lastRow = idNum[2],
                                       firstCol = idNum[3],
                                       lastCol = idNum[4],
                                       stringsAsFactors = FALSE)
                          }),
-                       by = "cellID")
+                       by = "cellRange")
 
     highCMCPlt <- arrangeCMCPlot(x3p1 = x3p1,
                                  x3p2 = x3p2,
@@ -754,7 +754,7 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
 
   sidelengthMultiplier <- floor(sqrt(cellCCF_params$regionToCellProp))
 
-  mat2_splitCorners <- getMat2SplitLocations(cellIDs = mat1_split$cellIDs,
+  mat2_splitCorners <- getMat2SplitLocations(cellRanges = mat1_split$cellRanges,
                                              cellSideLengths = mat1_split$cellSideLengths,
                                              mat2Dim = dim(mat2),
                                              sidelengthMultiplier = sidelengthMultiplier)
@@ -780,19 +780,19 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
     mat1_splitFiltered <- purrr::flatten(mat1_split$surfaceMat_split)[ccfDFSplit[[ind]]$cellNum]
     mat2_splitFiltered <- mat2_splitRotated[ccfDFSplit[[ind]]$cellNum]
 
-    filteredCellID <- mat1_split$cellIDs[ccfDFSplit[[ind]]$cellNum]
+    filteredcellRange <- mat1_split$cellRanges[ccfDFSplit[[ind]]$cellNum]
 
     if(!is.null(cellCCF_params$centerCell)){
       if(cellCCF_params$centerCell == "individualCell"){
         m1 <- mat1_splitFiltered %>%
           purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
 
 
 
         m2 <-  mat2_splitFiltered %>%
           purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
       }
     }
 
@@ -800,11 +800,11 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
       if(cellCCF_params$scaleCell == "individualCell"){
         sd1 <-  mat1_splitFiltered %>%
           purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
 
         sd2 <-  mat2_splitFiltered %>%
           purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredCellID)
+          setNames(filteredcellRange)
       }
     }
 
@@ -823,7 +823,7 @@ getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
     cellRegionPairs[[ind]] <- purrr::map2(mat1_splitShifted,
                                           mat2_splitShifted,
                                           ~ list(.x,.y)) %>%
-      setNames(filteredCellID)
+      setNames(filteredcellRange)
   }
 
   cellRegionPairs %>%

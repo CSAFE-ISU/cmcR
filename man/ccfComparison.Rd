@@ -5,7 +5,7 @@
 \title{Computes the location of the maximum CCF value in a CCF map between two
 matrices}
 \usage{
-ccfComparison(im1, im2, ccfMethod = "fftThenPairwise")
+ccfComparison(mat1, mat2, ccfMethod = "fft")
 }
 \arguments{
 \item{ccfMethod}{implements 3 different methods to calculate the CCF -- all which yield differing CCF values}
