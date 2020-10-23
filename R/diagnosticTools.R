@@ -21,7 +21,7 @@
 #' @param guide internal usage
 #' @examples
 #' \dontrun{
-#'  x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
+#'  x3pListPlot(list("name1" = referenceScan, "name2" = targetScan))
 #' }
 #' @export
 #'
@@ -182,10 +182,10 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #' @importFrom stats median setNames
 #' @importFrom ggnewscale new_scale_fill
 
-utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","x","y","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellInd"))
+utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","x","y","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellIndex"))
 
-arrangeCMCPlot <- function(x3p1,
-                           x3p2,
+arrangeCMCPlot <- function(referenceScan,
+                           targetScan,
                            allCells,
                            x3pNames,
                            pltType = "faceted",
@@ -193,14 +193,13 @@ arrangeCMCPlot <- function(x3p1,
                            height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            cell.colors = c("#a50026","#313695"),
                            cell.alpha = .2,
-                           cell.text.size = 3,
                            na.value = "gray80"){
 
-  x3p1_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (x3p1$header.info$incrementY*1e6)*(firstRow),
-                  lastRow = (x3p1$header.info$incrementY*1e6)*(lastRow),
-                  firstCol = (x3p1$header.info$incrementY*1e6)*(firstCol),
-                  lastCol = (x3p1$header.info$incrementY*1e6)*(lastCol)) %>%
+  targetScan_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = (referenceScan$header.info$incrementY*1e6)*(firstRow),
+                  lastRow = (referenceScan$header.info$incrementY*1e6)*(lastRow),
+                  firstCol = (referenceScan$header.info$incrementY*1e6)*(firstCol),
+                  lastCol = (referenceScan$header.info$incrementY*1e6)*(lastCol)) %>%
     dplyr::mutate(x_1 = firstCol,
                   y_1 = firstRow,
                   x_2 = lastCol,
@@ -214,31 +213,31 @@ arrangeCMCPlot <- function(x3p1,
                         names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (lastCol + firstCol)/2,
                   midRow = (lastRow + firstRow)/2,
-                  cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                               floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                               ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                             nrow = ceiling(sqrt(max(cellNum))),
-                                             byrow = TRUE),
+                  # cellIndex = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                  #                              floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                  #                              ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                  #                            nrow = ceiling(sqrt(max(cellNum))),
+                  # byrow = TRUE),
                   x3p = rep(x3pNames[1],times = nrow(.)),
                   theta = rep(0,times = nrow(.)))
 
-  x3p2_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (x3p2$header.info$incrementY*1e6)*(firstRow),
-                  lastRow = (x3p2$header.info$incrementY*1e6)*(lastRow),
-                  firstCol = (x3p2$header.info$incrementY*1e6)*(firstCol),
-                  lastCol = (x3p2$header.info$incrementY*1e6)*(lastCol)) %>%
+  referenceScan_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = (targetScan$header.info$incrementY*1e6)*(firstRow),
+                  lastRow = (targetScan$header.info$incrementY*1e6)*(lastRow),
+                  firstCol = (targetScan$header.info$incrementY*1e6)*(firstCol),
+                  lastCol = (targetScan$header.info$incrementY*1e6)*(lastCol)) %>%
     dplyr::mutate(firstRowCentered = firstRow - max(lastRow)/2,
                   lastRowCentered = lastRow - max(lastRow)/2,
                   firstColCentered = firstCol - max(lastCol)/2,
                   lastColCentered = lastCol - max(lastCol)/2) %>%
-    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
-                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
-                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
-                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
-                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
-                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2,
-                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (x3p2$header.info$incrementY*1e6)*x/2,
-                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (x3p2$header.info$incrementY*1e6)*y/2) %>%
+    dplyr::mutate(topLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (targetScan$header.info$incrementY*1e6)*x/2,
+                  topLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (targetScan$header.info$incrementY*1e6)*y/2,
+                  topRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - lastRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (targetScan$header.info$incrementY*1e6)*x/2,
+                  topRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + lastRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (targetScan$header.info$incrementY*1e6)*y/2,
+                  bottomRightCorner_col = lastColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (targetScan$header.info$incrementY*1e6)*x/2,
+                  bottomRightCorner_row = lastColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (targetScan$header.info$incrementY*1e6)*y/2,
+                  bottomLeftCorner_col = firstColCentered*cos((theta - median(theta))*(pi/180)) - firstRowCentered*sin((theta - median(theta))*(pi/180)) + max(lastCol)/2 - (targetScan$header.info$incrementY*1e6)*x/2,
+                  bottomLeftCorner_row = firstColCentered*sin((theta - median(theta))*(pi/180)) + firstRowCentered*cos((theta - median(theta))*(pi/180)) + max(lastRow)/2 - (targetScan$header.info$incrementY*1e6)*y/2) %>%
     #this is redundant, but are the names attributed to the x and y columns are
     #set-up down below, so I won't change it
     dplyr::mutate(x_1 = topLeftCorner_col,
@@ -254,23 +253,23 @@ arrangeCMCPlot <- function(x3p1,
                         names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (topRightCorner_col + bottomLeftCorner_col)/2,
                   midRow = (topRightCorner_row + bottomLeftCorner_row)/2,
-                  cellInd = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                                               floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                                               ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                                             nrow = ceiling(sqrt(max(cellNum))),
-                                             byrow = TRUE),
+                  # cellIndex = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                  #                              floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                  #                              ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                  #                            nrow = ceiling(sqrt(max(cellNum))),
+                  # byrow = TRUE),
                   x3p = rep(x3pNames[2],times = nrow(.)),
                   theta = theta - median(theta))
 
-  x3p1_rotate <- 90 - median(allCells %>%
-                               dplyr::filter(cmc != "non-CMC") %>%
-                               dplyr::pull(theta))
+  targetScan_rotate <- 90 #- abs(median(allCells %>%
+  # dplyr::filter(cmc != "non-CMC") %>%
+  # dplyr::pull(theta)))
 
-  x3pPlt <- x3pListPlot(x3pList = list(x3p1,x3p2) %>%
+  x3pPlt <- x3pListPlot(x3pList = list(referenceScan,targetScan) %>%
                           setNames(x3pNames),
                         type = pltType,
-                        rotate = c(ifelse(is.na(x3p1_rotate),90,x3p1_rotate),
-                                   90),
+                        rotate = c(90,
+                                   ifelse(is.na(targetScan_rotate),90,targetScan_rotate)),
                         legend.quantiles = legend.quantiles,
                         height.colors = height.colors,
                         na.value = na.value,
@@ -280,28 +279,28 @@ arrangeCMCPlot <- function(x3p1,
 
     x3pPlt <- x3pPlt +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = x3p1_cellGrid,
+      ggplot2::geom_polygon(data = targetScan_cellGrid,
                             mapping = ggplot2::aes(x = x,
                                                    y = y,
-                                                   group = cellNum,
+                                                   group = cellIndex,
                                                    fill = cmc),
                             alpha = cell.alpha,
                             size = 2) +
-      ggplot2::geom_polygon(data = x3p2_cellGrid,
+      ggplot2::geom_polygon(data = referenceScan_cellGrid,
                             mapping = ggplot2::aes(x = x,
                                                    y = y,
-                                                   group = cellNum,
+                                                   group = cellIndex,
                                                    fill = cmc),
                             alpha = cell.alpha,
                             size = 2) +
-      ggplot2::geom_text(data = dplyr::bind_rows(x3p1_cellGrid,
-                                                 x3p2_cellGrid),
+      ggplot2::geom_text(data = dplyr::bind_rows(targetScan_cellGrid,
+                                                 referenceScan_cellGrid),
                          ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = cellInd,
+                                      label = cellIndex,
                                       colour = cmc,
                                       angle = theta),
-                         size = cell.text.size) +
+                         size = 3) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
       ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
@@ -310,43 +309,43 @@ arrangeCMCPlot <- function(x3p1,
   else if(pltType == "list"){
     x3pPlt[[1]] <- x3pPlt[[1]] +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = x3p1_cellGrid,
+      ggplot2::geom_polygon(data = targetScan_cellGrid,
                             mapping = ggplot2::aes(x = x,
                                                    y = y,
-                                                   group = cellNum,
+                                                   group = cellIndex,
                                                    fill = cmc),
                             alpha = cell.alpha,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
-      ggplot2::geom_text(data = x3p1_cellGrid,
+      ggplot2::geom_text(data = targetScan_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = cellInd,
+                                      label = cellIndex,
                                       colour = cmc,
                                       angle = theta),
-                         size = cell.text.size) +
+                         size = 3) +
       ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
       ggplot2::theme(legend.position = "bottom")
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = x3p2_cellGrid,
+      ggplot2::geom_polygon(data = referenceScan_cellGrid,
                             mapping = ggplot2::aes(x = x,
                                                    y = y,
-                                                   group = cellNum,
+                                                   group = cellIndex,
                                                    fill = cmc),
                             alpha = cell.alpha,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
-      ggplot2::geom_text(data = x3p2_cellGrid,
+      ggplot2::geom_text(data = referenceScan_cellGrid,
                          ggplot2::aes(x = midCol,
                                       y = midRow,
-                                      label = cellInd,
+                                      label = cellIndex,
                                       colour = cmc,
                                       angle = theta),
-                         size = cell.text.size) +
+                         size = 3) +
       ggplot2::guides(fill = ggplot2::guide_legend(title = "Cell Type")) +
       ggplot2::theme(legend.position = "bottom")
   }
@@ -360,13 +359,13 @@ arrangeCMCPlot <- function(x3p1,
 #'@description Constructs either a single faceted plot or a list of plots
 #'  depicting the CMCs/non-CMCs under the initially proposed and High CMC
 #'  methods for a pair of cartridge case scans
-#'
-#'@param x3p1 an x3p object
-#'@param x3p2 a different x3p object
-#'@param cellCCF_bothDirections_output output from the function
-#'  cmcR::cellCCF_bothDirections
-#'@param cmcFilter_improved_output output from the function
-#'  cmcR::cmcFilter_improved
+#'@param referenceScan an x3p object
+#'@param targetScan a different x3p object
+#'@param reference_v_target_CMCs CMCs for the comparison between the reference
+#'  scan and the target scan.
+#'@param target_v_reference_CMCs (optional) CMCs for the comparison between the
+#'  target scan and the reference scan. If this is missing, then only the
+#'  original method CMCs will be plotted
 #'@param type argument to be passed to cmcR::x3pListPlot function
 #'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
 #'  function
@@ -376,458 +375,223 @@ arrangeCMCPlot <- function(x3p1,
 #'  that dictates the height value colorscale
 #'@param cell.colors vector of 2 colors for plotting non-matching and matching
 #'  (in that order) cells
-#'@param cell.text.size size of cell label (passed to ggplot::geom_text)
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'
 #' @examples
 #' \dontrun{
-#' comparison <- cellCCF_bothDirections(x3p1,x3p2)
+#' comparison <- cellCCF_bothDirections(referenceScan,targetScan)
 #' cmcs <- cmcFilter_improved(comparison)
 #'
-#' cmcPlot(x3p1,x3p2,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
+#' cmcPlot(referenceScan,targetScan,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
 #'}
 #'
 #'@export
 
-utils::globalVariables(c(".","cmc","comparison","x","y","theta","cellNum","cellRange"))
+utils::globalVariables(c(".","cmc","comparison","x","y","theta","cellIndex","cellRange"))
 
-cmcPlot <- function(x3p1,
-                    x3p2,
-                    cellCCF_bothDirections_output,
-                    cmcFilter_improved_output,
+cmcPlot <- function(referenceScan,
+                    targetScan,
+                    reference_v_target_CMCs,
+                    target_v_reference_CMCs = reference_v_target_CMCs,
+                    corColName = "pairwiseCompCor",
                     type = "faceted",
-                    x3pNames = c("x3p1","x3p2"),
+                    x3pNames = c("referenceScan","targetScan"),
                     legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
-                    height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                    height.colors = c("#1B1B1B","#404040","#7B7B7B","#B0B0B0","#DBDBDB","#F7F7F7","#E4E4E4","#C5C5C5","#999999","#717171","#4E4E4E"),
                     cell.colors = c("#a50026","#313695"),
                     cell.alpha = .2,
-                    cell.text.size = 3,
                     na.value = "gray80"){
 
-  directionIndic <- which.min(c(nrow(cmcFilter_improved_output$originalMethodCMCs[[1]]),
-                                nrow(cmcFilter_improved_output$originalMethodCMCs[[2]])))
+  referenceScan_cellCorners <- referenceScan %>%
+    comparison_cellDivision() %>%
+    purrr::pmap_dfr(~ {
+      idNum <- ..2$cmcR.info$cellRange %>%
+        stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
+                                 pattern = "[0-9]{1,}") %>%
+        unlist() %>%
+        as.numeric()
 
+      data.frame(cellIndex = ..1,
+                 firstRow = idNum[1],
+                 lastRow = idNum[2],
+                 firstCol = idNum[3],
+                 lastCol = idNum[4],
+                 stringsAsFactors = FALSE)
+    })
 
-  originalMethodCMCs <- cmcFilter_improved_output$originalMethodCMCs[[directionIndic]] %>%
-    dplyr::mutate(cmc = rep("Original Method CMC",times = nrow(.)))
+  targetScan_cellCorners <- targetScan %>%
+    comparison_cellDivision() %>%
+    purrr::pmap_dfr(~ {
+      idNum <- ..2$cmcR.info$cellRange %>%
+        stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
+                                 pattern = "[0-9]{1,}") %>%
+        unlist() %>%
+        as.numeric()
 
-  nonoriginalMethodCMCs <- cellCCF_bothDirections_output[[directionIndic]]$ccfResults %>%
-    topResultsPerCell() %>%
-    dplyr::anti_join(originalMethodCMCs,by = "cellNum") %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)))
+      data.frame(cellIndex = ..1,
+                 firstRow = idNum[1],
+                 lastRow = idNum[2],
+                 firstCol = idNum[3],
+                 lastCol = idNum[4],
+                 stringsAsFactors = FALSE)
+    })
 
-  allInitialCells <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
-    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Original Method CMC"))) %>%
-    dplyr::left_join(dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
-                       purrr::pmap_dfr(~ {
-                         idNum <- ..2 %>%
-                           stringr::str_extract_all(string = ..2,
-                                                    pattern = "[0-9]{1,}") %>%
-                           unlist() %>%
-                           as.numeric()
+  if(nrow(reference_v_target_CMCs) == 0){
 
-                         data.frame(cellRange = ..2,
-                                    firstRow = idNum[1],
-                                    lastRow = idNum[2],
-                                    firstCol = idNum[3],
-                                    lastCol = idNum[4],
-                                    stringsAsFactors = FALSE)
-                       }),
-                     by = "cellRange")
+    originalMethodCMCs <- as.data.frame(matrix(nrow = 0,ncol = ncol(reference_v_target_CMCs))) %>%
+      setNames(names(reference_v_target_CMCs))
 
-  originalMethodCMCsPlt <- arrangeCMCPlot(x3p1 = list(x3p1,x3p2)[[directionIndic]],
-                                   x3p2 = list(x3p2,x3p1)[[directionIndic]],
-                                   allCells = allInitialCells,
-                                   x3pNames = list(x3pNames,rev(x3pNames))[[directionIndic]],
-                                   pltType = type,
-                                   legend.quantiles = legend.quantiles,
-                                   height.colors = height.colors,
-                                   cell.colors = cell.colors,
-                                   cell.alpha = cell.alpha,
-                                   na.value = na.value)
-
-  highCMCPlt <- NULL #missing by default unless high CMCs exist:
-
-  if(nrow(cmcFilter_improved_output$highCMCs) > 0){
-
-    x3p1_allcellRanges <- cellDivision(x3p1$surface.matrix,
-                                    cellNumHoriz = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum))),
-                                    cellNumVert = ceiling(sqrt(max(cellCCF_bothDirections_output$comparison_1to2$ccfResults[[1]]$cellNum)))) %>%
-      purrr::map2(names(.),
-                  function(mat,horizCell){
-                    purrr::map(.x = names(mat),
-                               function(vertCell) swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
-                  }) %>%
-      unlist() %>%
-      data.frame(cellRange = .) %>%
-      dplyr::mutate(cellNum = 1:nrow(.))
-
-    highCMCs_directionCorrected <- cmcFilter_improved_output$highCMCs %>%
-      dplyr::mutate(x = ifelse(comparison == "comparison_2to1",
-                                yes = -x,
-                                no = x),
-                    y = ifelse(comparison == "comparison_2to1",
-                                yes = -y,
-                                no = y),
-                    theta = ifelse(comparison == "comparison_2to1",
-                                   yes = -theta,
-                                   no = theta)) %>%
-      dplyr::arrange(cellNum) %>%
-      dplyr::select(-c(cellRange,nonMissingProportion)) %>%
-      dplyr::left_join(x3p1_allcellRanges,by = "cellNum") %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(cmc = rep("High CMC",times = nrow(.)),
-                    cellRange = as.character(cellRange))
-
-    nonHighCMCs_directionCorrected <- cellCCF_bothDirections_output$comparison_1to2$ccfResults  %>%
-      topResultsPerCell() %>%
-      dplyr::select(-nonMissingProportion) %>%
-      dplyr::anti_join(highCMCs_directionCorrected,
-                       by = "cellNum") %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(cmc = rep("non-CMC",times = nrow(.)),
-                    cellRange = as.character(cellRange))
-
-    allHighCMCs <- dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
-      dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","High CMC"))) %>%
-      dplyr::left_join(dplyr::bind_rows(highCMCs_directionCorrected,nonHighCMCs_directionCorrected) %>%
-                         purrr::pmap_dfr(~ {
-                           idNum <- ..8 %>%
-                             stringr::str_extract_all(string = ..8,
-                                                      pattern = "[0-9]{1,}") %>%
-                             unlist() %>%
-                             as.numeric()
-
-                           data.frame(cellRange = ..8,
-                                      firstRow = idNum[1],
-                                      lastRow = idNum[2],
-                                      firstCol = idNum[3],
-                                      lastCol = idNum[4],
-                                      stringsAsFactors = FALSE)
-                         }),
-                       by = "cellRange")
-
-    highCMCPlt <- arrangeCMCPlot(x3p1 = x3p1,
-                                 x3p2 = x3p2,
-                                 allCells = allHighCMCs,
-                                 x3pNames = x3pNames,
-                                 pltType = type,
-                                 legend.quantiles = legend.quantiles,
-                                 height.colors = height.colors,
-                                 cell.colors = cell.colors,
-                                 cell.alpha = cell.alpha,
-                                 na.value = na.value)
-  }
-
-  return(list("originalMethodCMCs" = originalMethodCMCsPlt,
-              "highCMCs" = highCMCPlt))
-}
-
-#' Create a bar plot of congruent matching cells per rotation value
-#'
-#' @name cmcPerThetaBarPlot
-#'
-#' @param cellCCF_output list returned by the cellCCF or cellCCF_bothDirections
-#'   function. If from the cellCCF_bothDirections, then the ggplot will be
-#'   faceted by the "direction" of the comparison (i.e., whether x3p1 or x3p2
-#'   played the role as the "questioned" cartridge case scan)
-#' @param consensus_function function to aggregate the translation (x and y)
-#'   and rotation (theta) values in the ccfDF data frame to determine
-#'   "consensus" values
-#' @param ccf_thresh minimum correlation threshold to call a cell pair
-#'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus x value that a cell
-#'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus y value that a cell
-#'   pair can be to be called "congruent matching"
-#' @param theta_thresh maximum distance from the consensus theta value that a
-#'   cell pair can be to be called "congruent matching"
-#' @param consensus_function_theta *(OPTIONAL)* function (separate from
-#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
-#'   data frame to determine "consensus" values
-#' @param highCMCThresh number of CMCs less than the max CMC count that should
-#'   be classified as a "High CMC" count. That is, CMC_high = CMC_max -
-#'   highCMCThresh
-#' @param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
-#'   function
-#' @examples
-#' \dontrun{
-#'  #x3p1 and x3p2 are two x3p objects containing processed cartridge case scans
-#'  comparison1 <- cellCCF(x3p1,x3p2)
-#'
-#'  #creates a single bar plot of the CMCs per theta
-#'  cmcPerThetaBarPlot(comparison1)
-#'
-#'  comparison2 <- cellCCF_bothDirections(x3p1,x3p2)
-#'
-#'  #creates a faceted bar plot of the CMCs per theta in both comparison directions
-#'  cmcPerThetaBarPlot(comparison2)
-#' }
-#'
-#' @export
-#'
-#' @importFrom stats median
-
-utils::globalVariables(c("comparison","theta","n","cmcHigh"))
-
-cmcPerThetaBarPlot <- function(cellCCF_output,
-                               consensus_function = median,
-                               ccf_thresh = .6,
-                               dx_thresh = 10,
-                               dy_thresh = dx_thresh,
-                               theta_thresh = 3,
-                               consensus_function_theta = consensus_function,
-                               highCMCThresh = 1,
-                               x3pNames = c("x3p1","x3p2")){
-  #make sure that cellCCF_output is either the output of the cellCCF function or
-  #cellCCF_bothDirections
-  testthat::expect_true(is.list(cellCCF_output))
-  testthat::expect_true(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1")) | identical(names(cellCCF_output),c("params","ccfResults")),
-                        label = "cellCCF_output argument is a list returned by cellCCF or cellCCF_bothDirections")
-
-  #if cellCCF_output is from cellCCF_bothDirections:
-  if(identical(names(cellCCF_output),c("comparison_1to2","comparison_2to1"))){
-    cmcDat <- dplyr::bind_rows(
-      cellCCF_output$comparison_1to2$ccfResults %>%
-        cmcFilterPerTheta(consensus_function = consensus_function,
-                          ccf_thresh = ccf_thresh,
-                          dx_thresh = dx_thresh,
-                          dy_thresh = dy_thresh,
-                          theta_thresh = theta_thresh) %>%
-        dplyr::mutate(comparison = paste0(x3pNames[1]," vs. ",x3pNames[2])),
-      cellCCF_output$comparison_2to1$ccfResults %>%
-        cmcFilterPerTheta(consensus_function = consensus_function,
-                          ccf_thresh = ccf_thresh,
-                          dx_thresh = dx_thresh,
-                          dy_thresh = dy_thresh,
-                          theta_thresh = theta_thresh) %>%
-        dplyr::mutate(comparison = paste0(x3pNames[2]," vs. ",x3pNames[1]))
-    ) %>%
-      dplyr::group_by(comparison,theta) %>%
-      dplyr::tally() %>%
-      dplyr::ungroup()
-
-    highCMCDat <- cmcDat %>%
-      dplyr::group_by(comparison) %>%
-      dplyr::summarise(x = min(theta) + 3,
-                       y = max(n) + 2,
-                       cmcHigh = max(n) - highCMCThresh)
-
-    cmcDat %>%
-      dplyr::group_by(comparison) %>%
-      dplyr::group_split() %>%
-      purrr::map2_dfr(.x = .,
-                      .y = highCMCDat$cmcHigh,
-                      function(comparisonDat = .x,cmcHigh = .y){
-                        comparisonDat %>%
-                          mutate(`Above Thresh.` = ifelse(n >= cmcHigh,TRUE,FALSE))
-                      }) %>%
-      ggplot2::ggplot(ggplot2::aes(x = theta,y = n)) +
-      ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
-                        stat = "identity",
-                        alpha = .7) +
-      ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
-      ggplot2::theme_bw()  +
-      ggplot2::xlab(expression(theta*" (degree)")) +
-      ggplot2::ylab("CMC number") +
-      ggplot2::facet_wrap(~ comparison,ncol = 1)  +
-      ggplot2::ylim(c(NA,25)) +
-      ggplot2::geom_hline(data = highCMCDat,
-                          ggplot2::aes(yintercept = cmcHigh),
-                          colour = "black",
-                          linetype = "dashed") +
-      ggplot2::geom_text(data = highCMCDat,
-                         ggplot2::aes(x = x,
-                                      y = y,
-                                      label = paste0("High CMC = ",cmcHigh)),
-                         fontface = "plain",
-                         family = "sans")  +
-      ggplot2::theme(legend.position = c(1, 1),
-                     legend.justification = c(1, 1),
-                     legend.direction = "horizontal",
-                     legend.background = ggplot2::element_blank())
   }
   else{
-    cellCCF_output$ccfResults  %>%
-      cmcFilterPerTheta(consensus_function = consensus_function,
-                        ccf_thresh = ccf_thresh,
-                        dx_thresh = dx_thresh,
-                        dy_thresh = dy_thresh,
-                        theta_thresh = theta_thresh) %>%
-      dplyr::group_by(theta) %>%
-      dplyr::tally() %>%
-      dplyr::mutate(cmcHigh = max(n) - highCMCThresh)  %>%
-      dplyr::mutate(`Above Thresh.` = ifelse(n >= cmcHigh,"TRUE","FALSE")) %>%
-      ggplot2::ggplot(ggplot2::aes(x = theta,
-                                   y = n)) +
-      ggplot2::geom_bar(ggplot2::aes(fill = `Above Thresh.`),
-                        stat = "identity",
-                        alpha = .7) +
-      ggplot2::scale_fill_manual(values = c("#a60b00","#1b03a3")) +
-      ggplot2::theme_bw()  +
-      ggplot2::xlab(expression(theta*" (degree)")) +
-      ggplot2::ylab("CMC count") +
-      ggplot2::ylim(c(NA,25)) +
-      ggplot2::geom_hline(ggplot2::aes(yintercept = cmcHigh),
-                          colour = "black",
-                          linetype = "dashed") +
-      ggplot2::geom_text(ggplot2::aes(x = min(theta) + 3,
-                                      y = cmcHigh,
-                                      label = paste0("High CMC = ",cmcHigh)),
-                         nudge_y = 1,
-                         fontface = "plain",
-                         family = "sans") +
-      ggplot2::theme(legend.position = c(1, 1),
-                     legend.justification = c(1, 1),
-                     legend.direction = "horizontal",
-                     legend.background = ggplot2::element_blank())
+    originalMethodCMCs <- reference_v_target_CMCs %>%
+      dplyr::filter(originalMethodClassif == "CMC")
   }
 
-}
+  nonoriginalMethodCMCs <- reference_v_target_CMCs %>%
+    dplyr::filter(!(cellIndex %in% originalMethodCMCs$cellIndex))
 
-#'Extract cell/region pair matrices for a comparison of interest
-#'@name getCellRegionPairs
-#'
-#'@description This function is meant as a diagnostic tool to determine what the
-#'  cell/region pairs for a particular cartridge case comparison looked like
-#'  right before calculation of the CCF.
-#'
-#'@param x3p1 an x3p object
-#'@param x3p2 another x3p object
-#'@param ccfDF data frame containing comparison results between x3p1 and x3p2. At a
-#'  minimum, this needs to contain "cellNum" and "theta" columns.
-#'@param cellCCF_params list of parameters under which the comparison represented in
-#'  ccfDF was performed. Such a list is returned by the cellCCF and
-#'  cellCCF_bothDirections function
-#'
-#'@examples
-#'\dontrun{
-#' comparison <- cellCCF(x3p1,x3p2)
-#'
-#' topResults <- comparison$ccfResults %>%
-#'  cmcR::topResultsPerCell()
-#'
-#' cellRegionPairs <- getCellRegionPairs(x3p1,x3p2,topResults,comparison$params)
-#'}
-#'
-#'@export
-#'
-#'@importFrom stats sd setNames
-
-utils::globalVariables(c("theta"))
-
-getCellRegionPairs <- function(x3p1,x3p2,ccfDF,cellCCF_params){
-  mat1 <- x3p1$surface.matrix
-  mat2 <- x3p2$surface.matrix
-
-  if(is.null(cellCCF_params$centerCell)){
-    m1 <- 0
-    m2 <- 0
-  }
-  if(is.null(cellCCF_params$scaleCell)){
-    sd1 <- 1
-    sd2 <- 1
+  if(nrow(nonoriginalMethodCMCs) > 0){
+    nonoriginalMethodCMCs <- nonoriginalMethodCMCs %>%
+      dplyr::group_by(cellIndex) %>%
+      dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName))))
   }
 
-  if(!is.null(cellCCF_params$centerCell)){
-    if(cellCCF_params$centerCell == "wholeMatrix"){
-      m1 <- mean(as.vector(mat1),na.rm = TRUE)
+  allInitialCells_reference_v_target <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
+    dplyr::mutate(cmc = ifelse(originalMethodClassif == "CMC","Original Method CMC","non-CMC")) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Original Method CMC"))) %>%
+    dplyr::left_join(referenceScan_cellCorners,
+                     by = "cellIndex")
 
-      m2 <- mean(as.vector(mat2),na.rm = TRUE)
-    }
+  originalMethodCMCsPlt_reference_v_target <- arrangeCMCPlot(referenceScan = referenceScan,
+                                                             targetScan = targetScan,
+                                                             allCells = allInitialCells_reference_v_target,
+                                                             x3pNames = x3pNames,
+                                                             pltType = type,
+                                                             legend.quantiles = legend.quantiles,
+                                                             height.colors = height.colors,
+                                                             cell.colors = cell.colors,
+                                                             cell.alpha = cell.alpha,
+                                                             na.value = na.value)
+
+  #If only data for one comparison direction were given, only plot the original
+  #method CMCs in that direction
+  if(assertthat::are_equal(reference_v_target_CMCs, target_v_reference_CMCs)){
+
+    return(list("CMCs" = originalMethodCMCsPlt_reference_v_target))
+
   }
 
-  if(!is.null(cellCCF_params$scaleCell)){
-    if(cellCCF_params$scaleCell == "wholeMatrix"){
-      sd1 <- sd(as.vector(mat1),na.rm = TRUE)
+  #otherwise, create the original CMC plots for the other direction and return:
 
-      sd2 <- sd(as.vector(mat2),na.rm = TRUE)
-    }
+  if(nrow(target_v_reference_CMCs) == 0){
+
+    originalMethodCMCs <- as.data.frame(matrix(nrow = 0,ncol = ncol(target_v_reference_CMCs))) %>%
+      setNames(names(target_v_reference_CMCs))
+
+  }
+  else{
+    originalMethodCMCs <- target_v_reference_CMCs %>%
+      dplyr::filter(originalMethodClassif == "CMC")
   }
 
-  mat1_split <- splitSurfaceMat1(surfaceMat = mat1,
-                                 cellNumHoriz = cellCCF_params$cellNumHoriz,
-                                 cellNumVert = cellCCF_params$cellNumVert,
-                                 minObservedProp = cellCCF_params$minObservedProp)
+  nonoriginalMethodCMCs <- target_v_reference_CMCs %>%
+    dplyr::filter(!(cellIndex %in% originalMethodCMCs$cellIndex)) %>%
+    dplyr::group_by(cellIndex) %>%
+    dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName))))
 
-  sidelengthMultiplier <- floor(sqrt(cellCCF_params$regionToCellProp))
+  allInitialCells_target_v_reference <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
+    dplyr::mutate(cmc = ifelse(originalMethodClassif == "CMC","Original Method CMC","non-CMC")) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","Original Method CMC"))) %>%
+    dplyr::left_join(referenceScan_cellCorners,
+                     by = "cellIndex")
 
-  mat2_splitCorners <- getMat2SplitIndices(cellRanges = mat1_split$cellRanges,
-                                             cellSideLengths = mat1_split$cellSideLengths,
-                                             mat2Dim = dim(mat2),
-                                             sidelengthMultiplier = sidelengthMultiplier)
+  originalMethodCMCsPlt_target_v_reference <- arrangeCMCPlot(referenceScan = targetScan,
+                                                             targetScan = referenceScan,
+                                                             allCells = allInitialCells_target_v_reference,
+                                                             x3pNames = rev(x3pNames),
+                                                             pltType = type,
+                                                             legend.quantiles = legend.quantiles,
+                                                             height.colors = height.colors,
+                                                             cell.colors = cell.colors,
+                                                             cell.alpha = cell.alpha,
+                                                             na.value = na.value)
 
-  thetas <- unique(ccfDF$theta)
+  originalMethod_bothDirections <-
 
-  cellRegionPairs <- list()
+    if(!hasName(reference_v_target_CMCs,"highCMCClassif") | !hasName(target_v_reference_CMCs,"highCMCClassif")){
 
-  ccfDFSplit <- ccfDF %>%
-    dplyr::group_by(theta) %>%
-    dplyr::group_split()
+      return(list("originalMethodCMCs_reference_v_target" = originalMethodCMCsPlt_reference_v_target,
+                  "originalMethodCMCs_target_v_reference" = originalMethodCMCsPlt_target_v_reference))
 
-  for(ind in 1:length(thetas)){
-    mat2_rotated <- mat2 %>%
-      rotateSurfaceMatrix(thetas[ind])
-
-    mat2_splitRotated <-
-      purrr::map(.x = mat2_splitCorners,
-                 ~ extractCellbyCornerLocs(cornerLocs = .x,
-                                           rotatedSurfaceMat = mat2_rotated,
-                                           mat2Dim = dim(mat2)))
-
-    mat1_splitFiltered <- purrr::flatten(mat1_split$surfaceMat_split)[ccfDFSplit[[ind]]$cellNum]
-    mat2_splitFiltered <- mat2_splitRotated[ccfDFSplit[[ind]]$cellNum]
-
-    filteredcellRange <- mat1_split$cellRanges[ccfDFSplit[[ind]]$cellNum]
-
-    if(!is.null(cellCCF_params$centerCell)){
-      if(cellCCF_params$centerCell == "individualCell"){
-        m1 <- mat1_splitFiltered %>%
-          purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredcellRange)
-
-
-
-        m2 <-  mat2_splitFiltered %>%
-          purrr::map(~ mean(.,na.rm = TRUE)) %>%
-          setNames(filteredcellRange)
-      }
     }
 
-    if(!is.null(cellCCF_params$scaleCell)){
-      if(cellCCF_params$scaleCell == "individualCell"){
-        sd1 <-  mat1_splitFiltered %>%
-          purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredcellRange)
+  #If the necessary data to construct the High CMCs were given, then plot them
+  #too.
 
-        sd2 <-  mat2_splitFiltered %>%
-          purrr::map(~ sd(.,na.rm = TRUE)) %>%
-          setNames(filteredcellRange)
-      }
-    }
+  highCMCs_reference_v_target <- reference_v_target_CMCs %>%
+    dplyr::filter(highCMCClassif == "CMC")
 
-    mat1_splitShifted <- purrr::pmap(list(mat1_splitFiltered,m1,sd1),
-                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
-                                                             m = ..2,
-                                                             s = ..3))
+  #Remaining cells not identified as High CMCs
+  non_highCMCs_reference_v_target <- reference_v_target_CMCs %>%
+    dplyr::filter(!(cellIndex %in% highCMCs_reference_v_target$cellIndex)) %>%
+    dplyr::group_by(cellIndex) %>%
+    dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName))))
 
-    #shift the pixel values in each image so that they both have 0 mean. Then
-    #replace the NA values with 0 (FFTs can't deal with NAs).
-    mat2_splitShifted <- purrr::pmap(list(mat2_splitFiltered,m2,sd2),
-                                     ~ standardizeSurfaceMat(surfaceMat = ..1,
-                                                             m = ..2,
-                                                             s = ..3))
+  highCMC_plotData_reference_v_target <- dplyr::bind_rows(highCMCs_reference_v_target,
+                                                          non_highCMCs_reference_v_target) %>%
+    dplyr::mutate(cmc = ifelse(highCMCClassif == "CMC","High CMC","non-CMC")) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","High CMC"))) %>%
+    dplyr::left_join(referenceScan_cellCorners,
+                     by = "cellIndex")
 
-    cellRegionPairs[[ind]] <- purrr::map2(mat1_splitShifted,
-                                          mat2_splitShifted,
-                                          ~ list(.x,.y)) %>%
-      setNames(filteredcellRange)
-  }
+  highCMCPlt_reference_v_target <- arrangeCMCPlot(referenceScan = referenceScan,
+                                                  targetScan = targetScan,
+                                                  allCells = highCMC_plotData_reference_v_target,
+                                                  x3pNames = x3pNames,
+                                                  pltType = type,
+                                                  legend.quantiles = legend.quantiles,
+                                                  height.colors = height.colors,
+                                                  cell.colors = cell.colors,
+                                                  cell.alpha = cell.alpha,
+                                                  na.value = na.value)
 
-  cellRegionPairs %>%
-    setNames(thetas)
+  #Different High CMCs may have been identified in the other direction -- we
+  #need to plot those separately
+
+  highCMCs_target_v_reference <- target_v_reference_CMCs %>%
+    dplyr::filter(highCMCClassif == "CMC")
+
+  #Remaining cells not identified as High CMCs
+  non_highCMCs_target_v_reference <- target_v_reference_CMCs %>%
+    dplyr::filter(!(cellIndex %in% highCMCs_target_v_reference$cellIndex)) %>%
+    dplyr::group_by(cellIndex) %>%
+    dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName))))
+
+  highCMC_plotData_target_v_reference <- dplyr::bind_rows(highCMCs_target_v_reference,
+                                                          non_highCMCs_target_v_reference) %>%
+    dplyr::mutate(cmc = ifelse(highCMCClassif == "CMC","High CMC","non-CMC")) %>%
+    dplyr::mutate(cmc = factor(cmc,levels = c("non-CMC","High CMC"))) %>%
+    dplyr::left_join(targetScan_cellCorners,
+                     by = "cellIndex")
+
+  highCMCPlt_target_v_reference <- arrangeCMCPlot(referenceScan = targetScan,
+                                                  targetScan = referenceScan,
+                                                  allCells = highCMC_plotData_target_v_reference,
+                                                  x3pNames = rev(x3pNames),
+                                                  pltType = type,
+                                                  legend.quantiles = legend.quantiles,
+                                                  height.colors = height.colors,
+                                                  cell.colors = cell.colors,
+                                                  cell.alpha = cell.alpha,
+                                                  na.value = na.value)
+
+
+  return(list("originalMethodCMCs_reference_v_target" = originalMethodCMCsPlt_reference_v_target,
+              "originalMethodCMCs_target_v_reference" = originalMethodCMCsPlt_target_v_reference,
+              "highCMC_reference_v_target"= highCMCPlt_reference_v_target,
+              "highCMC_target_v_reference"= highCMCPlt_target_v_reference))
+
 }
 
 #' @name ccfMap
@@ -880,7 +644,6 @@ ccfMap <- function(mat1,mat2){
 #'  ccfMapPlot(mat1,mat2)
 #'
 #' @importFrom gridExtra tableGrob arrangeGrob grid.arrange
-#' @importFrom colorspace divergingx_hcl
 #' @importFrom scales rescale
 #' @importFrom stats quantile
 #'

@@ -766,9 +766,11 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 
   cellTibble <- tibble::tibble(cellNum = 1:numCells,
                                cellHeightValues = splitSurfaceMat) %>%
-    dplyr::mutate(cellIndex = cmcR:::linear_to_matrix(index = cellNum,
-                                                      nrow = ceiling(sqrt(max(cellNum))),
-                                                      byrow = TRUE)) %>%
+    dplyr::mutate(cellIndex = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
+                                                 floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
+                                                 ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
+                                               nrow = ceiling(sqrt(max(cellNum))),
+                                               byrow = TRUE)) %>%
     dplyr::select(cellIndex,cellHeightValues)
 
   return(cellTibble)

@@ -52,12 +52,11 @@ library(ggplot2)
 Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2. The `read_x3p` function from the [x3ptools](https://github.com/heike/x3ptools) package can read scans from the [NBTRD](https://tsapps.nist.gov/NRBTD/Studies/Search) given the appropriate address. The two scans are read below and visualized using the [`x3pListPlot`](https://csafe-isu.github.io/cmcR/reference/x3pListPlot.html) function.
 
 ```{r}
-fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+data("fadul1.1_raw")
+data("fadul1.2_raw")
 
-fadul1.2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8")
-
-cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
-                       "Fadul 1-2" = fadul1.2),
+cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_raw,
+                       "Fadul 1-2" = fadul1.2_raw),
                   type = "faceted")
 ```
 
@@ -66,17 +65,23 @@ cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1,
 To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans from the microscope staging area, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Functions of the form `preProcess_*` perform the preprocessing procedures. See the [funtion reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we first downsample each scan (by a factor of 4, selecting every other row/column) using the `sample_x3p` function.
 
 ```{r}
-fadul1.1_processed <- fadul1.1 %>%
-  cmcR::preProcess_cropExterior(radiusOffset = -30) %>%
+fadul1.1_processed <- fadul1.1_raw %>%
+  cmcR::preProcess_cropExterior(radiusOffset = -30,
+                                  agg_function = median) %>%
   cmcR::preProcess_filterInterior(radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend() %>%
+  cmcR::preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
   cmcR::preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
-fadul1.2_processed <- fadul1.2 %>%
-  cmcR::preProcess_cropExterior(radiusOffset = -30) %>%
+fadul1.2_processed <- fadul1.2_raw %>%
+  cmcR::preProcess_cropExterior(radiusOffset = -30,
+                                  agg_function = median) %>%
   cmcR::preProcess_filterInterior(radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend() %>%
+  cmcR::preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
   cmcR::preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
@@ -151,16 +156,12 @@ cellTibble %>%
 Finally, this entire comparison procedure is to be repeated over a number of rotations of the target scan. The resulting data frame below contains the features that are used in the decision-rule procedure 
 
 ```{r}
-cellTibble <- fadul1.1_processed %>%
-  comparison_cellDivision(numCells = 64)
-
 comparison_allTogether <- function(reference,target,theta){
   
   reference %>%
     comparison_cellDivision(numCells = 64) %>%
     mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
                                                             target_x3p = target,
-                                                            regionSizeMultiplier = 9,
                                                             rotation = theta)) %>%
     mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
            regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
@@ -193,11 +194,9 @@ The decision rules described in [Song (2013)](https://tsapps.nist.gov/publicatio
 The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) considers only the similarity features at which the maximum correlation is attained for each cell across all rotations considered. Since there is ambiguity in exactly how the correlation is computed in the original methods, we will consider the features at which specifically the maximum `pairwiseCompCor` is attained (instead of using the `fft_ccf` column).
 
 ```{r}
-topVotesPerCell <- kmComparisonFeatures %>%
+kmComparisonFeatures %>%
   group_by(cellIndex) %>%
   top_n(n = 1,wt = pairwiseCompCor)
-
-topVotesPerCell
 ```
 
 The above set of features can be thought of as the `x`, `y`, and `theta` "votes" that each cell most strongly "believes" to be the correct alignment of the entire scan. If a pair is truly matching, we would expect many of these votes to be similar to each other; indicating that there is an approximate consensus of the true alignment of the entire scan (at least, this is the assumption made in [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)). In [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193), the consensus is defined to be the median of the `x`, `y`, and `theta` values in this `topVotesPerCell` data frame. Cells that are deemed "close" to these consensus values and that have a "large" correlation value are declared Congruent Matching Cells (CMCs). Cells with `x`, `y`, and `theta` values that are within user-defined $T_x$, $T_y$, and $T_{\theta}$ thresholds of the consensus `x`, `y`, and `theta` values are considered "close." If these cells also have a correlation greater than a user-defined $T_{\text{CCF}}$ threshold, then they are considered CMCs. Note that these thresholds are chosen entirely by experimentation in the CMC literature.
@@ -208,26 +207,26 @@ kmComparison_originalCMCs <- kmComparisonFeatures %>%
                                        xThresh = 20,
                                        yThresh = 20,
                                        thetaThresh = 6,
-                                       corThresh = .5) %>%
-  filter(originalMethodClassif == "CMC")
+                                       corThresh = .5)
 
-kmComparison_originalCMCs 
+kmComparison_originalCMCs
 ```
 
 One criticism of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) is that many cell/region pairs exhibit high correlation values at a number of rotations. In particular, a cell/region pair may attain a very high correlation at the "true" theta value, yet attain its maximum correlation at a theta value far from the consensus theta value. The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) only considers the "top" vote of each cell/region pairing, so it is not sensitive to how that cell/region pairing behaves across multiple rotations.
 
 [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose a different decision rule procedure that considers the behavior of cell/region pairings across multiple rotations. This method would come to be called the High CMC method. The procedure involves computing a "CMC-$\theta$" distribution where for each value of `theta`, the `x` and `y` values are compared to consensus `x` and `y` values (again, the median) and the correlation values to a minimum threshold. A cell is considered a "CMC candidate" (our language, not theirs) at a particular `theta` value if its `x` and `y` values are within $T_x$, $T_y$ thresholds of the consensus `x` and `y` values and the correlation is at least as larges as the $T_{\text{CCF}}$ threshold. This is similar to the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) except that it relaxes the requirement that the top `theta` value be close to a consensus. Continuing with the voting analogy, think of this as an [approval voting system](https://en.wikipedia.org/wiki/Approval_voting) where each cell is allowed to vote for multiple `theta` values as long as the `x` and `y` votes are deemed close to the `theta`-specific `x`,`y` consensuses and the correlation values are sufficiently high.
 
-The CMC-$\theta$ distribution consists of the CMC candidates at each value of `theta`. The assumption made in [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) is that, for a truly matching cartridge case pair, a large number of cells should vote close to the true `theta` alignment value. In their words, the CMC-$\theta$ distribution should exhibit a "prominent peak" close to the rotation at which the two cartridge cases actually align. Such a prominent peak should not occur for a non-match cartridge case pair.
+The CMC-$\theta$ distribution consists of the "CMC candidates" at each value of `theta`. The assumption made in [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) is that, for a truly matching cartridge case pair, a large number of CMC candidates should be concentrated around true `theta` alignment value. In their words, the CMC-$\theta$ distribution should exhibit a "prominent peak" close to the rotation at which the two cartridge cases actually align. Such a prominent peak should not occur for a non-match cartridge case pair.
 
 The figure below shows an example of a CMC-$\theta$ distribution between Fadul 1-1 and Fadul 1-2 constructed using the `decision_highCMC_cmcThetaDistrib` function. We can clearly see that a mode is attained around -27 to -24 degrees.
 
 ```{r}
 kmComparisonFeatures %>%
   decision_highCMC_cmcThetaDistrib(corColName = "pairwiseCompCor",
-                           xThresh = 20,
-                           yThresh = 20,
-                           corThresh = .5) %>%
+                                   xThresh = 20,
+                                   yThresh = 20,
+                                   corThresh = .5) %>%
+  filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot(aes(x = theta)) +
   geom_bar(stat = "count",
            alpha = .7) +
@@ -247,6 +246,7 @@ kmComparisonFeatures %>%
                                    yThresh = 20,
                                    corThresh = .5) %>%
   decision_highCMC_identifyHighCMCThetas(tau = 1) %>%
+  filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot() +
   geom_bar(aes(x = theta, fill = thetaCMCIdentif),
            stat = "count",
@@ -259,104 +259,64 @@ kmComparisonFeatures %>%
   xlab(expression(theta))
 ```
 
-If the range of High CMC count `theta` values is less than the user-defined $T_{\theta}$ threshold, then [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) classify all CMC candidates in the identified `theta` mode as actual CMCs. The `decision_highCMC_classifyCMCs` function classifies CMCs based on this High CMC criterion. Note that it accepts the output of the `decision_highCMC_cmcThetaDistrib` function (`decision_highCMC_identifyHighCMCThetas` is called internally, but is also exported as a diagnostic tool). Note that a cell may be counted as a CMC for multiple `theta` values. In these cases, we will only consider the alignment values at which the cell attained its maximum CCF and was classified as a CMC. Although it did not occur with this cartridge case pair, [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose using the CMC count determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) if the range of High CMC candidate `theta` values is deemed too large.
+If the range of High CMC count `theta` values is less than the user-defined $T_{\theta}$ threshold, then [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) classify all CMC candidates in the identified `theta` mode as actual CMCs. 
+
+The `decision_highCMC_classifyCMCs` function classifies CMCs based on this High CMC criterion. Note that it internally calls the `decision_highCMC_cmcThetaDistrib` and `decision_highCMC_identifyHighCMCThetas` functions (although they are exported as diagnostic tools). A cell may be counted as a CMC for multiple `theta` values. In these cases, we will only consider the alignment values at which the cell attained its maximum CCF and was classified as a CMC. If the cartridge case pair "fails" the High CMC criterion (i.e., the range of High CMC candidate `theta` values is deemed too large), [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose using the CMC count determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) as a backup CMC count.
 
 ```{r}
-kmComparison_highCMCs <- kmComparisonFeatures %>%
-  decision_highCMC_cmcThetaDistrib(corColName = "pairwiseCompCor",
-                                   xThresh = 20,
-                                   yThresh = 20,
-                                   corThresh = .5) %>%
-  decision_highCMC_classifyCMCs(tau = 1,thetaThresh = 6) %>%
-  group_by(cellIndex) %>%
-  filter(highCMCClassif == "CMC") %>%
-  filter(pairwiseCompCor == max(pairwiseCompCor))
+kmComparison_allCMCs <- kmComparisonFeatures %>%
+  decision_originalMethod_classifyCMCs(corColName = "pairwiseCompCor",
+                                       xThresh = 20,
+                                       yThresh = 20,
+                                       thetaThresh = 6,
+                                       corThresh = .5) %>%
+  decision_highCMC_classifyCMCs(corColName = "pairwiseCompCor",
+                                xThresh = 20,
+                                yThresh = 20,
+                                thetaThresh = 6,
+                                corThresh = .5,
+                                tau = 1)
 
-kmComparison_highCMCs
+kmComparison_allCMCs %>%
+  filter(originalMethodClassif == "CMC")
 ```
 
 The set of CMCs computed above are based on assuming Fadul 1-1 as the reference scan and Fadul 1-2 as the target scan. [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose performing the cell-based comparison and decision rule procedures with the roles reversed and combining the results. They indicate that if the High CMC method fails to identify a `theta` mode in the CMC-$\theta$ distribution, then the minimum of the two CMC counts computed under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) should be used as the CMC count (although they don't detail how to proceed if a `theta` mode is identified in only one of the two comparisons).
 
 ```{r}
+#Compare using Fadul 1-2 as reference and Fadul 1-1 as target
 kmComparisonFeatures_rev <- purrr::map_dfr(seq(-30,30,by = 3),
                                            ~ comparison_allTogether(reference = fadul1.2_processed,
                                                                     target = fadul1.1_processed,
                                                                     theta = .))
 
-kmComparison_originalCMCs_rev <- kmComparisonFeatures_rev %>%
+kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
   decision_originalMethod_classifyCMCs(corColName = "pairwiseCompCor",
                                        xThresh = 20,
                                        yThresh = 20,
                                        thetaThresh = 6,
-                                       corThresh = .5)
-
-kmComparison_originalCMCs_rev %>%
-  filter(originalMethodClassif == "CMC")
+                                       corThresh = .5) %>%
+  decision_highCMC_classifyCMCs(corColName = "pairwiseCompCor",
+                                xThresh = 20,
+                                yThresh = 20,
+                                thetaThresh = 6,
+                                corThresh = .5,
+                                tau = 1)
 ```
 
-If the High CMC method succeeds in identifying a `theta` mode (again, it's unclear whether this means in both directions or only one), then the CMC counts computed under the High CMC method are combined after excluding replicates.
+If the High CMC method succeeds in identifying a `theta` mode (again, it's unclear whether this means in both directions or only one - we require success in both directions), then the CMC counts computed under the High CMC method are combined after excluding replicates. The `decision_combineCMCDirections` combines two CMC outputs using the appropriate logic.
 
 ```{r}
-kmComparison_highCMCs_rev <- kmComparisonFeatures_rev %>%
-  decision_highCMC_cmcThetaDistrib(corColName = "pairwiseCompCor",
-                                   xThresh = 20,
-                                   yThresh = 20,
-                                   corThresh = .5) %>%
-  decision_highCMC_classifyCMCs(tau = 1,thetaThresh = 6) %>%
-  group_by(cellIndex) %>%
-  filter(highCMCClassif == "CMC") %>%
-  filter(pairwiseCompCor == max(pairwiseCompCor))
-
-kmComparison_allHighCMCs <- bind_rows(kmComparison_highCMCs %>%
-                                        mutate(direction = "comparison_1to2"),
-                                      kmComparison_highCMCs_rev %>%
-                                        mutate(direction = "comparison_2to1")) %>%
-  group_by(cellIndex) %>%
-  filter(pairwiseCompCor == max(pairwiseCompCor))
-
-kmComparison_allHighCMCs
+kmComparison_combinedCMCs <- cmcR::decision_combineCMCDirections(kmComparison_allCMCs,
+                                                              kmComparison_allCMCs_rev)
 ```
+
 
 Finally, we can visualize the regions of the scan identified as CMCs.
 
 ```{r}
-originalMethodCMC_x3p <- x3ptools::df_to_x3p(expand.grid(x = 1:nrow(fadul1.1_processed$surface.matrix),
-                                             y = 1:ncol(fadul1.1_processed$surface.matrix)) %>%
-                                   mutate(value = NA))
-
-originalMethodCMCs <- fadul1.1_processed %>%
-  comparison_cellDivision() %>%
-  right_join(kmComparison_originalCMCs,by = "cellIndex") %>%
-  pull(cellHeightValues)
-
-for(cell in originalMethodCMCs){
-  cellRange <- cell$cmcR.info$cellRange %>%
-    stringr::str_extract_all("[0-9]{1,}") %>%
-    unlist() %>%
-    as.numeric()
-  
-  originalMethodCMC_x3p$surface.matrix[cellRange[1]:cellRange[2],cellRange[3]:cellRange[4]] <- cell$surface.matrix
-}
-
-highCMC_x3p <- x3ptools::df_to_x3p(expand.grid(x = 1:nrow(fadul1.1_processed$surface.matrix),
-                                             y = 1:ncol(fadul1.1_processed$surface.matrix)) %>%
-                                   mutate(value = NA))
-
-highCMCs <- fadul1.1_processed %>%
-  comparison_cellDivision() %>%
-  right_join(kmComparison_allHighCMCs,by = "cellIndex") %>%
-  pull(cellHeightValues)
-
-for(cell in highCMCs){
-  cellRange <- cell$cmcR.info$cellRange %>%
-    stringr::str_extract_all("[0-9]{1,}") %>%
-    unlist() %>%
-    as.numeric()
-  
-  highCMC_x3p$surface.matrix[cellRange[1]:cellRange[2],cellRange[3]:cellRange[4]] <- cell$surface.matrix
-}
-
-x3pListPlot(list("Fadul 1-1 Original Method CMCs" = originalMethodCMC_x3p,
-                 "Fadul 1-1 High CMCs" = highCMC_x3p))
+cmcPlot(referenceScan = fadul1.1_processed,
+        targetScan  = fadul1.2_processed,
+        reference_v_target_CMCs = kmComparison_allCMCs,
+        target_v_reference_CMCs = kmComparison_allCMCs_rev)
 ```
-

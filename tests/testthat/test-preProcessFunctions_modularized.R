@@ -16,7 +16,7 @@ testthat::test_that("preProcess_ functions work as expected", {
 
   # testthat::expect_equal(as.numeric(quantile(tmp2,c(0,.5,1),na.rm = TRUE)),c(-2.143726e-05,7.115510e-07,2.005418e-05))
 
-  testthat::expect_error(preProcess_ransac("not a matrix"))
+  testthat::expect_error(preProcess_ransacLevel("not a matrix"))
   testthat::expect_error(preProcess_levelBF(tmp1$surface.matrix,
                                             useResiduals = logical(0)))
 

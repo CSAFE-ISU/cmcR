@@ -4,15 +4,16 @@
 \alias{cmcPlot}
 \title{Visualize initial and high CMCs for a cartridge case pair comparison}
 \arguments{
-\item{x3p1}{an x3p object}
+\item{referenceScan}{an x3p object}
 
-\item{x3p2}{a different x3p object}
+\item{targetScan}{a different x3p object}
 
-\item{cellCCF_bothDirections_output}{output from the function
-cmcR::cellCCF_bothDirections}
+\item{reference_v_target_CMCs}{CMCs for the comparison between the reference
+scan and the target scan.}
 
-\item{cmcFilter_improved_output}{output from the function
-cmcR::cmcFilter_improved}
+\item{target_v_reference_CMCs}{(optional) CMCs for the comparison between the
+target scan and the reference scan. If this is missing, then only the
+original method CMCs will be plotted}
 
 \item{type}{argument to be passed to cmcR::x3pListPlot function}
 
@@ -28,8 +29,6 @@ that dictates the height value colorscale}
 \item{cell.colors}{vector of 2 colors for plotting non-matching and matching
 (in that order) cells}
 
-\item{cell.text.size}{size of cell label (passed to ggplot::geom_text)}
-
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
 }
@@ -40,10 +39,10 @@ methods for a pair of cartridge case scans
 }
 \examples{
 \dontrun{
-comparison <- cellCCF_bothDirections(x3p1,x3p2)
+comparison <- cellCCF_bothDirections(referenceScan,targetScan)
 cmcs <- cmcFilter_improved(comparison)
 
-cmcPlot(x3p1,x3p2,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
+cmcPlot(referenceScan,targetScan,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
 }
 
 }

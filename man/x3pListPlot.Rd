@@ -32,6 +32,6 @@ surface matrix and returns them in a list.
 }
 \examples{
 \dontrun{
- x3pListPlot(list("name1" = x3p1, "name2" = x3p2))
+ x3pListPlot(list("name1" = referenceScan, "name2" = targetScan))
 }
 }
