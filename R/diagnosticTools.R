@@ -89,7 +89,7 @@ x3pListPlot <- function(x3pList,
                                                       title.theme = ggplot2::element_text(size = 10),
                                                       frame.colour = "black",
                                                       ticks.colour = "black"),
-                      colour = FALSE) +
+                      colour = 'none') +
       ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
       ggplot2::facet_wrap(~ x3p)
   }
@@ -142,7 +142,7 @@ x3pListPlot <- function(x3pList,
                                                                             title.theme = ggplot2::element_text(size = 10),
                                                                             frame.colour = "black",
                                                                             ticks.colour = "black"),
-                                            colour = FALSE) +
+                                            colour =  'none') +
                             ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
                             ggplot2::ggtitle(name)
                         })
