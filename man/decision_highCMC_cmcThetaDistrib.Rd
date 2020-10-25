@@ -5,11 +5,15 @@
 \title{Compute CMC-theta distribution for a set of comparison features}
 \usage{
 decision_highCMC_cmcThetaDistrib(
-  comparisonFeaturesDF,
+  cellIndex,
+  x,
+  y,
+  theta,
+  corr,
   corColName = "pairwiseCompCor",
   xThresh = 20,
   yThresh = xThresh,
-  corThresh = 0.5
+  corrThresh = 0.5
 )
 }
 \description{

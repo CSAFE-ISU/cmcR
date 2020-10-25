@@ -16,6 +16,3 @@ comparison_cor(
 Calculates correlation between a cell and a matrix of the same dimensions
 extracted from the cell's associated region.
 }
-\seealso{
-\url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
-}

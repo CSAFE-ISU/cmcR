@@ -6,12 +6,15 @@
 distribution returned by the decision_highCMC_cmcThetaDistrib function}
 \usage{
 decision_highCMC_classifyCMCs(
-  comparisonFeaturesDF,
-  corColName = "pairwiseCompCor",
+  cellIndex,
+  x,
+  y,
+  theta,
+  corr,
   xThresh = 20,
   yThresh = xThresh,
   thetaThresh = 6,
-  corThresh = 0.5,
+  corrThresh = 0.5,
   tau = 1
 )
 }

@@ -6,12 +6,15 @@
 \title{Apply CMC classification logic of the original method of Song (2013)}
 \usage{
 decision_originalMethod_classifyCMCs(
-  comparisonFeaturesDF,
-  corColName = "pairwiseCompCor",
+  cellIndex,
+  x,
+  y,
+  theta,
+  corr,
   xThresh = 20,
   yThresh = xThresh,
   thetaThresh = 6,
-  corThresh = 0.5
+  corrThresh = 0.5
 )
 }
 \description{

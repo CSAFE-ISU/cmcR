@@ -14,6 +14,9 @@ Cross-Correlation Theorem.
 \note{
 The FFT is not defined for matrices containing missing values. The
 missing values in the cell and region need to be replaced before using this
-function. See the \link[cmcR]{comparison_standardizeHeights} function
+function. See the \link[cmcR]{comparison_replaceMissing} function
 to replace missing values after standardization.
+}
+\seealso{
+\url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
 }

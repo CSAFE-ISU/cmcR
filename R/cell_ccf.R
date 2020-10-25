@@ -838,7 +838,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #' Standardize height values of a scan by centering/scaling by desired
 #' statistics and replacing missing values
 #'
-#' @name comparison_standardizeHeight
+#' @name comparison_standardizeHeights
 #'
 #' @note this function adds information to the metainformation of the x3p scan
 #'   it is given that is required for calculating, for example, the
@@ -847,9 +847,9 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #' @export
 
 comparison_standardizeHeights <- function(heightValues,
-                                               withRespectTo = "individualCell",
-                                               centerBy = mean,
-                                               scaleBy = sd){
+                                          withRespectTo = "individualCell",
+                                          centerBy = mean,
+                                          scaleBy = sd){
 
   heightValues <- heightValues %>%
     purrr::map(function(x3p){
@@ -875,7 +875,7 @@ comparison_standardizeHeights <- function(heightValues,
 #' @export
 
 comparison_replaceMissing <- function(heightValues,
-                                              replacement = 0){
+                                      replacement = 0){
   replacedHeights <- heightValues %>%
     purrr::map(function(x3p){
       x3p$surface.matrix[is.na(x3p$surface.matrix)] <- 0
@@ -893,14 +893,16 @@ comparison_replaceMissing <- function(heightValues,
 #'
 #' @note The FFT is not defined for matrices containing missing values. The
 #'   missing values in the cell and region need to be replaced before using this
-#'   function. See the \link[cmcR]{comparison_standardizeHeights} function
+#'   function. See the \link[cmcR]{comparison_replaceMissing} function
 #'   to replace missing values after standardization.
-#'
+#' @seealso \url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
 #' @export
 comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
   ccfList <- purrr::map2(cellHeightValues,
                          regionHeightValues,
-                         ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,mat2 = .y$surface.matrix,ccfMethod = "fft"))
+                         ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,
+                                                mat2 = .y$surface.matrix,
+                                                ccfMethod = "fft"))
 
   return(ccfList)
 }
@@ -910,7 +912,6 @@ comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
 #'
 #' @name comparison_cor
 #'
-#' @seealso \url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
 #' @export
 
 comparison_cor <- function(cellHeightValues,
@@ -936,4 +937,37 @@ comparison_cor <- function(cellHeightValues,
                              })
 
   return(rawCors)
+}
+
+
+#' Performs all steps in the cell-based comparison procedure.
+#'
+#' @name comparison_allTogether
+#'
+#' @export
+
+comparison_allTogether <- function(reference,target,
+                                   theta = 0,
+                                   numCells = 64,
+                                   maxMissingProp = .85){
+
+  reference %>%
+    comparison_cellDivision(numCells) %>%
+    mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                                            target_x3p = target,
+                                                            rotation = theta)) %>%
+    mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
+           regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
+    filter(cellPropMissing <= maxMissingProp & regionPropMissing <= maxMissingProp) %>%
+    mutate(cellHeightValues = comparison_standardizeHeights(cellHeightValues),
+           regionHeightValues = comparison_standardizeHeights(regionHeightValues)) %>%
+    mutate(cellHeightValues_replaced = comparison_replaceMissing(cellHeightValues),
+           regionHeightValues_replaced = comparison_replaceMissing(regionHeightValues)) %>%
+    mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues = cellHeightValues_replaced,
+                                           regionHeightValues = regionHeightValues_replaced)) %>%
+    mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft_ccf_df)) %>%
+    tidyr::unnest(fft_ccf_df) %>%
+    select(cellIndex,x,y,fft_ccf,pairwiseCompCor) %>%
+    mutate(theta = theta)
+
 }

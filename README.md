@@ -295,36 +295,16 @@ cellTibble %>%
 ```
 
 Finally, this entire comparison procedure is to be repeated over a
-number of rotations of the target scan. The resulting data frame below
-contains the features that are used in the decision-rule procedure
+number of rotations of the target scan. The entire cell-based comparison
+procedure is wrapped in the `comparison_allTogether` function. The
+resulting data frame below contains the features that are used in the
+decision-rule procedure
 
 ``` r
-comparison_allTogether <- function(reference,target,theta){
-  
-  reference %>%
-    comparison_cellDivision(numCells = 64) %>%
-    mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                            target_x3p = target,
-                                                            rotation = theta)) %>%
-    mutate(cellPropMissing = comparison_calcPropMissing(cellHeightValues),
-           regionPropMissing = comparison_calcPropMissing(regionHeightValues)) %>%
-    filter(cellPropMissing <= .85 & regionPropMissing <= .85) %>%
-    mutate(cellHeightValues = comparison_standardizeHeights(cellHeightValues),
-           regionHeightValues = comparison_standardizeHeights(regionHeightValues)) %>%
-    mutate(cellHeightValues_replaced = comparison_replaceMissing(cellHeightValues),
-           regionHeightValues_replaced = comparison_replaceMissing(regionHeightValues)) %>%
-    mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues = cellHeightValues_replaced,
-                                           regionHeightValues = regionHeightValues_replaced)) %>%
-    mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft_ccf_df)) %>%
-    tidyr::unnest(fft_ccf_df) %>%
-    select(cellIndex,x,y,fft_ccf,pairwiseCompCor) %>%
-    mutate(theta = theta)
-  
-}
-
 kmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),
                                        ~ comparison_allTogether(reference = fadul1.1_processed,
                                                                 target = fadul1.2_processed,
+                                                                
                                                                 theta = .))
 
 kmComparisonFeatures
@@ -410,27 +390,38 @@ experimentation in the CMC literature.
 
 ``` r
 kmComparison_originalCMCs <- kmComparisonFeatures %>%
-  decision_originalMethod_classifyCMCs(corColName = "pairwiseCompCor",
-                                       xThresh = 20,
-                                       yThresh = 20,
-                                       thetaThresh = 6,
-                                       corThresh = .5)
+  mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
+                                                                      x = x,
+                                                                      y = y,
+                                                                      theta = theta,
+                                                                      corr = pairwiseCompCor,
+                                                                      xThresh = 20,
+                                                                      yThresh = 20,
+                                                                      thetaThresh = 6,
+                                                                      corrThresh = .5))
 
-kmComparison_originalCMCs
-#> # A tibble: 527 x 7
+kmComparison_originalCMCs %>%
+  filter(originalMethodClassif == "CMC")
+#> # A tibble: 17 x 7
 #>    cellIndex     x     y fft_ccf pairwiseCompCor theta originalMethodClassif
 #>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl> <chr>                
-#>  1 7, 7        -28   -53   0.198           0.324   -30 non-CMC              
-#>  2 6, 1        -21    37   0.409           0.732   -30 non-CMC              
-#>  3 6, 8        -17   -22   0.253           0.507   -30 non-CMC              
-#>  4 5, 1         -9    35   0.284           0.673   -30 non-CMC              
-#>  5 5, 8         -8   -26   0.230           0.535   -30 non-CMC              
-#>  6 4, 1          0    34   0.293           0.610   -30 non-CMC              
-#>  7 4, 8          0   -22   0.217           0.518   -30 non-CMC              
-#>  8 3, 1          8    33   0.433           0.761   -30 non-CMC              
-#>  9 3, 2         65    66   0.278           0.529   -30 non-CMC              
-#> 10 3, 7          7   -12   0.135           0.340   -30 non-CMC              
-#> # ... with 517 more rows
+#>  1 2, 1         17     9   0.202           0.829   -30 CMC                  
+#>  2 2, 4         16    11   0.204           0.620   -30 CMC                  
+#>  3 2, 5         16     5   0.194           0.542   -30 CMC                  
+#>  4 1, 5         21     4   0.229           0.527   -30 CMC                  
+#>  5 5, 1         -6    23   0.333           0.720   -27 CMC                  
+#>  6 5, 8         -8   -12   0.244           0.602   -27 CMC                  
+#>  7 3, 1          3    22   0.439           0.782   -27 CMC                  
+#>  8 2, 2          5    18   0.252           0.697   -27 CMC                  
+#>  9 2, 7          6    -7   0.351           0.721   -27 CMC                  
+#> 10 6, 8         -8     4   0.273           0.609   -24 CMC                  
+#> 11 3, 2         -2     9   0.294           0.793   -24 CMC                  
+#> 12 2, 3         -1     6   0.195           0.664   -24 CMC                  
+#> 13 1, 3         -1    11   0.295           0.673   -24 CMC                  
+#> 14 4, 1         -4    -2   0.360           0.730   -21 CMC                  
+#> 15 4, 8         -7    14   0.257           0.644   -21 CMC                  
+#> 16 1, 6        -13    12   0.296           0.676   -21 CMC                  
+#> 17 6, 1          7    -9   0.513           0.777   -18 CMC
 ```
 
 One criticism of the original method of [Song
@@ -484,10 +475,14 @@ mode is attained around -27 to -24 degrees.
 
 ``` r
 kmComparisonFeatures %>%
-  decision_highCMC_cmcThetaDistrib(corColName = "pairwiseCompCor",
-                                   xThresh = 20,
-                                   yThresh = 20,
-                                   corThresh = .5) %>%
+  mutate(cmcThetaDistribClassif = decision_highCMC_cmcThetaDistrib(cellIndex = cellIndex,
+                                                           x = x,
+                                                           y = y,
+                                                           theta = theta,
+                                                           corr = pairwiseCompCor,
+                                                           xThresh = 20,
+                                                           yThresh = 20,
+                                                           corrThresh = .5)) %>%
   filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot(aes(x = theta)) +
   geom_bar(stat = "count",
@@ -527,10 +522,14 @@ values are all close to each other.
 
 ``` r
 kmComparisonFeatures %>%
-  decision_highCMC_cmcThetaDistrib(corColName = "pairwiseCompCor",
-                                   xThresh = 20,
-                                   yThresh = 20,
-                                   corThresh = .5) %>%
+  mutate(cmcThetaDistribClassif = decision_highCMC_cmcThetaDistrib(cellIndex = cellIndex,
+                                                           x = x,
+                                                           y = y,
+                                                           theta = theta,
+                                                           corr = pairwiseCompCor,
+                                                           xThresh = 20,
+                                                           yThresh = 20,
+                                                           corrThresh = .5)) %>%
   decision_highCMC_identifyHighCMCThetas(tau = 1) %>%
   filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot() +
@@ -562,50 +561,98 @@ multiple `theta` values. In these cases, we will only consider the
 alignment values at which the cell attained its maximum CCF and was
 classified as a CMC. If the cartridge case pair “fails” the High CMC
 criterion (i.e., the range of High CMC candidate `theta` values is
-deemed too large), [Tong et
-al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)
-propose using the CMC count determined under the original method of
-[Song
+deemed too large), every cell will be classified as “non-CMC (failed)”
+under the High CMC method. When it comes to combining the CMCs from two
+comparison directions (cartridge case A vs. B and B vs. A), we must
+treat a cell classified as a non-CMC because the High CMC criterion
+failed differently from a cell classified as a non-CMC for which the
+High CMC criterion passed.
+<!-- [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose using the CMC count determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) as a backup CMC count. -->
+
+``` r
+kmComparison_highCMCs <- kmComparisonFeatures %>%
+  mutate(highCMCClassif = decision_highCMC_classifyCMCs(cellIndex = cellIndex,
+                                                        x = x,
+                                                        y = y,
+                                                        theta = theta,
+                                                        corr = pairwiseCompCor,
+                                                        xThresh = 20,
+                                                        yThresh = 20,
+                                                        thetaThresh = 6,
+                                                        corrThresh = .5,
+                                                        tau = 1))
+#Example of cells classified as CMCs and non-CMCs
+kmComparison_highCMCs %>%
+  slice(21:35)
+#> # A tibble: 15 x 7
+#>    cellIndex     x     y fft_ccf pairwiseCompCor theta highCMCClassif  
+#>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl> <chr>           
+#>  1 1, 3         20    23   0.314           0.671   -30 non-CMC (passed)
+#>  2 1, 4         21    13   0.221           0.576   -30 non-CMC (passed)
+#>  3 1, 5         21     4   0.229           0.527   -30 non-CMC (passed)
+#>  4 1, 6         22     1   0.228           0.547   -30 non-CMC (passed)
+#>  5 1, 7         22   -14   0.339           0.856   -30 non-CMC (passed)
+#>  6 7, 7        -22   -43   0.214           0.364   -27 non-CMC (passed)
+#>  7 7, 8          3   -55   0.202           0.471   -27 non-CMC (passed)
+#>  8 6, 1        -13    26   0.436           0.760   -27 CMC             
+#>  9 6, 8        -13    -9   0.268           0.577   -27 non-CMC (passed)
+#> 10 5, 1         -6    23   0.333           0.720   -27 CMC             
+#> 11 5, 8         -8   -12   0.244           0.602   -27 CMC             
+#> 12 4, 1         -1    23   0.341           0.676   -27 non-CMC (passed)
+#> 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC (passed)
+#> 14 3, 1          3    22   0.439           0.782   -27 CMC             
+#> 15 3, 2         62    54   0.286           0.548   -27 non-CMC (passed)
+```
+
+The `decison_CMC` function applies both the decision rules of the
+original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
-as a backup CMC count.
+and the High CMC method of [Tong et
+al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf).
+It returns a data frame containing the key pair (`cellIndex`,`theta`)
+and the classification under the two decision rules associated with that
+key pair. Because it returns a data frame with two CMC classification
+columns, we need to `_join` it to the `kmComparisonFeatures` data frame
+(i.e., 2 columns cannot simultaneously be created from the output of 1
+function within a mutate statement). Note that a cell might be
+classified as a CMC under one method but not the other.
+<!-- That is, every cell/region comparison is uniquely identified by the reference cell's index and the amount the target scan was rotated before performing the comparison. Every reference cell can be counted as a CMC at most once under each decision rule. A cell being classified as a CMC under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) is neither a necessary nor sufficient condition for being classified as a CMC under the High CMC method (and vice versa). -->
 
 ``` r
 kmComparison_allCMCs <- kmComparisonFeatures %>%
-  decision_originalMethod_classifyCMCs(corColName = "pairwiseCompCor",
-                                       xThresh = 20,
-                                       yThresh = 20,
-                                       thetaThresh = 6,
-                                       corThresh = .5) %>%
-  decision_highCMC_classifyCMCs(corColName = "pairwiseCompCor",
-                                xThresh = 20,
-                                yThresh = 20,
-                                thetaThresh = 6,
-                                corThresh = .5,
-                                tau = 1)
+  left_join(decision_CMC(cellIndex = .$cellIndex,
+                         x = .$x,
+                         y = .$y,
+                         theta = .$theta,
+                         corr = .$pairwiseCompCor,
+                         xThresh = 20,
+                         thetaThresh = 6,
+                         corrThresh = .5,
+                         tau = 1),
+            by = c("cellIndex","theta"))
 
+#Example of cells classified as CMC under 1 decision rule but not the other.
 kmComparison_allCMCs %>%
-  filter(originalMethodClassif == "CMC")
-#> # A tibble: 17 x 9
+  slice(21:35)
+#> # A tibble: 15 x 8
 #>    cellIndex     x     y fft_ccf pairwiseCompCor theta originalMethodC~
 #>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl> <chr>           
-#>  1 2, 1         17     9   0.202           0.829   -30 CMC             
-#>  2 2, 4         16    11   0.204           0.620   -30 CMC             
-#>  3 2, 5         16     5   0.194           0.542   -30 CMC             
-#>  4 1, 5         21     4   0.229           0.527   -30 CMC             
-#>  5 5, 1         -6    23   0.333           0.720   -27 CMC             
-#>  6 5, 8         -8   -12   0.244           0.602   -27 CMC             
-#>  7 3, 1          3    22   0.439           0.782   -27 CMC             
-#>  8 2, 2          5    18   0.252           0.697   -27 CMC             
-#>  9 2, 7          6    -7   0.351           0.721   -27 CMC             
-#> 10 6, 8         -8     4   0.273           0.609   -24 CMC             
-#> 11 3, 2         -2     9   0.294           0.793   -24 CMC             
-#> 12 2, 3         -1     6   0.195           0.664   -24 CMC             
-#> 13 1, 3         -1    11   0.295           0.673   -24 CMC             
-#> 14 4, 1         -4    -2   0.360           0.730   -21 CMC             
-#> 15 4, 8         -7    14   0.257           0.644   -21 CMC             
-#> 16 1, 6        -13    12   0.296           0.676   -21 CMC             
-#> 17 6, 1          7    -9   0.513           0.777   -18 CMC             
-#> # ... with 2 more variables: highCMCClassif <chr>, highCMCCriterion <chr>
+#>  1 1, 3         20    23   0.314           0.671   -30 non-CMC         
+#>  2 1, 4         21    13   0.221           0.576   -30 non-CMC         
+#>  3 1, 5         21     4   0.229           0.527   -30 CMC             
+#>  4 1, 6         22     1   0.228           0.547   -30 non-CMC         
+#>  5 1, 7         22   -14   0.339           0.856   -30 non-CMC         
+#>  6 7, 7        -22   -43   0.214           0.364   -27 non-CMC         
+#>  7 7, 8          3   -55   0.202           0.471   -27 non-CMC         
+#>  8 6, 1        -13    26   0.436           0.760   -27 non-CMC         
+#>  9 6, 8        -13    -9   0.268           0.577   -27 non-CMC         
+#> 10 5, 1         -6    23   0.333           0.720   -27 CMC             
+#> 11 5, 8         -8   -12   0.244           0.602   -27 CMC             
+#> 12 4, 1         -1    23   0.341           0.676   -27 non-CMC         
+#> 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC         
+#> 14 3, 1          3    22   0.439           0.782   -27 CMC             
+#> 15 3, 2         62    54   0.286           0.548   -27 non-CMC         
+#> # ... with 1 more variable: highCMCClassif <chr>
 ```
 
 The set of CMCs computed above are based on assuming Fadul 1-1 as the
@@ -629,17 +676,16 @@ kmComparisonFeatures_rev <- purrr::map_dfr(seq(-30,30,by = 3),
                                                                     theta = .))
 
 kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
-  decision_originalMethod_classifyCMCs(corColName = "pairwiseCompCor",
-                                       xThresh = 20,
-                                       yThresh = 20,
-                                       thetaThresh = 6,
-                                       corThresh = .5) %>%
-  decision_highCMC_classifyCMCs(corColName = "pairwiseCompCor",
-                                xThresh = 20,
-                                yThresh = 20,
-                                thetaThresh = 6,
-                                corThresh = .5,
-                                tau = 1)
+  left_join(decision_CMC(cellIndex = .$cellIndex,
+                         x = .$x,
+                         y = .$y,
+                         theta = .$theta,
+                         corr = .$pairwiseCompCor,
+                         xThresh = 20,
+                         thetaThresh = 6,
+                         corrThresh = .5,
+                         tau = 1),
+            by = c("cellIndex","theta"))
 ```
 
 If the High CMC method succeeds in identifying a `theta` mode (again,
@@ -651,7 +697,7 @@ appropriate logic.
 
 ``` r
 kmComparison_combinedCMCs <- cmcR::decision_combineCMCDirections(kmComparison_allCMCs,
-                                                              kmComparison_allCMCs_rev)
+                                                                 kmComparison_allCMCs_rev)
 ```
 
 Finally, we can visualize the regions of the scan identified as CMCs.
@@ -664,19 +710,19 @@ cmcPlot(referenceScan = fadul1.1_processed,
 #> $originalMethodCMCs_reference_v_target
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
     #> 
     #> $originalMethodCMCs_target_v_reference
 
-<img src="man/figures/README-unnamed-chunk-17-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-2.png" width="100%" />
 
     #> 
     #> $highCMC_reference_v_target
 
-<img src="man/figures/README-unnamed-chunk-17-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-3.png" width="100%" />
 
     #> 
     #> $highCMC_target_v_reference
 
-<img src="man/figures/README-unnamed-chunk-17-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-18-4.png" width="100%" />

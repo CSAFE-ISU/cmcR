@@ -6,27 +6,39 @@
 #'
 #' @export
 
-decision_originalMethod_classifyCMCs <- function(comparisonFeaturesDF,
-                                                 corColName = "pairwiseCompCor",
+decision_originalMethod_classifyCMCs <- function(cellIndex,
+                                                 x,
+                                                 y,
+                                                 theta,
+                                                 corr,
                                                  xThresh = 20,
                                                  yThresh = xThresh,
                                                  thetaThresh = 6,
-                                                 corThresh = .5){
+                                                 corrThresh = .5){
+
+  comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
+                                     x = x,
+                                     y = y,
+                                     theta = theta,
+                                     corr = corr)
 
   originalMethodCMCs <- comparisonFeaturesDF %>%
     dplyr::group_by(cellIndex) %>%
-    dplyr::top_n(n = 1,wt = (!!as.name(corColName))) %>%
+    dplyr::top_n(n = 1,wt = corr) %>%
     dplyr::ungroup()  %>%
     dplyr::mutate(originalMethodClassif = ifelse(abs(x - median(x)) <= xThresh &
                                                    abs(y - median(y)) <= yThresh &
                                                    abs(theta - median(theta)) <= thetaThresh &
-                                                   (!!as.name(corColName)) >= corThresh,"CMC","non-CMC")) %>%
+                                                   corr >= corrThresh,"CMC","non-CMC")) %>%
     dplyr::filter(originalMethodClassif == "CMC") %>%
     dplyr::select(cellIndex,theta,originalMethodClassif)
 
-  comparisonFeaturesDF %>%
+  originalMethodClassif <- comparisonFeaturesDF %>%
     dplyr::left_join(originalMethodCMCs,by = c("cellIndex","theta")) %>%
-    dplyr::mutate(originalMethodClassif = ifelse(is.na(originalMethodClassif),"non-CMC","CMC"))
+    dplyr::mutate(originalMethodClassif = ifelse(is.na(originalMethodClassif),"non-CMC","CMC")) %>%
+    pull(originalMethodClassif)
+
+  return(originalMethodClassif)
 }
 
 #' Compute CMC-theta distribution for a set of comparison features
@@ -35,24 +47,37 @@ decision_originalMethod_classifyCMCs <- function(comparisonFeaturesDF,
 #'
 #' @export
 
-decision_highCMC_cmcThetaDistrib <- function(comparisonFeaturesDF,
+decision_highCMC_cmcThetaDistrib <- function(cellIndex,
+                                             x,
+                                             y,
+                                             theta,
+                                             corr,
                                              corColName = "pairwiseCompCor",
                                              xThresh = 20,
                                              yThresh = xThresh,
-                                             corThresh = .5){
+                                             corrThresh = .5){
+
+  comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
+                                     x = x,
+                                     y = y,
+                                     theta = theta,
+                                     corr = corr)
 
   highCMC_candidates <- comparisonFeaturesDF %>%
     dplyr::group_by(theta) %>%
     dplyr::mutate(cmcThetaDistribClassif = ifelse(abs(x - median(x)) <= xThresh &
                                                     abs(y - median(y)) <= yThresh &
-                                                    (!!as.name(corColName)) >= corThresh,
+                                                    corr >= corrThresh,
                                                   "CMC Candidate","not CMC Candidate")) %>%
     dplyr::ungroup() %>%
     dplyr::select(cellIndex,theta,cmcThetaDistribClassif)
 
 
-  comparisonFeaturesDF %>%
-    dplyr::left_join(highCMC_candidates,by = c("cellIndex","theta"))
+  cmcThetaDistribClassif <- comparisonFeaturesDF %>%
+    dplyr::left_join(highCMC_candidates,by = c("cellIndex","theta")) %>%
+    dplyr::pull(cmcThetaDistribClassif)
+
+  return(cmcThetaDistribClassif)
 }
 
 #' Classify theta values in CMC-theta distribution as having "High" or "Low" CMC
@@ -87,20 +112,32 @@ decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
 #'
 #' @export
 
-decision_highCMC_classifyCMCs <- function(comparisonFeaturesDF,
-                                          corColName = "pairwiseCompCor",
+decision_highCMC_classifyCMCs <- function(cellIndex,
+                                          x,
+                                          y,
+                                          theta,
+                                          corr,
                                           xThresh = 20,
                                           yThresh = xThresh,
                                           thetaThresh = 6,
-                                          corThresh = .5,
+                                          corrThresh = .5,
                                           tau = 1){
 
+  comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
+                                     x = x,
+                                     y = y,
+                                     theta = theta,
+                                     corr = corr)
 
   cmcThetaDistrib <- comparisonFeaturesDF %>%
-    decision_highCMC_cmcThetaDistrib(corColName = corColName,
-                                     xThresh = xThresh,
-                                     yThresh = yThresh,
-                                     corThresh = corThresh) %>%
+    mutate(cmcThetaDistribClassif = decision_highCMC_cmcThetaDistrib(cellIndex = cellIndex,
+                                                                     x = x,
+                                                                     y = y,
+                                                                     theta = theta,
+                                                                     corr = corr,
+                                                                     xThresh = xThresh,
+                                                                     yThresh = yThresh,
+                                                                     corrThresh = corrThresh)) %>%
     dplyr::filter(cmcThetaDistribClassif == "CMC Candidate")
 
   cmcThetaDistrib_classified <- decision_highCMC_identifyHighCMCThetas(cmcThetaDistrib,
@@ -116,24 +153,91 @@ decision_highCMC_classifyCMCs <- function(comparisonFeaturesDF,
 
   if(passesHighCMCCriterion){
     highCMCs <- cmcThetaDistrib_classified %>%
-      dplyr::mutate(highCMCClassif = ifelse(thetaCMCIdentif == "High","CMC","non-CMC")) %>%
+      dplyr::mutate(highCMCClassif = ifelse(thetaCMCIdentif == "High","CMC","non-CMC (passed)")) %>%
       dplyr::group_by(cellIndex) %>%
       dplyr::filter(highCMCClassif == "CMC") %>%
-      dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName)))) %>%
+      dplyr::filter(corr == max(corr)) %>%
       dplyr::select(c(cellIndex,theta,highCMCClassif))
 
-    comparisonFeaturesDF <- comparisonFeaturesDF %>%
+    highCMCClassif <- comparisonFeaturesDF %>%
       dplyr::left_join(highCMCs,by = c("cellIndex","theta")) %>%
-      dplyr::mutate(highCMCClassif = ifelse(highCMCClassif == "non-CMC" | is.na(highCMCClassif),"non-CMC","CMC"),
-                    highCMCCriterion = "passed")
+      dplyr::mutate(highCMCClassif = ifelse(highCMCClassif == "non-CMC (passed)" | is.na(highCMCClassif),"non-CMC (passed)","CMC")) %>%
+      dplyr::pull(highCMCClassif)
   }
   else{
-    comparisonFeaturesDF <- comparisonFeaturesDF %>%
-      mutate(highCMCClassif = "non-CMC",
-             highCMCCriterion = "failed")
+    highCMCClassif <- comparisonFeaturesDF %>%
+      dplyr::mutate(highCMCClassif = "non-CMC (failed)") %>%
+      dplyr::pull(highCMCClassif)
   }
 
-  return(comparisonFeaturesDF)
+  return(highCMCClassif)
+}
+
+#' Applies the decision rules of the original method of Song (2013) and the High
+#' CMC method of Tong et al. (2015)
+#'
+#' @name decision_CMC
+#'
+#' @param tau (optional) parameter required to apply the High CMC method of Tong
+#'   et al. (2015). If not given, only the decision rule of the original method
+#'   of Song (2013) is applied.
+#'
+#' @export
+
+decision_CMC <- function(cellIndex,
+                         x,
+                         y,
+                         theta,
+                         corr,
+                         xThresh = 20,
+                         yThresh = xThresh,
+                         thetaThresh = 6,
+                         corrThresh = .5,
+                         tau = NULL){
+
+  comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
+                                     x = x,
+                                     y = y,
+                                     theta = theta,
+                                     corr = corr)
+
+
+  comparisonFeaturesDF <- comparisonFeaturesDF %>%
+    dplyr::mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
+                                                                               x = x,
+                                                                               y = y,
+                                                                               theta = theta,
+                                                                               corr = corr,
+                                                                               xThresh = xThresh,
+                                                                               yThresh = yThresh,
+                                                                               thetaThresh = thetaThresh,
+                                                                               corrThresh = corrThresh))
+
+  if(is.numeric(tau)){
+    allCMCs <- comparisonFeaturesDF %>%
+      dplyr::mutate(highCMCClassif = decision_highCMC_classifyCMCs(cellIndex = cellIndex,
+                                                                   x = x,
+                                                                   y = y,
+                                                                   theta = theta,
+                                                                   corr = corr,
+                                                                   xThresh = xThresh,
+                                                                   yThresh = yThresh,
+                                                                   thetaThresh = thetaThresh,
+                                                                   corrThresh = corrThresh,
+                                                                   tau = tau)) %>%
+      dplyr::select(cellIndex,
+                    theta,
+                    originalMethodClassif,
+                    highCMCClassif)
+
+    return(allCMCs)
+  }
+  else{
+    allCMCs <- comparisonFeaturesDF %>%
+      dplyr::pull(originalMethodClassif)
+
+    return(allCMCs)
+  }
 }
 
 #' Combine CMC data from two comparison directions
@@ -164,10 +268,10 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
 
     originalMethodCMCs <- dplyr::bind_rows(comparison_1to2_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_1to2"),
+                                             dplyr::mutate(direction = "comparison_AtoB"),
                                            comparison_2to1_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_2to1"))
+                                             dplyr::mutate(direction = "comparison_BtoA"))
 
     if(nrow(originalMethodCMCs) == 0){
       return(data.frame(cellIndex = vector(length = 0),
@@ -214,15 +318,15 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
 
   #If both directions fail the High CMC criterion, assign them the minimum of
   #the two original method CMC counts (which may be 0)
-  if(any(stringr::str_detect(comparison_1to2_df$highCMCCriterion,"failed")) &
-     any(stringr::str_detect(comparison_2to1_df$highCMCCriterion,"failed"))){
+  if(any(stringr::str_detect(comparison_1to2_df$highCMCClassif,"failed")) |
+     any(stringr::str_detect(comparison_2to1_df$highCMCClassif,"failed"))){
 
     originalMethodCMCs <- dplyr::bind_rows(comparison_1to2_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_1to2"),
+                                             dplyr::mutate(direction = "comparison_AtoB"),
                                            comparison_2to1_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_2to1"))
+                                             dplyr::mutate(direction = "comparison_BtoA"))
 
     if(nrow(originalMethodCMCs) == 0){
       return(data.frame(cellIndex = vector(length = 0),
@@ -275,15 +379,15 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
   #seems to yield best results.
 
   #Checking if either direction failed
-  if(any(stringr::str_detect(comparison_1to2_df$highCMCCriterion,"failed")) |
-     any(stringr::str_detect(comparison_2to1_df$highCMCCriterion,"failed"))){
+  if(any(stringr::str_detect(comparison_1to2_df$highCMCClassif,"failed")) |
+     any(stringr::str_detect(comparison_2to1_df$highCMCClassif,"failed"))){
 
     originalMethodCMCs <- dplyr::bind_rows(comparison_1to2_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_1to2"),
+                                             dplyr::mutate(direction = "comparison_AtoB"),
                                            comparison_2to1_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_2to1"))
+                                             dplyr::mutate(direction = "comparison_BtoA"))
 
     if(nrow(originalMethodCMCs) == 0){
       return(data.frame(cellIndex = vector(length = 0),
@@ -368,10 +472,10 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
 
     originalMethodCMCs <- dplyr::bind_rows(comparison_1to2_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_1to2"),
+                                             dplyr::mutate(direction = "comparison_AtoB"),
                                            comparison_2to1_df %>%
                                              dplyr::filter(originalMethodClassif == "CMC") %>%
-                                             dplyr::mutate(direction = "comparison_2to1"))
+                                             dplyr::mutate(direction = "comparison_BtoA"))
 
     if(nrow(originalMethodCMCs) == 0){
       return(data.frame(cellIndex = vector(length = 0),
@@ -441,10 +545,10 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
 
       originalMethodCMCs <- dplyr::bind_rows(comparison_1to2_df %>%
                                                dplyr::filter(originalMethodClassif == "CMC") %>%
-                                               dplyr::mutate(direction = "comparison_1to2"),
+                                               dplyr::mutate(direction = "comparison_AtoB"),
                                              comparison_2to1_df %>%
                                                dplyr::filter(originalMethodClassif == "CMC") %>%
-                                               dplyr::mutate(direction = "comparison_2to1"))
+                                               dplyr::mutate(direction = "comparison_BtoA"))
 
       if(nrow(originalMethodCMCs) == 0){
         return(data.frame(cellIndex = vector(length = 0),
@@ -483,7 +587,7 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
           purrr::map_int(nrow) %>%
           which.min()
 
-        highCMCs<- originalMethodCMCs[[minIndex]]
+        highCMCs <- originalMethodCMCs[[minIndex]]
       }
 
       return(highCMCs)
@@ -494,10 +598,10 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
   #replicates:
   highCMCs <- bind_rows(comparison_1to2_df %>%
                           dplyr::filter(originalMethodClassif == "CMC" | highCMCClassif == "CMC") %>%
-                          dplyr::mutate(direction = "comparison_1to2"),
+                          dplyr::mutate(direction = "comparison_AtoB"),
                         comparison_2to1_df %>%
                           dplyr::filter(originalMethodClassif == "CMC" | highCMCClassif == "CMC") %>%
-                          dplyr::mutate(direction = "comparison_2to1")) %>%
+                          dplyr::mutate(direction = "comparison_BtoA")) %>%
     tidyr::pivot_longer(cols = c(originalMethodClassif,highCMCClassif),
                         names_to = "method",
                         values_to = "classification") %>%
@@ -1012,13 +1116,13 @@ cmcFilter_improved <- function(cellCCF_bothDirections_output,
       else if(nrow(thetaMax_dismissed) > 2){
 
         thetaMax_comparison_1to2_diff <- thetaMax_dismissed %>%
-          dplyr::filter(comparison == "comparison_1to2") %>%
+          dplyr::filter(comparison == "comparison_AtoB") %>%
           dplyr::arrange(theta) %>%
           dplyr::pull(theta) %>%
           diff()
 
         thetaMax_comparison_2to1_diff <- thetaMax_dismissed %>%
-          dplyr::filter(comparison == "comparison_2to1") %>%
+          dplyr::filter(comparison == "comparison_BtoA") %>%
           dplyr::arrange(theta) %>%
           dplyr::pull(theta) %>%
           diff()
