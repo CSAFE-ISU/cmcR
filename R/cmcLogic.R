@@ -173,13 +173,13 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
   return(highCMCClassif)
 }
 
-#' Applies the decision rules of the original method of Song (2013) and the High
+#' Applies the decision rules of the original method of Song (2013) or the High
 #' CMC method of Tong et al. (2015)
 #'
 #' @name decision_CMC
 #'
 #' @param tau (optional) parameter required to apply the High CMC method of Tong
-#'   et al. (2015). If not given, only the decision rule of the original method
+#'   et al. (2015). If not given, then the decision rule of the original method
 #'   of Song (2013) is applied.
 #'
 #' @export
@@ -201,20 +201,25 @@ decision_CMC <- function(cellIndex,
                                      theta = theta,
                                      corr = corr)
 
+  if(is.null(tau)){
+    comparisonFeaturesDF <- comparisonFeaturesDF %>%
+      dplyr::mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
+                                                                                 x = x,
+                                                                                 y = y,
+                                                                                 theta = theta,
+                                                                                 corr = corr,
+                                                                                 xThresh = xThresh,
+                                                                                 yThresh = yThresh,
+                                                                                 thetaThresh = thetaThresh,
+                                                                                 corrThresh = corrThresh))
+    originalMethodClassif <- comparisonFeaturesDF %>%
+      dplyr::pull(originalMethodClassif)
 
-  comparisonFeaturesDF <- comparisonFeaturesDF %>%
-    dplyr::mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
-                                                                               x = x,
-                                                                               y = y,
-                                                                               theta = theta,
-                                                                               corr = corr,
-                                                                               xThresh = xThresh,
-                                                                               yThresh = yThresh,
-                                                                               thetaThresh = thetaThresh,
-                                                                               corrThresh = corrThresh))
+    return(originalMethodClassif)
+  }
 
   if(is.numeric(tau)){
-    allCMCs <- comparisonFeaturesDF %>%
+    highCMCClassif <- comparisonFeaturesDF %>%
       dplyr::mutate(highCMCClassif = decision_highCMC_classifyCMCs(cellIndex = cellIndex,
                                                                    x = x,
                                                                    y = y,
@@ -225,18 +230,9 @@ decision_CMC <- function(cellIndex,
                                                                    thetaThresh = thetaThresh,
                                                                    corrThresh = corrThresh,
                                                                    tau = tau)) %>%
-      dplyr::select(cellIndex,
-                    theta,
-                    originalMethodClassif,
-                    highCMCClassif)
+      dplyr::pull(highCMCClassif)
 
-    return(allCMCs)
-  }
-  else{
-    allCMCs <- comparisonFeaturesDF %>%
-      dplyr::pull(originalMethodClassif)
-
-    return(allCMCs)
+    return(highCMCClassif)
   }
 }
 

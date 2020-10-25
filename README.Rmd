@@ -272,21 +272,27 @@ kmComparison_highCMCs %>%
   slice(21:35)
 ```
 
-The `decison_CMC` function applies both the decision rules of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) and the High CMC method of [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf). It returns a data frame containing the key pair (`cellIndex`,`theta`) and the classification under the two decision rules associated with that key pair. Because it returns a data frame with two CMC classification columns, we need to `_join` it to the `kmComparisonFeatures` data frame (i.e., 2 columns cannot simultaneously be created from the output of 1 function within a mutate statement). Note that a cell might be classified as a CMC under one method but not the other.
-<!-- That is, every cell/region comparison is uniquely identified by the reference cell's index and the amount the target scan was rotated before performing the comparison. Every reference cell can be counted as a CMC at most once under each decision rule. A cell being classified as a CMC under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) is neither a necessary nor sufficient condition for being classified as a CMC under the High CMC method (and vice versa). -->
+The `decison_CMC` function applies both the decision rules of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) or the High CMC method of [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf), depending on whether the user specifies a value for the High CMC threshold $\tau$.
 
 ```{r}
 kmComparison_allCMCs <- kmComparisonFeatures %>%
-  left_join(decision_CMC(cellIndex = .$cellIndex,
-                         x = .$x,
-                         y = .$y,
-                         theta = .$theta,
-                         corr = .$pairwiseCompCor,
-                         xThresh = 20,
-                         thetaThresh = 6,
-                         corrThresh = .5,
-                         tau = 1),
-            by = c("cellIndex","theta"))
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
 
 #Example of cells classified as CMC under 1 decision rule but not the other.
 kmComparison_allCMCs %>%
@@ -304,16 +310,23 @@ kmComparisonFeatures_rev <- purrr::map_dfr(seq(-30,30,by = 3),
                                                                     theta = .))
 
 kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
-  left_join(decision_CMC(cellIndex = .$cellIndex,
-                         x = .$x,
-                         y = .$y,
-                         theta = .$theta,
-                         corr = .$pairwiseCompCor,
-                         xThresh = 20,
-                         thetaThresh = 6,
-                         corrThresh = .5,
-                         tau = 1),
-            by = c("cellIndex","theta"))
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
 ```
 
 If the High CMC method succeeds in identifying a `theta` mode (again, it's unclear whether this means in both directions or only one - we require success in both directions), then the CMC counts computed under the High CMC method are combined after excluding replicates. The `decision_combineCMCDirections` combines two CMC outputs using the appropriate logic.

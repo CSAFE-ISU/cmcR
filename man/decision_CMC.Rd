@@ -2,7 +2,7 @@
 % Please edit documentation in R/cmcLogic.R
 \name{decision_CMC}
 \alias{decision_CMC}
-\title{Applies the decision rules of the original method of Song (2013) and the High
+\title{Applies the decision rules of the original method of Song (2013) or the High
 CMC method of Tong et al. (2015)}
 \usage{
 decision_CMC(
@@ -20,10 +20,10 @@ decision_CMC(
 }
 \arguments{
 \item{tau}{(optional) parameter required to apply the High CMC method of Tong
-et al. (2015). If not given, only the decision rule of the original method
+et al. (2015). If not given, then the decision rule of the original method
 of Song (2013) is applied.}
 }
 \description{
-Applies the decision rules of the original method of Song (2013) and the High
+Applies the decision rules of the original method of Song (2013) or the High
 CMC method of Tong et al. (2015)
 }
