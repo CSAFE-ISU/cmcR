@@ -53,3 +53,4 @@ fadul1.1_cropped <- preProcess_cropExterior(x3p = fadul1.1,radiusOffset = -20)
 
 x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped))
 }
+\keyword{internal}

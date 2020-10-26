@@ -592,7 +592,7 @@ estimateBFRadius <- function(mat,
 #'   impression scan where the rows/columns on the exterior of the breech face
 #'   impression have been cropped-out.
 #'
-#' @export
+#' @keywords internal
 #' @description The radius estimation procedure tends to over-estimate the
 #'   desired radius values. As such, a lot of the breech face impression
 #'   "roll-off" is included in the final scan. Excessive roll-off can bias the
@@ -676,7 +676,7 @@ preProcess_cropExterior <- function(x3p,
 #'   impression scan where the observations on the interior of the firing pin
 #'   impression hole have been filtered out.
 #' @rdname removeFiringPin
-#' @export
+#' @keywords internal
 #' @note The radius estimation procedure effectively estimates the radius
 #'   of the firing pin hole. Unfortunately, it is often desired that more than
 #'   just observations in firing pin hole are removed. In particular, the
@@ -743,6 +743,50 @@ preProcess_filterInterior <- function(x3p,
 
 
   return(x3p_clone)
+}
+
+#' Removes observations from a surface matrix on the exterior of interior of the
+#' cartridge case surface.
+#'
+#' @name preProcess_crop
+#'
+#' @param region dictates whether the observations on the "exterior" or
+#'   "interior" of the scan are removed
+#' @param radiusOffset the procedures used to detect the interior/exterior of
+#'   the scan tend to under/overestimate the radius of the region of interest,
+#'   respectively. The number passed to this argument is added to the radius
+#'   estimate as an offset.
+#'
+#' @export
+
+preProcess_crop <- function(x3p,
+                            region = "exterior",
+                            radiusOffset = 0,
+                            croppingThresh = 1,
+                            agg_function = median,
+                            scheme = 3,
+                            high_connectivity = FALSE,
+                            tolerance = 0){
+  #test that region is "exterior" or "interior"
+
+  if(region == "exterior"){
+    x3p <- preProcess_cropExterior(x3p,
+                                   radiusOffset = radiusOffset,
+                                   high_connectivity = high_connectivity,
+                                   tolerance = tolerance,
+                                   croppingThresh = croppingThresh,
+                                   agg_function = agg_function)
+
+    return(x3p)
+  }
+  if(region == "interior"){
+    x3p <- preProcess_filterInterior(x3p,
+                                     radiusOffset = radiusOffset,
+                                     high_connectivity = high_connectivity,
+                                     tolerance = tolerance)
+
+    return(x3p)
+  }
 }
 
 #' Level a breech face impression surface matrix by a conditional statistics

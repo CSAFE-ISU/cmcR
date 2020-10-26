@@ -76,7 +76,7 @@ function.
 data("fadul1.1_raw")
 data("fadul1.2_raw")
 
-cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_raw,
+x3pListPlot(list("Fadul 1-1" = fadul1.1_raw,
                        "Fadul 1-2" = fadul1.2_raw),
                   type = "faceted")
 ```
@@ -101,26 +101,28 @@ scan (by a factor of 4, selecting every other row/column) using the
 
 ``` r
 fadul1.1_processed <- fadul1.1_raw %>%
-  cmcR::preProcess_cropExterior(radiusOffset = -30,
-                                  agg_function = median) %>%
-  cmcR::preProcess_filterInterior(radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
+  preProcess_crop(region = "exterior",
+                  radiusOffset = -30) %>%
+  preProcess_crop(region = "interior",
+                  radiusOffset = 200) %>%
+  preProcess_removeTrend(statistic = "quantile",
                                  tau = .5,
                                  method = "fn") %>%
-  cmcR::preProcess_gaussFilter() %>%
+  preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
-fadul1.2_processed <- fadul1.2_raw %>%
-  cmcR::preProcess_cropExterior(radiusOffset = -30,
-                                  agg_function = median) %>%
-  cmcR::preProcess_filterInterior(radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
+fadul1.2_processed <- fadul1.2_raw  %>%
+  preProcess_crop(region = "exterior",
+                  radiusOffset = -30) %>%
+  preProcess_crop(region = "interior",
+                  radiusOffset = 200) %>%
+  preProcess_removeTrend(statistic = "quantile",
                                  tau = .5,
                                  method = "fn") %>%
-  cmcR::preProcess_gaussFilter() %>%
+  preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
-cmcR::x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
+x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
                        "Processed Fadul1-2" = fadul1.2_processed),
                   type = "faceted")
 ```
@@ -704,7 +706,7 @@ the High CMC method are combined after excluding replicates. The
 appropriate logic.
 
 ``` r
-kmComparison_combinedCMCs <- cmcR::decision_combineCMCDirections(kmComparison_allCMCs,
+kmComparison_combinedCMCs <- decision_combineCMCDirections(kmComparison_allCMCs,
                                                                  kmComparison_allCMCs_rev)
 ```
 

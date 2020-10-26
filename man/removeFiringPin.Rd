@@ -107,3 +107,4 @@ fadul1.1_filtered <- preProcess_filterInterior(x3p = fadul1.1_cropped, radiusOff
 
 x3pListPlot(list("Original" = fadul1.1,"Cropped" = fadul1.1_cropped,"Cropped & Filtered" = fadul1.1_filtered))
 }
+\keyword{internal}
