@@ -54,13 +54,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/cmcFilter_improved-function-options.html">cmcFilter_improved function options</a>
-    </li>
-    <li>
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
-      <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
     </li>
   </ul>
 </li>
@@ -75,7 +72,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="cmcR_plotReproduction_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Reproduction of Song et al. (2018) plots using the cmcR package</h1>
@@ -88,14 +85,14 @@
 
     
     
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">cmcR</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">magrittr</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggplot2</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">purrr</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">dplyr</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">x3ptools</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rgl</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">4132020</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">magrittr</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-forge.r-project.org/projects/rgl/">rgl</a></span><span class="op">)</span></pre></div>
 <!-- TODO: -->
 <!--   - Add hyperlinks to .png images of original plots -->
 <!--   - Add red squares indicating non-CMCs based on topResultsPerCell output -->
@@ -120,352 +117,304 @@
 <div id="cartridge-case-scan-image-figure-1-1" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cartridge-case-scan-image-figure-1-1" class="anchor"></a>Cartridge case scan image (Figure 1.1)</h2>
-<p>The <code>rgl</code> package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an <code>rgl</code> “scene” including placing lights at desired locations and controlling color, surface reflectance, etc. Each <code>rgl</code> scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at <span class="math inline">\((0,0,10)\)</span> and another located “north-by-northwest” of the scan at <span class="math inline">\((-1,2,2)\)</span>. Note that these positions are relative to where the viewer begins - which is somewhere along the <span class="math inline">\(z\)</span>-axis depending on the value provided to the <code>zoom</code> attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There’s truly an arbitrary amount of tinkering one could perform to get the “best” looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the <code>rgl</code> device is opened, the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3ptools::x3p_snapshot</a></code> function saves the device’s current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the <code>x3p2</code> object (not shown).</p>
+<p>The <code>rgl</code> package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an <code>rgl</code> “scene” including placing lights at desired locations and controlling color, surface reflectance, etc. Each <code>rgl</code> scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at <span class="math inline">\((0,0,10)\)</span> and another located “north-by-northwest” of the scan at <span class="math inline">\((-1,2,2)\)</span>. Note that these positions are relative to where the viewer begins - which is somewhere along the <span class="math inline">\(z\)</span>-axis depending on the value provided to the <code>zoom</code> attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There’s truly an arbitrary amount of tinkering one could perform to get the “best” looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the <code>rgl</code> device is opened, the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3ptools::x3p_snapshot</a></code> function saves the device’s current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the <code>fadul1.2_raw</code> object (not shown).</p>
 <p>To learn more about how various aspects of a scene are constructed, see <a href="https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html">this vignette</a> for the <code>rgl</code> package. For more details on using <code>rgl</code> specifically applied to .x3p files, see the documentation for the <a href="https://github.com/heike/x3ptools"><code>x3ptools</code> package on Github</a>.</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="kw">if</span>(!<span class="fu"><a href="https://rdrr.io/r/base/files2.html">dir.exists</a></span>(<span class="st">"bfScanImages"</span>)){
-  <span class="fu"><a href="https://rdrr.io/r/base/files2.html">dir.create</a></span>(<span class="st">"bfScanImages"</span>)
-}
-
-<span class="no">x3p1</span> <span class="kw">&lt;-</span> <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>)
-<span class="no">x3p2</span> <span class="kw">&lt;-</span> <span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>)
-
+<div class="sourceCode" id="cb2"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_raw"</span>,<span class="st">"fadul1.2_raw"</span><span class="op">)</span>
 
 <span class="co">#apply lowpass filter to reduce noise in scan:</span>
-<span class="no">surface1</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">surface.matrix</span> <span class="kw">%&gt;%</span>
-  <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span>(<span class="kw">res</span> <span class="kw">=</span> <span class="fl">3.125e-06</span>,<span class="kw">wavelength</span> <span class="kw">=</span> <span class="fl">16</span>,<span class="kw">filtertype</span> <span class="kw">=</span> <span class="st">"lp"</span>)
-<span class="no">surface2</span> <span class="kw">&lt;-</span> <span class="no">x3p2</span>$<span class="no">surface.matrix</span> <span class="kw">%&gt;%</span>
-  <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span>(<span class="kw">res</span> <span class="kw">=</span> <span class="fl">3.125e-06</span>,<span class="kw">wavelength</span> <span class="kw">=</span> <span class="fl">16</span>,<span class="kw">filtertype</span> <span class="kw">=</span> <span class="st">"lp"</span>)
+<span class="va">surface1</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span> <span class="op">%&gt;%</span>
+  <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span>wavelength <span class="op">=</span> <span class="fl">16</span>,filtertype <span class="op">=</span> <span class="st">"lp"</span><span class="op">)</span>
+<span class="va">surface2</span> <span class="op">&lt;-</span> <span class="va">fadul1.2_raw</span> <span class="op">%&gt;%</span>
+  <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span>wavelength <span class="op">=</span> <span class="fl">16</span>,filtertype <span class="op">=</span> <span class="st">"lp"</span><span class="op">)</span>
 
-<span class="no">params</span> <span class="kw">&lt;-</span> <span class="kw pkg">rgl</span><span class="kw ns">::</span><span class="no"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">r3dDefaults</a></span>
+<span class="va">params</span> <span class="op">&lt;-</span> <span class="fu">rgl</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">r3dDefaults</a></span>
 
-<span class="no">zoom</span> <span class="kw">=</span> <span class="fl">.7</span>
-<span class="no">size</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">300</span>,<span class="fl">300</span>)
+<span class="va">zoom</span> <span class="op">=</span> <span class="fl">.7</span>
+<span class="va">size</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">300</span>,<span class="fl">300</span><span class="op">)</span>
 
-<span class="no">params</span>$<span class="no">windowRect</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">40</span>, <span class="fl">125</span>, <span class="fl">40</span> + <span class="no">size</span>[<span class="fl">1</span>], <span class="fl">125</span> + <span class="no">size</span>[<span class="fl">2</span>])
-<span class="no">params</span>$<span class="no">userMatrix</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>))
-<span class="no">params</span>$<span class="no">zoom</span> <span class="kw">&lt;-</span> <span class="no">zoom</span>
+<span class="va">params</span><span class="op">$</span><span class="va">windowRect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">125</span>, <span class="fl">40</span> <span class="op">+</span> <span class="va">size</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">125</span> <span class="op">+</span> <span class="va">size</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>
+<span class="va">params</span><span class="op">$</span><span class="va">userMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+<span class="va">params</span><span class="op">$</span><span class="va">zoom</span> <span class="op">&lt;-</span> <span class="va">zoom</span>
 
 <span class="co">#opens blank "canvas" upon which we can add lights, surfaces, etc.</span>
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">open3d</a></span>(<span class="kw">params</span> <span class="kw">=</span> <span class="no">params</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">open3d</a></span><span class="op">(</span>params <span class="op">=</span> <span class="va">params</span><span class="op">)</span>
 <span class="co">#&gt; wgl </span>
 <span class="co">#&gt;   1</span>
 
 <span class="co">#removes any previously declared lights in scene</span>
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/scene.html">rgl.pop</a></span>(<span class="st">"lights"</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/scene.html">rgl.pop</a></span><span class="op">(</span><span class="st">"lights"</span><span class="op">)</span>
 
 <span class="co">#set-up two lights for scene -- a lot of experimentation possible here</span>
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span>(<span class="kw">x</span> <span class="kw">=</span> -<span class="fl">1</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">z</span> <span class="kw">=</span> <span class="fl">2</span>,<span class="kw">viewpoint.rel</span> <span class="kw">=</span> <span class="fl">TRUE</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"white"</span>,<span class="kw">diffuse</span> <span class="kw">=</span> <span class="st">"white"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"white"</span>)
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span>(<span class="kw">x</span> <span class="kw">=</span> <span class="fl">0</span>,<span class="kw">y</span> <span class="kw">=</span> <span class="fl">0</span>,<span class="kw">z</span> <span class="kw">=</span> <span class="fl">10</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"grey60"</span>,<span class="kw">diffuse</span> <span class="kw">=</span> <span class="st">"grey50"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"grey60"</span>,<span class="kw">viewpoint.rel</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span><span class="op">(</span>x <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>,y <span class="op">=</span> <span class="fl">1</span>,z <span class="op">=</span> <span class="fl">2</span>,viewpoint.rel <span class="op">=</span> <span class="cn">TRUE</span>,ambient <span class="op">=</span> <span class="st">"white"</span>,diffuse <span class="op">=</span> <span class="st">"white"</span>,specular <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/light.html">light3d</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">0</span>,y <span class="op">=</span> <span class="fl">0</span>,z <span class="op">=</span> <span class="fl">10</span>,ambient <span class="op">=</span> <span class="st">"grey60"</span>,diffuse <span class="op">=</span> <span class="st">"grey50"</span>,specular <span class="op">=</span> <span class="st">"grey60"</span>,viewpoint.rel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co">#setup surface visualization</span>
-<span class="no">multiply</span> <span class="kw">&lt;-</span> <span class="fl">1</span> <span class="co">#x3ptools::image_x3p default to exaggerate relief</span>
-<span class="no">z</span> <span class="kw">&lt;-</span> <span class="no">multiply</span> * <span class="no">surface1</span> <span class="co"># Exaggerate the relief</span>
-<span class="no">yidx</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(<span class="no">z</span>):<span class="fl">1</span>
-<span class="no">y</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">header.info</span>$<span class="no">incrementY</span> * <span class="no">yidx</span>
-<span class="no">x</span> <span class="kw">&lt;-</span> <span class="no">x3p1</span>$<span class="no">header.info</span>$<span class="no">incrementX</span> * (<span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">z</span>))
+<span class="va">multiply</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="co">#x3ptools::image_x3p default to exaggerate relief</span>
+<span class="va">z</span> <span class="op">&lt;-</span> <span class="va">multiply</span> <span class="op">*</span> <span class="va">surface1</span><span class="op">$</span><span class="va">surface.matrix</span> <span class="co"># Exaggerate the relief</span>
+<span class="va">yidx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span><span class="op">:</span><span class="fl">1</span>
+<span class="va">y</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span><span class="op">$</span><span class="va">header.info</span><span class="op">$</span><span class="va">incrementY</span> <span class="op">*</span> <span class="va">yidx</span>
+<span class="va">x</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span><span class="op">$</span><span class="va">header.info</span><span class="op">$</span><span class="va">incrementX</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># emission, specular, ambient affect how the surface interacts with lights --</span>
 <span class="co"># again, a lot of possible experimentation</span>
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/surface3d.html">surface3d</a></span>(<span class="no">x</span>, <span class="no">y</span>, <span class="no">z</span>, <span class="kw">back</span> <span class="kw">=</span> <span class="st">"filled"</span>,<span class="kw">emission</span> <span class="kw">=</span> <span class="st">"grey30"</span>,<span class="kw">specular</span> <span class="kw">=</span> <span class="st">"grey50"</span>,<span class="kw">ambient</span> <span class="kw">=</span> <span class="st">"grey10"</span>)
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/surface3d.html">surface3d</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span>, back <span class="op">=</span> <span class="st">"filled"</span>,emission <span class="op">=</span> <span class="st">"grey30"</span>,specular <span class="op">=</span> <span class="st">"grey50"</span>,ambient <span class="op">=</span> <span class="st">"grey10"</span><span class="op">)</span>
 
-<span class="kw pkg">x3ptools</span><span class="kw ns">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3p_snapshot</a></span>(<span class="kw">file</span> <span class="kw">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span>)
+<span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3p_snapshot</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span>()</pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-1.png"</span>),
-                       <span class="kw pkg">magick</span><span class="kw ns">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span>(<span class="st">"bfScanImages/fadul1-2.png"</span>))) <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>()</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit">
+<span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>,
+                       <span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-2.png"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 </div>
 <div id="processed-cartrige-case-scan-figure-5" class="section level2">
 <h2 class="hasAnchor">
 <a href="#processed-cartrige-case-scan-figure-5" class="anchor"></a>Processed Cartrige Case Scan (Figure 5)</h2>
 <p>Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use <code>ggplot2</code> to accomplish this.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fadul1.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>,
-                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))
-<span class="no">fadul1.2</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>,
-                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))
-<span class="no">fadul2.1</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></span>(<span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span>,
-                                                <span class="kw">gaussFilterWavelength</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">16</span>,<span class="fl">500</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span>(<span class="kw">x3pList</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="st">"Fadul 1-1"</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                                 <span class="st">"Fadul 1-2"</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>),
-                  <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>,
-                  <span class="kw">rotate</span> <span class="kw">=</span> <span class="fl">90</span>,
-                  <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>))</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_processed"</span>,<span class="st">"fadul1.2_processed"</span>,<span class="st">"fadul2.1_processed"</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit">
+<span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span>x3pList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                                 <span class="st">"Fadul 1-2"</span> <span class="op">=</span> <span class="va">fadul1.2_processed</span><span class="op">)</span>,
+                  type <span class="op">=</span> <span class="st">"faceted"</span>,
+                  rotate <span class="op">=</span> <span class="fl">90</span>,
+                  legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 </div>
 <div id="cmc-plot-figure-4" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cmc-plot-figure-4" class="anchor"></a>CMC Plot (Figure 4)</h2>
 <p>The code below will perform the cell-based comparison procedure and then determine the initial/high CMCs for the known match and known non-match pairs of cartridge cases. The “initial” CMCs are determined based on the originally proposed method from Song (2013) while the “high” CMCs are determined using the “High CMC” method proposed by Tong et al. (2015).</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">kmComparison</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cellCCF_bothDirections.html">cellCCF_bothDirections</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                                             <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
-                                             <span class="kw">cellNumHoriz</span> <span class="kw">=</span> <span class="fl">8</span>,
-                                             <span class="kw">minObservedProp</span> <span class="kw">=</span> <span class="fl">.1</span>,
-                                             <span class="kw">regionToCellProp</span> <span class="kw">=</span> <span class="fl">9</span>)
+<div class="sourceCode" id="cb6"><pre class="downlit">
+<span class="va">kmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+                                       <span class="op">~</span> <span class="fu"><a href="../reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                                                                target <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
+                                                                
+                                                                theta <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span>
 
-<span class="no">knmComparison</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cellCCF_bothDirections.html">cellCCF_bothDirections</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                                              <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
-                                              <span class="kw">cellNumHoriz</span> <span class="kw">=</span> <span class="fl">8</span>,
-                                              <span class="kw">minObservedProp</span> <span class="kw">=</span> <span class="fl">.1</span>,
-                                              <span class="kw">regionToCellProp</span> <span class="kw">=</span> <span class="fl">9</span>)
+<span class="va">kmComparisonFeatures_rev</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+                                           <span class="op">~</span> <span class="fu"><a href="../reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
+                                                                    target <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                                                                    theta <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span>
 
-<span class="no">kmCMC</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcFilter_improved.html">cmcFilter_improved</a></span>(<span class="no">kmComparison</span>,
-                         <span class="kw">ccf_thresh</span> <span class="kw">=</span> <span class="fl">.6</span>,
-                         <span class="kw">dx_thresh</span> <span class="kw">=</span> <span class="fl">15</span>,
-                         <span class="kw">theta_thresh</span> <span class="kw">=</span> <span class="fl">6</span>)
+<span class="va">kmComparison_allCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,
+         highCMCClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span>,
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
 
-<span class="no">knmCMC</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcFilter_improved.html">cmcFilter_improved</a></span>(<span class="no">knmComparison</span>,
-                         <span class="kw">ccf_thresh</span> <span class="kw">=</span> <span class="fl">.6</span>,
-                         <span class="kw">dx_thresh</span> <span class="kw">=</span> <span class="fl">15</span>,
-                         <span class="kw">theta_thresh</span> <span class="kw">=</span> <span class="fl">6</span>)</pre></body></html></div>
-<p>We can then visualize the CMCs for these comarisons. Below are the high CMCs for the known match pair.</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">kmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                        <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
-                        <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">kmComparison</span>,
-                        <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">kmCMC</span>,
-                        <span class="kw">type</span> <span class="kw">=</span> <span class="st">"faceted"</span>,
-                        <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>),
-                        <span class="kw">height.colors</span> <span class="kw">=</span> <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu"><a href="http://colorspace.R-Forge.R-project.org//reference/desaturate.html">desaturate</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'#7f3b08'</span>,
-                                                                 <span class="st">'#b35806'</span>,
-                                                                 <span class="st">'#e08214'</span>,
-                                                                 <span class="st">'#fdb863'</span>,
-                                                                 <span class="st">'#fee0b6'</span>,
-                                                                 <span class="st">'#f7f7f7'</span>,
-                                                                 <span class="st">'#d8daeb'</span>,
-                                                                 <span class="st">'#b2abd2'</span>,
-                                                                 <span class="st">'#8073ac'</span>,
-                                                                 <span class="st">'#542788'</span>,
-                                                                 <span class="st">'#2d004b'</span>),
-                                                               <span class="kw">amount</span> <span class="kw">=</span> <span class="fl">.75</span>),
-                        <span class="kw">cell.colors</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"#a60b00"</span>,<span class="st">"#1b03a3"</span>),
-                        <span class="kw">cell.alpha</span> <span class="kw">=</span> <span class="fl">.15</span>,
-                        <span class="kw">na.value</span> <span class="kw">=</span> <span class="st">"gray80"</span>)
-<span class="no">kmPlts</span>$<span class="no">highCMC</span></pre></body></html></div>
+<span class="va">kmComparison_allCMCs_rev</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures_rev</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,
+         highCMCClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span>,
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+                                       <span class="op">~</span> <span class="fu"><a href="../reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                                                                target <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
+                                                                
+                                                                theta <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knmComparisonFeatures_rev</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+                                           <span class="op">~</span> <span class="fu"><a href="../reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
+                                                                    target <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                                                                    theta <span class="op">=</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knmComparison_allCMCs</span> <span class="op">&lt;-</span> <span class="va">knmComparisonFeatures</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,
+         highCMCClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span>,
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knmComparison_allCMCs_rev</span> <span class="op">&lt;-</span> <span class="va">knmComparisonFeatures_rev</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span>,
+         highCMCClassif <span class="op">=</span> <span class="fu"><a href="../reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
+                                              x <span class="op">=</span> <span class="va">x</span>,
+                                              y <span class="op">=</span> <span class="va">y</span>,
+                                              theta <span class="op">=</span> <span class="va">theta</span>,
+                                              corr <span class="op">=</span> <span class="va">pairwiseCompCor</span>,
+                                              xThresh <span class="op">=</span> <span class="fl">20</span>,
+                                              thetaThresh <span class="op">=</span> <span class="fl">6</span>,
+                                              corrThresh <span class="op">=</span> <span class="fl">.5</span>,
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+<p>We can then visualize the CMCs for these comparisons. Below are the CMCs determined under the original method of Song (2013).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit">
+<span class="va">kmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                            targetScan <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
+                            reference_v_target_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs</span>,
+                            target_v_reference_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs_rev</span>,
+                            type <span class="op">=</span> <span class="st">"faceted"</span>,
+                            x3pNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span>,<span class="st">"Fadul 2-1"</span><span class="op">)</span>,
+                            legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span>,
+                            cell.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"#a60b00"</span>,<span class="st">"#1b03a3"</span><span class="op">)</span>,
+                            cell.alpha <span class="op">=</span> <span class="fl">.15</span>,
+                            na.value <span class="op">=</span> <span class="st">"gray80"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">kmLegend_originalCMC</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_reference_v_target</span> <span class="op">+</span>
+                                   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.direction <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_originalCMC_reference_v_target</span> <span class="op">&lt;-</span> <span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_reference_v_target</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_originalCMC_target_v_reference</span> <span class="op">&lt;-</span> <span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_target_v_reference</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_originalCMCPlot_bothDirections</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">10</span><span class="op">)</span>,
+                  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">11</span><span class="op">)</span>,
+                  expand <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">km_originalCMC_reference_v_target</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">6.2</span>,ymax <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">km_originalCMC_target_v_reference</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">2</span>,ymax <span class="op">=</span> <span class="fl">6.2</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="va">kmLegend_originalCMC</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">1.45</span>,ymax <span class="op">=</span> <span class="fl">1.45</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.85</span>,y <span class="op">=</span> <span class="fl">8.15</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.85</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">8.15</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
+
+<span class="va">km_originalCMCPlot_bothDirections</span></pre></div>
+<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+<p>And the CMCs determined under the High CMC method of Tong et al. (2015).</p>
+<div class="sourceCode" id="cb8"><pre class="downlit">
+<span class="va">kmLegend_highCMC</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span>
+                                   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.direction <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_highCMC_reference_v_target</span> <span class="op">&lt;-</span> <span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_highCMC_target_v_reference</span> <span class="op">&lt;-</span> <span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_target_v_reference</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">km_highCMCCMCPlot_bothDirections</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">10</span><span class="op">)</span>,
+                  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">11</span><span class="op">)</span>,
+                  expand <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">km_highCMC_reference_v_target</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1.1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">6.55</span>,ymax <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">km_highCMC_target_v_reference</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">2</span>,ymax <span class="op">=</span> <span class="fl">6.55</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="va">kmLegend_highCMC</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">1.45</span>,ymax <span class="op">=</span> <span class="fl">1.45</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.65</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.65</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
+
+<span class="va">km_highCMCCMCPlot_bothDirections</span></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
-<p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the initial CMCs.</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">knmPlts</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span>(<span class="kw">x3p1</span> <span class="kw">=</span> <span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                         <span class="kw">x3p2</span> <span class="kw">=</span> <span class="no">fadul2.1</span>$<span class="no">x3p</span>,
-                         <span class="kw">cellCCF_bothDirections_output</span> <span class="kw">=</span> <span class="no">knmComparison</span>,
-                         <span class="kw">cmcFilter_improved_output</span> <span class="kw">=</span> <span class="no">knmCMC</span>,
-                         <span class="kw">legend.quantiles</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span>),
-                         <span class="kw">height.colors</span> <span class="kw">=</span> <span class="kw pkg">colorspace</span><span class="kw ns">::</span><span class="fu"><a href="http://colorspace.R-Forge.R-project.org//reference/desaturate.html">desaturate</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'#7f3b08'</span>,
-                                                                  <span class="st">'#b35806'</span>,
-                                                                  <span class="st">'#e08214'</span>,
-                                                                  <span class="st">'#fdb863'</span>,
-                                                                  <span class="st">'#fee0b6'</span>,
-                                                                  <span class="st">'#f7f7f7'</span>,
-                                                                  <span class="st">'#d8daeb'</span>,
-                                                                  <span class="st">'#b2abd2'</span>,
-                                                                  <span class="st">'#8073ac'</span>,
-                                                                  <span class="st">'#542788'</span>,
-                                                                  <span class="st">'#2d004b'</span>),
-                                                                <span class="kw">amount</span> <span class="kw">=</span> <span class="fl">.75</span>),
-                         <span class="kw">cell.colors</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"#a60b00"</span>,<span class="st">"#1b03a3"</span>),
-                         <span class="kw">cell.alpha</span> <span class="kw">=</span> <span class="fl">.15</span>,
-                         <span class="kw">na.value</span> <span class="kw">=</span> <span class="st">"gray80"</span>)
+<p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).</p>
+<div class="sourceCode" id="cb9"><pre class="downlit">
+<span class="va">knmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                            targetScan <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
+                            reference_v_target_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs</span>,
+                            target_v_reference_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs_rev</span>,
+                            type <span class="op">=</span> <span class="st">"faceted"</span>,
+                            x3pNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span>,<span class="st">"Fadul 2-1"</span><span class="op">)</span>,
+                            legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span>,
+                            height.colors <span class="op">=</span> <span class="fu">colorspace</span><span class="fu">::</span><span class="fu"><a href="http://colorspace.R-Forge.R-project.org//reference/desaturate.html">desaturate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'#7f3b08'</span>,<span class="st">'#b35806'</span>,
+                                                                     <span class="st">'#e08214'</span>,<span class="st">'#fdb863'</span>,
+                                                                     <span class="st">'#fee0b6'</span>,<span class="st">'#f7f7f7'</span>,
+                                                                     <span class="st">'#d8daeb'</span>,<span class="st">'#b2abd2'</span>,
+                                                                     <span class="st">'#8073ac'</span>,<span class="st">'#542788'</span>,
+                                                                     <span class="st">'#2d004b'</span><span class="op">)</span>,
+                                                                   amount <span class="op">=</span> <span class="fl">.75</span><span class="op">)</span>,
+                            cell.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"#a60b00"</span>,<span class="st">"#1b03a3"</span><span class="op">)</span>,
+                            cell.alpha <span class="op">=</span> <span class="fl">.15</span>,
+                            na.value <span class="op">=</span> <span class="st">"gray80"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 
-<span class="no">knmPlts</span>$<span class="no">originalMethodCMCs</span></pre></body></html></div>
+<span class="va">knmLegend</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">knmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_reference_v_target</span> <span class="op">+</span>
+                                   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.direction <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knm_reference_v_target</span> <span class="op">&lt;-</span> <span class="va">knmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_reference_v_target</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knm_target_v_reference</span> <span class="op">&lt;-</span> <span class="va">knmCMCPlot</span><span class="op">$</span><span class="va">originalMethodCMCs_target_v_reference</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        plot.margin<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span>,<span class="op">-</span><span class="fl">.05</span>,<span class="op">-</span><span class="fl">.5</span><span class="op">)</span>, <span class="st">"cm"</span><span class="op">)</span>,
+        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">knm_cmcPlot_bothDirections</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_void</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">10</span><span class="op">)</span>,
+                  ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">11</span><span class="op">)</span>,
+                  expand <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">knm_reference_v_target</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">6.5</span>,ymax <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplotGrob.html">ggplotGrob</a></span><span class="op">(</span><span class="va">knm_target_v_reference</span><span class="op">)</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">2</span>,ymax <span class="op">=</span> <span class="fl">6.5</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotation_custom.html">annotation_custom</a></span><span class="op">(</span><span class="va">knmLegend</span>,
+                    xmin <span class="op">=</span> <span class="fl">1</span>,xmax <span class="op">=</span> <span class="fl">10</span>,ymin <span class="op">=</span> <span class="fl">1.45</span>,ymax <span class="op">=</span> <span class="fl">1.45</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.75</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">3.75</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span>
+
+<span class="va">knm_cmcPlot_bothDirections</span></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
-</div>
-<div id="bonus-ccf-map" class="section level2">
-<h2 class="hasAnchor">
-<a href="#bonus-ccf-map" class="anchor"></a>Bonus: CCF “Map”</h2>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">kmCellRegionPairs</span> <span class="kw">&lt;-</span> <span class="kw pkg">cmcR</span><span class="kw ns">::</span><span class="fu"><a href="../reference/getCellRegionPairs.html">getCellRegionPairs</a></span>(<span class="no">fadul1.1</span>$<span class="no">x3p</span>,
-                                              <span class="no">fadul1.2</span>$<span class="no">x3p</span>,
-                                              <span class="kw">ccfDF</span> <span class="kw">=</span> <span class="no">kmCMC</span>$<span class="no">highCMCs</span>,
-                                              <span class="kw">cellCCF_params</span> <span class="kw">=</span> <span class="no">kmComparison</span>$<span class="no">comparison_1to2</span>$<span class="no">params</span>)
-
-<span class="no">kmCellRegionPairs</span>[<span class="fl">3</span>] <span class="kw">%&gt;%</span>
-  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2</a></span>(<span class="kw">.x</span> <span class="kw">=</span> <span class="no">.</span>,
-       <span class="kw">.y</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">.</span>),
-       <span class="kw">function</span>(<span class="no">set</span>,<span class="no">theta</span>){
-         <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span>(<span class="no">set</span>[<span class="fl">2</span>], ~ <span class="fu"><a href="../reference/ccfMapPlot.html">ccfMapPlot</a></span>(<span class="kw">mat1</span> <span class="kw">=</span> <span class="no">.</span><span class="kw">[[</span><span class="fl">1</span>]],
-                                  <span class="kw">mat2</span> <span class="kw">=</span> <span class="no">.</span><span class="kw">[[</span><span class="fl">2</span>]],
-                                  <span class="kw">theta</span> <span class="kw">=</span> <span class="no">theta</span>,
-                                  <span class="kw">type</span> <span class="kw">=</span> <span class="st">"raster"</span>))
-       })</pre></body></html></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
-<pre><code>#&gt; $`-21`
-#&gt; $`-21`$`x = 146 - 217,y = 1 - 73`
-#&gt; NULL</code></pre>
-<!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
-<!-- ```{r} -->
-<!-- par(mar = c(1,1,1,1)) -->
-<!-- imlist("Fadul 1-1" = as.cimg(fadul1.1$x3p$surface.matrix), -->
-<!--        "Fadul 1-2" = as.cimg(fadul1.2$x3p$surface.matrix), -->
-<!--        "Fadul 2-1" = as.cimg(fadul2.1$x3p$surface.matrix), -->
-<!--        "Fadul 2-2" = as.cimg(fadul2.2$x3p$surface.matrix)) %>% -->
-<!--   plot() -->
-<!-- ``` -->
-<!-- Now the cartridge cases are ready to be compared. This is done below using the `cellCCF_bothDirections` function for each KM and KNM pairing (so 6 in total). Note that we are considering the rangle of rotation values from -30 to 30 degrees and using a grid of 8 by 8 cells. The code here is written in a way to be at least somewhat generalizable (e.g., using the `purrr::map` family) if the reader is interested in applying the method to a larger set of cartridge cases. -->
-<!-- ```{r} -->
-<!-- kmPairs <- list("1.1_1.2" = list(fadul1.1$x3p,fadul1.2$x3p), -->
-<!--                 "2.1_2.2" = list(fadul2.1$x3p,fadul2.2$x3p)) -->
-<!-- knmPairs <- list("1.1_2.1" = list(fadul1.1$x3p,fadul2.1$x3p), -->
-<!--                  "1.1_2.2" = list(fadul1.1$x3p,fadul2.2$x3p), -->
-<!--                  "1.2_2.1" = list(fadul1.2$x3p,fadul2.1$x3p), -->
-<!--                  "1.2_2.2" = list(fadul1.2$x3p,fadul2.2$x3p)) -->
-<!-- kmComparisons <- kmPairs %>% -->
-<!--   map(~ cmcR::cellCCF_bothDirections(.[[1]],.[[2]], -->
-<!--                                      thetas = seq(-30,30,by = 3), -->
-<!--                                      cellNumHoriz = 8)) -->
-<!-- knmComparisons <- knmPairs %>% -->
-<!--   map(~ cmcR::cellCCF_bothDirections(.[[1]],.[[2]], -->
-<!--                                      thetas = seq(-30,30,by = 3), -->
-<!--                                      cellNumHoriz = 8)) -->
-<!-- ``` -->
-<!-- With the comparisons completed, we can now show how to reproduce a variety of plots commonly given in the CMC literature. -->
-<!-- ### CMC-$\theta$ distribution -->
-<!-- Tong et al. (2015) discusses an improvement to the CMC method originally proposed by Song (2013). Figures 2 and 3 of Tong et al. (2015) show how the CMC count varies across a variety of rotation values for a known match pair and a known non-match pair of cartridges cases, respectively. For a truly matching pair of cartridge cases, this "CMC-$\theta$ distribution" tends to attain a mode around the rotation value that correctly aligns one to the other. This tendency can be used to determine, for example, if comparing one cartridge case scan to another in one "direction" yields a CMC-$\theta$ mode that agrees the comparison in the other direction up to a sign.  -->
-<!-- The plot below illustrates this by showing the CMC-$\theta$ for the known match Fadul 1-1 and Fadul 1-2 pair. The `cmcPerThetaBarPlot` function is used to construct the plot. Comparing Fadul 1-1 to Fadul 1-2 (i.e., Fadul 1-1 is partitioned into a grid of cells and compared to larger regions in Fadul 1-2) clearly yields a CMC-$\theta$ mode around -24 degrees (i.e., Fadul 1-2 should be rotated -24 degrees to align with Fadul 1-1). In the other direction, we see that comparing Fadul 1-2 to Fadul 1-1 yields a CMC-$\theta$ mode around 21, which indicates that both directions agree (at least within a tolerance of, say, 3 degrees).  -->
-<!-- The way that Tong et al. propose to identify modes in the CMC-$\theta$ distribution is to introduce a "high CMC" threshold equal to the max CMC count minus some constant. That is, $CMC_{\text{high}} = CMC_{\max} - \tau$ for some $\tau$. Using this high CMC threshold, we can determine how spread out the high CMC $\theta$ values are; the motivation here being that excessively diffuse high CMC $\theta$ values indicate that little "consensus" is reached as to the correct $\theta$ rotation value and the cartridge case pair under consideration is likely not a match. -->
-<!-- ```{r} -->
-<!-- cmcR::cmcPerThetaBarPlot(kmComparisons$`1.1_1.2`, -->
-<!--                          ccf_thresh = .6, -->
-<!--                          dx_thresh = 10, -->
-<!--                          highCMCThresh = 1) -->
-<!-- ``` -->
-<!-- In contrast, we can see the CMC-$\theta$ distribution for the known non-match pair of Fadul 1-1 and Fadul 2-1. Following the high CMC criterion discussed above, we can see that the range of $\theta$ values that we would classify as having a high CMC count is rather spread out (-18 to 3 degrees in one direction vs. -12 to 21 degrees in the other). Thus, we would conclude that this cartridge case pair is likely not a match. -->
-<!-- ```{r} -->
-<!-- cmcR::cmcPerThetaBarPlot(knmComparisons$`1.1_2.1`, -->
-<!--                          ccf_thresh = .6, -->
-<!--                          dx_thresh = 10, -->
-<!--                          highCMCThresh = 1) -->
-<!-- ``` -->
-<!-- ### CCF Map -->
-<!-- We may be interested in learning more about a particular comparison that was done between a pair of cartridge case scans. For example, as discussed above it appears that Fadul 1-1 and Fadul 1-2 align well for a rotation of 24 degrees (-24 depending on the direction). We may be interested in what the cell/region pairs looked like just before the CCF was computed. The `getCellRegionPairs` function will take a data frame of CCF results, such as the one associated with the comparison after Fadul 1-2 is rotated -24 degrees, and return each cell/region pair represented in that data frame. For brevity, we'll just consider as examples the Fadul 1-1 and Fadul 1-2 comparison as well as the Fadul 1-1 and Fadul 2-1 comparison. -->
-<!-- ```{r} -->
-<!-- kmCellRegionPairs <- cmcR::getCellRegionPairs(x3p1 = fadul1.1$x3p, -->
-<!--                                               x3p2 = fadul1.2$x3p, -->
-<!--                                               ccfDF = kmComparisons$`1.1_1.2`$comparison_1to2$ccfResults$`-24`, -->
-<!--                                               params = kmComparisons$`1.1_1.2`$comparison_1to2$params) -->
-<!-- knmCellRegionPairs <- cmcR::getCellRegionPairs(x3p1 = fadul1.1$x3p, -->
-<!--                                                x3p2 = fadul2.1$x3p, -->
-<!--                                                ccfDF = knmComparisons$`1.1_2.1`$comparison_1to2$ccfResults$`-9`, -->
-<!--                                                params = knmComparisons$`1.1_2.1`$comparison_1to2$params) -->
-<!-- ``` -->
-<!-- Figures 4 and 5 in Tong et al. (2015) show examples of "CCF maps," as they are aptly called, for a known match cell/region pair and a known non-match cell/region pair, respectively. These "maps" are actually just the 3-dimensional cross-correlation function surface. They are referred as maps because they indicate what the CCF is for various translation values of one surface matrix compared to the other. The coordinates at which the CCF achieves a maximum can be used as estimates of the "true" translation values at which a particular cell aligns best to its associated region. The `ccfMapPlot` function plots the CCF where function values are mapped to color. Additionally, the function will plot the cell/region pair for which the CCF map was determined. An orange square will be plotted on the region that visually indicates where the CCF "believes" the correct translation of the cell to be relative to the region. The plot below shows a particular cell/region pair and its associated CCF map from the known match comparison of Fadul 1-1 vs. Fadul 1-2. Note that the CCF max value is actually rather small in this instance. This is an artifact of how the CCF method is calculated using a Fast Fourier Transform technique. Effectively, any `NA` values in the scan, of which there are many, must be replaced prior to calculation of the CCF using FFTs. This often causes the CCF to be "deflated" relative the "true" CCF values. -->
-<!-- ```{r} -->
-<!-- kmCellRegionPairs$`-24`[27] %>% -->
-<!--   map(~ cmcR::ccfMapPlot(mat1 = .[[1]], -->
-<!--                          mat2 = .[[2]], -->
-<!--                          theta = -24)) -->
-<!-- ``` -->
-<!-- In contrast, the plot below shows a particular cell/region pair and its associated CCF map from the known non-match comparison of Fadul 1-1 vs. Fadul 2-1. -->
-<!-- ```{r} -->
-<!-- knmCellRegionPairs$`-9`[30] %>% -->
-<!--   map(~ cmcR::ccfMapPlot(mat1 = .[[1]], -->
-<!--                          mat2 = .[[2]], -->
-<!--                          theta = -9)) -->
-<!-- ``` -->
-<!-- ### $CCF_\max$ distribution  -->
-<!-- Figure 4 of Tong et al. (2014) and Figure 5(a) of Chen et al. (2017) -->
-<!-- ```{r} -->
-<!-- ggplot() + -->
-<!--   geom_histogram(data = kmComparisons %>% -->
-<!--                    map2_dfr(.x = ., -->
-<!--                             .y = names(.), -->
-<!--                             ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                               ungroup() %>% -->
-<!--                               mutate(pair = rep(.y,times = nrow(.)))), -->
-<!--                  aes(x = ccf,y = ..density..), -->
-<!--                  fill = "orange", -->
-<!--                  alpha = .7, -->
-<!--                  binwidth = .03) + -->
-<!--   geom_histogram(data = knmComparisons %>% -->
-<!--                    map2_dfr(.x = ., -->
-<!--                             .y = names(.), -->
-<!--                             ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                               ungroup() %>% -->
-<!--                               mutate(pair = rep(.y,times = nrow(.)))), -->
-<!--                  aes(x = ccf,y = ..density..), -->
-<!--                  fill = "royalblue", -->
-<!--                  alpha = .7, -->
-<!--                  binwidth = .03) + -->
-<!--   geom_bar(data = data.frame(x = c(.5,.5), -->
-<!--                              y = c(0,0), -->
-<!--                              comparisonType = c("known non-match","known match")), -->
-<!--            aes(x = x,y = y,fill = comparisonType),stat = "identity", -->
-<!--            alpha = .7) + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) + -->
-<!--   theme_bw() + -->
-<!--   xlim(c(0,1)) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- bind_rows(kmComparisons %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                        ungroup() %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known match")), -->
-<!--           knmComparisons %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                        ungroup() %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match"))) %>% -->
-<!--   ggplot(aes(x = ccf,fill = comparisonType)) + -->
-<!--   geom_density(alpha = .5) + -->
-<!--   theme_bw() + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) + -->
-<!--   xlim(c(0,1)) -->
-<!-- ``` -->
-<!-- ### Identified CMCs -->
-<!-- Figure 7 of Tong et al. (2015) -->
-<!-- ```{r} -->
-<!-- kmCMCs <- kmComparisons %>% -->
-<!--   map(~ cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ., -->
-<!--                                  consensus_function = median, -->
-<!--                                  ccf_thresh = .6, -->
-<!--                                  dx_thresh = 10, -->
-<!--                                  theta_thresh = 3)) -->
-<!-- knmCMCs <- knmComparisons %>% -->
-<!--   map(~ cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ., -->
-<!--                                  consensus_function = median, -->
-<!--                                  ccf_thresh = .6, -->
-<!--                                  dx_thresh = 10, -->
-<!--                                  theta_thresh = 3)) -->
-<!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = kmCMCs$`1.1_1.2`$highCMCs) -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = knmCMCs$`1.1_2.1`$originalMethodCMCs[[1]]$comparison_1to2) -->
-<!-- ``` -->
-<!-- ### CMC Distribution -->
-<!-- Figure 7 of Tong et al. (2014), Figure 9 of Tong et al. (2015), and Figure 6 of Chen et al. (2017) -->
-<!-- ```{r} -->
-<!-- bind_rows(kmCMCs %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ .$highCMCs %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known match")), -->
-<!--           knmCMCs %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      function(cmcs = .x,name = .y){ -->
-<!--                        if(!is.null(cmcs$highCMCs)){ -->
-<!--                        return(cmcs$highCMCs %>% -->
-<!--                        mutate(pair = rep(name,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match")) -->
-<!--                        } -->
-<!--                        else{ -->
-<!--                          cmcs$originalMethodCMCs[[1]][[which.min(c(nrow(cmcs$originalMethodCMCs[[1]]$comparison_1to2),nrow(cmcs$originalMethodCMCs[[1]]$comparison_2to1)))]] %>% -->
-<!--                            mutate(pair = rep(name,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match") %>% -->
-<!--                            return() -->
-<!--                        } -->
-<!--                        })) %>% -->
-<!--   group_by(pair,comparisonType) %>% -->
-<!--   tally() %>% -->
-<!--   ggplot(aes(x = n,fill = comparisonType)) + -->
-<!--   geom_histogram(binwidth = 1) + -->
-<!--   theme_bw() + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) -->
-<!-- ``` -->
 </div>
 <div id="references" class="section level2">
 <h2 class="hasAnchor">
@@ -493,7 +442,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

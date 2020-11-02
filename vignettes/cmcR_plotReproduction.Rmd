@@ -22,7 +22,6 @@ library(purrr)
 library(dplyr)
 library(x3ptools)
 library(rgl)
-set.seed(4132020)
 ```
   
 <!-- TODO: -->
@@ -57,33 +56,18 @@ For the sake of an example we will consider 3 cartridge cases are from Fadul et 
 
 ## Cartridge case scan image (Figure 1.1)
 
-The `rgl` package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an `rgl` "scene" including placing lights at desired locations and controlling color, surface reflectance, etc. Each `rgl` scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at $(0,0,10)$ and another located "north-by-northwest" of the scan at $(-1,2,2)$. Note that these positions are relative to where the viewer begins - which is somewhere along the $z$-axis depending on the value provided to the `zoom` attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There's truly an arbitrary amount of tinkering one could perform to get the "best" looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the `rgl` device is opened, the `x3ptools::x3p_snapshot` function saves the device's current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the `x3p2` object (not shown).
+The `rgl` package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an `rgl` "scene" including placing lights at desired locations and controlling color, surface reflectance, etc. Each `rgl` scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at $(0,0,10)$ and another located "north-by-northwest" of the scan at $(-1,2,2)$. Note that these positions are relative to where the viewer begins - which is somewhere along the $z$-axis depending on the value provided to the `zoom` attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There's truly an arbitrary amount of tinkering one could perform to get the "best" looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the `rgl` device is opened, the `x3ptools::x3p_snapshot` function saves the device's current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the `fadul1.2_raw` object (not shown).
 
 To learn more about how various aspects of a scene are constructed, see [this vignette](https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html) for the `rgl` package. For more details on using `rgl` specifically applied to .x3p files, see the documentation for the [`x3ptools` package on Github](https://github.com/heike/x3ptools).
 
-
-```{r include=FALSE,eval=FALSE}
-x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d") %>%
-  x3ptools::image_x3p(file = "bfScanImages/fadul1-1.png",col = "white",zoom = .7,size = c(300,300))
-
-x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8") %>%
-  x3ptools::image_x3p(file = "bfScanImages/fadul1-2.png",col = "white",zoom = .7,size = c(300,300))
-```
-
 ```{r}
-if(!dir.exists("bfScanImages")){
-  dir.create("bfScanImages")
-}
-
-x3p1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
-x3p2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8")
-
+data("fadul1.1_raw","fadul1.2_raw")
 
 #apply lowpass filter to reduce noise in scan:
-surface1 <- x3p1$surface.matrix %>%
-  cmcR::preProcess_gaussFilter(res = 3.125e-06,wavelength = 16,filtertype = "lp")
-surface2 <- x3p2$surface.matrix %>%
-  cmcR::preProcess_gaussFilter(res = 3.125e-06,wavelength = 16,filtertype = "lp")
+surface1 <- fadul1.1_raw %>%
+  cmcR::preProcess_gaussFilter(wavelength = 16,filtertype = "lp")
+surface2 <- fadul1.2_raw %>%
+  cmcR::preProcess_gaussFilter(wavelength = 16,filtertype = "lp")
 
 params <- rgl::r3dDefaults
 
@@ -106,10 +90,10 @@ light3d(x = 0,y = 0,z = 10,ambient = "grey60",diffuse = "grey50",specular = "gre
 
 #setup surface visualization
 multiply <- 1 #x3ptools::image_x3p default to exaggerate relief
-z <- multiply * surface1 # Exaggerate the relief
+z <- multiply * surface1$surface.matrix # Exaggerate the relief
 yidx <- ncol(z):1
-y <- x3p1$header.info$incrementY * yidx
-x <- x3p1$header.info$incrementX * (1:nrow(z))
+y <- fadul1.1_raw$header.info$incrementY * yidx
+x <- fadul1.1_raw$header.info$incrementX * (1:nrow(z))
 
 # emission, specular, ambient affect how the surface interacts with lights --
 # again, a lot of possible experimentation
@@ -133,10 +117,10 @@ light3d(x = 0,y = 0,z = 10,ambient = "grey60",diffuse = "grey50",specular = "gre
 
 #setup surface visualization
 multiply <- 1 #x3ptools::image_x3p default to exaggerate relief
-z <- multiply * surface2 # Exaggerate the relief
+z <- multiply * surface2$surface.matrix # Exaggerate the relief
 yidx <- ncol(z):1
-y <- x3p2$header.info$incrementY * yidx
-x <- x3p2$header.info$incrementX * (1:nrow(z))
+y <- fadul1.2_raw$header.info$incrementY * yidx
+x <- fadul1.2_raw$header.info$incrementX * (1:nrow(z))
 
 # emission, specular, ambient affect how the surface interacts with lights --
 # again, a lot of possible experimentation
@@ -158,23 +142,18 @@ magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
 Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use `ggplot2` to accomplish this.
 
 ```{r}
-fadul1.1 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d",
-                                                gaussFilterWavelength = c(16,500))
-fadul1.2 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8",
-                                                gaussFilterWavelength = c(16,500))
-fadul2.1 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96",
-                                                gaussFilterWavelength = c(16,500))
+data("fadul1.1_processed","fadul1.2_processed","fadul2.1_processed")
 ```
 
 ```{r include=FALSE,eval=FALSE}
 #if we want to include more pairs in the comparison
-fadul2.2 <- cmcR::selectBFImpression_sample_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
+fadul2.2 <- cmcR::x3p_read("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
 ```
 
 
 ```{r}
-cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,
-                                 "Fadul 1-2" = fadul1.2$x3p),
+cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1_processed,
+                                 "Fadul 1-2" = fadul1.2_processed),
                   type = "faceted",
                   rotate = 90,
                   legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
@@ -185,321 +164,241 @@ cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1$x3p,
 The code below will perform the cell-based comparison procedure and then determine the initial/high CMCs for the known match and known non-match pairs of cartridge cases. The "initial" CMCs are determined based on the originally proposed method from Song (2013) while the "high" CMCs are determined using the "High CMC" method proposed by Tong et al. (2015).
 
 ```{r}
-kmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
-                                             x3p2 = fadul1.2$x3p,
-                                             cellNumHoriz = 8,
-                                             minObservedProp = .1,
-                                             regionToCellProp = 9)
+kmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),
+                                       ~ comparison_allTogether(reference = fadul1.1_processed,
+                                                                target = fadul1.2_processed,
+                                                                
+                                                                theta = .))
 
-knmComparison <- cmcR::cellCCF_bothDirections(x3p1 = fadul1.1$x3p,
-                                              x3p2 = fadul2.1$x3p,
-                                              cellNumHoriz = 8,
-                                              minObservedProp = .1,
-                                              regionToCellProp = 9)
+kmComparisonFeatures_rev <- purrr::map_dfr(seq(-30,30,by = 3),
+                                           ~ comparison_allTogether(reference = fadul1.2_processed,
+                                                                    target = fadul1.1_processed,
+                                                                    theta = .))
 
-kmCMC <- cmcR::cmcFilter_improved(kmComparison,
-                         ccf_thresh = .6,
-                         dx_thresh = 15,
-                         theta_thresh = 6)
+kmComparison_allCMCs <- kmComparisonFeatures %>%
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
 
-knmCMC <- cmcR::cmcFilter_improved(knmComparison,
-                         ccf_thresh = .6,
-                         dx_thresh = 15,
-                         theta_thresh = 6)
+kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
+
+knmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),
+                                       ~ comparison_allTogether(reference = fadul1.1_processed,
+                                                                target = fadul2.1_processed,
+                                                                
+                                                                theta = .))
+
+knmComparisonFeatures_rev <- purrr::map_dfr(seq(-30,30,by = 3),
+                                           ~ comparison_allTogether(reference = fadul2.1_processed,
+                                                                    target = fadul1.1_processed,
+                                                                    theta = .))
+
+knmComparison_allCMCs <- knmComparisonFeatures %>%
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
+
+knmComparison_allCMCs_rev <- knmComparisonFeatures_rev %>%
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5),
+         highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5,
+                                              tau = 1))
 ```
 
-We can then visualize the CMCs for these comarisons. Below are the high CMCs for the known match pair.
+We can then visualize the CMCs for these comparisons. Below are the CMCs determined under the original method of Song (2013).
 
 ```{r}
-kmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
-                        x3p2 = fadul1.2$x3p,
-                        cellCCF_bothDirections_output = kmComparison,
-                        cmcFilter_improved_output = kmCMC,
-                        type = "faceted",
-                        legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                        height.colors = colorspace::desaturate(c('#7f3b08',
-                                                                 '#b35806',
-                                                                 '#e08214',
-                                                                 '#fdb863',
-                                                                 '#fee0b6',
-                                                                 '#f7f7f7',
-                                                                 '#d8daeb',
-                                                                 '#b2abd2',
-                                                                 '#8073ac',
-                                                                 '#542788',
-                                                                 '#2d004b'),
-                                                               amount = .75),
-                        cell.colors = c("#a60b00","#1b03a3"),
-                        cell.alpha = .15,
-                        na.value = "gray80")
-kmPlts$highCMC
+kmCMCPlot <- cmcR::cmcPlot(referenceScan = fadul1.1_processed,
+                            targetScan = fadul1.2_processed,
+                            reference_v_target_CMCs = kmComparison_allCMCs,
+                            target_v_reference_CMCs = kmComparison_allCMCs_rev,
+                            type = "faceted",
+                            x3pNames = c("Fadul 1-1","Fadul 2-1"),
+                            legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                            cell.colors = c("#a60b00","#1b03a3"),
+                            cell.alpha = .15,
+                            na.value = "gray80") %>%
+  map(~ . + theme(strip.text = element_blank()))
+
+kmLegend_originalCMC <- cowplot::get_legend(kmCMCPlot$originalMethodCMCs_reference_v_target +
+                                   theme(legend.direction = "horizontal"))
+
+km_originalCMC_reference_v_target <- kmCMCPlot$originalMethodCMCs_reference_v_target + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+km_originalCMC_target_v_reference <- kmCMCPlot$originalMethodCMCs_target_v_reference + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+km_originalCMCPlot_bothDirections <- ggplot(data.frame(a = 1)) +
+  theme_void() +
+  coord_cartesian(xlim = c(1,10),
+                  ylim = c(1,11),
+                  expand = FALSE) +
+  annotation_custom(ggplotGrob(km_originalCMC_reference_v_target),
+                    xmin = 1,xmax = 10,ymin = 6.2,ymax = 11) +
+  annotation_custom(ggplotGrob(km_originalCMC_target_v_reference),
+                    xmin = 1,xmax = 10,ymin = 2,ymax = 6.2) +
+  annotation_custom(kmLegend_originalCMC,
+                    xmin = 1,xmax = 10,ymin = 1.45,ymax = 1.45) +
+  annotate("text",x = 3.85,y = 8.15,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 3.85,y = 4,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 7.05,y = 8.15,size = 5,label = "Fadul 1-2") +
+  annotate("text",x = 7.05,y = 4,size = 5,label = "Fadul 1-2")
+
+km_originalCMCPlot_bothDirections
 ```
 
-The known non-match pair didn't yield any high CMCs, so we can only visualize the initial CMCs.
+And the CMCs determined under the High CMC method of Tong et al. (2015).
 
 ```{r}
-knmPlts <- cmcR::cmcPlot(x3p1 = fadul1.1$x3p,
-                         x3p2 = fadul2.1$x3p,
-                         cellCCF_bothDirections_output = knmComparison,
-                         cmcFilter_improved_output = knmCMC,
-                         legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                         height.colors = colorspace::desaturate(c('#7f3b08',
-                                                                  '#b35806',
-                                                                  '#e08214',
-                                                                  '#fdb863',
-                                                                  '#fee0b6',
-                                                                  '#f7f7f7',
-                                                                  '#d8daeb',
-                                                                  '#b2abd2',
-                                                                  '#8073ac',
-                                                                  '#542788',
-                                                                  '#2d004b'),
-                                                                amount = .75),
-                         cell.colors = c("#a60b00","#1b03a3"),
-                         cell.alpha = .15,
-                         na.value = "gray80")
+kmLegend_highCMC <- cowplot::get_legend(kmCMCPlot$highCMC_reference_v_target +
+                                   theme(legend.direction = "horizontal"))
 
-knmPlts$originalMethodCMCs
+km_highCMC_reference_v_target <- kmCMCPlot$highCMC_reference_v_target + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+km_highCMC_target_v_reference <- kmCMCPlot$highCMC_target_v_reference + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+km_highCMCCMCPlot_bothDirections <- ggplot(data.frame(a = 1)) +
+  theme_void() +
+  coord_cartesian(xlim = c(1,10),
+                  ylim = c(1,11),
+                  expand = FALSE) +
+  annotation_custom(ggplotGrob(km_highCMC_reference_v_target),
+                    xmin = 1.1,xmax = 10,ymin = 6.55,ymax = 11) +
+  annotation_custom(ggplotGrob(km_highCMC_target_v_reference),
+                    xmin = 1,xmax = 10,ymin = 2,ymax = 6.55) +
+  annotation_custom(kmLegend_highCMC,
+                    xmin = 1,xmax = 10,ymin = 1.45,ymax = 1.45) +
+  annotate("text",x = 3.65,y = 8.65,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 3.65,y = 4,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 7.25,y = 8.65,size = 5,label = "Fadul 1-2") +
+  annotate("text",x = 7.25,y = 4,size = 5,label = "Fadul 1-2")
+
+km_highCMCCMCPlot_bothDirections
 ```
 
-## Bonus: CCF "Map"
+
+The known non-match pair didn't yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).
 
 ```{r}
-kmCellRegionPairs <- cmcR::getCellRegionPairs(fadul1.1$x3p,
-                                              fadul1.2$x3p,
-                                              ccfDF = kmCMC$highCMCs,
-                                              cellCCF_params = kmComparison$comparison_1to2$params)
+knmCMCPlot <- cmcR::cmcPlot(referenceScan = fadul1.1_processed,
+                            targetScan = fadul2.1_processed,
+                            reference_v_target_CMCs = knmComparison_allCMCs,
+                            target_v_reference_CMCs = knmComparison_allCMCs_rev,
+                            type = "faceted",
+                            x3pNames = c("Fadul 1-1","Fadul 2-1"),
+                            legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
+                            height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
+                                                                     '#e08214','#fdb863',
+                                                                     '#fee0b6','#f7f7f7',
+                                                                     '#d8daeb','#b2abd2',
+                                                                     '#8073ac','#542788',
+                                                                     '#2d004b'),
+                                                                   amount = .75),
+                            cell.colors = c("#a60b00","#1b03a3"),
+                            cell.alpha = .15,
+                            na.value = "gray80") %>%
+  map(~ . + theme(strip.text = element_blank()))
 
-kmCellRegionPairs[3] %>%
-  map2(.x = .,
-       .y = names(.), 
-       function(set,theta){
-         map(set[2], ~ ccfMapPlot(mat1 = .[[1]],
-                                  mat2 = .[[2]],
-                                  theta = theta,
-                                  type = "raster"))
-       })
+knmLegend <- cowplot::get_legend(knmCMCPlot$originalMethodCMCs_reference_v_target +
+                                   theme(legend.direction = "horizontal"))
+
+knm_reference_v_target <- knmCMCPlot$originalMethodCMCs_reference_v_target + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+knm_target_v_reference <- knmCMCPlot$originalMethodCMCs_target_v_reference + 
+  theme(legend.position = "none",
+        plot.margin=unit(c(-.05,-.5,-.05,-.5), "cm"),
+        plot.title = element_blank())
+
+knm_cmcPlot_bothDirections <- ggplot(data.frame(a = 1)) +
+  theme_void() +
+  coord_cartesian(xlim = c(1,10),
+                  ylim = c(1,11),
+                  expand = FALSE) +
+  annotation_custom(ggplotGrob(knm_reference_v_target),
+                    xmin = 1,xmax = 10,ymin = 6.5,ymax = 11) +
+  annotation_custom(ggplotGrob(knm_target_v_reference),
+                    xmin = 1,xmax = 10,ymin = 2,ymax = 6.5) +
+  annotation_custom(knmLegend,
+                    xmin = 1,xmax = 10,ymin = 1.45,ymax = 1.45) +
+  annotate("text",x = 3.75,y = 8.65,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 3.75,y = 4,size = 5,label = "Fadul 1-1") +
+  annotate("text",x = 7.45,y = 8.65,size = 5,label = "Fadul 2-1") +
+  annotate("text",x = 7.45,y = 4,size = 5,label = "Fadul 2-1")
+
+knm_cmcPlot_bothDirections
 ```
-
-<!-- The cartridge cases after pre-processing can be visualized quickly by first converting the surface matrices into the `imager` package's datatype `cimg`. The base `plot` function interacts fairly well with `cimg` objects. -->
-
-<!-- ```{r} -->
-<!-- par(mar = c(1,1,1,1)) -->
-
-<!-- imlist("Fadul 1-1" = as.cimg(fadul1.1$x3p$surface.matrix), -->
-<!--        "Fadul 1-2" = as.cimg(fadul1.2$x3p$surface.matrix), -->
-<!--        "Fadul 2-1" = as.cimg(fadul2.1$x3p$surface.matrix), -->
-<!--        "Fadul 2-2" = as.cimg(fadul2.2$x3p$surface.matrix)) %>% -->
-<!--   plot() -->
-<!-- ``` -->
-
-<!-- Now the cartridge cases are ready to be compared. This is done below using the `cellCCF_bothDirections` function for each KM and KNM pairing (so 6 in total). Note that we are considering the rangle of rotation values from -30 to 30 degrees and using a grid of 8 by 8 cells. The code here is written in a way to be at least somewhat generalizable (e.g., using the `purrr::map` family) if the reader is interested in applying the method to a larger set of cartridge cases. -->
-
-<!-- ```{r} -->
-<!-- kmPairs <- list("1.1_1.2" = list(fadul1.1$x3p,fadul1.2$x3p), -->
-<!--                 "2.1_2.2" = list(fadul2.1$x3p,fadul2.2$x3p)) -->
-
-<!-- knmPairs <- list("1.1_2.1" = list(fadul1.1$x3p,fadul2.1$x3p), -->
-<!--                  "1.1_2.2" = list(fadul1.1$x3p,fadul2.2$x3p), -->
-<!--                  "1.2_2.1" = list(fadul1.2$x3p,fadul2.1$x3p), -->
-<!--                  "1.2_2.2" = list(fadul1.2$x3p,fadul2.2$x3p)) -->
-
-<!-- kmComparisons <- kmPairs %>% -->
-<!--   map(~ cmcR::cellCCF_bothDirections(.[[1]],.[[2]], -->
-<!--                                      thetas = seq(-30,30,by = 3), -->
-<!--                                      cellNumHoriz = 8)) -->
-
-<!-- knmComparisons <- knmPairs %>% -->
-<!--   map(~ cmcR::cellCCF_bothDirections(.[[1]],.[[2]], -->
-<!--                                      thetas = seq(-30,30,by = 3), -->
-<!--                                      cellNumHoriz = 8)) -->
-<!-- ``` -->
-
-<!-- With the comparisons completed, we can now show how to reproduce a variety of plots commonly given in the CMC literature. -->
-
-<!-- ### CMC-$\theta$ distribution -->
-
-<!-- Tong et al. (2015) discusses an improvement to the CMC method originally proposed by Song (2013). Figures 2 and 3 of Tong et al. (2015) show how the CMC count varies across a variety of rotation values for a known match pair and a known non-match pair of cartridges cases, respectively. For a truly matching pair of cartridge cases, this "CMC-$\theta$ distribution" tends to attain a mode around the rotation value that correctly aligns one to the other. This tendency can be used to determine, for example, if comparing one cartridge case scan to another in one "direction" yields a CMC-$\theta$ mode that agrees the comparison in the other direction up to a sign.  -->
-
-<!-- The plot below illustrates this by showing the CMC-$\theta$ for the known match Fadul 1-1 and Fadul 1-2 pair. The `cmcPerThetaBarPlot` function is used to construct the plot. Comparing Fadul 1-1 to Fadul 1-2 (i.e., Fadul 1-1 is partitioned into a grid of cells and compared to larger regions in Fadul 1-2) clearly yields a CMC-$\theta$ mode around -24 degrees (i.e., Fadul 1-2 should be rotated -24 degrees to align with Fadul 1-1). In the other direction, we see that comparing Fadul 1-2 to Fadul 1-1 yields a CMC-$\theta$ mode around 21, which indicates that both directions agree (at least within a tolerance of, say, 3 degrees).  -->
-
-<!-- The way that Tong et al. propose to identify modes in the CMC-$\theta$ distribution is to introduce a "high CMC" threshold equal to the max CMC count minus some constant. That is, $CMC_{\text{high}} = CMC_{\max} - \tau$ for some $\tau$. Using this high CMC threshold, we can determine how spread out the high CMC $\theta$ values are; the motivation here being that excessively diffuse high CMC $\theta$ values indicate that little "consensus" is reached as to the correct $\theta$ rotation value and the cartridge case pair under consideration is likely not a match. -->
-
-<!-- ```{r} -->
-<!-- cmcR::cmcPerThetaBarPlot(kmComparisons$`1.1_1.2`, -->
-<!--                          ccf_thresh = .6, -->
-<!--                          dx_thresh = 10, -->
-<!--                          highCMCThresh = 1) -->
-<!-- ``` -->
-
-<!-- In contrast, we can see the CMC-$\theta$ distribution for the known non-match pair of Fadul 1-1 and Fadul 2-1. Following the high CMC criterion discussed above, we can see that the range of $\theta$ values that we would classify as having a high CMC count is rather spread out (-18 to 3 degrees in one direction vs. -12 to 21 degrees in the other). Thus, we would conclude that this cartridge case pair is likely not a match. -->
-
-<!-- ```{r} -->
-<!-- cmcR::cmcPerThetaBarPlot(knmComparisons$`1.1_2.1`, -->
-<!--                          ccf_thresh = .6, -->
-<!--                          dx_thresh = 10, -->
-<!--                          highCMCThresh = 1) -->
-<!-- ``` -->
-
-<!-- ### CCF Map -->
-
-<!-- We may be interested in learning more about a particular comparison that was done between a pair of cartridge case scans. For example, as discussed above it appears that Fadul 1-1 and Fadul 1-2 align well for a rotation of 24 degrees (-24 depending on the direction). We may be interested in what the cell/region pairs looked like just before the CCF was computed. The `getCellRegionPairs` function will take a data frame of CCF results, such as the one associated with the comparison after Fadul 1-2 is rotated -24 degrees, and return each cell/region pair represented in that data frame. For brevity, we'll just consider as examples the Fadul 1-1 and Fadul 1-2 comparison as well as the Fadul 1-1 and Fadul 2-1 comparison. -->
-
-<!-- ```{r} -->
-<!-- kmCellRegionPairs <- cmcR::getCellRegionPairs(x3p1 = fadul1.1$x3p, -->
-<!--                                               x3p2 = fadul1.2$x3p, -->
-<!--                                               ccfDF = kmComparisons$`1.1_1.2`$comparison_1to2$ccfResults$`-24`, -->
-<!--                                               params = kmComparisons$`1.1_1.2`$comparison_1to2$params) -->
-
-<!-- knmCellRegionPairs <- cmcR::getCellRegionPairs(x3p1 = fadul1.1$x3p, -->
-<!--                                                x3p2 = fadul2.1$x3p, -->
-<!--                                                ccfDF = knmComparisons$`1.1_2.1`$comparison_1to2$ccfResults$`-9`, -->
-<!--                                                params = knmComparisons$`1.1_2.1`$comparison_1to2$params) -->
-<!-- ``` -->
-
-
-<!-- Figures 4 and 5 in Tong et al. (2015) show examples of "CCF maps," as they are aptly called, for a known match cell/region pair and a known non-match cell/region pair, respectively. These "maps" are actually just the 3-dimensional cross-correlation function surface. They are referred as maps because they indicate what the CCF is for various translation values of one surface matrix compared to the other. The coordinates at which the CCF achieves a maximum can be used as estimates of the "true" translation values at which a particular cell aligns best to its associated region. The `ccfMapPlot` function plots the CCF where function values are mapped to color. Additionally, the function will plot the cell/region pair for which the CCF map was determined. An orange square will be plotted on the region that visually indicates where the CCF "believes" the correct translation of the cell to be relative to the region. The plot below shows a particular cell/region pair and its associated CCF map from the known match comparison of Fadul 1-1 vs. Fadul 1-2. Note that the CCF max value is actually rather small in this instance. This is an artifact of how the CCF method is calculated using a Fast Fourier Transform technique. Effectively, any `NA` values in the scan, of which there are many, must be replaced prior to calculation of the CCF using FFTs. This often causes the CCF to be "deflated" relative the "true" CCF values. -->
-
-<!-- ```{r} -->
-<!-- kmCellRegionPairs$`-24`[27] %>% -->
-<!--   map(~ cmcR::ccfMapPlot(mat1 = .[[1]], -->
-<!--                          mat2 = .[[2]], -->
-<!--                          theta = -24)) -->
-<!-- ``` -->
-
-<!-- In contrast, the plot below shows a particular cell/region pair and its associated CCF map from the known non-match comparison of Fadul 1-1 vs. Fadul 2-1. -->
-
-<!-- ```{r} -->
-<!-- knmCellRegionPairs$`-9`[30] %>% -->
-<!--   map(~ cmcR::ccfMapPlot(mat1 = .[[1]], -->
-<!--                          mat2 = .[[2]], -->
-<!--                          theta = -9)) -->
-<!-- ``` -->
-
-
-<!-- ### $CCF_\max$ distribution  -->
-
-<!-- Figure 4 of Tong et al. (2014) and Figure 5(a) of Chen et al. (2017) -->
-
-<!-- ```{r} -->
-<!-- ggplot() + -->
-<!--   geom_histogram(data = kmComparisons %>% -->
-<!--                    map2_dfr(.x = ., -->
-<!--                             .y = names(.), -->
-<!--                             ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                               ungroup() %>% -->
-<!--                               mutate(pair = rep(.y,times = nrow(.)))), -->
-<!--                  aes(x = ccf,y = ..density..), -->
-<!--                  fill = "orange", -->
-<!--                  alpha = .7, -->
-<!--                  binwidth = .03) + -->
-<!--   geom_histogram(data = knmComparisons %>% -->
-<!--                    map2_dfr(.x = ., -->
-<!--                             .y = names(.), -->
-<!--                             ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                               ungroup() %>% -->
-<!--                               mutate(pair = rep(.y,times = nrow(.)))), -->
-<!--                  aes(x = ccf,y = ..density..), -->
-<!--                  fill = "royalblue", -->
-<!--                  alpha = .7, -->
-<!--                  binwidth = .03) + -->
-<!--   geom_bar(data = data.frame(x = c(.5,.5), -->
-<!--                              y = c(0,0), -->
-<!--                              comparisonType = c("known non-match","known match")), -->
-<!--            aes(x = x,y = y,fill = comparisonType),stat = "identity", -->
-<!--            alpha = .7) + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) + -->
-<!--   theme_bw() + -->
-<!--   xlim(c(0,1)) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- bind_rows(kmComparisons %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                        ungroup() %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known match")), -->
-<!--           knmComparisons %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ cmcR::topResultsPerCell(.x$comparison_1to2$ccfResults) %>% -->
-<!--                        ungroup() %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match"))) %>% -->
-<!--   ggplot(aes(x = ccf,fill = comparisonType)) + -->
-<!--   geom_density(alpha = .5) + -->
-<!--   theme_bw() + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) + -->
-<!--   xlim(c(0,1)) -->
-<!-- ``` -->
-
-
-<!-- ### Identified CMCs -->
-
-<!-- Figure 7 of Tong et al. (2015) -->
-
-<!-- ```{r} -->
-<!-- kmCMCs <- kmComparisons %>% -->
-<!--   map(~ cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ., -->
-<!--                                  consensus_function = median, -->
-<!--                                  ccf_thresh = .6, -->
-<!--                                  dx_thresh = 10, -->
-<!--                                  theta_thresh = 3)) -->
-
-<!-- knmCMCs <- knmComparisons %>% -->
-<!--   map(~ cmcR::cmcFilter_improved(cellCCF_bothDirections_output = ., -->
-<!--                                  consensus_function = median, -->
-<!--                                  ccf_thresh = .6, -->
-<!--                                  dx_thresh = 10, -->
-<!--                                  theta_thresh = 3)) -->
-
-<!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = kmCMCs$`1.1_1.2`$highCMCs) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- cmcR::cmcPlot(x3p = fadul1.1$x3p, -->
-<!--               cmcDF = knmCMCs$`1.1_2.1`$originalMethodCMCs[[1]]$comparison_1to2) -->
-<!-- ``` -->
-
-
-<!-- ### CMC Distribution -->
-
-<!-- Figure 7 of Tong et al. (2014), Figure 9 of Tong et al. (2015), and Figure 6 of Chen et al. (2017) -->
-
-<!-- ```{r} -->
-<!-- bind_rows(kmCMCs %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      ~ .$highCMCs %>% -->
-<!--                        mutate(pair = rep(.y,times = nrow(.)), -->
-<!--                               comparisonType = "known match")), -->
-<!--           knmCMCs %>% -->
-<!--             map2_dfr(.x = ., -->
-<!--                      .y = names(.), -->
-<!--                      function(cmcs = .x,name = .y){ -->
-<!--                        if(!is.null(cmcs$highCMCs)){ -->
-<!--                        return(cmcs$highCMCs %>% -->
-<!--                        mutate(pair = rep(name,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match")) -->
-<!--                        } -->
-<!--                        else{ -->
-<!--                          cmcs$originalMethodCMCs[[1]][[which.min(c(nrow(cmcs$originalMethodCMCs[[1]]$comparison_1to2),nrow(cmcs$originalMethodCMCs[[1]]$comparison_2to1)))]] %>% -->
-<!--                            mutate(pair = rep(name,times = nrow(.)), -->
-<!--                               comparisonType = "known non-match") %>% -->
-<!--                            return() -->
-<!--                        } -->
-<!--                        })) %>% -->
-<!--   group_by(pair,comparisonType) %>% -->
-<!--   tally() %>% -->
-<!--   ggplot(aes(x = n,fill = comparisonType)) + -->
-<!--   geom_histogram(binwidth = 1) + -->
-<!--   theme_bw() + -->
-<!--   scale_fill_manual(values = c("orange","royalblue")) -->
-<!-- ``` -->
-
 
 ## References
 

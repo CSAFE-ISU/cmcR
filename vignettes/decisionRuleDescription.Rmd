@@ -7,6 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Set-up
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -14,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [National Ballistics & Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`cellpairwiseCompCor_bothDirections`](https://csafe-isu.github.io/cmcR/reference/cellpairwiseCompCor_bothDirections.html) function on the **cmcR** website for information regarding this procedure.
+This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [National Ballistics & Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`comparison_allTogether`](https://csafe-isu.github.io/cmcR/reference/comparison_allTogether.html) function on the **cmcR** website for information regarding this procedure.
 
 ```{r setup,message=FALSE,warning=FALSE}
 library(cmcR)
@@ -158,17 +160,6 @@ knmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
                             cell.alpha = .15,
                             na.value = "gray80")
 
-#We want Fadul 1-1 to be the reference cartridge case for all 3 of these plots
-#to enforce visual consistency. The original CMC method applied to Fadul 1-1 and
-#Fadul 1-2 results in two CMC counts (one for each comparison direction), the
-#minimum of which is associated with Fadul 1-2 being the reference cartridge
-#case. Unless changed, the cmcPlot function (by design) will then create a Top
-#Vote CMC plot with Fadul 1-2 as the reference cartridge case (which we don't
-#want). Since we desire Fadul 1-1 to be the reference for this particular
-#illustrative example, we will artificially inflate the number CMCs in the Fadul
-#1-2 vs. Fadul 1-1 direction (i.e., with Fadul 1-2 as the reference) so as to
-#force Fadul 1-1 to be plotted as the reference.
-
 kmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
                            fadul1.2_processed,
                            reference_v_target_CMCs = kmComparison_allCMCs,
@@ -233,14 +224,34 @@ kmCMCPlot_list_comparison1to2 <- cmcR::cmcPlot(fadul1.1_processed,
                                                type = "list")
 ```
 
-To illustrate the assumptions underlying the CMC method, compare the results of the cell-based comparison procedure for the comparison between the known match pair Fadul 1-1 and Fadul 1-2 and the known non-match pair Fadul 1-1 and Fadul 2-1. 
-\autoref{fig:translationVotes} shows the distributions of the $\{(x_i, y_i)\}_{i = 1,...,n}$ values which produce the highest pairwiseCompCor for the alignment of each cell/region pair.
-The squares in \autoref{fig:translationVotes} are centered on the comparisons' respective $(x_{\text{ref}},y_{\text{ref}})$ values and represent the maximum distance an $(x_i,y_i)$ estimated translation value can be from $(x_{\text{ref}},y_{\text{ref}})$ to be classified as "congruent" based on thresholds $T_{x} = T_{y} = 20$ pixels. 
-Of the 29 cell/region pairs considered in the known match comparison between Fadul 1-1 and Fadul 1-2, 19 $(x_i,y_i)$ values are within 20 pixels of $(x_{\text{ref}},y_{\text{ref}})$. 
-In contrast, 3 out of 35 $(x_i,y_i)$ are within 20 pixels of $(x_{\text{ref}},y_{\text{ref}})$ for the known non-match comparison between Fadul 1-1 and Fadul 2-1. These plots exhibit similar behavior to Figures 1 and 2 in \citet{chen_convergence_2017} which show the estimated translation values for various rotation values for the same cartridge case pairs.
-<!-- \svp{XXX I think some points are missing in the KM plot at least - how many points were excluded for not having enough area? I count 39 points (27 inside, I'm taking your word on that).} -->
+The cell-based comparison procedure implemented in the `comparison_allTogether` function returns a data frame/tibble of similarity features between two cartridge case scans. For each cell in the "reference" scan (Fadul 1-1 in this example), the similarity features include
 
-Turning our attention to the estimated rotation values, \autoref{fig:rotationVotes} shows the distribution of the $\theta_i$ values which produce the highest pairwiseCompCor for the comparisons of Fadul 1-1 vs. Fadul 1-2 and Fadul 1-1 vs. Fadul 2-1. A vertical line is drawn at the comparisons' respective $\theta_{\text{ref}}$ value and a threshold of $T_{\theta} = 6$ degrees is used to classify $\theta_i$ values as "congruent." 25 of 29 known match and 2 of 34 known non-match $\theta_i$ values are classified as congruent under these conditions.
+- Estimated horizontal and vertical translations, `(x,y)`, required to align the reference cell in the target scan
+- Cross-correlation between the reference cell and its associated target region after aligning by the estimated `(x,y)` values
+- Rotation performed on the target scan that resulted in the `(x,y,CCF)` feature set
+
+The fundamental assumption underlying all CMC decision rules is that truly matching cartridge case pairs should have similarity features that are consistent across the cell/region pairs. In particular, a plurality of cell/region pairs should "vote" for similar `(x, y, theta)` alignment values. In contrast, the cell/region pairs of a truly non-matching cartridge cases should have seemingly random `(x, y, theta)` votes. The two decision rules implemented in the **cmcR** package can be understood as two different systems by which cells vote for `(x, y, theta)` values that they "believe" to be the true alignment values for the overall cartridge case scans.
+
+# Original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868)
+
+An actual implementation of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) is described in [Song et al. (2014)](https://iopscience.iop.org/article/10.1088/0957-0233/25/6/064005). The decision rule [Song et al. (2014)](https://iopscience.iop.org/article/10.1088/0957-0233/25/6/064005) describe using is based on
+
+> a virtual reference with three reference registration parameters $\theta_{\text{ref}}$, $x_{\text{ref}}$ and $y_{\text{ref}}$ generated by the median values of the collective $\theta$, and $x$-, $y$-translation values of all cell pairs.
+
+That is, a consensus is determined by finding the median registration phase values across the cell/region pairs for a particular cartridge case pair comparison.
+Then, the distances between the consensus registration values and the cell comparison values are assessed to determine whether they are within a specified distance of the consensus.
+This consensus assessment introduces threshold parameters $T_{x}, T_{y}, T_\theta, T_{\text{CCF}}$.
+
+Let $x_i, y_i, \theta_i$ denote the translation and rotation parameters which produce the highest CCF for the alignment of cell/region pair $i$. Also let $x_{\text{ref}}, y_{\text{ref}}, \theta_{\text{ref}}$ be the median over alignment values for a particular cartridge case comparison (these are the "virtual reference" values). A cell/region pair $i$ is declared a match if all of the following conditions hold:
+
+- $|x_i - x_{\text{ref}}| \leq T_{x}$
+- $|y_i - y_{\text{ref}}| \leq T_{y}$
+- $|\theta_i - \theta_{\text{ref}}| \leq T_{\theta}$
+- CCF$_{\max,i} \geq T_{\text{CCF}}$.
+
+With respect to the voting system analogy, we might interpret this decision rule as a single-choice voting system similar to the system used in U.S. presidential elections. That is, every cell is allowed to submit one vote corresponding to the registration phase with the highest CCF$_{\max}$ value. Some of these votes are discarded if the associated CCF$_{\max}$ are below the $T_{\text{CCF}}$ threshold. A consensus is determined by counting the number of votes that are close to the reference values $x_{\text{ref}}, y_{\text{ref}}, \theta_{\text{ref}}$ (which is dyadically defined based on the $T_x,T_y,T_{\theta}$ thresholds).
+
+The plot below shows the values of $x_i, y_i, \theta_i$, and $CCF_{\max,i}$ for each cell/region pair between Fadul 1-1 and Fadul 1-2 as well as Fadul 1-1 and Fadul 2-1. These values are shown as blue/red bars. The purple bands indicate the range of acceptable values within $T_{x} = 20 T_{y}, T_{\theta} = 6$ within $x_{\text{ref}}, y_{\text{ref}}, \theta_{\text{ref}}$ and above $T_{\text{CCF}} = .5$ to be declared "congruent." As we might expect, a larger proportion of $x_i, y_i, \theta_i$, and $CCF_{\max,i}$ values are within these acceptable ranges for the comparison between Fadul 1-1 and Fadul 1-2 than the comparison between Fadul 1-1 and Fadul 2-1. This indicates that there is a clearer "consensus" about the true alignment values for the matching cartridge case pair than the non-matching.
 
 ```{r include=FALSE}
 kmComparison_xData <- kmComparisonFeatures %>%
@@ -547,7 +558,7 @@ kmComparison_pairwiseCompCorData_plot <- kmComparison_pairwiseCompCorData %>%
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
-  scale_x_continuous(expression(paste("Estimated cross-correlation pairwiseCompCor"[max])), 
+  scale_x_continuous(expression(paste("Estimated CCF"[max])), 
                      breaks = seq(0,1,by = .5)) +
   coord_cartesian(xlim = c(0,1),
                   ylim = c(0,3.5),
@@ -571,7 +582,7 @@ knmComparison_pairwiseCompCorData_plot <- knmComparison_pairwiseCompCorData %>%
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
-  scale_x_continuous(expression(paste("Estimated cross-correlation pairwiseCompCor"[max])), 
+  scale_x_continuous(expression(paste("Estimated CCF"[max])), 
                      breaks = seq(0,1,by = .5)) +
   coord_cartesian(xlim = c(0,1),
                   ylim = c(0,3.5),
@@ -612,24 +623,21 @@ knmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 2-1`
 ```
 
 
-```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
-#problem with cowplot is that it's trying to force each square of the grid to be the same size -- not sure how to fix this
-
-
+```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 8, fig.align = 'center',cache = F}
 horizontalTranslation_label <- ggplot() +
-  annotate("text",x = 1,y = 1,size = 2,label = "  Horizontal \n Translation") +
+  annotate("text",x = 1,y = 1,size = 2.5,label = "  Horizontal \n Translation") +
   theme_void()
 
 verticalTranslation_label <- ggplot() +
-  annotate("text",x = 1,y = 1,size = 2,label = "  Vertical \n Translation") +
+  annotate("text",x = 1,y = 1,size = 2.5,label = "  Vertical \n Translation") +
   theme_void()
 
 rotation_label <- ggplot() +
-  annotate("text",x = 1,y = 1,size = 2,label = "Rotation") +
+  annotate("text",x = 1,y = 1,size = 2.5,label = "Rotation") +
   theme_void()
 
 pairwiseCompCor_label <- ggplot() +
-  annotate("text",x = 1,y = 1,size = 2,label = expression(paste("pairwiseCompCor"[max]))) +
+  annotate("text",x = 1,y = 1,size = 2.5,label = expression(paste("CCF"[max]))) +
   theme_void()
 
 blank_label <- ggplot() +
@@ -658,6 +666,8 @@ gridExtra::grid.arrange(kmCMCPlot_list_comparison1to2$originalMethodCMCs_referen
                         widths = unit(c(1,1.5,1.5),"null"))
 
 ```
+
+The first step in the High CMC method is to count the CMCs under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) in both comparison "directions," meaning each scan plays the role as the "reference" and "target" scan. After these CMCs are counted, [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) propose using the minimum of the 2 CMC counts as an initial CMC count prior to applying the High CMC decision rule. The figure below shows the behavior of the $x_i, y_i, \theta_i$, and $CCF_{\max,i}$ values in each direction via a [parallel-coordinates plot](https://en.wikipedia.org/wiki/Parallel_coordinates), which is useful for visualizing multi-dimensional data sets. Each connected path represents a single cell/region pair. The purple regions again represent the acceptable regions that are sufficiently "close" to the reference values (or above .5 in the case of the CCF). Paths that only traverse through purple regions are deemed congruent under the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and are colored blue. We can see that 19 cells are deemed congruent for the comparison in which Fadul 1-1 is treated as the reference while 18 are considered congruent in the other direction. As such, the initial CMC count used for the High CMC method would be 18.
 
 ```{r include=FALSE}
 #PC plots look best when the values are rescaled to be between 0 and 1. We want
@@ -926,32 +936,31 @@ kmCMCPlot_list_comparison2to1 <- cmcR::cmcPlot(fadul1.2_processed,
                                                na.value = "gray90",
                                                type = "list")
 
-kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-1`$layers <- kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-1`$layers[-3]
-kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-2`$layers <- kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-2`$layers[-3]
-knmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 2-1`$layers <- knmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 2-1`$layers[-3]
+kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1`$layers <- kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1`$layers[-3]
+kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`$layers <- kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`$layers[-3]
+knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1`$layers <- knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1`$layers[-3]
 
-kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-1` <- kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-1` +
+kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1` +
   ggplot2::theme(legend.position = "none",
                  plot.margin=unit(c(0,-.5,0,-.5), "cm"),
                  plot.title = element_blank()) +
   coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
   annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-1",size = 4)
 
-kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-2` <- kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-2`+
+kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2` <- kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`+
   ggplot2::theme(legend.position = "none",
                  plot.margin=unit(c(0,-.5,0,-.5), "cm"),
                  plot.title = element_blank()) +
   coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
   annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 1-2",size = 4)
 
-knmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 2-1` <- knmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 2-1` +
+knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1` <- knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1` +
   ggplot2::theme(legend.position = "none",
                  plot.margin=unit(c(0,-.5,0,-.5), "cm"),
                  plot.title = element_blank()) +
   coord_fixed(xlim = c(-400,3600), ylim = c(-100,3800)) +
   annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 2-1",size = 4)
 ```
-
 
 ```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
 
@@ -988,8 +997,8 @@ gridExtra::grid.arrange(reference_label,
                         kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
                         originalMethod_comparison1to2_pcp,
                         originalCMC_comparison1to2_label,
-                        kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
-                        kmCMCPlot_list_comparison2to1$originalMethodCMCs_reference_v_target$`Fadul 1-1`,
+                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`,
+                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1`,
                         originalMethod_comparison2to1_pcp,
                         originalCMC_comparison2to1_label,
                         blank_label,
@@ -1284,11 +1293,11 @@ ggplot(data.frame(a = 1)) +
             aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed",ends = "first"))
 ```
 
-An analogy is useful for understanding the difference between the decision rules of the original method of \citet{song_proposed_2013} and the High CMC method. Consider the decision rules as a voting system by which each cell in the reference scan votes for what it considers to be the true registration phase (translations and rotation) of the overall scans. The "votes" of each cell are ranked based on the associated pairwiseCompCor$_{\max}$ value. The original method of \citet{song_proposed_2013} might be viewed as a single-choice voting system similar to the system used in U.S. presidential elections. That is, every cell is allowed to submit one vote corresponding to the registration phase with the highest pairwiseCompCor$_{\max}$ value. Some of these votes are discarded if the associated pairwiseCompCor$_{\max}$ are below the $T_{\text{pairwiseCompCor}}$ threshold. A consensus is determined by counting the number of votes that are close to the reference values $x_{\text{ref}}, y_{\text{ref}}, \theta_{\text{ref}}$ (which is yadically defined based on the $T_x,T_y,T_{\theta}$ thresholds). By considering only the "top vote" of each cell, information is lost regarding other registration phases for which a cell might also rank highly. As \citet{tong_improved_2015} observe:
+By considering only the "top vote" of each cell as is done in the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868), information is lost regarding other registration phases for which a cell might also rank highly. As [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) observe:
 
-> some of the valid cell pairs may be mistakenly excluded from the CMC count because by chance their correlation yields a higher pairwiseCompCor value at a rotation angle outside the threshold range $T_\theta$.
+> some of the valid cell pairs may be mistakenly excluded from the CMC count because by chance their correlation yields a higher CCF value at a rotation angle outside the threshold range $T_\theta$.
 
-The High CMC method lifts the single-choice restriction by allowing cells to cast a vote for the translation phase at every $\theta$ value for which it has a sufficiently large associated pairwiseCompCor$_{\max}$ value. 
+The High CMC method lifts the single-choice restriction by allowing cells to cast a vote for the translation phase at every $\theta$ value for which it has a sufficiently large associated CCF$_{\max}$ value. 
 Under this system, each vote represents the translation phase that the cell considers to be the true translation phase of the overall scans conditional on a particular $\theta$ value.
 In this way, the High CMC method might be viewed as an approval voting system in which an individual may cast a vote for all of the candidates that they would like.
 For each $\theta$ value, the number of translation phase votes that are close to the $\theta$-specific reference values $x_{\text{ref},\theta}, y_{\text{ref},\theta}$ are counted (now defined based only on the $T_x,T_y$ thresholds).
@@ -1306,9 +1315,9 @@ We can clearly see a CMC mode around $\theta = -24$ in one direction and $21$ in
 
 Based on this observation, \citet{tong_improved_2015} outline the following procedure for the High CMC method:
 
-> Conduct both forward and backward correlations at each rotation and record the registration based on pairwiseCompCor$_{\max}$, $x$, and $y$ for each cell at each rotation. These data will be used in the next two steps separately.
+> Conduct both forward and backward correlations at each rotation and record the registration based on CCF$_{\max}$, $x$, and $y$ for each cell at each rotation. These data will be used in the next two steps separately.
 
-> At every rotation angle, each cell in the reference image finds a registration position in the compared image with a maximum pairwiseCompCor value. By selecting the registration with the maximum pairwiseCompCor value for each cell, the two CMC numbers determined by the four thresholds can be obtained based on the original algorithm [\citet{tong_fired_2014}]. The lower CMC number is used as the initial result.
+> At every rotation angle, each cell in the reference image finds a registration position in the compared image with a maximum CCF value. By selecting the registration with the maximum CCF value for each cell, the two CMC numbers determined by the four thresholds can be obtained based on the original algorithm [\citet{tong_fired_2014}]. The lower CMC number is used as the initial result.
 
 > Build CMC-$\theta$ distributions using the data generated in step 1, by counting the number of cells that have congruent positions at each individual rotation angle. Calculate the angular range of “high CMCs” using both the forward and backward CMC-$\theta$ distributions, as illustrated in Figs. 2 and 3.
 
