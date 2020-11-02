@@ -279,6 +279,14 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
                                                                      corrThresh = corrThresh)) %>%
     dplyr::filter(cmcThetaDistribClassif == "CMC Candidate")
 
+  if(nrow(cmcThetaDistrib) == 0){
+    highCMCClassif <- comparisonFeaturesDF %>%
+      dplyr::mutate(highCMCClassif = "non-CMC (failed)") %>%
+      dplyr::pull(highCMCClassif)
+
+    return(highCMCClassif)
+  }
+
   cmcThetaDistrib_classified <- decision_highCMC_identifyHighCMCThetas(cmcThetaDistrib,
                                                                        tau = tau)
 

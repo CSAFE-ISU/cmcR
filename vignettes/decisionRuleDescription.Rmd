@@ -31,7 +31,7 @@ data("fadul2.1_processed")
 
 The three processed cartridge cases are shown below.
 
-```{r, include=FALSE,fig.width = 7, fig.align = 'center'}
+```{r, echo=FALSE,fig.width = 7, fig.align = 'center'}
 cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
                        "Fadul 1-2" = fadul1.2_processed,
                        "Fadul 2-1" = fadul2.1_processed))
