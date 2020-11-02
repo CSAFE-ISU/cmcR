@@ -62,7 +62,7 @@
 #' @seealso
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
-#' @export
+#'@keywords internal
 #'
 #' @importFrom stats median
 

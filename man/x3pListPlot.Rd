@@ -31,7 +31,10 @@ creates one plot faceted by surface matrix or creates individual plots per
 surface matrix and returns them in a list.
 }
 \examples{
-\dontrun{
- x3pListPlot(list("name1" = referenceScan, "name2" = targetScan))
-}
+data(fadul1.1_processed,fadul1.2_processed,fadul2.1_processed)
+
+x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
+                 "Fadul 1-2" = fadul1.2_processed,
+                 "Fadul 2-1" = fadul2.1_processed))
+
 }

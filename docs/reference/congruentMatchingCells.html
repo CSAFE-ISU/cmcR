@@ -104,6 +104,9 @@ cmcFilter_improved functions together" />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -135,24 +138,24 @@ scans</h1>
 cmcFilter_improved functions together</p>
     </div>
 
-    <pre class="usage"><span class='fu'>congruentMatchingCells</span>(
-  <span class='no'>x3p1</span>,
-  <span class='no'>x3p2</span>,
-  <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
-  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
-  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.15</span>,
-  <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-  <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-  <span class='kw'>consensus_function</span> <span class='kw'>=</span> <span class='no'>median</span>,
-  <span class='kw'>ccf_thresh</span> <span class='kw'>=</span> <span class='fl'>0.6</span>,
-  <span class='kw'>dx_thresh</span> <span class='kw'>=</span> <span class='fl'>10</span>,
-  <span class='kw'>dy_thresh</span> <span class='kw'>=</span> <span class='no'>dx_thresh</span>,
-  <span class='kw'>theta_thresh</span> <span class='kw'>=</span> <span class='fl'>3</span>,
-  <span class='kw'>consensus_function_theta</span> <span class='kw'>=</span> <span class='no'>consensus_function</span>,
-  <span class='no'>...</span>
-)</pre>
+    <pre class="usage"><span class='fu'>congruentMatchingCells</span><span class='op'>(</span>
+  <span class='va'>x3p1</span>,
+  <span class='va'>x3p2</span>,
+  thetas <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>30</span>, <span class='fl'>30</span>, by <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
+  cellNumHoriz <span class='op'>=</span> <span class='fl'>8</span>,
+  cellNumVert <span class='op'>=</span> <span class='va'>cellNumHoriz</span>,
+  regionToCellProp <span class='op'>=</span> <span class='fl'>4</span>,
+  minObservedProp <span class='op'>=</span> <span class='fl'>0.15</span>,
+  centerCell <span class='op'>=</span> <span class='st'>"individualCell"</span>,
+  scaleCell <span class='op'>=</span> <span class='st'>"individualCell"</span>,
+  consensus_function <span class='op'>=</span> <span class='va'>median</span>,
+  ccf_thresh <span class='op'>=</span> <span class='fl'>0.6</span>,
+  dx_thresh <span class='op'>=</span> <span class='fl'>10</span>,
+  dy_thresh <span class='op'>=</span> <span class='va'>dx_thresh</span>,
+  theta_thresh <span class='op'>=</span> <span class='fl'>3</span>,
+  consensus_function_theta <span class='op'>=</span> <span class='va'>consensus_function</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -257,10 +260,12 @@ consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
 <p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf</a></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'>#x3p1 and x3p2 are two processed cartridge case scans</span>
-<span class='no'>cmc</span> <span class='kw'>&lt;-</span> <span class='fu'>congruentMatchingCells</span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>)
-}</div></pre>
+<span class='va'>cmc</span> <span class='op'>&lt;-</span> <span class='fu'>congruentMatchingCells</span><span class='op'>(</span><span class='va'>x3p1</span>,<span class='va'>x3p2</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -276,7 +281,7 @@ consensus_function_theta (e.g., na.rm = TRUE) if necessary</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -38,11 +38,48 @@ depicting the CMCs/non-CMCs under the initially proposed and High CMC
 methods for a pair of cartridge case scans
 }
 \examples{
-\dontrun{
-comparison <- cellCCF_bothDirections(referenceScan,targetScan)
-cmcs <- cmcFilter_improved(comparison)
+data(fadul1.1_processed,fadul1.2_processed)
 
-cmcPlot(referenceScan,targetScan,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
-}
+comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
+                                   ~ comparison_allTogether(fadul1.1_processed,
+                                                       fadul1.2_processed,
+                                                       theta = .))
+comparisonDF_2to1 <- purrr::map_dfr(seq(-30,30,by = 3),
+                                   ~ comparison_allTogether(fadul1.2_processed,
+                                                       fadul1.1_processed,
+                                                       theta = .))
+
+comparisonDF_1to2 <- comparisonDF_1to2 \%>\%
+dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                                   x = x,
+                                                   y = y,
+                                                   theta = theta,
+                                                   corr = pairwiseCompCor),
+              highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                           x = x,
+                                           y = y,
+                                           theta = theta,
+                                           corr = pairwiseCompCor,
+                                           tau = 1))
+
+
+comparisonDF_2to1 <- comparisonDF_2to1 \%>\%
+dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                                   x = x,
+                                                   y = y,
+                                                   theta = theta,
+                                                   corr = pairwiseCompCor),
+              highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                           x = x,
+                                           y = y,
+                                           theta = theta,
+                                           corr = pairwiseCompCor,
+                                           tau = 1))
+
+cmcPlot(fadul1.1_processed,
+       fadul1.2_processed,
+       comparisonDF_1to2,
+       comparisonDF_2to1,
+       corColName = "pairwiseCompCor")
 
 }

@@ -20,9 +20,12 @@
 #'   scale_fill_gradientn)
 #' @param guide internal usage
 #' @examples
-#' \dontrun{
-#'  x3pListPlot(list("name1" = referenceScan, "name2" = targetScan))
-#' }
+#' data(fadul1.1_processed,fadul1.2_processed,fadul2.1_processed)
+#'
+#' x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
+#'                  "Fadul 1-2" = fadul1.2_processed,
+#'                  "Fadul 2-1" = fadul2.1_processed))
+#'
 #' @export
 #'
 #' @importFrom stats setNames median quantile
@@ -378,13 +381,50 @@ arrangeCMCPlot <- function(referenceScan,
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'
-#' @examples
-#' \dontrun{
-#' comparison <- cellCCF_bothDirections(referenceScan,targetScan)
-#' cmcs <- cmcFilter_improved(comparison)
+#'@examples
+#'data(fadul1.1_processed,fadul1.2_processed)
 #'
-#' cmcPlot(referenceScan,targetScan,comparison,cmcs,type = "faceted",x3pNames = c("name1","name2"))
-#'}
+#'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
+#'                                    ~ comparison_allTogether(fadul1.1_processed,
+#'                                                        fadul1.2_processed,
+#'                                                        theta = .))
+#'comparisonDF_2to1 <- purrr::map_dfr(seq(-30,30,by = 3),
+#'                                    ~ comparison_allTogether(fadul1.2_processed,
+#'                                                        fadul1.1_processed,
+#'                                                        theta = .))
+#'
+#'comparisonDF_1to2 <- comparisonDF_1to2 %>%
+#' dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+#'                                                    x = x,
+#'                                                    y = y,
+#'                                                    theta = theta,
+#'                                                    corr = pairwiseCompCor),
+#'               highCMCClassif = decision_CMC(cellIndex = cellIndex,
+#'                                            x = x,
+#'                                            y = y,
+#'                                            theta = theta,
+#'                                            corr = pairwiseCompCor,
+#'                                            tau = 1))
+#'
+#'
+#'comparisonDF_2to1 <- comparisonDF_2to1 %>%
+#' dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+#'                                                    x = x,
+#'                                                    y = y,
+#'                                                    theta = theta,
+#'                                                    corr = pairwiseCompCor),
+#'               highCMCClassif = decision_CMC(cellIndex = cellIndex,
+#'                                            x = x,
+#'                                            y = y,
+#'                                            theta = theta,
+#'                                            corr = pairwiseCompCor,
+#'                                            tau = 1))
+#'
+#'cmcPlot(fadul1.1_processed,
+#'        fadul1.2_processed,
+#'        comparisonDF_1to2,
+#'        comparisonDF_2to1,
+#'        corColName = "pairwiseCompCor")
 #'
 #'@export
 
@@ -647,7 +687,7 @@ ccfMap <- function(mat1,mat2){
 #' @importFrom scales rescale
 #' @importFrom stats quantile
 #'
-#' @export
+#' @keywords internal
 
 utils::globalVariables(c("x","y","value","fft.ccf","x","y"))
 

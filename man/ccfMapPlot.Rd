@@ -39,3 +39,4 @@ maximum CCF value.
  ccfMapPlot(mat1,mat2)
 
 }
+\keyword{internal}

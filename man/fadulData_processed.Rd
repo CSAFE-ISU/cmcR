@@ -6,8 +6,8 @@
 \alias{fadul1.1_processed}
 \alias{fadul1.2_processed}
 \alias{fadul2.1_processed}
-\title{Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
-functions from the cmcR package}
+\title{Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
+datasets using preProcess_* functions from the cmcR package}
 \format{
 An x3p object containing a surface matrix and metainformation
 concerning the conditions under which the scan was taken \describe{
@@ -41,7 +41,6 @@ fadul1.2_processed
 fadul2.1_processed
 }
 \description{
-An x3p (XML 3D Surface Profile) object containing a processed version of the
 "Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The
 scans have been downsampled by a factor of 8 and processed using functions
 from the cmcR package.

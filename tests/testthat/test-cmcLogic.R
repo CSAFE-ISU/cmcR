@@ -1,6 +1,6 @@
 
-tmp1 <- x3ptools::read_x3p(tmpfile1)
-tmp2 <- x3ptools::read_x3p(tmpfile2)
+tmp1 <- x3ptools::x3p_read(tmpfile1)
+tmp2 <- x3ptools::x3p_read(tmpfile2)
 
 comp <- cmcR::cellCCF_bothDirections(tmp1,
                                tmp2,

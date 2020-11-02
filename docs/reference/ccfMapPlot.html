@@ -106,6 +106,9 @@ maximum CCF value." />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -173,15 +176,16 @@ object</p></td>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> <span class='no'>mat1</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>imager</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/imfill.html'>imfill</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>100</span>,<span class='kw'>y</span> <span class='kw'>=</span> <span class='fl'>100</span>) <span class='kw'>%&gt;%</span>
- <span class='kw pkg'>imager</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/draw_rect.html'>draw_rect</a></span>(<span class='kw'>x0</span> <span class='kw'>=</span> <span class='fl'>40</span>,<span class='kw'>y0</span> <span class='kw'>=</span> <span class='fl'>40</span>,<span class='kw'>x1</span> <span class='kw'>=</span> <span class='fl'>60</span>,<span class='kw'>y1</span> <span class='kw'>=</span> <span class='fl'>60</span>,<span class='kw'>color</span> <span class='kw'>=</span> <span class='fl'>255</span>) <span class='kw'>%&gt;%</span>
- <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span>()
+    <pre class="examples"><div class='input'> <span class='va'>mat1</span> <span class='op'>&lt;-</span> <span class='fu'>imager</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/imfill.html'>imfill</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>100</span>,y <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+ <span class='fu'>imager</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/draw_rect.html'>draw_rect</a></span><span class='op'>(</span>x0 <span class='op'>=</span> <span class='fl'>40</span>,y0 <span class='op'>=</span> <span class='fl'>40</span>,x1 <span class='op'>=</span> <span class='fl'>60</span>,y1 <span class='op'>=</span> <span class='fl'>60</span>,color <span class='op'>=</span> <span class='fl'>255</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span><span class='op'>(</span><span class='op'>)</span>
 
- <span class='no'>mat2</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>imager</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/imfill.html'>imfill</a></span>(<span class='kw'>x</span> <span class='kw'>=</span> <span class='fl'>100</span>,<span class='kw'>y</span> <span class='kw'>=</span> <span class='fl'>100</span>) <span class='kw'>%&gt;%</span>
- <span class='kw pkg'>imager</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/draw_rect.html'>draw_rect</a></span>(<span class='kw'>x0</span> <span class='kw'>=</span> <span class='fl'>15</span>,<span class='kw'>y0</span> <span class='kw'>=</span> <span class='fl'>30</span>,<span class='kw'>x1</span> <span class='kw'>=</span> <span class='fl'>35</span>,<span class='kw'>y1</span> <span class='kw'>=</span> <span class='fl'>50</span>,<span class='kw'>color</span> <span class='kw'>=</span> <span class='fl'>255</span>) <span class='kw'>%&gt;%</span>
- <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span>()
+ <span class='va'>mat2</span> <span class='op'>&lt;-</span> <span class='fu'>imager</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/imfill.html'>imfill</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>100</span>,y <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+ <span class='fu'>imager</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/imager/man/draw_rect.html'>draw_rect</a></span><span class='op'>(</span>x0 <span class='op'>=</span> <span class='fl'>15</span>,y0 <span class='op'>=</span> <span class='fl'>30</span>,x1 <span class='op'>=</span> <span class='fl'>35</span>,y1 <span class='op'>=</span> <span class='fl'>50</span>,color <span class='op'>=</span> <span class='fl'>255</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+ <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>as.matrix</a></span><span class='op'>(</span><span class='op'>)</span>
 
- <span class='fu'>ccfMapPlot</span>(<span class='no'>mat1</span>,<span class='no'>mat2</span>)</div><div class='img'><img src='ccfMapPlot-1.png' alt='' width='700' height='433' /></div><div class='input'>
+ <span class='fu'>ccfMapPlot</span><span class='op'>(</span><span class='va'>mat1</span>,<span class='va'>mat2</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in ccfMapPlot(mat1, mat2): could not find function "ccfMapPlot"</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -198,7 +202,7 @@ object</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

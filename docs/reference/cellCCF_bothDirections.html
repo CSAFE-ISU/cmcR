@@ -103,6 +103,9 @@ details." />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -134,20 +137,20 @@ and again for x3p2 vs. x3p1. See cellCCF function documentation for more
 details.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>cellCCF_bothDirections</span>(
-  <span class='no'>x3p1</span>,
-  <span class='no'>x3p2</span>,
-  <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>, <span class='fl'>30</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>3</span>),
-  <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-  <span class='kw'>cellNumVert</span> <span class='kw'>=</span> <span class='no'>cellNumHoriz</span>,
-  <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>minObservedProp</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-  <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-  <span class='kw'>ccfMethod</span> <span class='kw'>=</span> <span class='st'>"fftThenPairwise"</span>,
-  <span class='kw'>rawCorrTieBreaker</span> <span class='kw'>=</span> <span class='no'>which.max</span>,
-  <span class='kw'>use</span> <span class='kw'>=</span> <span class='st'>"pairwise.complete.obs"</span>
-)</pre>
+    <pre class="usage"><span class='fu'>cellCCF_bothDirections</span><span class='op'>(</span>
+  <span class='va'>x3p1</span>,
+  <span class='va'>x3p2</span>,
+  thetas <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>30</span>, <span class='fl'>30</span>, by <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
+  cellNumHoriz <span class='op'>=</span> <span class='fl'>8</span>,
+  cellNumVert <span class='op'>=</span> <span class='va'>cellNumHoriz</span>,
+  regionToCellProp <span class='op'>=</span> <span class='fl'>4</span>,
+  minObservedProp <span class='op'>=</span> <span class='fl'>0.1</span>,
+  centerCell <span class='op'>=</span> <span class='st'>"individualCell"</span>,
+  scaleCell <span class='op'>=</span> <span class='st'>"individualCell"</span>,
+  ccfMethod <span class='op'>=</span> <span class='st'>"fft"</span>,
+  rawCorrTieBreaker <span class='op'>=</span> <span class='va'>which.max</span>,
+  use <span class='op'>=</span> <span class='st'>"pairwise.complete.obs"</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -209,7 +212,7 @@ deviation.</p></td>
     <tr>
       <th>ccfMethod</th>
       <td><p>dictates which of 3 different methods are used to calculate
-a final maximum cross-correlation estimate. "fftThenPairwise" estimates the
+a final maximum cross-correlation estimate. "fft" estimates the
 optimal translation values to align each cell within in its associated
 region by using Cross-Correlation theorem + FFT algorithm and then
 calculates the pairwise-complete correlation between the cell and a
@@ -224,7 +227,7 @@ them by the following: nonMissingCount*cor/max(nonMissingCount).</p></td>
     </tr>
     <tr>
       <th>rawCorrTieBreaker</th>
-      <td><p>Only applicable if ccfMethod == "fftThenPairwise".
+      <td><p>Only applicable if ccfMethod == "fft".
 The way in which the CCF (see ccfMethod) is calculated may require slight
 padding/cropping of the mat1-sized matrix extracted from mat2 to make their
 dimensions equal (e.g., "center" of mat1-sized matrix in mat2 may be one of
@@ -238,7 +241,7 @@ respectively).</p></td>
     </tr>
     <tr>
       <th>use</th>
-      <td><p>Only applicable if ccfMethod == "fftThenPairwise". argument to be
+      <td><p>Only applicable if ccfMethod == "fft". argument to be
 passed to the cor function. Dictates how NAs are dealt with in computing
 the correlation.</p></td>
     </tr>
@@ -249,19 +252,20 @@ the correlation.</p></td>
     <div class='dont-index'><p>cmcR::cellCCF_improved</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
  <span class='co'>#x3p1 and x3p2 are assumed to be 2 processed scans</span>
-<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'>cellCCF_bothDirections</span>(<span class='kw'>x3p1</span> <span class='kw'>=</span> <span class='no'>x3p1</span>,
-                                      <span class='kw'>x3p2</span> <span class='kw'>=</span> <span class='no'>x3p2</span>,
-                                      <span class='kw'>thetas</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(-<span class='fl'>30</span>,<span class='fl'>30</span>,<span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>30</span>),
-                                      <span class='kw'>cellNumHoriz</span> <span class='kw'>=</span> <span class='fl'>8</span>,
-                                      <span class='kw'>regionToCellProp</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-                                      <span class='kw'>centerCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>,
-                                      <span class='kw'>scaleCell</span> <span class='kw'>=</span> <span class='st'>"individualCell"</span>)
+<span class='va'>comparison1</span> <span class='op'>&lt;-</span> <span class='fu'>cellCCF_bothDirections</span><span class='op'>(</span>x3p1 <span class='op'>=</span> <span class='va'>x3p1</span>,
+                                      x3p2 <span class='op'>=</span> <span class='va'>x3p2</span>,
+                                      thetas <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>30</span>,<span class='fl'>30</span>,by <span class='op'>=</span> <span class='fl'>30</span><span class='op'>)</span>,
+                                      cellNumHoriz <span class='op'>=</span> <span class='fl'>8</span>,
+                                      regionToCellProp <span class='op'>=</span> <span class='fl'>4</span>,
+                                      centerCell <span class='op'>=</span> <span class='st'>"individualCell"</span>,
+                                      scaleCell <span class='op'>=</span> <span class='st'>"individualCell"</span><span class='op'>)</span>
 
-<span class='no'>comparison1</span>$<span class='no'>comparison_1to2</span> <span class='co'>#comparison of x3p1 vs x3p2</span>
-<span class='no'>comparison1</span>$<span class='no'>comparison_2to1</span> <span class='co'>#comparison of x3p2 vs x3p1</span>
-}</div></pre>
+<span class='va'>comparison1</span><span class='op'>$</span><span class='va'>comparison_1to2</span> <span class='co'>#comparison of x3p1 vs x3p2</span>
+<span class='va'>comparison1</span><span class='op'>$</span><span class='va'>comparison_2to1</span> <span class='co'>#comparison of x3p2 vs x3p1</span>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -277,7 +281,7 @@ the correlation.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

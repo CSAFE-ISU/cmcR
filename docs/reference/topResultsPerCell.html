@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculate dx, dy, theta values at which top similarity is achieved in a cell
+<title>Calculate x, y, theta values at which top similarity is achieved in a cell
 pair. — topResultsPerCell • cmcR</title>
 
 
@@ -40,11 +40,11 @@ pair. — topResultsPerCell • cmcR</title>
 
 
 
-<meta property="og:title" content="Calculate dx, dy, theta values at which top similarity is achieved in a cell
+<meta property="og:title" content="Calculate x, y, theta values at which top similarity is achieved in a cell
 pair. — topResultsPerCell" />
 <meta property="og:description" content="Given a list of data frames like the one returned in the
 ccfResults element of the list returned from cmcR::cellCCF, returns a
-data frame of the theta, dx, dy, ccf, and ccf values at which each cell
+data frame of the theta, x, y, ccf, and ccf values at which each cell
 pair attains maximum ccf." />
 
 
@@ -106,6 +106,9 @@ pair attains maximum ccf." />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -126,7 +129,7 @@ pair attains maximum ccf." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculate dx, dy, theta values at which top similarity is achieved in a cell
+    <h1>Calculate x, y, theta values at which top similarity is achieved in a cell
 pair.</h1>
     
     <div class="hidden name"><code>topResultsPerCell.Rd</code></div>
@@ -135,7 +138,7 @@ pair.</h1>
     <div class="ref-description">
     <p>Given a list of data frames like the one returned in the
 <code>ccfResults</code> element of the list returned from cmcR::cellCCF, returns a
-data frame of the theta, dx, dy, ccf, and ccf values at which each cell
+data frame of the theta, x, y, ccf, and ccf values at which each cell
 pair attains maximum ccf.</p>
     </div>
 
@@ -155,13 +158,14 @@ cmcR::cellCCF, containing breech face cell comparison results</p></td>
     <div class='dont-index'><p>cmcR::cellCCF</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'>#x3p1 and x3p2 are two x3p objects containing processed surface matrices</span>
-<span class='no'>comparison1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span>(<span class='no'>x3p1</span>,<span class='no'>x3p2</span>) <span class='co'>#defaults assumed</span>
+<span class='va'>comparison1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span><span class='op'>(</span><span class='va'>x3p1</span>,<span class='va'>x3p2</span><span class='op'>)</span> <span class='co'>#defaults assumed</span>
 
-<span class='no'>comparison1</span>$<span class='no'>ccfResults</span> <span class='kw'>%&gt;%</span>
-  <span class='kw pkg'>cmcR</span><span class='kw ns'>::</span><span class='fu'>topResultsPerCell</span>()
-}</div></pre>
+<span class='va'>comparison1</span><span class='op'>$</span><span class='va'>ccfResults</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>topResultsPerCell</span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -177,7 +181,7 @@ cmcR::cellCCF, containing breech face cell comparison results</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

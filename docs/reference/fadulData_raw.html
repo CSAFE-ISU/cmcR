@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Downsampled cartridge case scans "Fadul 1-1" and "Fadul 1-2" from Fadul et
-al. (2011) — fadulData_raw • cmcR</title>
+<title>"Fadul 1-1", "Fadul 1-2", and "Fadul 2-1" cartridge cases from Fadul et al.
+(2011) in their raw format — fadulData_raw • cmcR</title>
 
 
 <!-- jquery -->
@@ -40,12 +40,11 @@ al. (2011) — fadulData_raw • cmcR</title>
 
 
 
-<meta property="og:title" content="Downsampled cartridge case scans "Fadul 1-1" and "Fadul 1-2" from Fadul et
-al. (2011) — fadulData_raw" />
-<meta property="og:description" content="x3p (XML 3D Surface Profile) objects containing downsampled versions of the
-&quot;Fadul 1-1&quot; and &quot;Fadyl 1-2&quot; cartridge case from Fadul et al. (2011). The scans
-have been downsampled by a factor of 8 using the sample_x3p function from the
-x3ptools package due to file size constraints." />
+<meta property="og:title" content=""Fadul 1-1", "Fadul 1-2", and "Fadul 2-1" cartridge cases from Fadul et al.
+(2011) in their raw format — fadulData_raw" />
+<meta property="og:description" content="An x3p (XML 3D Surface Profile) object containing the &quot;Fadul 1-1&quot;, &quot;Fadul
+1-2&quot;, and &quot;Fadul 2-1&quot; cartridge cases from Fadul et al. (2011) in their raw
+format" />
 
 
 
@@ -106,6 +105,9 @@ x3ptools package due to file size constraints." />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -126,32 +128,34 @@ x3ptools package due to file size constraints." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Downsampled cartridge case scans "Fadul 1-1" and "Fadul 1-2" from Fadul et
-al. (2011)</h1>
+    <h1>"Fadul 1-1", "Fadul 1-2", and "Fadul 2-1" cartridge cases from Fadul et al.
+(2011) in their raw format</h1>
     
     <div class="hidden name"><code>fadulData_raw.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>x3p (XML 3D Surface Profile) objects containing downsampled versions of the
-"Fadul 1-1" and "Fadyl 1-2" cartridge case from Fadul et al. (2011). The scans
-have been downsampled by a factor of 8 using the sample_x3p function from the
-x3ptools package due to file size constraints.</p>
+    <p>An x3p (XML 3D Surface Profile) object containing the "Fadul 1-1", "Fadul
+1-2", and "Fadul 2-1" cartridge cases from Fadul et al. (2011) in their raw
+format</p>
     </div>
 
-    <pre class="usage"><span class='no'>fadul1.1_raw</span>
+    <pre class="usage"><span class='va'>fadul1.1_raw</span>
 
-<span class='no'>fadul1.2_raw</span></pre>
+<span class='va'>fadul1.2_raw</span>
+
+<span class='va'>fadul2.1_raw</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
     <p>An x3p object containing a surface matrix and metainformation
-concerning the conditions under which the scan was taken</p><dl'>
+concerning the conditions under which the scan was taken</p><dl>
 <dt>header.info</dt><dd><p>size and resolution of scan</p></dd>
 
 <dt>surface.matrix</dt><dd><p>spatially-ordered matrix of elements representing the
-height values of the cartridge case surface at particular locations</p></dd>
+height values of the processed cartridge case surface at particular
+locations</p></dd>
 
 <dt>feature.info</dt><dd><p>provides structure for storing surface data</p></dd>
 
@@ -163,6 +167,7 @@ capturing device</p></dd>
 
 </dl>
 
+<p>An object of class <code>x3p</code> of length 5.</p>
 <p>An object of class <code>x3p</code> of length 5.</p>
     <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
 
@@ -189,7 +194,7 @@ Identification Utilizing 10 Consecutively Manufactured Slides, 2011.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

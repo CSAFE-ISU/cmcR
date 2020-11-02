@@ -100,6 +100,9 @@
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -146,86 +149,114 @@
       <tr>
         
         <td>
-          <p><code><a href="ccfMapPlot.html">ccfMapPlot</a></code> </p>
-        </td>
-        <td><p>Plots the CCF map between two matrices</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cellCCF.html">cellCCF</a></code> </p>
-        </td>
-        <td><p>Calculates the cross-correlation function between cells in one matrix to
-regions in another.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cellCCF_bothDirections.html">cellCCF_bothDirections()</a></code> </p>
-        </td>
-        <td><p>Applies cellCCF function twice for a pair of cartridge case scans.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cmcFilter.html">cmcFilter</a></code> </p>
-        </td>
-        <td><p>Implements CMC logic on a single data frame as proposed by Song (2013).</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cmcFilter_improved.html">cmcFilter_improved</a></code> </p>
-        </td>
-        <td><p>Implements "improved" CMC logic on a list of CCF results for a comparison
-between two cartridge case scans as proposed by Tong et al. (2015)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cmcPerThetaBarPlot.html">cmcPerThetaBarPlot</a></code> </p>
-        </td>
-        <td><p>Create a bar plot of congruent matching cells per rotation value</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cmcPlot.html">cmcPlot</a></code> </p>
         </td>
         <td><p>Visualize initial and high CMCs for a cartridge case pair comparison</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="congruentMatchingCells.html">congruentMatchingCells()</a></code> </p>
+          <p><code><a href="comparison_allTogether.html">comparison_allTogether()</a></code> </p>
         </td>
-        <td><p>Identifies the congruent matching cells between two processed cartridge case
-scans</p></td>
+        <td><p>Performs all steps in the cell-based comparison procedure.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="cropBFExterior.html">cropBFExterior()</a></code> </p>
+          <p><code><a href="comparison_calcPropMissing.html">comparison_calcPropMissing()</a></code> </p>
         </td>
-        <td><p>Crop the exterior of a breech face impression surface matrix</p></td>
+        <td><p>Calculate the proportion of missing values in a breech face scan</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="fadulData_processed.html">fadul1.1_processed</a></code> <code><a href="fadulData_processed.html">fadul1.2_processed</a></code> </p>
+          <p><code><a href="comparison_cellDivision.html">comparison_cellDivision()</a></code> </p>
         </td>
-        <td><p>Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
-functions from the cmcR package</p></td>
+        <td><p>Split a reference scan into a grid of cells</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="fadulData_raw.html">fadul1.1_raw</a></code> <code><a href="fadulData_raw.html">fadul1.2_raw</a></code> </p>
+          <p><code><a href="comparison_cor.html">comparison_cor()</a></code> </p>
         </td>
-        <td><p>Downsampled cartridge case scans "Fadul 1-1" and "Fadul 1-2" from Fadul et
-al. (2011)</p></td>
+        <td><p>Calculates correlation between a cell and a matrix of the same dimensions
+extracted from the cell's associated region.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="filterBFInterior.html">filterBFInterior()</a></code> </p>
+          <p><code><a href="comparison_fft_ccf.html">comparison_fft_ccf()</a></code> </p>
         </td>
-        <td><p>Filter-out the firing pin impression region of a breech face impression scan</p></td>
+        <td><p>Estimate translation alignment between a cell/region pair based on the
+Cross-Correlation Theorem.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="getCellRegionPairs.html">getCellRegionPairs</a></code> </p>
+          <p><code><a href="comparison_getTargetRegions.html">comparison_getTargetRegions()</a></code> </p>
         </td>
-        <td><p>Extract cell/region pair matrices for a comparison of interest</p></td>
+        <td><p>Extract regions from a target scan based on associated cells in reference
+scan</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="comparison_replaceMissing.html">comparison_replaceMissing()</a></code> </p>
+        </td>
+        <td><p>Replace missing values in a scan</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="comparison_standardizeHeights.html">comparison_standardizeHeights()</a></code> </p>
+        </td>
+        <td><p>Standardize height values of a scan by centering/scaling by desired
+statistics and replacing missing values</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_CMC.html">decision_CMC()</a></code> </p>
+        </td>
+        <td><p>Applies the decision rules of the original method of Song (2013) or the High
+CMC method of Tong et al. (2015)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_combineCMCDirections.html">decision_combineCMCDirections()</a></code> </p>
+        </td>
+        <td><p>Combine CMC data from two comparison directions</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_highCMC_classifyCMCs.html">decision_highCMC_classifyCMCs()</a></code> </p>
+        </td>
+        <td><p>Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
+distribution returned by the decision_highCMC_cmcThetaDistrib function</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_highCMC_cmcThetaDistrib.html">decision_highCMC_cmcThetaDistrib()</a></code> </p>
+        </td>
+        <td><p>Compute CMC-theta distribution for a set of comparison features</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_highCMC_identifyHighCMCThetas.html">decision_highCMC_identifyHighCMCThetas()</a></code> </p>
+        </td>
+        <td><p>Classify theta values in CMC-theta distribution as having "High" or "Low" CMC
+candidate counts</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="decision_originalMethod_classifyCMCs.html">decision_originalMethod_classifyCMCs()</a></code> </p>
+        </td>
+        <td><p>Apply CMC classification logic of the original method of Song (2013)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fadulData_processed.html">fadul1.1_processed</a></code> <code><a href="fadulData_processed.html">fadul1.2_processed</a></code> <code><a href="fadulData_processed.html">fadul2.1_processed</a></code> </p>
+        </td>
+        <td><p>Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
+datasets using preProcess_* functions from the cmcR package</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fadulData_raw.html">fadul1.1_raw</a></code> <code><a href="fadulData_raw.html">fadul1.2_raw</a></code> <code><a href="fadulData_raw.html">fadul2.1_raw</a></code> </p>
+        </td>
+        <td><p>"Fadul 1-1", "Fadul 1-2", and "Fadul 2-1" cartridge cases from Fadul et al.
+(2011) in their raw format</p></td>
       </tr><tr>
         
         <td>
@@ -235,16 +266,15 @@ al. (2011)</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="levelByConditionalStatistic.html">levelByConditionalStatistic()</a></code> </p>
+          <p><code><a href="levelBreechFace.html">preProcess_ransacLevel()</a></code> <code><a href="levelBreechFace.html">preProcess_removeTrend()</a></code> </p>
         </td>
-        <td><p>Level a breech face impression surface matrix by a conditional statistics</p></td>
+        <td><p>Finds plane of breechface marks using the RANSAC method</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="preProcess_cropWS.html">preProcess_cropWS()</a></code> </p>
+          <p><code><a href="preProcess_crop.html">preProcess_crop()</a></code> </p>
         </td>
-        <td><p>Crop out rows/columns outside of the breech face impression in a cartridge
-case scan.</p></td>
+        <td><p>Remove observations from the exterior of interior of a breech face scan</p></td>
       </tr><tr>
         
         <td>
@@ -255,49 +285,10 @@ particular cut-off wavelength.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="preProcess_levelBF.html">preProcess_levelBF()</a></code> </p>
-        </td>
-        <td><p>Levels a breech face impression matrix basedo on a RANSAC-fitted plane</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="preProcess_ransac.html">preProcess_ransac()</a></code> </p>
-        </td>
-        <td><p>Finds plane of breechface marks using the RANSAC method</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="preProcess_removeFPCircle.html">preProcess_removeFPCircle()</a></code> </p>
+          <p><code><a href="removeFiringPin.html">preProcess_removeFPCircle()</a></code> </p>
         </td>
         <td><p>Given a surface matrix, estimates and filters any pixels within the estimated
 firing pin impression circle</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="selectBFImpression.html">selectBFImpression</a></code> </p>
-        </td>
-        <td><p>Select breech face impression from a cartridge case scan</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="selectBFImpression_resize.html">selectBFImpression_resize()</a></code> </p>
-        </td>
-        <td><p>Select breech face impression from a cartridge case scan after using
-imager::resize to resize the scan.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="selectBFImpression_sample_x3p.html">selectBFImpression_sample_x3p</a></code> </p>
-        </td>
-        <td><p>Select breech face impression from a cartridge case scan after using
-x3ptools::sample_x3p to downsample the scan.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="topResultsPerCell.html">topResultsPerCell</a></code> </p>
-        </td>
-        <td><p>Calculate dx, dy, theta values at which top similarity is achieved in a cell
-pair.</p></td>
       </tr><tr>
         
         <td>
@@ -323,7 +314,7 @@ pair.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -6,8 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
-functions from the cmcR package — fadulData_processed • cmcR</title>
+<title>Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
+datasets using preProcess_* functions from the cmcR package — fadulData_processed • cmcR</title>
 
 
 <!-- jquery -->
@@ -40,10 +40,9 @@ functions from the cmcR package — fadulData_processed • cmcR</title>
 
 
 
-<meta property="og:title" content="Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
-functions from the cmcR package — fadulData_processed" />
-<meta property="og:description" content="An x3p (XML 3D Surface Profile) object containing a processed version of the
-&quot;Fadul 1-1&quot; and &quot;Fadul 1-2&quot; cartridge cases from Fadul et al. (2011). The
+<meta property="og:title" content="Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
+datasets using preProcess_* functions from the cmcR package — fadulData_processed" />
+<meta property="og:description" content="&quot;Fadul 1-1&quot; and &quot;Fadul 1-2&quot; cartridge cases from Fadul et al. (2011). The
 scans have been downsampled by a factor of 8 and processed using functions
 from the cmcR package." />
 
@@ -106,6 +105,9 @@ from the cmcR package." />
       <a href="../articles/cmcR_plotReproduction.html">Reproduction of Song et al. (2018) plots using the cmcR package</a>
     </li>
     <li>
+      <a href="../articles/decisionRuleDescription.html">CMC Decision Rule Description</a>
+    </li>
+    <li>
       <a href="../articles/reproducibleExample.html">cmcR Reproducible Example</a>
     </li>
   </ul>
@@ -126,28 +128,29 @@ from the cmcR package." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Processed versions of the fadul1.1_raw and fadul1.2_raw datasets using
-functions from the cmcR package</h1>
+    <h1>Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
+datasets using preProcess_* functions from the cmcR package</h1>
     
     <div class="hidden name"><code>fadulData_processed.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>An x3p (XML 3D Surface Profile) object containing a processed version of the
-"Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The
+    <p>"Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The
 scans have been downsampled by a factor of 8 and processed using functions
 from the cmcR package.</p>
     </div>
 
-    <pre class="usage"><span class='no'>fadul1.1_processed</span>
+    <pre class="usage"><span class='va'>fadul1.1_processed</span>
 
-<span class='no'>fadul1.2_processed</span></pre>
+<span class='va'>fadul1.2_processed</span>
+
+<span class='va'>fadul2.1_processed</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
     <p>An x3p object containing a surface matrix and metainformation
-concerning the conditions under which the scan was taken</p><dl'>
+concerning the conditions under which the scan was taken</p><dl>
 <dt>header.info</dt><dd><p>size and resolution of scan</p></dd>
 
 <dt>surface.matrix</dt><dd><p>spatially-ordered matrix of elements representing the
@@ -164,6 +167,7 @@ capturing device</p></dd>
 
 </dl>
 
+<p>An object of class <code>x3p</code> of length 5.</p>
 <p>An object of class <code>x3p</code> of length 5.</p>
     <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
 
@@ -190,7 +194,7 @@ Identification Utilizing 10 Consecutively Manufactured Slides, 2011.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
