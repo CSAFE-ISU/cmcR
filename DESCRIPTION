@@ -27,11 +27,11 @@ Imports:
     assertthat,
     stats,
     utils,
-    colorspace,
-    gridExtra,
     scales,
     ggnewscale,
-    quantreg
+    quantreg,
+    tibble,
+    tidyr
 Suggests: 
     knitr,
     rmarkdown,
@@ -39,7 +39,9 @@ Suggests:
     DT,
     magick,
     rgl,
-    covr
+    covr,
+    gridExtra,
+    cowplot
 Remotes: 
     https://github.com/xhtai/cartridges3D,
     https://github.com/heike/x3ptools

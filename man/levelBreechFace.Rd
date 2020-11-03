@@ -30,6 +30,10 @@ as the final breech face estimate.}
 \item{iters}{number of candidate planes to fit (higher value yields more
 stable breech face estimate)}
 
+\item{returnResiduals}{dictates whether the difference between the estimated
+breech face and fitted plane are returned (residuals) or if the estimates
+breech face is simply shifted down by its mean value}
+
 \item{statistic}{either "mean" or "quantile"}
 
 \item{...}{arguments to be set in the quantreg::rq function if statistic =

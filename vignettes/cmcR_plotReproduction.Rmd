@@ -20,6 +20,7 @@ library(magrittr)
 library(ggplot2)
 library(purrr)
 library(dplyr)
+library(tidyr)
 library(x3ptools)
 library(rgl)
 ```
@@ -356,13 +357,6 @@ knmCMCPlot <- cmcR::cmcPlot(referenceScan = fadul1.1_processed,
                             type = "faceted",
                             x3pNames = c("Fadul 1-1","Fadul 2-1"),
                             legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                            height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
-                                                                     '#e08214','#fdb863',
-                                                                     '#fee0b6','#f7f7f7',
-                                                                     '#d8daeb','#b2abd2',
-                                                                     '#8073ac','#542788',
-                                                                     '#2d004b'),
-                                                                   amount = .75),
                             cell.colors = c("#a60b00","#1b03a3"),
                             cell.alpha = .15,
                             na.value = "gray80") %>%

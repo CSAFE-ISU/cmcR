@@ -48,7 +48,7 @@ dplyr::mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues,
 
 cellTibble \%>\%
 tidyr::unnest(cols = fft_ccf_df) \%>\%
-head(cellTibble)
+head()
 }
 \seealso{
 \url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}

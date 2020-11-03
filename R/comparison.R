@@ -41,7 +41,7 @@ comparison_cellDivision <- function(x3p,numCells = 64){
   cellRanges <- purrr::map(names(splitSurfaceMat),
                            function(horizCell){
                              purrr::map(.x = names(splitSurfaceMat[[1]]),
-                                        function(vertCell) cmcR:::swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
+                                        function(vertCell) swapcellRangeAxes(paste(horizCell,vertCell,sep = ",")))
                            }) %>%
     unlist()
 
@@ -139,19 +139,19 @@ comparison_getTargetRegions <- function(cellHeightValues,
   cellRange <- cellHeightValues %>%
     purrr::map_chr(~ .$cmcR.info$cellRange)
 
-  target_regionIndices <- cmcR:::getMat2SplitIndices(cellRanges = cellRange,
+  target_regionIndices <- getMat2SplitIndices(cellRanges = cellRange,
                                                          cellSideLengths = cellSideLengths,
                                                          mat2Dim = dim(target$surface.matrix),
                                                          sidelengthMultiplier = floor(sqrt(regionSizeMultiplier)))
 
-  target_surfaceMat_rotated <- cmcR:::rotateSurfaceMatrix(target$surface.matrix,
+  target_surfaceMat_rotated <- rotateSurfaceMatrix(target$surface.matrix,
                                                           theta = theta)
 
 
   target_splitRotated <-
     purrr::map(.x = target_regionIndices,
                function(cornerIndices){
-                 regionMatrix <- cmcR:::extractCellbyCornerLocs(cornerLocs = cornerIndices,
+                 regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
                                                                 rotatedSurfaceMat = target_surfaceMat_rotated,
                                                                 mat2Dim = dim(target$surface.matrix))
 
@@ -292,12 +292,12 @@ comparison_replaceMissing <- function(heightValues,
 #'
 #'cellTibble %>%
 #' tidyr::unnest(cols = fft_ccf_df) %>%
-#' head(cellTibble)
+#' head()
 #'@export
 comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
   ccfList <- purrr::map2(cellHeightValues,
                          regionHeightValues,
-                         ~ cmcR:::ccfComparison(mat1 = .x$surface.matrix,
+                         ~ ccfComparison(mat1 = .x$surface.matrix,
                                                 mat2 = .y$surface.matrix,
                                                 ccfMethod = "fft"))
 

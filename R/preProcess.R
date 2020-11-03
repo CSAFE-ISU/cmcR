@@ -76,6 +76,9 @@ preProcess_levelBF <- function(ransacFit,
 #'   as the final breech face estimate.
 #' @param iters number of candidate planes to fit (higher value yields more
 #'   stable breech face estimate)
+#' @param returnResiduals dictates whether the difference between the estimated
+#'   breech face and fitted plane are returned (residuals) or if the estimates
+#'   breech face is simply shifted down by its mean value
 #'
 #' @note The preProcess_ransacLevel function will throw an error if the final
 #'   plane estimate is rank-deficient (which is relatively unlikely, but

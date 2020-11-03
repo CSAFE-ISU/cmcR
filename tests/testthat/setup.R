@@ -7,16 +7,20 @@ x3p1 <- x3ptools::x3p_read(file = x3p1_url) %>%
   x3ptools::sample_x3p(m = 8)
 
 x3p1 <- x3p1 %>%
-  cmcR::preProcess_cropExterior() %>%
-  cmcR::preProcess_filterInterior() %>%
+  cmcR::preProcess_crop(region = "exterior",
+                        radiusOffset = -30) %>%
+  cmcR::preProcess_filterInterior(region = "interior",
+                                  radiusOffset = 200) %>%
   cmcR::preProcess_removeTrend()
 
 x3p2 <- x3ptools::x3p_read(file = x3p2_url) %>%
   x3ptools::sample_x3p(m = 8)
 
 x3p2 <- x3p2 %>%
-  cmcR::preProcess_cropExterior() %>%
-  cmcR::preProcess_filterInterior() %>%
+  cmcR::preProcess_crop(region = "exterior",
+                        radiusOffset = -30) %>%
+  cmcR::preProcess_filterInterior(region = "interior",
+                                  radiusOffset = 200)
   cmcR::preProcess_removeTrend()
 
 tmpfile1 <- tempfile(fileext = ".x3p")

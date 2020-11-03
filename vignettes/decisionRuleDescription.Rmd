@@ -20,7 +20,11 @@ This vignette will describe the decision rules used in the original method of [S
 
 ```{r setup,message=FALSE,warning=FALSE}
 library(cmcR)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(tidyr)
+library(gridExtra)
 ```
 
 We will consider comparisons between three cartridge case scans. Fadul 1-1 and Fadul 1-2 are known matches (i.e., were fired from the same firearm) while Fadul 2-1 is a non-match. The comparisons considered are Fadul 1-1 vs. Fadul 1-2 and Fadul 1-1 vs. Fadul 2-1.
@@ -40,7 +44,7 @@ cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
 ```
 
 
-```{r,cache=T,include=FALSE}
+```{r,include=FALSE}
 kmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),
                                        ~ comparison_allTogether(reference = fadul1.1_processed,
                                                                 target = fadul1.2_processed,
@@ -149,13 +153,6 @@ knmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
                             type = "faceted",
                             x3pNames = c("Fadul 1-1","Fadul 2-1"),
                             legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                            height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
-                                                                     '#e08214','#fdb863',
-                                                                     '#fee0b6','#f7f7f7',
-                                                                     '#d8daeb','#b2abd2',
-                                                                     '#8073ac','#542788',
-                                                                     '#2d004b'),
-                                                                   amount = .75),
                             cell.colors = c("#a60b00","#1b03a3"),
                             cell.alpha = .15,
                             na.value = "gray80")
@@ -166,18 +163,6 @@ kmCMCPlot <- cmcR::cmcPlot(fadul1.1_processed,
                            target_v_reference_CMCs = knmComparison_allCMCs_rev,
                            x3pNames = c("Fadul 1-1","Fadul 1-2"),
                            legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                           height.colors = colorspace::desaturate(c('#7f3b08',
-                                                                    '#b35806',
-                                                                    '#e08214',
-                                                                    '#fdb863',
-                                                                    '#fee0b6',
-                                                                    '#f7f7f7',
-                                                                    '#d8daeb',
-                                                                    '#b2abd2',
-                                                                    '#8073ac',
-                                                                    '#542788',
-                                                                    '#2d004b'),
-                                                                  amount = .75),
                            cell.colors = c("#a60b00","#1b03a3"),
                            cell.alpha = .15,
                            na.value = "gray80")
@@ -189,13 +174,6 @@ knmCMCPlot_list_comparison1to2 <- cmcR::cmcPlot(fadul1.1_processed,
                                                 type = "list",
                                                 x3pNames = c("Fadul 1-1","Fadul 2-1"),
                                                 legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                                                height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
-                                                                                         '#e08214','#fdb863',
-                                                                                         '#fee0b6','#f7f7f7',
-                                                                                         '#d8daeb','#b2abd2',
-                                                                                         '#8073ac','#542788',
-                                                                                         '#2d004b'),
-                                                                                       amount = .75),
                                                 cell.colors = c("black","black"),
                                                 cell.alpha = .15,
                                                 na.value = "gray90")
@@ -206,18 +184,6 @@ kmCMCPlot_list_comparison1to2 <- cmcR::cmcPlot(fadul1.1_processed,
                                                target_v_reference_CMCs = knmComparison_allCMCs_rev,
                                                x3pNames = c("Fadul 1-1","Fadul 1-2"),
                                                legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                                               height.colors = colorspace::desaturate(c('#7f3b08',
-                                                                                        '#b35806',
-                                                                                        '#e08214',
-                                                                                        '#fdb863',
-                                                                                        '#fee0b6',
-                                                                                        '#f7f7f7',
-                                                                                        '#d8daeb',
-                                                                                        '#b2abd2',
-                                                                                        '#8073ac',
-                                                                                        '#542788',
-                                                                                        '#2d004b'),
-                                                                                      amount = .75),
                                                cell.colors = c("black","black"),
                                                cell.alpha = .15,
                                                na.value = "gray90",
@@ -623,7 +589,7 @@ knmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 2-1`
 ```
 
 
-```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 8, fig.align = 'center',cache = F}
+```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 8, fig.align = 'center'}
 horizontalTranslation_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 2.5,label = "  Horizontal \n Translation") +
   theme_void()
@@ -902,14 +868,6 @@ knmCMCPlot_list_comparison2to1 <- cmcR::cmcPlot(fadul2.1_processed,
                                                 type = "list",
                                                 x3pNames = c("Fadul 2-1","Fadul 1-1"),
                                                 legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                                                height.colors = colorspace::desaturate(c('#7f3b08','#b35806',
-                                                                                         '#e08214','#fdb863',
-                                                                                         '#fee0b6','#f7f7f7',
-                                                                                         '#d8daeb','#b2abd2',
-                                                                                         '#8073ac','#542788',
-                                                                                         '#2d004b'),
-                                                                                       amount = .75),
-                                                cell.colors = c("black","black"),
                                                 cell.alpha = .15,
                                                 na.value = "gray90")
 
@@ -919,18 +877,6 @@ kmCMCPlot_list_comparison2to1 <- cmcR::cmcPlot(fadul1.2_processed,
                                                target_v_reference_CMCs = kmComparison_allCMCs,
                                                x3pNames = c("Fadul 1-1","Fadul 1-2"),
                                                legend.quantiles = c(0,.01,.2,.5,.8,.99,1),
-                                               height.colors = colorspace::desaturate(c('#7f3b08',
-                                                                                        '#b35806',
-                                                                                        '#e08214',
-                                                                                        '#fdb863',
-                                                                                        '#fee0b6',
-                                                                                        '#f7f7f7',
-                                                                                        '#d8daeb',
-                                                                                        '#b2abd2',
-                                                                                        '#8073ac',
-                                                                                        '#542788',
-                                                                                        '#2d004b'),
-                                                                                      amount = .75),
                                                cell.colors = c("black","black"),
                                                cell.alpha = .15,
                                                na.value = "gray90",
@@ -962,7 +908,7 @@ knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1`
   annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 2-1",size = 4)
 ```
 
-```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
 
 reference_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("Reference")))) +
@@ -1009,6 +955,27 @@ gridExtra::grid.arrange(reference_label,
                         widths = unit(c(2,2,2,1),"null")
                         )
 ```
+By considering only the "top vote" of each cell as is done in the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868), information is lost regarding other registration phases for which a cell might also rank highly. As [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) observe:
+
+> some of the valid cell pairs may be mistakenly excluded from the CMC count because by chance their correlation yields a higher CCF value at a rotation angle outside the threshold range $T_\theta$.
+
+The High CMC method lifts the single-choice restriction by allowing cells to cast a vote for the translation phase at every $\theta$ value for which it has a sufficiently large associated CCF$_{\max}$ value. 
+Under this system, each vote represents the translation phase that the cell considers to be the true translation phase of the overall scans conditional on a particular $\theta$ value.
+In this way, the High CMC method might be viewed as an approval voting system in which an individual may cast a vote for all of the candidates that they would like.
+For each $\theta$ value, the number of translation phase votes that are close to the $\theta$-specific reference values $x_{\text{ref},\theta}, y_{\text{ref},\theta}$ are counted (now defined based only on the $T_x,T_y$ thresholds).
+This yields what \citet{tong_improved_2015} refer to as a "CMC-$\theta$" distribution representing, as they consider it, the number of "congruent cells" per $\theta$ value. 
+Thus, there may be more than one $\theta$ value for which a single cell/region pair is considered congruent.
+While seemingly contradictory (as there should be only one "true" $\theta$ alignment value), \citet{tong_improved_2015} justify their method by the empirical observation:
+
+> [i]f two images are truly matching, the CMC-$\theta$ distribution of matching image pairs should have a prominent peak located near the initial phase angle $\Theta_0$, while non-matching image pairs may have a relatively flat and random CMC-$\theta$ distribution pattern.
+
+The assumption underlying the High CMC method is that the number of cells classified as congruent should be larger near the true $\theta$ value (the "initial phase angle $\Theta_0$", as they call it) than for other $\theta$ values if the cartridge case pair is indeed a match.
+These phenomena are illustrated in Figures \ref{fig:kmCMCPerTheta} and \ref{fig:knmCMCPerTheta}. 
+\autoref{fig:kmCMCPerTheta} shows the CMC counts per rotation value in both directions for the known match pair Fadul 1-1 and Fadul 1-2 from \citet{fadul_empirical_nodate}. 
+We can clearly see a CMC mode around $\theta = -24$ in one direction and $21$ in the other, which is to be expected for a known match pair. 
+\autoref{fig:knmCMCPerTheta}, on the other hand, shows the CMC counts for the known non-match pair Fadul 1-1 and Fadul 2-1; in this comparison, no such CMC count mode is achieved.
+
+An example of the CMC-$\theta$ distribution for the comparison between Fadul 1-1 and Fadul 1-2 is shown below. We can see that, conditional on $\theta = -24$ degrees, more cells tend to have similar `x, y` values than conditional on $\theta = 30$. The CCF values are also larger. This indicates that $\theta = -24$ is likely closer to the "true" rotation than $\theta = 30$ or elsewhere. The two darker-shaded bars represent the $\theta$ values that have a "High CMC" count as described above. Because these $\theta$ values are adjacent rather than being far from each other, there is evidence that the "true" $\theta$ value is approximately $\theta = -24$ or $-27$ degrees. We say that this comparison direction would "pass" the High CMC criteria because the $\theta$ values with high CMC counts are adjacent. 
 
 ```{r include=FALSE}
 theta_rescaled <- kmComparisonFeatures %>%
@@ -1147,6 +1114,11 @@ highCMC_comparison1to2_congruentCells_lowCMC <- highCMC_congruentData_comparison
 ```
 
 ```{r, include=FALSE}
+#For some reason the extrema aren't calculated correctly making the delta x
+#rectangle look longer than the delta y rectangle. I'm just going to fix it here
+highCMC_extremaData_comparison1to2 <- highCMC_extremaData_comparison1to2 %>%
+              mutate(ymin = ifelse(parameter == "x",ymax - .297,ymin))
+
 highCMC_comparison1to2_thetaNeg24 <- highCMC_congruentData_comparison1to2 %>%
   filter(cellNum < 90 & theta == -24) %>%
   left_join(theta_rescaled,by = "theta") %>%
@@ -1242,7 +1214,7 @@ highCMC_comparison1to2_theta30 <- highCMC_congruentData_comparison1to2_lowCMC %>
                               expression("CCF"[max])))
 ```
 
-```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center',cache = F}
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
 
 highCMC_comparison1to2_cmcTheta <- bind_rows(kmComparisonFeatures %>%
             mutate(direction = "Fadul 1-1 vs. Fadul 1-2",
@@ -1293,25 +1265,6 @@ ggplot(data.frame(a = 1)) +
             aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed",ends = "first"))
 ```
 
-By considering only the "top vote" of each cell as is done in the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868), information is lost regarding other registration phases for which a cell might also rank highly. As [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) observe:
-
-> some of the valid cell pairs may be mistakenly excluded from the CMC count because by chance their correlation yields a higher CCF value at a rotation angle outside the threshold range $T_\theta$.
-
-The High CMC method lifts the single-choice restriction by allowing cells to cast a vote for the translation phase at every $\theta$ value for which it has a sufficiently large associated CCF$_{\max}$ value. 
-Under this system, each vote represents the translation phase that the cell considers to be the true translation phase of the overall scans conditional on a particular $\theta$ value.
-In this way, the High CMC method might be viewed as an approval voting system in which an individual may cast a vote for all of the candidates that they would like.
-For each $\theta$ value, the number of translation phase votes that are close to the $\theta$-specific reference values $x_{\text{ref},\theta}, y_{\text{ref},\theta}$ are counted (now defined based only on the $T_x,T_y$ thresholds).
-This yields what \citet{tong_improved_2015} refer to as a "CMC-$\theta$" distribution representing, as they consider it, the number of "congruent cells" per $\theta$ value. 
-Thus, there may be more than one $\theta$ value for which a single cell/region pair is considered congruent.
-While seemingly contradictory (as there should be only one "true" $\theta$ alignment value), \citet{tong_improved_2015} justify their method by the empirical observation:
-
-> [i]f two images are truly matching, the CMC-$\theta$ distribution of matching image pairs should have a prominent peak located near the initial phase angle $\Theta_0$, while non-matching image pairs may have a relatively flat and random CMC-$\theta$ distribution pattern.
-
-The assumption underlying the High CMC method is that the number of cells classified as congruent should be larger near the true $\theta$ value (the "initial phase angle $\Theta_0$", as they call it) than for other $\theta$ values if the cartridge case pair is indeed a match.
-These phenomena are illustrated in Figures \ref{fig:kmCMCPerTheta} and \ref{fig:knmCMCPerTheta}. 
-\autoref{fig:kmCMCPerTheta} shows the CMC counts per rotation value in both directions for the known match pair Fadul 1-1 and Fadul 1-2 from \citet{fadul_empirical_nodate}. 
-We can clearly see a CMC mode around $\theta = -24$ in one direction and $21$ in the other, which is to be expected for a known match pair. 
-\autoref{fig:knmCMCPerTheta}, on the other hand, shows the CMC counts for the known non-match pair Fadul 1-1 and Fadul 2-1; in this comparison, no such CMC count mode is achieved.
 
 Based on this observation, \citet{tong_improved_2015} outline the following procedure for the High CMC method:
 
@@ -1323,7 +1276,7 @@ Based on this observation, \citet{tong_improved_2015} outline the following proc
 
 > If the angular range of the “high CMCs” is within the range $T_\theta$, identify the CMCs for each rotation angle in this range and combine them to give the number of CMCs for this comparison in place of the original CMC number. In this step, if the range is narrower than $T_\theta$, the nearby angles are included to make the range equal to $T_\theta$; CMCs with same index in each rotation are only counted once.
 
-\citet{tong_improved_2015} introduce an additional criterion to identify a mode in the CMC count per $\theta$ distribution.
+\citet{tong_improved_2015} introduce an additional criteria to identify a mode in the CMC count per $\theta$ distribution.
 Let $\{\text{CMC}_{\theta} : \theta \in \Theta \}$ denote the CMC-$\theta$ distribution where $\Theta$ is the set of rotation values considered for the comparison. 
 Define CMC$_{\max} \equiv \max_{\theta} \{\text{CMC}_{\theta} : \theta \in \Theta\}$.
 \citet{tong_improved_2015} \svp{define} a "high" CMC threshold as CMC$_{\text{high}} \equiv$ CMC$_{\max} - \tau$ for some constant $\tau$ (they choose $\tau = 1$).
@@ -1334,10 +1287,11 @@ If $R \leq T_{\theta}$, then there is evidence that a single mode exists in the 
 Otherwise, no such mode exists (by their definition) and the cartridge case pair is likely not a match.
 The horizontal dashed lines in Figures \ref{fig:kmCMCPerTheta} and \ref{fig:knmCMCPerTheta} represent the CMC$_{\text{high}}$ thresholds. 
 The $\theta \in \Theta_{\text{high}}$ are represented by blue bars.
-For the matching pair shown in \ref{fig:kmCMCPerTheta}, the range of $\Theta_{\text{high}}$ is less than the threshold $T_{\theta} = 6$ degrees, so this pair would "pass" the High CMC criterion.
+For the matching pair shown in \ref{fig:kmCMCPerTheta}, the range of $\Theta_{\text{high}}$ is less than the threshold $T_{\theta} = 6$ degrees, so this pair would "pass" the High CMC criteria.
 In contrast, the range of $\Theta_{\text{high}}$ is larger than $T_{\theta} = 6$ degrees for the non-match pair shown in \autoref{fig:knmCMCPerTheta}. 
-Thus, the non-match pair would "fail" the High CMC criterion.
+Thus, the non-match pair would "fail" the High CMC criteria.
 
 The "prominent peak" empirical observation upon which the High CMC method is based does seem to hold for many known match and known non-match pairs in our experience.
 However, we've observed that the behavior of the CMC-$\theta$ distributions depend heavily on the preprocessing procedures used and thresholds set. 
 In particular, the CMC-$\theta$ distributions for some KNM pairs exhibit the prominent peak behavior for a wide range of threshold values making them difficult to distinguish from KM pairs.
+

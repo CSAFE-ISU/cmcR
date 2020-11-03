@@ -204,34 +204,36 @@ decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
     dplyr::left_join(thetaClassifications,by = "theta")
 }
 
-#' Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
-#' distribution returned by the decision_highCMC_cmcThetaDistrib function
+#'Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
+#'distribution returned by the decision_highCMC_cmcThetaDistrib function
 #'
-#' @name decision_highCMC_classifyCMCs
-#' @param cellIndex vector/tibble column containing cell indices corresponding
-#'   to a reference cell
-#' @param x vector/tibble column containing x horizontal translation values
-#' @param y vector/tibble column containing y vertical translation values
-#' @param theta vector/tibble column containing theta rotation values
-#' @param corr vector/tibble column containing correlation similarity scores
-#'   between a reference cell and its associated target region
-#' @param xThresh used to classify particular x values "congruent" (conditional
-#'   on a particular theta value) if they are within xThresh of the
-#'   theta-specific median x value
-#' @param yThresh used to classify particular y values "congruent" (conditional
-#'   on a particular theta value) if they are within yThresh of the
-#'   theta-specific median y value
-#' @param corrThresh to classify particular correlation values "congruent"
-#'   (conditional on a particular theta value) if they are at least corrThresh
-#' @param tau constant used to define a "high" CMC count. This number is
-#'   subtracted from the maximum CMC count achieved in the CMC-theta
-#'   distribution. Theta values with CMC counts above this value are considered
-#'   to have "high" CMC counts.
-#' @seealso
-#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
+#'@name decision_highCMC_classifyCMCs
+#'@param cellIndex vector/tibble column containing cell indices corresponding to
+#'  a reference cell
+#'@param x vector/tibble column containing x horizontal translation values
+#'@param y vector/tibble column containing y vertical translation values
+#'@param theta vector/tibble column containing theta rotation values
+#'@param corr vector/tibble column containing correlation similarity scores
+#'  between a reference cell and its associated target region
+#'@param xThresh used to classify particular x values "congruent" (conditional
+#'  on a particular theta value) if they are within xThresh of the
+#'  theta-specific median x value
+#'@param yThresh used to classify particular y values "congruent" (conditional
+#'  on a particular theta value) if they are within yThresh of the
+#'  theta-specific median y value
+#'@param thetaThresh defines how wide a High CMC mode is allowed to be in the
+#'  CMC-theta distribution before it's considered too diffuse
+#'@param corrThresh to classify particular correlation values "congruent"
+#'  (conditional on a particular theta value) if they are at least corrThresh
+#'@param tau constant used to define a "high" CMC count. This number is
+#'  subtracted from the maximum CMC count achieved in the CMC-theta
+#'  distribution. Theta values with CMC counts above this value are considered
+#'  to have "high" CMC counts.
+#'@seealso
+#'\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'
-#' @note the decision_CMC function internally calls this function if a value of
-#'   tau is provided
+#'@note the decision_CMC function internally calls this function if a value of
+#'  tau is provided
 #'@examples
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
@@ -249,7 +251,7 @@ decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
 #'
 #'comparisonDF %>%
 #' dplyr::filter(highCMCClassif == "CMC")
-#' @export
+#'@export
 
 decision_highCMC_classifyCMCs <- function(cellIndex,
                                           x,
@@ -337,6 +339,10 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 #'@param yThresh used to classify particular y values "congruent" (conditional
 #'  on a particular theta value) if they are within yThresh of the
 #'  theta-specific median y value
+#'@param thetaThresh (original method of Song (2013)) used to classify
+#'  particular theta values "congruent" if they are within thetaThresh of the
+#'  median theta value. (High CMC) defines how wide a High CMC mode is allowed
+#'  to be in the CMC-theta distribution before it's considered too diffuse
 #'@param corrThresh to classify particular correlation values "congruent"
 #'  (conditional on a particular theta value) if they are at least corrThresh
 #'@param tau (optional) parameter required to apply the High CMC method of Tong
@@ -498,6 +504,7 @@ decision_CMC <- function(cellIndex,
 #'                              comparisonDF_2to1,
 #'                              corColName = "pairwiseCompCor",
 #'                              method = "highCMC")
+#'@importFrom dplyr bind_rows filter
 #' @export
 
 decision_combineCMCDirections <- function(comparison_1to2_df,
@@ -506,9 +513,9 @@ decision_combineCMCDirections <- function(comparison_1to2_df,
                                           method = "highCMC",
                                           compareThetas = TRUE,
                                           thetaThresh = 6){
-  #missingTheta_decision is only applicable when method == "highCMC" or "highCMC".
-  #compareThetas argument is only applicable when method == "highCMC". Test for
-  #this.
+  #missingTheta_decision is only applicable when method == "highCMC" or
+  #"highCMC". compareThetas argument is only applicable when method ==
+  #"highCMC". Test for this.
 
   #For the original method, it's unclear which of the two directions should be
   #taken as the "official" CMC count. To be conservative, assign the pair the

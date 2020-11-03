@@ -19,8 +19,8 @@ decision_highCMC_classifyCMCs(
 )
 }
 \arguments{
-\item{cellIndex}{vector/tibble column containing cell indices corresponding
-to a reference cell}
+\item{cellIndex}{vector/tibble column containing cell indices corresponding to
+a reference cell}
 
 \item{x}{vector/tibble column containing x horizontal translation values}
 
@@ -38,6 +38,9 @@ theta-specific median x value}
 \item{yThresh}{used to classify particular y values "congruent" (conditional
 on a particular theta value) if they are within yThresh of the
 theta-specific median y value}
+
+\item{thetaThresh}{defines how wide a High CMC mode is allowed to be in the
+CMC-theta distribution before it's considered too diffuse}
 
 \item{corrThresh}{to classify particular correlation values "congruent"
 (conditional on a particular theta value) if they are at least corrThresh}
