@@ -61,6 +61,7 @@ library(dplyr)
 #> 
 #>     intersect, setdiff, setequal, union
 library(ggplot2)
+library(x3ptools)
 ```
 
 Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2.
@@ -73,12 +74,19 @@ the
 function.
 
 ``` r
-data("fadul1.1_raw")
-data("fadul1.2_raw")
+fadul1.1_id <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+# Same source comparison
+fadul1.2_id <- "DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
+
+# Code to download breech face impressions:
+nbtrd_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+
+fadul1.1_raw <- x3p_read(paste0(nbtrd_url,fadul1.1_id))
+fadul1.2_raw <- x3p_read(paste0(nbtrd_url,fadul1.2_id))
 
 x3pListPlot(list("Fadul 1-1" = fadul1.1_raw,
-                       "Fadul 1-2" = fadul1.2_raw),
-                  type = "faceted")
+                 "Fadul 1-2" = fadul1.2_raw),
+            type = "faceted")
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
@@ -171,7 +179,7 @@ reference scan.
 ``` r
 cellTibble <- cellTibble %>%
   mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                          target_x3p = fadul1.2_processed))
+                                                          target = fadul1.2_processed))
 
 cellTibble
 #> # A tibble: 64 x 3

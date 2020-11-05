@@ -4,6 +4,19 @@
 \alias{cmcFilter_improved}
 \title{Implements "improved" CMC logic on a list of CCF results for a comparison
 between two cartridge case scans as proposed by Tong et al. (2015)}
+\usage{
+cmcFilter_improved(
+  cellCCF_bothDirections_output,
+  consensus_function = median,
+  ccf_thresh = 0.6,
+  dx_thresh = 10,
+  dy_thresh = dx_thresh,
+  theta_thresh = 3,
+  missingTheta_decision = "replace",
+  compareInitialAndHighThetas = FALSE,
+  consensus_function_theta = consensus_function
+)
+}
 \arguments{
 \item{cellCCF_bothDirections_output}{list returned by the function
 cmcR::cellCCF_bothdirections}

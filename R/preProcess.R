@@ -266,8 +266,6 @@ preProcess_cropWS <- function(x3p,
 #' @keywords internal
 #' @importFrom stats quantile
 
-utils::globalVariables(c(".","value","x","y","r"))
-
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregationFunction = mean,
                                       smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
@@ -743,13 +741,22 @@ preProcess_filterInterior <- function(x3p,
 #'   seems to work well for the Fadul cartridge cases) to remove these unwanted
 #'   observations.
 #' @examples
-#' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
-#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,radiusOffset = -20,region = "exterior")
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 #'
-#' fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped, radiusOffset = 200,region = "interior")
+#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+#'                                        radiusOffset = -20,
+#'                                        region = "exterior")
 #'
-#' x3pListPlot(list("Original" = fadul1.1,"Exterior Cropped" = fadul1.1_extCropped,"Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
+#' fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
+#'                                           radiusOffset = 200,
+#'                                           region = "interior")
+#'
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "Exterior Cropped" = fadul1.1_extCropped,
+#'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
 #'
 #' @export
 
@@ -795,15 +802,27 @@ preProcess_crop <- function(x3p,
 #'   matrix.
 #' @rdname levelBreechFace
 #' @examples
-#' fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
-#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,region = "exterior",radiusOffset = -20)
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+#'                                        region = "exterior",
+#'                                        radiusOffset = -20)
 #'
-#' fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped, region = "interior",radiusOffset = 200)
+#' fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
+#'                                       region = "interior",
+#'                                       radiusOffset = 200)
 #'
-#' fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,statistic = "quantile",tau = .5,method = "fn")
+#' fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,
+#'                                            statistic = "quantile",
+#'                                            tau = .5,
+#'                                            method = "fn")
 #'
-#' x3pListPlot(list("Original" = fadul1.1,"Ext. Cropped" = fadul1.1_extCropped,"Ext. & Int. Cropped" = fadul1.1_intCroped,"Cropped and Leveled" = fadul1.1_leveled))
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "Ext. Cropped" = fadul1.1_extCropped,
+#'                  "Ext. & Int. Cropped" = fadul1.1_intCroped,
+#'                  "Cropped and Leveled" = fadul1.1_leveled))
 #' @export
 
 preProcess_removeTrend <- function(x3p,

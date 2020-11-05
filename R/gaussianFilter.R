@@ -20,8 +20,6 @@ gaussianKernel <- function(size,sig){
 #'
 #' @importFrom stats fft
 
-utils::globalVariables(".")
-
 gaussianFilter <- function(surfaceMat,
                            res,
                            wavelength,

@@ -4,6 +4,22 @@
 \alias{cellCCF}
 \title{Calculates the cross-correlation function between cells in one matrix to
 regions in another.}
+\usage{
+cellCCF(
+  x3p1,
+  x3p2,
+  thetas = seq(-30, 30, by = 3),
+  cellNumHoriz = 8,
+  cellNumVert = cellNumHoriz,
+  regionToCellProp = 4,
+  minObservedProp = 0.1,
+  centerCell = "individualCell",
+  scaleCell = "individualCell",
+  ccfMethod = "fft",
+  rawCorrTieBreaker = which.max,
+  use = "pairwise.complete.obs"
+)
+}
 \arguments{
 \item{x3p1}{an x3p object containing the surface matrix of a cartridge case
 scan}

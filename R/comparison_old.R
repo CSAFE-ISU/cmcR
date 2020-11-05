@@ -94,8 +94,6 @@ extractCellbyCornerLocs <- function(cornerLocs,
 #'
 #' @keywords internal
 
-utils::globalVariables(c("."))
-
 rotateSurfaceMatrix <- function(surfaceMat,
                                 theta = 0,
                                 interpolation = 0){
@@ -194,8 +192,6 @@ splitSurfaceMat1 <- function(surfaceMat,cellNumHoriz,cellNumVert,minObservedProp
 #' @keywords internal
 #'
 #' @importFrom stats setNames
-
-utils::globalVariables(c("."))
 
 getMat2SplitIndices <- function(cellRanges,
                                 cellSideLengths,
@@ -345,8 +341,6 @@ swapcellRangeAxes <- function(cellRange){
 #'
 #' @importFrom stats sd setNames
 #'@keywords internal
-
-utils::globalVariables(c("cellRange","."))
 
 cellCCF <- function(x3p1,
                     x3p2,

@@ -4,6 +4,9 @@
 \alias{topResultsPerCell}
 \title{Calculate x, y, theta values at which top similarity is achieved in a cell
 pair.}
+\usage{
+topResultsPerCell(ccfResults)
+}
 \arguments{
 \item{ccfResults}{list of data frames, like the one returned by
 cmcR::cellCCF, containing breech face cell comparison results}

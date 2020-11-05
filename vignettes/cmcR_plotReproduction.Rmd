@@ -62,8 +62,19 @@ The `rgl` package can be used to visualize the cartridge case scans in 3 dimensi
 To learn more about how various aspects of a scene are constructed, see [this vignette](https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html) for the `rgl` package. For more details on using `rgl` specifically applied to .x3p files, see the documentation for the [`x3ptools` package on Github](https://github.com/heike/x3ptools).
 
 ```{r}
-data("fadul1.1_raw","fadul1.2_raw")
+fadul1.1_id <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+# Same source comparison
+fadul1.2_id <- "DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
 
+# Code to download breech face impressions:
+nbtrd_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement"
+
+fadul1.1_raw <- x3p_read(file.path(nbtrd_url,fadul1.1_id))
+fadul1.2_raw <- x3p_read(file.path(nbtrd_url,fadul1.2_id))
+```
+
+
+```{r}
 #apply lowpass filter to reduce noise in scan:
 surface1 <- fadul1.1_raw %>%
   cmcR::preProcess_gaussFilter(wavelength = 16,filtertype = "lp")
@@ -148,7 +159,7 @@ data("fadul1.1_processed","fadul1.2_processed","fadul2.1_processed")
 
 ```{r include=FALSE,eval=FALSE}
 #if we want to include more pairs in the comparison
-fadul2.2 <- cmcR::x3p_read("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
+fadul2.2 <- x3ptools::x3p_read("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
 ```
 
 

@@ -3,6 +3,18 @@
 \name{cmcFilter}
 \alias{cmcFilter}
 \title{Implements CMC logic on a single data frame as proposed by Song (2013).}
+\usage{
+cmcFilter(
+  ccfDF,
+  consensus_function = median,
+  ccf_thresh = 0.6,
+  dx_thresh = 10,
+  dy_thresh = dx_thresh,
+  theta_thresh = 3,
+  consensus_function_theta = consensus_function,
+  ...
+)
+}
 \arguments{
 \item{ccfDF}{data frame containing ccf results from a comparison between two
 cartridge case scans}

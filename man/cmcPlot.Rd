@@ -3,6 +3,23 @@
 \name{cmcPlot}
 \alias{cmcPlot}
 \title{Visualize initial and high CMCs for a cartridge case pair comparison}
+\usage{
+cmcPlot(
+  referenceScan,
+  targetScan,
+  reference_v_target_CMCs,
+  target_v_reference_CMCs = reference_v_target_CMCs,
+  corColName = "pairwiseCompCor",
+  type = "faceted",
+  x3pNames = c("referenceScan", "targetScan"),
+  legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
+  height.colors = c("#1B1B1B", "#404040", "#7B7B7B", "#B0B0B0", "#DBDBDB", "#F7F7F7",
+    "#E4E4E4", "#C5C5C5", "#999999", "#717171", "#4E4E4E"),
+  cell.colors = c("#a50026", "#313695"),
+  cell.alpha = 0.2,
+  na.value = "gray80"
+)
+}
 \arguments{
 \item{referenceScan}{an x3p object}
 
@@ -14,6 +31,10 @@ scan and the target scan.}
 \item{target_v_reference_CMCs}{(optional) CMCs for the comparison between the
 target scan and the reference scan. If this is missing, then only the
 original method CMCs will be plotted}
+
+\item{corColName}{name of correlation similarity score column used to
+identify the CMCs in the two comparison_*_df data frames (e.g.,
+pairwiseCompCor)}
 
 \item{type}{argument to be passed to cmcR::x3pListPlot function}
 
@@ -28,6 +49,8 @@ that dictates the height value colorscale}
 
 \item{cell.colors}{vector of 2 colors for plotting non-matching and matching
 (in that order) cells}
+
+\item{cell.alpha}{sets alpha of cells (passed to geom_polygon)}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}

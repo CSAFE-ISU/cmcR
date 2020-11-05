@@ -3,6 +3,18 @@
 \name{x3pListPlot}
 \alias{x3pListPlot}
 \title{Plot a list of x3ps}
+\usage{
+x3pListPlot(
+  x3pList,
+  type = "faceted",
+  rotate = 0,
+  legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
+  height.colors = rev(c("#7f3b08", "#b35806", "#e08214", "#fdb863", "#fee0b6",
+    "#f7f7f7", "#d8daeb", "#b2abd2", "#8073ac", "#542788", "#2d004b")),
+  na.value = "gray80",
+  guide = "colorbar"
+)
+}
 \arguments{
 \item{x3pList}{a list of x3p objects. If the x3p objects are named in the
 list, then these names will be included in the title of their respective

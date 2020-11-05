@@ -64,12 +64,21 @@ seems to work well for the Fadul cartridge cases) to remove these unwanted
 observations.
 }
 \examples{
-fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
-fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,radiusOffset = -20,region = "exterior")
+fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 
-fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped, radiusOffset = 200,region = "interior")
+fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+                                       radiusOffset = -20,
+                                       region = "exterior")
 
-x3pListPlot(list("Original" = fadul1.1,"Exterior Cropped" = fadul1.1_extCropped,"Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
+fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
+                                          radiusOffset = 200,
+                                          region = "interior")
+
+x3pListPlot(list("Original" = fadul1.1,
+                 "Exterior Cropped" = fadul1.1_extCropped,
+                 "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
 
 }

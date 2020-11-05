@@ -4,16 +4,24 @@
 \alias{preProcess_detectFPCircle}
 \title{Detect the radius and center of a firing pin impression circle in a breech
 face impression scan using a circular Hough transform.}
+\usage{
+preProcess_detectFPCircle(
+  surfaceMat,
+  aggregationFunction = mean,
+  smootherSize = 2 * round((0.1 * nrow(surfaceMat)/2)) + 1,
+  gridSize = 40,
+  gridGranularity = 1,
+  houghScoreQuant = 0.9
+)
+}
 \arguments{
-\item{x3p}{an x3p object containing a surface matrix}
+\item{aggregationFunction}{function to aggregate all 12 radius estimates
+determined under the initial radius estimation procedure those calculated
+using fpRadiusGridSearch}
 
 \item{smootherSize}{size of average smoother (to be passed to zoo::roll_mean)
 used to determine where the non-NA pixel count-per-row series attains a
 mode.}
-
-\item{aggregationFunction}{function to aggregate all 12 radius estimates
-determined under the initial radius estimation procedure those calculated
-using fpRadiusGridSearch}
 
 \item{gridGranularity}{granularity of radius grid used to determine the best
 fitting circle to the surface matrix via the Hough transform method}
@@ -21,6 +29,8 @@ fitting circle to the surface matrix via the Hough transform method}
 \item{houghScoreQuant}{quantile cut-off to be used when determining a final
 radius estimate using the score values returned by the imager::hough_circle
 function}
+
+\item{x3p}{an x3p object containing a surface matrix}
 }
 \description{
 This function estimates the radius of a firing pin impression

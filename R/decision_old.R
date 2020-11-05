@@ -22,8 +22,6 @@
 #'@keywords internal
 #' @seealso cmcR::cellCCF
 
-utils::globalVariables(c(".","cellRange","ccf"))
-
 topResultsPerCell <- function(ccfResults){
 
   ccfResults  %>%
@@ -85,8 +83,6 @@ topResultsPerCell <- function(ccfResults){
 #'@keywords internal
 #' @importFrom stats median
 
-utils::globalVariables(c("x","y","theta","ccf"))
-
 cmcFilter <- function(ccfDF,
                       consensus_function = median,
                       ccf_thresh = .6,
@@ -135,8 +131,6 @@ cmcFilter <- function(ccfDF,
 #' @keywords internal
 #'
 #' @importFrom stats median setNames
-
-utils::globalVariables(c(".","ccf"))
 
 cmcFilterPerTheta <- function(ccfResults,
                               consensus_function = median,
@@ -236,8 +230,6 @@ getMode <- function(x){
 #' @keywords internal
 #'
 #' @importFrom stats median
-
-utils::globalVariables(c("theta","n","distanceToCMCMax"))
 
 calcMaxCMCTheta <- function(cmcPerTheta,
                             highCMC_thresh = 1,
@@ -360,8 +352,6 @@ calcMaxCMCTheta <- function(cmcPerTheta,
 #' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'@keywords internal
 #' @importFrom stats median
-
-utils::globalVariables(c(".","cellNum","comparison","theta"))
 
 cmcFilter_improved <- function(cellCCF_bothDirections_output,
                                consensus_function = median,

@@ -30,8 +30,6 @@
 #'
 #' @importFrom stats setNames median quantile
 
-utils::globalVariables(c("value","x","y",".","x3p","height"))
-
 x3pListPlot <- function(x3pList,
                         type = "faceted",
                         rotate = 0,
@@ -184,8 +182,6 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #'
 #' @importFrom stats median setNames
 #' @importFrom ggnewscale new_scale_fill
-
-utils::globalVariables(c("firstRow","lastRow","firstCol","lastCol","cellNum",".","firstColCentered","theta","firstRowCentered","x","y","lastColCentered","lastRowCentered","topRightCorner_col","bottomLeftCorner_col","topRightCorner_row","bottomLeftCorner_row","cmc","midCol","midRow","cellIndex"))
 
 arrangeCMCPlot <- function(referenceScan,
                            targetScan,
@@ -369,6 +365,9 @@ arrangeCMCPlot <- function(referenceScan,
 #'@param target_v_reference_CMCs (optional) CMCs for the comparison between the
 #'  target scan and the reference scan. If this is missing, then only the
 #'  original method CMCs will be plotted
+#' @param corColName name of correlation similarity score column used to
+#'   identify the CMCs in the two comparison_*_df data frames (e.g.,
+#'   pairwiseCompCor)
 #'@param type argument to be passed to cmcR::x3pListPlot function
 #'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
 #'  function
@@ -378,6 +377,7 @@ arrangeCMCPlot <- function(referenceScan,
 #'  that dictates the height value colorscale
 #'@param cell.colors vector of 2 colors for plotting non-matching and matching
 #'  (in that order) cells
+#'@param cell.alpha sets alpha of cells (passed to geom_polygon)
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'
@@ -428,8 +428,6 @@ arrangeCMCPlot <- function(referenceScan,
 #'
 #'@importFrom utils hasName
 #'@export
-
-utils::globalVariables(c(".","cmc","comparison","x","y","theta","cellIndex","cellRange"))
 
 cmcPlot <- function(referenceScan,
                     targetScan,

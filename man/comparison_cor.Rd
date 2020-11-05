@@ -33,15 +33,22 @@ data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
 comparison_cellDivision(numCells = 64) \%>\%
-dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                               target = fadul1.2_processed)) \%>\%
-dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues),
-              regionPropMissing = comparison_calcPropMissing(heightValues = regionHeightValues)) \%>\%
+dplyr::mutate(regionHeightValues =
+             comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                         target = fadul1.2_processed)) \%>\%
+dplyr::mutate(cellPropMissing =
+           comparison_calcPropMissing(heightValues = cellHeightValues),
+              regionPropMissing =
+           comparison_calcPropMissing(heightValues = regionHeightValues)) \%>\%
 dplyr::filter(cellPropMissing <= .85 & regionPropMissing <= .85) \%>\%
-dplyr::mutate(cellHeightValues = comparison_standardizeHeights(heightValues = cellHeightValues),
-              regionHeightValues = comparison_standardizeHeights(heightValues = regionHeightValues)) \%>\%
-dplyr::mutate(cellHeightValues = comparison_replaceMissing(heightValues = cellHeightValues),
-              regionHeightValues = comparison_replaceMissing(heightValues = regionHeightValues)) \%>\%
+dplyr::mutate(cellHeightValues =
+        comparison_standardizeHeights(heightValues = cellHeightValues),
+              regionHeightValues =
+        comparison_standardizeHeights(heightValues = regionHeightValues)) \%>\%
+dplyr::mutate(cellHeightValues =
+                  comparison_replaceMissing(heightValues = cellHeightValues),
+              regionHeightValues =
+            comparison_replaceMissing(heightValues = regionHeightValues)) \%>\%
 dplyr::mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues,
                                               regionHeightValues)) \%>\%
 dplyr::mutate(pairwiseCompCor = comparison_cor(cellHeightValues,

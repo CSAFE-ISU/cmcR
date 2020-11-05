@@ -70,15 +70,27 @@ fittedPlane <- raw_x3p$surface.matrix \%>\%
                     iters = 150)
 }
 
-fadul1.1 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d")
+nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
-fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,region = "exterior",radiusOffset = -20)
+fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+                                       region = "exterior",
+                                       radiusOffset = -20)
 
-fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped, region = "interior",radiusOffset = 200)
+fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
+                                      region = "interior",
+                                      radiusOffset = 200)
 
-fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,statistic = "quantile",tau = .5,method = "fn")
+fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,
+                                           statistic = "quantile",
+                                           tau = .5,
+                                           method = "fn")
 
-x3pListPlot(list("Original" = fadul1.1,"Ext. Cropped" = fadul1.1_extCropped,"Ext. & Int. Cropped" = fadul1.1_intCroped,"Cropped and Leveled" = fadul1.1_leveled))
+x3pListPlot(list("Original" = fadul1.1,
+                 "Ext. Cropped" = fadul1.1_extCropped,
+                 "Ext. & Int. Cropped" = fadul1.1_intCroped,
+                 "Cropped and Leveled" = fadul1.1_leveled))
 }
 \seealso{
 https://github.com/xhtai/cartridges3D
