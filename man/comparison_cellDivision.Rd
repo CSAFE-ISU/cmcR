@@ -3,9 +3,6 @@
 \name{comparison_cellDivision}
 \alias{comparison_cellDivision}
 \title{Split a reference scan into a grid of cells}
-\usage{
-comparison_cellDivision(x3p, numCells = 64)
-}
 \arguments{
 \item{x3p}{an x3p object containing a breech face scan}
 

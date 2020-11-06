@@ -45,6 +45,7 @@
 #'   modes) can be differentiated from noise introduced by spotty missing
 #'   values. The size of the kernel used in the roll_mean function is
 #'   indicated by the nonNA_sum_smootherSize argument.
+#'   @importFrom rlang .data
 #'   @keywords internal
 
 fpRadiusEstimation <- function(surfaceMat,
@@ -63,16 +64,16 @@ fpRadiusEstimation <- function(surfaceMat,
 
   firingPinDiameter_estim <- surfaceMat_summedNAs %>%
     data.frame(naSum = .) %>%
-    dplyr::mutate(nonNA_sum = nrow(surfaceMat) - naSum,
+    dplyr::mutate(nonNA_sum = nrow(surfaceMat) - .data$naSum,
                   smoothednonNA_sum =c(rep(NA,nonNA_sum_smootherSize/2),
-                                       zoo::rollmean(nonNA_sum,k = nonNA_sum_smootherSize),
+                                       zoo::rollmean(.data$nonNA_sum,k = nonNA_sum_smootherSize),
                                        rep(NA,nonNA_sum_smootherSize/2)),
-                  rowNum = seq(length.out = length(nonNA_sum)),
-                  smoothednonNA_sum_diff = c(NA,diff(smoothednonNA_sum)),
-                  smoothednonNA_sum_diff_lag = c(smoothednonNA_sum_diff[2:length(smoothednonNA_sum_diff)],NA)) %>%
-    dplyr::filter(smoothednonNA_sum_diff >= 0 & smoothednonNA_sum_diff_lag < 0) %>% #search for rows that change from increasing to decreasing (local maxima)
+                  rowNum = seq(length.out = length(.data$nonNA_sum)),
+                  smoothednonNA_sum_diff = c(NA,diff(.data$smoothednonNA_sum)),
+                  smoothednonNA_sum_diff_lag = c(.data$smoothednonNA_sum_diff[2:length(.data$smoothednonNA_sum_diff)],NA)) %>%
+    dplyr::filter(.data$smoothednonNA_sum_diff >= 0 & .data$smoothednonNA_sum_diff_lag < 0) %>% #search for rows that change from increasing to decreasing (local maxima)
     dplyr::slice(c(1,nrow(.))) %>% #the first and last of such local maxima rows should be the start and end of the firing pin impression circle
-    dplyr::pull(rowNum) %>%
+    dplyr::pull(.data$rowNum) %>%
     diff()
 
   return(floor(firingPinDiameter_estim/2))

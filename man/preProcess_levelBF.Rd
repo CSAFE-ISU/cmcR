@@ -19,10 +19,11 @@ to the RANSAC-fitted plane or residuals between the fitted plane and
 observed values.
 }
 \description{
-Given the output of preProcess_ransacLevel, extracts values (either
-raw or residual) from the surface matrix to which the RANSAC plane was fit.
-Adapted from the cartridges3D::levelBF3D function. This ia modified version
-of the levelBF3D function available in the cartridges3D package on GitHub.
+Given the output of preProcess_ransacLevel, extracts values
+(either raw or residual) from the surface matrix to which the RANSAC plane
+was fit. Adapted from the cartridges3D::levelBF3D function. This ia
+modified version of the levelBF3D function available in the cartridges3D
+package on GitHub.
 }
 \examples{
 \dontrun{

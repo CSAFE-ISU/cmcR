@@ -48,25 +48,7 @@ Apply CMC classification logic of the original method of Song (2013)
 the decision_CMC function internally calls this function if a value of
 tau is not provided
 }
-\examples{
-data(fadul1.1_processed,fadul1.2_processed)
-
-comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
-                              ~ comparison_allTogether(fadul1.1_processed,
-                                                       fadul1.2_processed,
-                                                       theta = .))
-
-
-comparisonDF <- comparisonDF \%>\%
-dplyr::mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
-                                                                           x = x,
-                                                                           y = y,
-                                                                           theta = theta,
-                                                                           corr = pairwiseCompCor))
-
-comparisonDF \%>\%
-dplyr::filter(originalMethodClassif == "CMC")
-}
 \seealso{
 \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}
 }
+\keyword{internal}

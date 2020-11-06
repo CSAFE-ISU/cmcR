@@ -43,11 +43,11 @@ aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument gridGranularity. A hough transform is
-applied to the breech face impression scan for each radius value in the
-grid. A final estimate is determined by finding the longest consecutive
-sequence of radii values with high associated hough scores. How we
-determine "high" hough scores is determined by the houghScoreQuant
+grid mesh size is determined by the argument gridGranularity. A hough
+transform is applied to the breech face impression scan for each radius
+value in the grid. A final estimate is determined by finding the longest
+consecutive sequence of radii values with high associated hough scores. How
+we determine "high" hough scores is determined by the houghScoreQuant
 argument. Once the longest sequence of high hough score radii values is
 found, the average of these radii values is used as the final radius
 estimate.

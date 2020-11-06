@@ -45,4 +45,5 @@ dplyr::mutate(cellHeightValues = comparison_standardizeHeights(heightValues = ce
              regionHeightValues = comparison_standardizeHeights(heightValues = regionHeightValues))
 
 head(cellTibble)
+
 }

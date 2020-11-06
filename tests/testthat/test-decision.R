@@ -38,7 +38,7 @@ cellTibble <- cmcR::comparison_allTogether(x3p1,x3p2,
                                                            corr = pairwiseCompCor,
                                                            xThresh = 20,
                                                            corrThresh = .5,
-                                                           thetaThresh = 3),
+                                                           thetaThresh = 6),
                 highCMCClassif = cmcR::decision_CMC(cellIndex = cellIndex,
                                                     x = x,
                                                     y = y,
@@ -46,7 +46,7 @@ cellTibble <- cmcR::comparison_allTogether(x3p1,x3p2,
                                                     corr = pairwiseCompCor,
                                                     xThresh = 20,
                                                     corrThresh = .5,
-                                                    thetaThresh = 3,
+                                                    thetaThresh = 6,
                                                     tau = 1))
 
 cellTibble_rev <- cmcR::comparison_allTogether(x3p2,x3p1,
@@ -60,7 +60,7 @@ cellTibble_rev <- cmcR::comparison_allTogether(x3p2,x3p1,
                                                            corr = pairwiseCompCor,
                                                            xThresh = 20,
                                                            corrThresh = .5,
-                                                           thetaThresh = 3),
+                                                           thetaThresh = 6),
                 highCMCClassif = cmcR::decision_CMC(cellIndex = cellIndex,
                                                     x = x,
                                                     y = y,
@@ -68,57 +68,65 @@ cellTibble_rev <- cmcR::comparison_allTogether(x3p2,x3p1,
                                                     corr = pairwiseCompCor,
                                                     xThresh = 20,
                                                     corrThresh = .5,
-                                                    thetaThresh = 3,
+                                                    thetaThresh = 6,
                                                     tau = 1))
 
+originalMethod_cmcCounts <- dplyr::bind_rows(cellTibble %>%
+                                               dplyr::mutate(direction = "direction_1to2"),
+                                             cellTibble_rev %>%
+                                               dplyr::mutate(direction = "direction_2to1")) %>%
+  dplyr::filter(originalMethodClassif == "CMC") %>%
+  dplyr::group_by(direction) %>%
+  dplyr::tally() %>%
+  dplyr::pull(n)
 
-x3pPlt <- cmcR::x3pListPlot(list("name1" = x3p1,
-                                 "name2" = x3p2),
-                            type = "list")
+high_cmcCounts <- dplyr::bind_rows(cellTibble %>%
+                                     dplyr::mutate(direction = "direction_1to2"),
+                                   cellTibble_rev %>%
+                                     dplyr::mutate(direction = "direction_2to1")) %>%
+  dplyr::filter(highCMCClassif == "CMC") %>%
+  dplyr::group_by(direction) %>%
+  dplyr::tally() %>%
+  dplyr::pull(n)
 
-cmcPlt <- cmcR::cmcPlot(x3p1,
-                        x3p2,
-                        cellTibble,
-                        cellTibble_rev,
-                        x3pNames = c("name1","name2"),
-                        corColName = "pairwiseCompCor")
+#some cells will likely not be considered congruent even if the overall
+#cartridge case pair passes the High CMC criterion.
+nonCMC_butPassing <- dplyr::bind_rows(cellTibble %>%
+                                        dplyr::mutate(direction = "direction_1to2"),
+                                      cellTibble_rev %>%
+                                        dplyr::mutate(direction = "direction_2to1")) %>%
+  dplyr::filter(highCMCClassif != "CMC")
 
-cmcPlt_list <- cmcR::cmcPlot(x3p1,
-                             x3p2,
-                             cellTibble,
-                             cellTibble_rev,
-                             x3pNames = c("name1","name2"),
-                             corColName = "pairwiseCompCor",type = "list")
+cellTibble_failed <- cmcR::comparison_allTogether(x3p1,x3p2,
+                                                  theta = -24,
+                                                  numCells = 64,
+                                                  maxMissingProp = .85) %>%
+  dplyr::mutate(originalMethodClassif = cmcR::decision_CMC(cellIndex = cellIndex,
+                                                           x = x,
+                                                           y = y,
+                                                           theta = theta,
+                                                           corr = pairwiseCompCor,
+                                                           xThresh = 20,
+                                                           corrThresh = 1,
+                                                           thetaThresh = 6),
+                highCMCClassif = cmcR::decision_CMC(cellIndex = cellIndex,
+                                                    x = x,
+                                                    y = y,
+                                                    theta = theta,
+                                                    corr = pairwiseCompCor,
+                                                    xThresh = 20,
+                                                    corrThresh = 1,
+                                                    thetaThresh = 6,
+                                                    tau = 1))
 
-testthat::test_that("diagnosticTools functions work as expected", {
-  testthat::expect_named(x3pPlt,expected = c("name1","name2"))
+testthat::test_that("decision_ functions work as expected", {
+  #cmc counts should be equal for this limited example considering only 1 theta
+  #value
+  testthat::expect_equal(originalMethod_cmcCounts,high_cmcCounts)
 
-  testthat::expect_true(all(unlist(purrr::map(x3pPlt, ~ class(.) == c("gg","ggplot")))))
+  testthat::expect_true(all(nonCMC_butPassing$highCMCClassif == "non-CMC (passed)"))
 
+  testthat::expect_true(all(cellTibble_failed$originalMethodClassif == "non-CMC"))
+  testthat::expect_true(all(cellTibble_failed$highCMCClassif == "non-CMC (failed)"))
 
-  testthat::expect_named(cmcPlt,
-                         expected = c("originalMethodCMCs_reference_v_target",
-                                      "originalMethodCMCs_target_v_reference",
-                                      "highCMC_reference_v_target",
-                                      "highCMC_target_v_reference"))
-
-  testthat::expect_true(all(unlist(purrr::map(cmcPlt, ~ class(.) == c("gg","ggplot")))))
-
-  #Returning each plot individually rather than faceted:
-  testthat::expect_named(cmcPlt_list,
-                         expected = c("originalMethodCMCs_reference_v_target",
-                                      "originalMethodCMCs_target_v_reference",
-                                      "highCMC_reference_v_target",
-                                      "highCMC_target_v_reference"))
-
-  #individual plots should be named appropriately
-  testthat::expect_true(all(purrr::map2_lgl(cmcPlt_list,
-                                            list(c("name1","name2"),
-                                                 c("name2","name1"),
-                                                 c("name1","name2"),
-                                                 c("name2","name1")),
-                                            ~ assertthat::are_equal(names(.x),.y))))
-
-  #add more "expect failure" tests?
 })
-

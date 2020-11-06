@@ -114,43 +114,36 @@ circshift <- function(x, vec) {
   return(x)
 }
 
-#' calculates the "brute force" pairwise-complete correlation between matrix a
-#' and matrix b translated by (offsetx,offsety)
-#'
-#' @name pairwise_ccf
-#'
-#' @keywords internal
-
-pairwise_ccf <- function(a, b, offsetx = 0, offsety = 0) {
-  if ("x3p" %in% class(a)) a <- a$surface.matrix
-  if ("x3p" %in% class(b)) b <- b$surface.matrix
-
-  aadj <- b_pad <- matrix(NA,
-                          nrow = nrow(a) + nrow(b),
-                          ncol = ncol(a) + ncol(b))
-
-  hdim <- (dim(a) + dim(b))/4
-
-  b_pad[(hdim[1] + 1):(hdim[1] + dim(b)[1]),
-        (hdim[2] + 1):(hdim[2] + dim(b)[2])] <- b
-
-  idx <- (offsetx + 1):(offsetx + ncol(a))
-  idy <- (offsety + 1):(offsety + nrow(a))
-  aadj[idy,idx] <- a
-
-  if(all(is.na(aadj)) | all(is.na(b_pad))){
-    return(NA)
-  }
-  else{
-    suppressWarnings(
-      suppressMessages(
-        list("ccf" = cor(as.numeric(aadj), as.numeric(b_pad), use = "pairwise.complete.obs"),
-             "nonMissing" = sum(!is.na(as.numeric(aadj)) & !is.na(b_pad)))
-
-      )
-    )
-  }
-}
+# pairwise_ccf <- function(a, b, offsetx = 0, offsety = 0) {
+#   if ("x3p" %in% class(a)) a <- a$surface.matrix
+#   if ("x3p" %in% class(b)) b <- b$surface.matrix
+#
+#   aadj <- b_pad <- matrix(NA,
+#                           nrow = nrow(a) + nrow(b),
+#                           ncol = ncol(a) + ncol(b))
+#
+#   hdim <- (dim(a) + dim(b))/4
+#
+#   b_pad[(hdim[1] + 1):(hdim[1] + dim(b)[1]),
+#         (hdim[2] + 1):(hdim[2] + dim(b)[2])] <- b
+#
+#   idx <- (offsetx + 1):(offsetx + ncol(a))
+#   idy <- (offsety + 1):(offsety + nrow(a))
+#   aadj[idy,idx] <- a
+#
+#   if(all(is.na(aadj)) | all(is.na(b_pad))){
+#     return(NA)
+#   }
+#   else{
+#     suppressWarnings(
+#       suppressMessages(
+#         list("ccf" = cor(as.numeric(aadj), as.numeric(b_pad), use = "pairwise.complete.obs"),
+#              "nonMissing" = sum(!is.na(as.numeric(aadj)) & !is.na(b_pad)))
+#
+#       )
+#     )
+#   }
+# }
 
 #' Computes the location of the maximum CCF value in a CCF map between two
 #' matrices
@@ -164,35 +157,35 @@ pairwise_ccf <- function(a, b, offsetx = 0, offsety = 0) {
 ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   stopifnot(ccfMethod %in% c("bruteForceReweighted","imager","fft"))
 
-  if(ccfMethod == "bruteForceReweighted"){
-    resp <- expand.grid(offsetx = 1:(max(ncol(mat1),ncol(mat2))),
-                        offsety = 1:(max(nrow(mat1),nrow(mat2)))) %>%
-      purrr::pmap_dfr(~ {
-        pwiseCCF <- pairwise_ccf(mat1,mat2,offsetx = ..1,offsety = ..2)
+  # if(ccfMethod == "bruteForceReweighted"){
+  #   resp <- expand.grid(offsetx = 1:(max(ncol(mat1),ncol(mat2))),
+  #                       offsety = 1:(max(nrow(mat1),nrow(mat2)))) %>%
+  #     purrr::pmap_dfr(~ {
+  #       pwiseCCF <- pairwise_ccf(mat1,mat2,offsetx = ..1,offsety = ..2)
+  #
+  #       data.frame(offsetx = ..1,
+  #                  offsety = ..2,
+  #                  ccf = pwiseCCF$ccf,
+  #                  nonMissing = pwiseCCF$nonMissing)
+  #     }) %>%
+  #     dplyr::mutate(ccfReweighted = nonMissing*ccf/max(nonMissing),
+  #                   offsetx = offsetx - max(offsetx)/2 - ncol(mat1)/2,
+  #                   offsety = offsety - max(offsety)/2 - nrow(mat1)/2) %>%
+  #     dplyr::filter(ccfReweighted == max(ccfReweighted,na.rm = TRUE))
+  #
+  #   return(data.frame("ccf" = resp$ccfReweighted,"x" = resp$offsetx,"y" = resp$offsety))
+  # }
+  #
+  # else if(ccfMethod == "imager"){
+  #   resp <- imager::correlate(im = imager::as.cimg(mat2),
+  #                             filter = imager::as.cimg(mat1),
+  #                             normalise = TRUE) %>%
+  #     as.matrix()
+  # }
 
-        data.frame(offsetx = ..1,
-                   offsety = ..2,
-                   ccf = pwiseCCF$ccf,
-                   nonMissing = pwiseCCF$nonMissing)
-      }) %>%
-      dplyr::mutate(ccfReweighted = nonMissing*ccf/max(nonMissing),
-                    offsetx = offsetx - max(offsetx)/2 - ncol(mat1)/2,
-                    offsety = offsety - max(offsety)/2 - nrow(mat1)/2) %>%
-      dplyr::filter(ccfReweighted == max(ccfReweighted,na.rm = TRUE))
-
-    return(data.frame("ccf" = resp$ccfReweighted,"x" = resp$offsetx,"y" = resp$offsety))
-  }
-
-  else if(ccfMethod == "imager"){
-    resp <- imager::correlate(im = imager::as.cimg(mat2),
-                              filter = imager::as.cimg(mat1),
-                              normalise = TRUE) %>%
-      as.matrix()
-  }
-
-  else if(ccfMethod == "fft"){
-    resp <- filterViaFFT(mat1, mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-  }
+  # else if(ccfMethod == "fft"){
+  resp <- filterViaFFT(mat1, mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
+  # }
 
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]

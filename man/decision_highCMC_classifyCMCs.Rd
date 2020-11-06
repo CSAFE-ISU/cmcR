@@ -58,24 +58,7 @@ distribution returned by the decision_highCMC_cmcThetaDistrib function
 the decision_CMC function internally calls this function if a value of
 tau is provided
 }
-\examples{
-data(fadul1.1_processed,fadul1.2_processed)
-
-comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
-                              ~ comparison_allTogether(fadul1.1_processed,
-                                                       fadul1.2_processed,
-                                                       theta = .))
-
-comparisonDF <- comparisonDF \%>\%
-dplyr::mutate(highCMCClassif = decision_highCMC_classifyCMCs(cellIndex = cellIndex,
-                                                             x = x,
-                                                             y = y,
-                                                             theta = theta,
-                                                             corr = pairwiseCompCor))
-
-comparisonDF \%>\%
-dplyr::filter(highCMCClassif == "CMC")
-}
 \seealso{
 \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 }
+\keyword{internal}

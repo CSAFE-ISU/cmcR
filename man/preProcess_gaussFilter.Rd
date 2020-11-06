@@ -12,11 +12,11 @@ preProcess_gaussFilter(x3p, wavelength = c(16, 500), filtertype = "bp")
 
 \item{wavelength}{cut-off wavelength}
 
-\item{filtertype}{specifies whether a low pass, "lp", high pass, "hp", or bandpass,
-"bp" filter is to be used. Note that setting filterype = "bp" means that
-wavelength should be a vector of two numbers. In this case, the max of
-these two number will be used for the high pass filter and the min for the
-low pass filter.}
+\item{filtertype}{specifies whether a low pass, "lp", high pass, "hp", or
+bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
+means that wavelength should be a vector of two numbers. In this case, the
+max of these two number will be used for the high pass filter and the min
+for the low pass filter.}
 }
 \description{
 Performs a low, high, or bandpass Gaussian filter on a surface matrix with a

@@ -2,10 +2,11 @@
 #'
 #' @name preProcess_levelBF
 #'
-#' @description Given the output of preProcess_ransacLevel, extracts values (either
-#'   raw or residual) from the surface matrix to which the RANSAC plane was fit.
-#'   Adapted from the cartridges3D::levelBF3D function. This ia modified version
-#'   of the levelBF3D function available in the cartridges3D package on GitHub.
+#' @description Given the output of preProcess_ransacLevel, extracts values
+#'   (either raw or residual) from the surface matrix to which the RANSAC plane
+#'   was fit. Adapted from the cartridges3D::levelBF3D function. This ia
+#'   modified version of the levelBF3D function available in the cartridges3D
+#'   package on GitHub.
 #'
 #' @param ransacFit output from the cmcR::preProcess_ransacLevel function.
 #' @param useResiduals dictates whether the difference between the estimated
@@ -254,17 +255,18 @@ preProcess_cropWS <- function(x3p,
 #'   radius estimate (e.g., minimum was determined to be an effective
 #'   aggregation function in preliminary tests). A grid of radii values centered
 #'   on this estimate are then tested to determine which a final estimate. The
-#'   grid mesh size is determined by the argument gridGranularity. A hough transform is
-#'   applied to the breech face impression scan for each radius value in the
-#'   grid. A final estimate is determined by finding the longest consecutive
-#'   sequence of radii values with high associated hough scores. How we
-#'   determine "high" hough scores is determined by the houghScoreQuant
+#'   grid mesh size is determined by the argument gridGranularity. A hough
+#'   transform is applied to the breech face impression scan for each radius
+#'   value in the grid. A final estimate is determined by finding the longest
+#'   consecutive sequence of radii values with high associated hough scores. How
+#'   we determine "high" hough scores is determined by the houghScoreQuant
 #'   argument. Once the longest sequence of high hough score radii values is
 #'   found, the average of these radii values is used as the final radius
 #'   estimate.
 #'
 #' @keywords internal
 #' @importFrom stats quantile
+#' @importFrom rlang .data
 
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregationFunction = mean,
@@ -275,7 +277,7 @@ preProcess_detectFPCircle <- function(surfaceMat,
 
   firingPinRadiusEstimate <- fpRadiusGridSearch(surfaceMat = surfaceMat,smootherSize = smootherSize,
                                                 aggregationFunction = aggregationFunction) %>%
-    .$radiusEstim
+    {.$radiusEstim}
 
   firingPinRadiusGrid <- seq(from = firingPinRadiusEstimate - floor(gridSize/2),
                              to = firingPinRadiusEstimate + floor(gridSize/2),
@@ -294,9 +296,11 @@ preProcess_detectFPCircle <- function(surfaceMat,
                                                                              radius = rad) %>%
                                                         nms(50) %>%
                                                         as.data.frame() %>%
-                                                        dplyr::top_n(1,wt = value) %>%
-                                                        dplyr::group_by(value) %>%
-                                                        dplyr::summarise(x=mean(x),y=mean(y),r = rad)
+                                                        dplyr::top_n(1,wt = .data$value) %>%
+                                                        dplyr::group_by(.data$value) %>%
+                                                        dplyr::summarise(x=mean(.data$x),y=mean(.data$y),r = rad)
+
+                                                      return(surfaceMat_houghCircle)
                                                     })
 
   q3_htValue <- surfaceMat_houghCircleLocations$value %>%
@@ -318,7 +322,7 @@ preProcess_detectFPCircle <- function(surfaceMat,
   finalRadiusEstimate <- floor(finalRadiusEstimate)
 
   houghCircleLoc <- surfaceMat_houghCircleLocations %>%
-    dplyr::filter(r == finalRadiusEstimate)
+    dplyr::filter(.data$r == finalRadiusEstimate)
 
   return(houghCircleLoc)
 }
@@ -361,6 +365,7 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'                                   houghScoreQuant = .9)
 #' }
 #' @rdname removeFiringPin
+#' @importFrom rlang .data
 #' @export
 
 preProcess_removeFPCircle <- function(x3p,
@@ -382,8 +387,8 @@ preProcess_removeFPCircle <- function(x3p,
   breechFace_firingPinFiltered <- surfaceMat %>%
     imager::as.cimg() %>%
     as.data.frame() %>%
-    dplyr::mutate(value = ifelse(test = (x - fpImpressionCircle$x)^2 + (y - fpImpressionCircle$y)^2 >= (fpImpressionCircle$r)^2,
-                                 yes = value,
+    dplyr::mutate(value = ifelse(test = (.data$x - fpImpressionCircle$x)^2 + (.data$y - fpImpressionCircle$y)^2 >= (fpImpressionCircle$r)^2,
+                                 yes = .data$value,
                                  no = NA)) %>%
     imager::as.cimg(dim = c(max(.$x),max(.$y),1,1)) %>%
     as.matrix()
@@ -399,11 +404,11 @@ preProcess_removeFPCircle <- function(x3p,
 #'
 #' @param x3p an x3p object containing a surface matrix
 #' @param wavelength cut-off wavelength
-#' @param filtertype specifies whether a low pass, "lp", high pass, "hp", or bandpass,
-#'   "bp" filter is to be used. Note that setting filterype = "bp" means that
-#'   wavelength should be a vector of two numbers. In this case, the max of
-#'   these two number will be used for the high pass filter and the min for the
-#'   low pass filter.
+#' @param filtertype specifies whether a low pass, "lp", high pass, "hp", or
+#'   bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
+#'   means that wavelength should be a vector of two numbers. In this case, the
+#'   max of these two number will be used for the high pass filter and the min
+#'   for the low pass filter.
 #'
 #' @examples
 #' \dontrun{
@@ -456,7 +461,9 @@ preProcess_gaussFilter <- function(x3p,
 }
 
 #' @name estimateBFRadius
+#'
 #' @keywords internal
+#' @importFrom rlang .data
 
 estimateBFRadius <- function(mat,
                              scheme = 3,
@@ -500,10 +507,10 @@ estimateBFRadius <- function(mat,
     as.matrix()
 
   exteriorLabel <- data.frame(firstRow = mat_labeled[1,]) %>%
-    dplyr::group_by(firstRow) %>%
+    dplyr::group_by(.data$firstRow) %>%
     dplyr::tally() %>%
-    dplyr::top_n(n = 1,wt= n) %>%
-    dplyr::pull(firstRow)
+    dplyr::top_n(n = 1,wt= .data$n) %>%
+    dplyr::pull(.data$firstRow)
 
   mat_segmented <- mat_labeled
   mat_segmented[mat_segmented != exteriorLabel] <- -1
@@ -525,14 +532,14 @@ estimateBFRadius <- function(mat,
 
   mat_radiusEstimate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
     dplyr::mutate(x = 1:nrow(.)) %>%
-    dplyr::filter(y != 0) %>%
-    dplyr::mutate(x_lag = c(x[2:(nrow(.))],NA)) %>%
-    dplyr::mutate(x_diff = abs(x - x_lag)) %>%
-    dplyr::top_n(n = 1,wt = x_diff) %>%
-    dplyr::summarise(x_lag = agg_function(x_lag),
-                     x = agg_function(x)) %>%
-    dplyr::summarise(radEstimate = round((x_lag - x)/2)) %>%
-    dplyr::pull(radEstimate) %>%
+    dplyr::filter(.data$y != 0) %>%
+    dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
+    dplyr::mutate(x_diff = abs(.data$x - .data$x_lag)) %>%
+    dplyr::top_n(n = 1,wt = .data$x_diff) %>%
+    dplyr::summarise(x_lag = agg_function(.data$x_lag),
+                     x = agg_function(.data$x)) %>%
+    dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
+    dplyr::pull(.data$radEstimate) %>%
     agg_function(na.rm = TRUE)
 
   if(all(2*mat_radiusEstimate < max(nrow(mat)/2,ncol(mat)/2))){
@@ -843,10 +850,14 @@ preProcess_removeTrend <- function(x3p,
   }
 
   else if(statistic == "mean"){
-    x3p_fit <- lm(data = expand.grid(y = 1:nrow(x3p$surface.matrix),
-                                     x = 1:ncol(x3p$surface.matrix)) %>%
-                    dplyr::mutate(value = as.numeric(x3p$surface.matrix)),
-                  formula = value ~ x + y)
+    surfaceMat <- x3p$surface.matrix
+
+    observedPixelLocations <- data.frame(which(!is.na(surfaceMat),
+                                               arr.ind = TRUE)) %>%
+      dplyr::mutate(depth = surfaceMat[!is.na(surfaceMat)])
+
+    x3p_fit <- lm(depth ~ row + col,
+                  data = observedPixelLocations)
   }
 
   x3p_condStatRemoved <- x3p

@@ -31,7 +31,8 @@ Imports:
     ggnewscale,
     quantreg,
     tibble,
-    tidyr
+    tidyr,
+    rlang
 Suggests: 
     knitr,
     rmarkdown,
