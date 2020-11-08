@@ -52,11 +52,11 @@ aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument gridGranularity. A hough transform is
-applied to the breech face impression scan for each radius value in the
-grid. A final estimate is determined by finding the longest consecutive
-sequence of radii values with high associated hough scores. How we
-determine &quot;high&quot; hough scores is determined by the houghScoreQuant
+grid mesh size is determined by the argument gridGranularity. A hough
+transform is applied to the breech face impression scan for each radius
+value in the grid. A final estimate is determined by finding the longest
+consecutive sequence of radii values with high associated hough scores. How
+we determine &quot;high&quot; hough scores is determined by the houghScoreQuant
 argument. Once the longest sequence of high hough score radii values is
 found, the average of these radii values is used as the final radius
 estimate." />
@@ -154,35 +154,39 @@ aggregationFunction, these radii estimates are reduced to a single, rough
 radius estimate (e.g., minimum was determined to be an effective
 aggregation function in preliminary tests). A grid of radii values centered
 on this estimate are then tested to determine which a final estimate. The
-grid mesh size is determined by the argument gridGranularity. A hough transform is
-applied to the breech face impression scan for each radius value in the
-grid. A final estimate is determined by finding the longest consecutive
-sequence of radii values with high associated hough scores. How we
-determine "high" hough scores is determined by the houghScoreQuant
+grid mesh size is determined by the argument gridGranularity. A hough
+transform is applied to the breech face impression scan for each radius
+value in the grid. A final estimate is determined by finding the longest
+consecutive sequence of radii values with high associated hough scores. How
+we determine "high" hough scores is determined by the houghScoreQuant
 argument. Once the longest sequence of high hough score radii values is
 found, the average of these radii values is used as the final radius
 estimate.</p>
     </div>
 
+    <pre class="usage"><span class='fu'>preProcess_detectFPCircle</span><span class='op'>(</span>
+  <span class='va'>surfaceMat</span>,
+  aggregationFunction <span class='op'>=</span> <span class='va'>mean</span>,
+  smootherSize <span class='op'>=</span> <span class='fl'>2</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='op'>(</span><span class='fl'>0.1</span> <span class='op'>*</span> <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>surfaceMat</span><span class='op'>)</span><span class='op'>/</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fl'>1</span>,
+  gridSize <span class='op'>=</span> <span class='fl'>40</span>,
+  gridGranularity <span class='op'>=</span> <span class='fl'>1</span>,
+  houghScoreQuant <span class='op'>=</span> <span class='fl'>0.9</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x3p</th>
-      <td><p>an x3p object containing a surface matrix</p></td>
+      <th>aggregationFunction</th>
+      <td><p>function to aggregate all 12 radius estimates
+determined under the initial radius estimation procedure those calculated
+using fpRadiusGridSearch</p></td>
     </tr>
     <tr>
       <th>smootherSize</th>
       <td><p>size of average smoother (to be passed to zoo::roll_mean)
 used to determine where the non-NA pixel count-per-row series attains a
 mode.</p></td>
-    </tr>
-    <tr>
-      <th>aggregationFunction</th>
-      <td><p>function to aggregate all 12 radius estimates
-determined under the initial radius estimation procedure those calculated
-using fpRadiusGridSearch</p></td>
     </tr>
     <tr>
       <th>gridGranularity</th>
@@ -194,6 +198,10 @@ fitting circle to the surface matrix via the Hough transform method</p></td>
       <td><p>quantile cut-off to be used when determining a final
 radius estimate using the score values returned by the imager::hough_circle
 function</p></td>
+    </tr>
+    <tr>
+      <th>x3p</th>
+      <td><p>an x3p object containing a surface matrix</p></td>
     </tr>
     </table>
 

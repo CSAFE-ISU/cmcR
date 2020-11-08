@@ -165,6 +165,12 @@ as the final breech face estimate.</p></td>
 stable breech face estimate)</p></td>
     </tr>
     <tr>
+      <th>returnResiduals</th>
+      <td><p>dictates whether the difference between the estimated
+breech face and fitted plane are returned (residuals) or if the estimates
+breech face is simply shifted down by its mean value</p></td>
+    </tr>
+    <tr>
       <th>statistic</th>
       <td><p>either "mean" or "quantile"</p></td>
     </tr>
@@ -204,15 +210,27 @@ seed) if this occurs.</p>
                     iters <span class='op'>=</span> <span class='fl'>150</span><span class='op'>)</span>
 <span class='op'>}</span>
 
-<span class='va'>fadul1.1</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span><span class='op'>)</span>
+<span class='va'>nbtrd_link</span> <span class='op'>&lt;-</span> <span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"</span>
+<span class='va'>fadul1.1_link</span> <span class='op'>&lt;-</span> <span class='st'>"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
 
-<span class='va'>fadul1.1_extCropped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1</span>,region <span class='op'>=</span> <span class='st'>"exterior"</span>,radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>20</span><span class='op'>)</span>
+<span class='va'>fadul1.1</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>nbtrd_link</span>,<span class='va'>fadul1.1_link</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>fadul1.1_extCropped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1</span>,
+                                       region <span class='op'>=</span> <span class='st'>"exterior"</span>,
+                                       radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>20</span><span class='op'>)</span>
 
-<span class='va'>fadul1.1_intCroped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>, region <span class='op'>=</span> <span class='st'>"interior"</span>,radiusOffset <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
+<span class='va'>fadul1.1_intCroped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,
+                                      region <span class='op'>=</span> <span class='st'>"interior"</span>,
+                                      radiusOffset <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
 
-<span class='va'>fadul1.1_leveled</span> <span class='op'>&lt;-</span> <span class='fu'>preProcess_removeTrend</span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,statistic <span class='op'>=</span> <span class='st'>"quantile"</span>,tau <span class='op'>=</span> <span class='fl'>.5</span>,method <span class='op'>=</span> <span class='st'>"fn"</span><span class='op'>)</span>
+<span class='va'>fadul1.1_leveled</span> <span class='op'>&lt;-</span> <span class='fu'>preProcess_removeTrend</span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,
+                                           statistic <span class='op'>=</span> <span class='st'>"quantile"</span>,
+                                           tau <span class='op'>=</span> <span class='fl'>.5</span>,
+                                           method <span class='op'>=</span> <span class='st'>"fn"</span><span class='op'>)</span>
 
-<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Original"</span> <span class='op'>=</span> <span class='va'>fadul1.1</span>,<span class='st'>"Ext. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,<span class='st'>"Ext. &amp; Int. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,<span class='st'>"Cropped and Leveled"</span> <span class='op'>=</span> <span class='va'>fadul1.1_leveled</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Original"</span> <span class='op'>=</span> <span class='va'>fadul1.1</span>,
+                 <span class='st'>"Ext. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,
+                 <span class='st'>"Ext. &amp; Int. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,
+                 <span class='st'>"Cropped and Leveled"</span> <span class='op'>=</span> <span class='va'>fadul1.1_leveled</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='img'><img src='levelBreechFace-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

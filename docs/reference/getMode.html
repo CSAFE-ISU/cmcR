@@ -144,12 +144,12 @@ function in cmcR::cmcFilter or cmcR::cmcFilter_improved.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'>#x3p1 and x3p2 are two x3p objects containing processed surface matrices</span>
-<span class='va'>comparison1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cellCCF.html'>cellCCF</a></span><span class='op'>(</span><span class='va'>x3p1</span>,<span class='va'>x3p2</span><span class='op'>)</span> <span class='co'>#defaults assumed</span>
+<span class='va'>comparison1</span> <span class='op'>&lt;-</span> <span class='fu'>cellCCF</span><span class='op'>(</span><span class='va'>x3p1</span>,<span class='va'>x3p2</span><span class='op'>)</span> <span class='co'>#defaults assumed</span>
 
 <span class='co'>#calculate "initial" cmcs</span>
 <span class='va'>comparison1</span><span class='op'>$</span><span class='va'>ccfResults</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='topResultsPerCell.html'>topResultsPerCell</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='cmcFilter.html'>cmcFilter</a></span><span class='op'>(</span>consensus_function <span class='op'>=</span> <span class='va'>median</span>,
+  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>topResultsPerCell</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>cmcFilter</span><span class='op'>(</span>consensus_function <span class='op'>=</span> <span class='va'>median</span>,
                   ccf_thresh <span class='op'>=</span> <span class='fl'>.4</span>,
                   dx_thresh <span class='op'>=</span> <span class='fl'>20</span>,
                   dy_thresh <span class='op'>=</span> <span class='va'>dx_thresh</span>,

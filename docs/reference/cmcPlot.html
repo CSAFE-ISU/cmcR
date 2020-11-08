@@ -131,6 +131,21 @@ depicting the CMCs/non-CMCs under the initially proposed and High CMC
 methods for a pair of cartridge case scans</p>
     </div>
 
+    <pre class="usage"><span class='fu'>cmcPlot</span><span class='op'>(</span>
+  <span class='va'>referenceScan</span>,
+  <span class='va'>targetScan</span>,
+  <span class='va'>reference_v_target_CMCs</span>,
+  target_v_reference_CMCs <span class='op'>=</span> <span class='va'>reference_v_target_CMCs</span>,
+  corColName <span class='op'>=</span> <span class='st'>"pairwiseCompCor"</span>,
+  type <span class='op'>=</span> <span class='st'>"faceted"</span>,
+  x3pNames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"referenceScan"</span>, <span class='st'>"targetScan"</span><span class='op'>)</span>,
+  legend.quantiles <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0.01</span>, <span class='fl'>0.25</span>, <span class='fl'>0.5</span>, <span class='fl'>0.75</span>, <span class='fl'>0.99</span>, <span class='fl'>1</span><span class='op'>)</span>,
+  height.colors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#1B1B1B"</span>, <span class='st'>"#404040"</span>, <span class='st'>"#7B7B7B"</span>, <span class='st'>"#B0B0B0"</span>, <span class='st'>"#DBDBDB"</span>, <span class='st'>"#F7F7F7"</span>,
+    <span class='st'>"#E4E4E4"</span>, <span class='st'>"#C5C5C5"</span>, <span class='st'>"#999999"</span>, <span class='st'>"#717171"</span>, <span class='st'>"#4E4E4E"</span><span class='op'>)</span>,
+  cell.colors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#a50026"</span>, <span class='st'>"#313695"</span><span class='op'>)</span>,
+  cell.alpha <span class='op'>=</span> <span class='fl'>0.2</span>,
+  na.value <span class='op'>=</span> <span class='st'>"gray80"</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -155,6 +170,12 @@ target scan and the reference scan. If this is missing, then only the
 original method CMCs will be plotted</p></td>
     </tr>
     <tr>
+      <th>corColName</th>
+      <td><p>name of correlation similarity score column used to
+identify the CMCs in the two comparison_*_df data frames (e.g.,
+pairwiseCompCor)</p></td>
+    </tr>
+    <tr>
       <th>type</th>
       <td><p>argument to be passed to cmcR::x3pListPlot function</p></td>
     </tr>
@@ -177,6 +198,10 @@ that dictates the height value colorscale</p></td>
       <th>cell.colors</th>
       <td><p>vector of 2 colors for plotting non-matching and matching
 (in that order) cells</p></td>
+    </tr>
+    <tr>
+      <th>cell.alpha</th>
+      <td><p>sets alpha of cells (passed to geom_polygon)</p></td>
     </tr>
     <tr>
       <th>na.value</th>

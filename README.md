@@ -1,7 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# cmcR
+cmcR
+====
 
 <!-- badges: start -->
 
@@ -18,14 +19,12 @@ Matching Cells method for cartridge case identification as proposed by
 as well as the “High CMC” method proposed by [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf).
 
-## Installation
+Installation
+------------
 
 <!-- You can install the released version of cmcR from [CRAN](https://CRAN.R-project.org) with: -->
-
 <!-- ``` r -->
-
 <!-- install.packages("cmcR") -->
-
 <!-- ``` -->
 
 Install the development version from
@@ -40,12 +39,12 @@ Cartridge case scan data can be accessed at the [NIST Ballisitics and
 Toolmarks Research
 Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
-## Example
+Example
+-------
 
-We will illustrate the package’s functionality here. This is intended to
-be a concise demonstration, so please refer to the package vignettes
-available under the “Articles” tab of the [package
-website](https://csafe-isu.github.io/cmcR/index.html) for more detailed
+We will illustrate the package’s functionality here. Please refer to the
+package vignettes available under the “Articles” tab of the [package
+website](https://csafe-isu.github.io/cmcR/index.html) for more
 information.
 
 ``` r
@@ -239,8 +238,8 @@ Then, the `comparison_fft_ccf` function estimates the translations
 required to align the cell and region using the [Cross-Correlation
 Theorem](https://mathworld.wolfram.com/Cross-CorrelationTheorem.html).
 The `comparison_fft_ccf` function returns a data frame of 3 `x`, `y`,
-and `fft_ccf` values: the \(x,y\) estimated translation values at which
-the CCF\(_\max\) value is attained between the cell and region. The
+and `fft_ccf` values: the *x*, *y* estimated translation values at which
+the CCF<sub>max</sub> value is attained between the cell and region. The
 `tidyr::unnest` function can unpack the data frame into 3 separate
 columns, if desired.
 
@@ -272,16 +271,17 @@ cellTibble %>%
 #> # ... with 15 more rows
 ```
 
-Because so many missing values need to be replaced, the CCF\(_{\max}\)
-value calculated in the `fft_ccf` column using frequency-domain
-techniques is not a very good similarity score (doesn’t differentiate
-matches from non-matches well). However, the `x` and `y` estimated
-translations are good estimates of the “true” translation values needed
-to align the cell and region. To calculate a more accurate similarity
-score, we can use the pairwise-complete correlation in which only pairs
-of non-missing pixels are considered in the correlation calculation.
-This provides a better similarity metric. The pairwise-complete
-correlation can be calculated with the `comparison_cor` function.
+Because so many missing values need to be replaced, the
+CCF<sub>max</sub> value calculated in the `fft_ccf` column using
+frequency-domain techniques is not a very good similarity score (doesn’t
+differentiate matches from non-matches well). However, the `x` and `y`
+estimated translations are good estimates of the “true” translation
+values needed to align the cell and region. To calculate a more accurate
+similarity score, we can use the pairwise-complete correlation in which
+only pairs of non-missing pixels are considered in the correlation
+calculation. This provides a better similarity metric. The
+pairwise-complete correlation can be calculated with the
+`comparison_cor` function.
 
 ``` r
 cellTibble %>%
@@ -391,24 +391,24 @@ the consensus is defined to be the median of the `x`, `y`, and `theta`
 values in this `topVotesPerCell` data frame. Cells that are deemed
 “close” to these consensus values and that have a “large” correlation
 value are declared Congruent Matching Cells (CMCs). Cells with `x`, `y`,
-and `theta` values that are within user-defined \(T_x\), \(T_y\), and
-\(T_{\theta}\) thresholds of the consensus `x`, `y`, and `theta` values
-are considered “close.” If these cells also have a correlation greater
-than a user-defined \(T_{\text{CCF}}\) threshold, then they are
-considered CMCs. Note that these thresholds are chosen entirely by
-experimentation in the CMC literature.
+and `theta` values that are within user-defined *T*<sub>*x*</sub>,
+*T*<sub>*y*</sub>, and *T*<sub>*θ*</sub> thresholds of the consensus
+`x`, `y`, and `theta` values are considered “close.” If these cells also
+have a correlation greater than a user-defined *T*<sub>CCF</sub>
+threshold, then they are considered CMCs. Note that these thresholds are
+chosen entirely by experimentation in the CMC literature.
 
 ``` r
 kmComparison_originalCMCs <- kmComparisonFeatures %>%
-  mutate(originalMethodClassif = decision_originalMethod_classifyCMCs(cellIndex = cellIndex,
-                                                                      x = x,
-                                                                      y = y,
-                                                                      theta = theta,
-                                                                      corr = pairwiseCompCor,
-                                                                      xThresh = 20,
-                                                                      yThresh = 20,
-                                                                      thetaThresh = 6,
-                                                                      corrThresh = .5))
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              yThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5))
 
 kmComparison_originalCMCs %>%
   filter(originalMethodClassif == "CMC")
@@ -451,14 +451,14 @@ al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.0
 propose a different decision rule procedure that considers the behavior
 of cell/region pairings across multiple rotations. This method would
 come to be called the High CMC method. The procedure involves computing
-a “CMC-\(\theta\)” distribution where for each value of `theta`, the `x`
+a “CMC-`theta`” distribution where for each value of `theta`, the `x`
 and `y` values are compared to consensus `x` and `y` values (again, the
 median) and the correlation values to a minimum threshold. A cell is
 considered a “CMC candidate” (our language, not theirs) at a particular
-`theta` value if its `x` and `y` values are within \(T_x\), \(T_y\)
-thresholds of the consensus `x` and `y` values and the correlation is at
-least as larges as the \(T_{\text{CCF}}\) threshold. This is similar to
-the original method of [Song
+`theta` value if its `x` and `y` values are within *T*<sub>*x*</sub>,
+*T*<sub>*y*</sub> thresholds of the consensus `x` and `y` values and the
+correlation is at least as larges as the *T*<sub>CCF</sub> threshold.
+This is similar to the original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 except that it relaxes the requirement that the top `theta` value be
 close to a consensus. Continuing with the voting analogy, think of this
@@ -468,31 +468,31 @@ is allowed to vote for multiple `theta` values as long as the `x` and
 `y` votes are deemed close to the `theta`-specific `x`,`y` consensuses
 and the correlation values are sufficiently high.
 
-The CMC-\(\theta\) distribution consists of the “CMC candidates” at each
+The CMC-`theta` distribution consists of the “CMC candidates” at each
 value of `theta`. The assumption made in [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)
 is that, for a truly matching cartridge case pair, a large number of CMC
 candidates should be concentrated around true `theta` alignment value.
-In their words, the CMC-\(\theta\) distribution should exhibit a
-“prominent peak” close to the rotation at which the two cartridge
-cases actually align. Such a prominent peak should not occur for a
-non-match cartridge case pair.
+In their words, the CMC-`theta` distribution should exhibit a “prominent
+peak” close to the rotation at which the two cartridge cases actually
+align. Such a prominent peak should not occur for a non-match cartridge
+case pair.
 
-The figure below shows an example of a CMC-\(\theta\) distribution
-between Fadul 1-1 and Fadul 1-2 constructed using the
+The figure below shows an example of a CMC-`theta` distribution between
+Fadul 1-1 and Fadul 1-2 constructed using the
 `decision_highCMC_cmcThetaDistrib` function. We can clearly see that a
 mode is attained around -27 to -24 degrees.
 
 ``` r
 kmComparisonFeatures %>%
   mutate(cmcThetaDistribClassif = decision_highCMC_cmcThetaDistrib(cellIndex = cellIndex,
-                                                           x = x,
-                                                           y = y,
-                                                           theta = theta,
-                                                           corr = pairwiseCompCor,
-                                                           xThresh = 20,
-                                                           yThresh = 20,
-                                                           corrThresh = .5)) %>%
+                                                                   x = x,
+                                                                   y = y,
+                                                                   theta = theta,
+                                                                   corr = pairwiseCompCor,
+                                                                   xThresh = 20,
+                                                                   yThresh = 20,
+                                                                   corrThresh = .5)) %>%
   filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot(aes(x = theta)) +
   geom_bar(stat = "count",
@@ -505,9 +505,9 @@ kmComparisonFeatures %>%
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 The next step of the High CMC method is to automatically determine if a
-mode (i.e., a “prominent peak”) exists in a CMC-\(\theta\) distribution.
-If we find a mode, then there is evidence that a “true” rotation exists
-to align the two cartridge cases implying the cartridge cases must be
+mode (i.e., a “prominent peak”) exists in a CMC-`theta` distribution. If
+we find a mode, then there is evidence that a “true” rotation exists to
+align the two cartridge cases implying the cartridge cases must be
 matches (such is the logic employed in [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)).
 To automatically identify a mode, [Tong et
@@ -515,31 +515,33 @@ al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.0
 propose determining the range of `theta` values with “high” CMC
 candidate counts (if this range is small, then there is likely a mode).
 They define a “high” CMC candidate count to be
-\(CMC_{\text{high}} \equiv CMC_{\max} - \tau\) where \(CMC_{\max}\) is
-the maximum value attained in the CMC-\(\theta\) distribution (17 in the
-plot shown above) and \(\tau\) is a user-defined constant ([Tong et
+*C**M**C*<sub>high</sub> ≡ *C**M**C*<sub>max</sub> − *τ* where
+*C**M**C*<sub>max</sub> is the maximum value attained in the CMC-`theta`
+distribution (17 in the plot shown above) and *τ* is a user-defined
+constant ([Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)
-use \(\tau = 1\)). Any `theta` value with associated an associated CMC
-candidate count at least as large as \(CMC_{\text{high}}\) have a “high”
-CMC candidate count while any others have a “low” CMC candidate count.
+use *τ* = 1). Any `theta` value with associated an associated CMC
+candidate count at least as large as *C**M**C*<sub>high</sub> have a
+“high” CMC candidate count while any others have a “low” CMC candidate
+count.
 
 The figure below shows the classification of `theta` values into “High”
 and “Low” CMC candidate count groups using the
 `decision_highCMC_identifyHighCMCThetas` function. The High CMC count
-threshold is shown as a dashed line at \(17 - 1\) CMCs. As expected
-since this cartridge case pair is a match, the High CMC count `theta`
-values are all close to each other.
+threshold is shown as a dashed line at 17 − 1 CMCs. As expected since
+this cartridge case pair is a match, the High CMC count `theta` values
+are all close to each other.
 
 ``` r
 kmComparisonFeatures %>%
   mutate(cmcThetaDistribClassif = decision_highCMC_cmcThetaDistrib(cellIndex = cellIndex,
-                                                           x = x,
-                                                           y = y,
-                                                           theta = theta,
-                                                           corr = pairwiseCompCor,
-                                                           xThresh = 20,
-                                                           yThresh = 20,
-                                                           corrThresh = .5)) %>%
+                                                                   x = x,
+                                                                   y = y,
+                                                                   theta = theta,
+                                                                   corr = pairwiseCompCor,
+                                                                   xThresh = 20,
+                                                                   yThresh = 20,
+                                                                   corrThresh = .5)) %>%
   decision_highCMC_identifyHighCMCThetas(tau = 1) %>%
   filter(cmcThetaDistribClassif == "CMC Candidate") %>%
   ggplot() +
@@ -557,14 +559,14 @@ kmComparisonFeatures %>%
 <img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 If the range of High CMC count `theta` values is less than the
-user-defined \(T_{\theta}\) threshold, then [Tong et
+user-defined *T*<sub>*θ*</sub> threshold, then [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)
 classify all CMC candidates in the identified `theta` mode as actual
 CMCs.
 
-The `decision_highCMC_classifyCMCs` function classifies CMCs based on
-this High CMC criterion. Note that it internally calls the
-`decision_highCMC_cmcThetaDistrib` and
+The `decision_CMC` function classifies CMCs based on this High CMC
+criterion if a value for `tau` is given. Note that it internally calls
+the `decision_highCMC_cmcThetaDistrib` and
 `decision_highCMC_identifyHighCMCThetas` functions (although they are
 exported as diagnostic tools). A cell may be counted as a CMC for
 multiple `theta` values. In these cases, we will only consider the
@@ -581,16 +583,16 @@ High CMC criterion passed.
 
 ``` r
 kmComparison_highCMCs <- kmComparisonFeatures %>%
-  mutate(highCMCClassif = decision_highCMC_classifyCMCs(cellIndex = cellIndex,
-                                                        x = x,
-                                                        y = y,
-                                                        theta = theta,
-                                                        corr = pairwiseCompCor,
-                                                        xThresh = 20,
-                                                        yThresh = 20,
-                                                        thetaThresh = 6,
-                                                        corrThresh = .5,
-                                                        tau = 1))
+  mutate(highCMCClassif = decision_CMC(cellIndex = cellIndex,
+                                       x = x,
+                                       y = y,
+                                       theta = theta,
+                                       corr = pairwiseCompCor,
+                                       xThresh = 20,
+                                       yThresh = 20,
+                                       thetaThresh = 6,
+                                       corrThresh = .5,
+                                       tau = 1))
 #Example of cells classified as CMCs and non-CMCs
 kmComparison_highCMCs %>%
   slice(21:35)
@@ -614,13 +616,13 @@ kmComparison_highCMCs %>%
 #> 15 3, 2         62    54   0.286           0.548   -27 non-CMC (passed)
 ```
 
-The `decison_CMC` function applies both the decision rules of the
-original method of [Song
+In summary: the `decison_CMC` function applies both the decision rules
+of the original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 or the High CMC method of [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf),
 depending on whether the user specifies a value for the High CMC
-threshold \(\tau\).
+threshold `tau`.
 
 ``` r
 kmComparison_allCMCs <- kmComparisonFeatures %>%
@@ -672,7 +674,7 @@ al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.0
 propose performing the cell-based comparison and decision rule
 procedures with the roles reversed and combining the results. They
 indicate that if the High CMC method fails to identify a `theta` mode in
-the CMC-\(\theta\) distribution, then the minimum of the two CMC counts
+the CMC-`theta` distribution, then the minimum of the two CMC counts
 computed under the original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 should be used as the CMC count (although they don’t detail how to
@@ -706,17 +708,23 @@ kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
                                               tau = 1))
 ```
 
-If the High CMC method succeeds in identifying a `theta` mode (again,
-it’s unclear whether this means in both directions or only one - we
-require success in both directions), then the CMC counts computed under
-the High CMC method are combined after excluding replicates. The
-`decision_combineCMCDirections` combines two CMC outputs using the
-appropriate logic.
+The final step is obviously to tally all of the CMCs and determine
+whether the final CMC count is sufficient evidence to say that the
+cartridge case pair is a match. If the High CMC method succeeds in
+identifying a `theta` mode (again, it’s unclear whether this means in
+both directions or only one - we require success in both directions),
+then the CMC counts computed under the High CMC method are combined
+after excluding replicates.
 
-``` r
-kmComparison_combinedCMCs <- decision_combineCMCDirections(kmComparison_allCMCs,
-                                                                 kmComparison_allCMCs_rev)
-```
+The user must decide precisely how results from both directions are to
+be combined. For example, if one direction fails the High CMC criterion
+yet the other passes, should we treat this as if *both* directions
+failed? Will you only count the CMCs in the direction that passed? We
+have found the best option to be treating a failure in one direction as
+a failure in both directions – such cartridge case pairs would then be
+assigned the minimum of the two CMC counts determined under the original
+method of [Song
+(2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193).
 
 Finally, we can visualize the regions of the scan identified as CMCs.
 
@@ -724,23 +732,24 @@ Finally, we can visualize the regions of the scan identified as CMCs.
 cmcPlot(referenceScan = fadul1.1_processed,
         targetScan  = fadul1.2_processed,
         reference_v_target_CMCs = kmComparison_allCMCs,
-        target_v_reference_CMCs = kmComparison_allCMCs_rev)
+        target_v_reference_CMCs = kmComparison_allCMCs_rev,
+        x3pNames = c("Fadul 1-1","Fadul 1-2"))
 #> $originalMethodCMCs_reference_v_target
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="100%" />
 
     #> 
     #> $originalMethodCMCs_target_v_reference
 
-<img src="man/figures/README-unnamed-chunk-18-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-2.png" width="100%" />
 
     #> 
     #> $highCMC_reference_v_target
 
-<img src="man/figures/README-unnamed-chunk-18-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-3.png" width="100%" />
 
     #> 
     #> $highCMC_target_v_reference
 
-<img src="man/figures/README-unnamed-chunk-18-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-17-4.png" width="100%" />
