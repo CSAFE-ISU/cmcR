@@ -139,11 +139,6 @@ two cartridge case scans.</p>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>cellCCF_bothDirections_output</th>
-      <td><p>list returned by the function
-cmcR::cellCCF_bothdirections</p></td>
-    </tr>
-    <tr>
       <th>consensus_function</th>
       <td><p>function to aggregate the translation (x and y)
 and rotation (theta) values in the ccfDF data frame to determine
@@ -165,12 +160,12 @@ pair can be to be called "congruent matching"</p></td>
 pair can be to be called "congruent matching"</p></td>
     </tr>
     <tr>
-      <th>theta_thresh</th>
+      <th>thetaThresh</th>
       <td><p>maximum distance from the consensus theta value that a
 cell pair can be to be called "congruent matching"</p></td>
     </tr>
     <tr>
-      <th>missingTheta_decision</th>
+      <th>missingThetaDecision</th>
       <td><p>dictates how function should handle situations
 in which one direction passes the high CMC criterion while another
 direction does not. "replace": replaces theta value in failed direction
@@ -179,12 +174,12 @@ counts the initial CMCs in failed direction and high CMCs in successful
 direction. "fail": only counts the initial CMCs in either direction.</p></td>
     </tr>
     <tr>
-      <th>compareInitialAndHighThetas</th>
+      <th>compareThetas</th>
       <td><p>dictates if the consensus theta values
 determined under the initially proposed method should be compared to the
 consensus theta values determined under the High CMC method. In particular,
 determines for each direction whether the consensus theta values determined
-under the two methods are within theta_thresh of each other. It is often
+under the two methods are within thetaThresh of each other. It is often
 the case that non-matching cartridge cases, even if they pass the High CMC
 criterion, will have differing consensus theta values under the two
 methods. If this isn't taken into account, non-matches tend to be assigned
@@ -194,7 +189,7 @@ a lot of false positive CMCs under the High CMC method.</p></td>
       <th>consensus_function_theta</th>
       <td><p><em>(OPTIONAL)</em> function (separate from
 consensus_function) to aggregate the rotation (theta) values in the ccfDF
-data frame to determine "consensus" values</p></td>
+data frame to determine "consensus" value</p></td>
     </tr>
     </table>
 
@@ -202,20 +197,6 @@ data frame to determine "consensus" values</p></td>
 
     <div class='dont-index'><p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf</a></p></div>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>comparison1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='cellCCF_bothDirections.html'>cellCCF_bothDirections</a></span><span class='op'>(</span><span class='va'>x3p1</span>,<span class='va'>x3p2</span><span class='op'>)</span>
-
-<span class='va'>cmcs</span> <span class='op'>&lt;-</span> <span class='fu'>cmcFilter_improved</span><span class='op'>(</span><span class='va'>comparison1</span>,
-                           consensus_function <span class='op'>=</span> <span class='va'>median</span>,
-                           ccf_thresh <span class='op'>=</span> <span class='fl'>.4</span>,
-                           dx_thresh <span class='op'>=</span> <span class='fl'>20</span>,
-                           dy_thresh <span class='op'>=</span> <span class='va'>dx_thresh</span>,
-                           theta_thresh <span class='op'>=</span> <span class='fl'>3</span>,
-                           missingTheta_decision <span class='op'>=</span> <span class='st'>"replace"</span>,
-                           consensus_function_theta <span class='op'>=</span> <span class='va'>getMode</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
