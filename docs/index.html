@@ -514,26 +514,91 @@
                                               thetaThresh <span class="op">=</span> <span class="fl">6</span>,
                                               corrThresh <span class="op">=</span> <span class="fl">.5</span>,
                                               tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
-<p>The final step is obviously to tally all of the CMCs and determine whether the final CMC count is sufficient evidence to say that the cartridge case pair is a match. If the High CMC method succeeds in identifying a <code>theta</code> mode (again, it’s unclear whether this means in both directions or only one - we require success in both directions), then the CMC counts computed under the High CMC method are combined after excluding replicates.</p>
-<p>The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if <em>both</em> directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions – such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a>.</p>
-<p>Finally, we can visualize the regions of the scan identified as CMCs.</p>
+<p>The logic required to combine the results in <code>kmComparison_allCMCs</code> and <code>kmComparison_allCMCs_rev</code> can get a little complicated (although entirely doable using <code>dplyr</code> and other <code>tidyverse</code> functions). The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if <em>both</em> directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions – such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a>. The <code>decision_combineDirections</code> function implements the logic to combine the two sets of results, assuming the data frame contains columns named <code>originalMethodClassif</code> and <code>highCMCClassif</code> (as defined above).</p>
 <div class="sourceCode" id="cb18"><pre class="downlit">
+<span class="fu"><a href="reference/decision_combineDirections.html">decision_combineDirections</a></span><span class="op">(</span><span class="va">kmComparison_allCMCs</span>,
+                           <span class="va">kmComparison_allCMCs_rev</span><span class="op">)</span>
+<span class="co">#&gt; $originalMethodCMCs</span>
+<span class="co">#&gt; $originalMethodCMCs[[1]]</span>
+<span class="co">#&gt; # A tibble: 17 x 7</span>
+<span class="co">#&gt;    cellIndex     x     y fft_ccf pairwiseCompCor theta direction         </span>
+<span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;             </span>
+<span class="co">#&gt;  1 2, 1         17     9   0.202           0.829   -30 reference_v_target</span>
+<span class="co">#&gt;  2 2, 4         16    11   0.204           0.620   -30 reference_v_target</span>
+<span class="co">#&gt;  3 2, 5         16     5   0.194           0.542   -30 reference_v_target</span>
+<span class="co">#&gt;  4 1, 5         21     4   0.229           0.527   -30 reference_v_target</span>
+<span class="co">#&gt;  5 5, 1         -6    23   0.333           0.720   -27 reference_v_target</span>
+<span class="co">#&gt;  6 5, 8         -8   -12   0.244           0.602   -27 reference_v_target</span>
+<span class="co">#&gt;  7 3, 1          3    22   0.439           0.782   -27 reference_v_target</span>
+<span class="co">#&gt;  8 2, 2          5    18   0.252           0.697   -27 reference_v_target</span>
+<span class="co">#&gt;  9 2, 7          6    -7   0.351           0.721   -27 reference_v_target</span>
+<span class="co">#&gt; 10 6, 8         -8     4   0.273           0.609   -24 reference_v_target</span>
+<span class="co">#&gt; 11 3, 2         -2     9   0.294           0.793   -24 reference_v_target</span>
+<span class="co">#&gt; 12 2, 3         -1     6   0.195           0.664   -24 reference_v_target</span>
+<span class="co">#&gt; 13 1, 3         -1    11   0.295           0.673   -24 reference_v_target</span>
+<span class="co">#&gt; 14 4, 1         -4    -2   0.360           0.730   -21 reference_v_target</span>
+<span class="co">#&gt; 15 4, 8         -7    14   0.257           0.644   -21 reference_v_target</span>
+<span class="co">#&gt; 16 1, 6        -13    12   0.296           0.676   -21 reference_v_target</span>
+<span class="co">#&gt; 17 6, 1          7    -9   0.513           0.777   -18 reference_v_target</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $originalMethodCMCs[[2]]</span>
+<span class="co">#&gt; # A tibble: 18 x 7</span>
+<span class="co">#&gt;    cellIndex     x     y fft_ccf pairwiseCompCor theta direction         </span>
+<span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;             </span>
+<span class="co">#&gt;  1 5, 1         -1    12   0.530           0.825    18 target_v_reference</span>
+<span class="co">#&gt;  2 7, 7         -5   -16   0.262           0.610    21 target_v_reference</span>
+<span class="co">#&gt;  3 4, 1          2    -1   0.338           0.810    21 target_v_reference</span>
+<span class="co">#&gt;  4 4, 8          7   -19   0.388           0.651    21 target_v_reference</span>
+<span class="co">#&gt;  5 3, 1          6     1   0.329           0.833    21 target_v_reference</span>
+<span class="co">#&gt;  6 2, 2          8    -2   0.460           0.776    21 target_v_reference</span>
+<span class="co">#&gt;  7 7, 8          5    -3   0.250           0.691    24 target_v_reference</span>
+<span class="co">#&gt;  8 6, 8          4    -4   0.297           0.639    24 target_v_reference</span>
+<span class="co">#&gt;  9 5, 8          2    -6   0.378           0.761    24 target_v_reference</span>
+<span class="co">#&gt; 10 3, 2          0   -10   0.218           0.716    24 target_v_reference</span>
+<span class="co">#&gt; 11 3, 6         -5    -8   0.277           0.695    24 target_v_reference</span>
+<span class="co">#&gt; 12 2, 3         -1   -10   0.358           0.827    24 target_v_reference</span>
+<span class="co">#&gt; 13 2, 7         -3    -7   0.248           0.604    24 target_v_reference</span>
+<span class="co">#&gt; 14 1, 4         -3    -5   0.264           0.644    24 target_v_reference</span>
+<span class="co">#&gt; 15 3, 8         -4    10   0.444           0.783    27 target_v_reference</span>
+<span class="co">#&gt; 16 2, 5        -11    -3   0.281           0.680    27 target_v_reference</span>
+<span class="co">#&gt; 17 2, 6         -9     1   0.223           0.652    27 target_v_reference</span>
+<span class="co">#&gt; 18 1, 5        -15    -1   0.326           0.613    27 target_v_reference</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; $highCMCs</span>
+<span class="co">#&gt; # A tibble: 24 x 7</span>
+<span class="co">#&gt;    cellIndex     x     y fft_ccf pairwiseCompCor theta direction         </span>
+<span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;           &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;             </span>
+<span class="co">#&gt;  1 6, 1        -13    26   0.436           0.760   -27 reference_v_target</span>
+<span class="co">#&gt;  2 5, 1         -6    23   0.333           0.720   -27 reference_v_target</span>
+<span class="co">#&gt;  3 2, 7          6    -7   0.351           0.721   -27 reference_v_target</span>
+<span class="co">#&gt;  4 3, 2         -2     9   0.294           0.793   -24 reference_v_target</span>
+<span class="co">#&gt;  5 2, 4         -3     8   0.200           0.595   -24 reference_v_target</span>
+<span class="co">#&gt;  6 1, 3         -1    11   0.295           0.673   -24 reference_v_target</span>
+<span class="co">#&gt;  7 1, 6         -1     7   0.294           0.658   -24 reference_v_target</span>
+<span class="co">#&gt;  8 1, 7         -1     0   0.362           0.880   -24 reference_v_target</span>
+<span class="co">#&gt;  9 7, 7         -5   -16   0.262           0.610    21 target_v_reference</span>
+<span class="co">#&gt; 10 4, 1          2    -1   0.338           0.810    21 target_v_reference</span>
+<span class="co">#&gt; # ... with 14 more rows</span></pre></div>
+<p>The final step is then deciding whether the number of CMCs computed under your preferred method is large enough to declare the cartridge case a match. <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> originally proposed using a CMC count equal to 6 as the decision boundary (i.e., classify “match” if CMC count is greater than or equal to 6). This has been shown to not generalize to other proposed methods and data sets (see, e.g., <a href="https://www.sciencedirect.com/science/article/pii/S0379073817303420?via%3Dihub">Chen et al. (2017)</a>). A more principled approach to choosing the CMC count has not yet been described.</p>
+<p>Finally, we can visualize the regions of the scan identified as CMCs.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit">
 <span class="fu"><a href="reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
         targetScan  <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
         reference_v_target_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs</span>,
         target_v_reference_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs_rev</span>,
         x3pNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span>,<span class="st">"Fadul 1-2"</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; $originalMethodCMCs_reference_v_target</span></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-17-1.png" width="100%"></p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $originalMethodCMCs_target_v_reference</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-17-2.png" width="100%"></p>
+<p><img src="reference/figures/README-unnamed-chunk-18-1.png" width="100%"></p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $highCMC_reference_v_target</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-17-3.png" width="100%"></p>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $originalMethodCMCs_target_v_reference</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-18-2.png" width="100%"></p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $highCMC_target_v_reference</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-17-4.png" width="100%"></p>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $highCMC_reference_v_target</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-18-3.png" width="100%"></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $highCMC_target_v_reference</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-18-4.png" width="100%"></p>
 </div>
 </div>
 </div>

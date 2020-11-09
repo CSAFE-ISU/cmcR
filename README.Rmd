@@ -339,16 +339,14 @@ kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
                                               tau = 1))
 ```
 
+The logic required to combine the results in `kmComparison_allCMCs` and `kmComparison_allCMCs_rev` can get a little complicated (although entirely doable using `dplyr` and other `tidyverse` functions). The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if *both* directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions -- such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193). The `decision_combineDirections` function implements the logic to combine the two sets of results, assuming the data frame contains columns named `originalMethodClassif` and `highCMCClassif` (as defined above).
+
 ```{r}
-# debugonce(cmcR:::cmcFilter_improved)
 decision_combineDirections(kmComparison_allCMCs,
                            kmComparison_allCMCs_rev)
 ```
 
-
-The final step is obviously to tally all of the CMCs and determine whether the final CMC count is sufficient evidence to say that the cartridge case pair is a match. If the High CMC method succeeds in identifying a `theta` mode (again, it's unclear whether this means in both directions or only one - we require success in both directions), then the CMC counts computed under the High CMC method are combined after excluding replicates. 
-
-The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if *both* directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions -- such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193).
+The final step is then deciding whether the number of CMCs computed under your preferred method is large enough to declare the cartridge case a match. [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) originally proposed using a CMC count equal to 6 as the decision boundary (i.e., classify "match" if CMC count is greater than or equal to 6). This has been shown to not generalize to other proposed methods and data sets (see, e.g., [Chen et al. (2017)](https://www.sciencedirect.com/science/article/pii/S0379073817303420?via%3Dihub)). A more principled approach to choosing the CMC count has not yet been described.
 
 Finally, we can visualize the regions of the scan identified as CMCs.
 
