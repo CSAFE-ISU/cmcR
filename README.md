@@ -35,8 +35,8 @@ Install the development version from
 devtools::install_github("jzemmels/cmcR")
 ```
 
-Cartridge case scan data can be accessed at the [NIST Ballisitics and
-Toolmarks Research
+Cartridge case scan data can be accessed at the [NIST Ballisitics
+Toolmark Research
 Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
 Example
@@ -102,8 +102,8 @@ implemented in the cmcR package. Functions of the form `preProcess_*`
 perform the preprocessing procedures. See the [funtion
 reference](https://csafe-isu.github.io/cmcR/reference/index.html) of the
 cmcR package for more information regarding these procedures. As is
-commonly done when comparing cartridge cases, we first downsample each
-scan (by a factor of 4, selecting every other row/column) using the
+commonly done when comparing cartridge cases, we downsample each scan
+(by a factor of 4, selecting every other row/column) using the
 `sample_x3p` function.
 
 ``` r
@@ -616,7 +616,7 @@ kmComparison_highCMCs %>%
 #> 15 3, 2         62    54   0.286           0.548   -27 non-CMC (passed)
 ```
 
-In summary: the `decison_CMC` function applies both the decision rules
+In summary: the `decison_CMC` function applies either the decision rules
 of the original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 or the High CMC method of [Tong et
@@ -792,9 +792,9 @@ decision_combineDirections(kmComparison_allCMCs,
 #> # ... with 14 more rows
 ```
 
-The final step is then deciding whether the number of CMCs computed
-under your preferred method is large enough to declare the cartridge
-case a match. [Song
+The final step is to decide whether the number of CMCs computed under
+your preferred method is large enough to declare the cartridge case a
+match. [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 originally proposed using a CMC count equal to 6 as the decision
 boundary (i.e., classify “match” if CMC count is greater than or equal
