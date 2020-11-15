@@ -43,8 +43,7 @@ Suggests:
     covr,
     gridExtra,
     cowplot
-Remotes: 
-    https://github.com/xhtai/cartridges3D,
+Remotes:
     https://github.com/heike/x3ptools
 VignetteBuilder: knitr
 Depends: 
