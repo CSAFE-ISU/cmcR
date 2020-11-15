@@ -166,8 +166,8 @@ for the low pass filter.</p></td>
 
 <span class='va'>raw_x3p</span><span class='op'>$</span><span class='va'>surface.matrix</span> <span class='op'>&lt;-</span> <span class='va'>raw_x3p</span><span class='op'>$</span><span class='va'>surface.matrix</span> <span class='op'>%&gt;%</span>
   <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='preProcess_ransacLevel.html'>preProcess_ransacLevel</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='preProcess_levelBF.html'>preProcess_levelBF</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='preProcess_cropWS.html'>preProcess_cropWS</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_levelBF</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_cropWS</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='preProcess_removeFPCircle.html'>preProcess_removeFPCircle</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
   <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_gaussFilter</span><span class='op'>(</span>wavelength <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>16</span>,<span class='fl'>500</span><span class='op'>)</span>,
                                filtertype <span class='op'>=</span> <span class='st'>"bp"</span><span class='op'>)</span>

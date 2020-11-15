@@ -18,11 +18,12 @@ the breech face scan of that cell.
 Split a reference scan into a grid of cells
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
 comparison_cellDivision(numCells = 64)
 
 head(cellTibble)
-
+}
 }

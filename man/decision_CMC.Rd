@@ -58,6 +58,7 @@ Applies the decision rules of the original method of Song (2013) or the High
 CMC method of Tong et al. (2015)
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -82,6 +83,7 @@ dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
 
 comparisonDF \%>\%
 dplyr::filter(originalMethodClassif == "CMC" | highCMCClassif == "CMC")
+}
 }
 \seealso{
 \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}

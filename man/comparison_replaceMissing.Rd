@@ -15,6 +15,7 @@ comparison_replaceMissing(heightValues, replacement = 0)
 Replace missing values in a scan
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
@@ -37,4 +38,5 @@ dplyr::mutate(cellHeightValues =
                 comparison_replaceMissing(heightValues = regionHeightValues))
 
 head(cellTibble)
+}
 }

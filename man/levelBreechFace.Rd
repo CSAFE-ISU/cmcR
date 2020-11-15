@@ -70,6 +70,7 @@ fittedPlane <- raw_x3p$surface.matrix \%>\%
                     iters = 150)
 }
 
+\dontrun{
 nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
@@ -91,6 +92,7 @@ x3pListPlot(list("Original" = fadul1.1,
                  "Ext. Cropped" = fadul1.1_extCropped,
                  "Ext. & Int. Cropped" = fadul1.1_intCroped,
                  "Cropped and Leveled" = fadul1.1_leveled))
+}
 }
 \seealso{
 https://github.com/xhtai/cartridges3D

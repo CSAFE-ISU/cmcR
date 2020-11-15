@@ -1,5 +1,5 @@
-#' Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
-#' datasets using preProcess_* functions from the cmcR package
+#' Processed versions of the fadul1.1_raw and  fadul1.2_raw datasets using
+#' preProcess_* functions from the cmcR package
 #'
 #' "Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The
 #' scans have been downsampled by a factor of 8 and processed using functions
@@ -39,5 +39,3 @@
 #' @rdname fadulData_processed
 "fadul1.2_processed"
 
-#' @rdname fadulData_processed
-"fadul2.1_processed"

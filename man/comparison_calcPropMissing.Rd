@@ -17,6 +17,7 @@ missing values in each x3p object's breech face scan.
 Calculate the proportion of missing values in a breech face scan
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
@@ -24,4 +25,5 @@ comparison_cellDivision(numCells = 64) \%>\%
 dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues))
 
 head(cellTibble)
+}
 }

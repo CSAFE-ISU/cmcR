@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [National Ballistics & Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`comparison_allTogether`](https://csafe-isu.github.io/cmcR/reference/comparison_allTogether.html) function on the **cmcR** website for information regarding this procedure.
+This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [NIST Ballistics Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`comparison_allTogether`](https://csafe-isu.github.io/cmcR/reference/comparison_allTogether.html) function on the **cmcR** website for information regarding this procedure.
 
 ```{r setup,message=FALSE,warning=FALSE}
 library(cmcR)
@@ -32,15 +32,30 @@ We will consider comparisons between three cartridge case scans. Fadul 1-1 and F
 ```{r}
 data("fadul1.1_processed")
 data("fadul1.2_processed")
-data("fadul2.1_processed")
+```
+
+```{r}
+#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2
+
+fadul2.1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96")
+
+fadul2.1_processed <- fadul2.1_raw %>%
+  preProcess_crop(region = "exterior",
+                  radiusOffset = -30) %>%
+  preProcess_crop(region = "interior",
+                  radiusOffset = 200) %>%
+  preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
+  preProcess_gaussFilter() %>%
+  x3ptools::sample_x3p()
 ```
 
 The three processed cartridge cases are shown below.
 
 ```{r, echo=FALSE,fig.width = 7, fig.align = 'center'}
 cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
-                       "Fadul 1-2" = fadul1.2_processed,
-                       "Fadul 2-1" = fadul2.1_processed))
+                       "Fadul 1-2" = fadul1.2_processed))
 ```
 
 

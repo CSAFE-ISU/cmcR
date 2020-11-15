@@ -31,6 +31,7 @@ extracted from the cell's associated region.
 \examples{
 data(fadul1.1_processed,fadul1.2_processed)
 
+\dontrun{
 cellTibble <- fadul1.1_processed \%>\%
 comparison_cellDivision(numCells = 64) \%>\%
 dplyr::mutate(regionHeightValues =
@@ -56,4 +57,5 @@ dplyr::mutate(pairwiseCompCor = comparison_cor(cellHeightValues,
                                                fft_ccf_df))
 
 head(cellTibble)
+}
 }

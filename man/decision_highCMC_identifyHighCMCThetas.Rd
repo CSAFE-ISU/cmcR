@@ -26,6 +26,7 @@ function. It is exported to be used as a diagnostic tool for the High CMC
 method
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -46,4 +47,5 @@ highCMCthetas \%>\%
 dplyr::filter(cmcThetaDistribClassif == "CMC Candidate") \%>\%
 ggplot2::ggplot(ggplot2::aes(x = theta,fill = thetaCMCIdentif)) +
 ggplot2::geom_bar(stat = "count")
+}
 }

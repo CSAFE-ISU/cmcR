@@ -154,8 +154,26 @@ magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
 Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use `ggplot2` to accomplish this.
 
 ```{r}
-data("fadul1.1_processed","fadul1.2_processed","fadul2.1_processed")
+data("fadul1.1_processed","fadul1.2_processed")
 ```
+
+```{r}
+#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2
+
+fadul2.1_raw <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96")
+
+fadul2.1_processed <- fadul2.1_raw %>%
+  preProcess_crop(region = "exterior",
+                  radiusOffset = -30) %>%
+  preProcess_crop(region = "interior",
+                  radiusOffset = 200) %>%
+  preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
+  preProcess_gaussFilter() %>%
+  x3ptools::sample_x3p()
+```
+
 
 ```{r include=FALSE,eval=FALSE}
 #if we want to include more pairs in the comparison
@@ -165,7 +183,8 @@ fadul2.2 <- x3ptools::x3p_read("https://tsapps.nist.gov/NRBTD/Studies/CartridgeM
 
 ```{r}
 cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1_processed,
-                                 "Fadul 1-2" = fadul1.2_processed),
+                                 "Fadul 1-2" = fadul1.2_processed,
+                                 "Fadul 2-1" = fadul2.1_processed),
                   type = "faceted",
                   rotate = 90,
                   legend.quantiles = c(0,.01,.2,.5,.8,.99,1))

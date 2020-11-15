@@ -1,8 +1,8 @@
-#' @name gaussianKernel
-#'
-#' @seealso https://rdrr.io/bioc/EBImage/src/R/morphology.R
-#'
-#' @keywords internal
+# @name gaussianKernel
+#
+# @seealso https://rdrr.io/bioc/EBImage/src/R/morphology.R
+#
+# @keywords internal
 
 gaussianKernel <- function(size,sig){
   x = seq(-(size-1)/2, (size-1)/2, length=size)
@@ -13,11 +13,11 @@ gaussianKernel <- function(size,sig){
   return(z)
 }
 
-#' @name gaussianFilter
-#'
-#' @seealso https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
-#' @keywords internal
-#'
+# @name gaussianFilter
+#
+# @seealso https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
+# @keywords internal
+#
 #' @importFrom stats fft
 
 utils::globalVariables(".")

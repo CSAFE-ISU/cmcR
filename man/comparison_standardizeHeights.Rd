@@ -32,6 +32,7 @@ it is given that is required for calculating, for example, the
 pairwise-complete correlation using the comparison_cor function.
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
@@ -45,5 +46,5 @@ dplyr::mutate(cellHeightValues = comparison_standardizeHeights(heightValues = ce
              regionHeightValues = comparison_standardizeHeights(heightValues = regionHeightValues))
 
 head(cellTibble)
-
+}
 }

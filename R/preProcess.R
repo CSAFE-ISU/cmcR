@@ -1,36 +1,36 @@
-#' Levels a breech face impression matrix basedo on a RANSAC-fitted plane
-#'
-#' @name preProcess_levelBF
-#'
-#' @description Given the output of preProcess_ransacLevel, extracts values
-#'   (either raw or residual) from the surface matrix to which the RANSAC plane
-#'   was fit. Adapted from the cartridges3D::levelBF3D function. This ia
-#'   modified version of the levelBF3D function available in the cartridges3D
-#'   package on GitHub.
-#'
-#' @param ransacFit output from the cmcR::preProcess_ransacLevel function.
-#' @param useResiduals dictates whether the difference between the estimated
-#'   breech face and fitted plane are returned (residuals) or if the estimates
-#'   breech face is simply shifted down by its mean value
-#'
-#' @return a surface matrix of either "raw" breech face values that are inliers
-#'   to the RANSAC-fitted plane or residuals between the fitted plane and
-#'   observed values.
-#'
-#' @examples
-#' \dontrun{
-#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#'   x3ptools::sample_x3p(m = 2)
-#'
-#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
-#'  cmcR::preProcess_ransacLevel() %>%
-#'  cmcR::preProcess_levelBF(useResiduals = TRUE)
-#' }
-#'
-#' @seealso https://github.com/xhtai/cartridges3D
-#' @keywords internal
-#'
-#' @importFrom stats predict
+# Levels a breech face impression matrix basedo on a RANSAC-fitted plane
+#
+# @name preProcess_levelBF
+#
+# @description Given the output of preProcess_ransacLevel, extracts values
+#   (either raw or residual) from the surface matrix to which the RANSAC plane
+#   was fit. Adapted from the cartridges3D::levelBF3D function. This ia
+#   modified version of the levelBF3D function available in the cartridges3D
+#   package on GitHub.
+#
+# @param ransacFit output from the cmcR::preProcess_ransacLevel function.
+# @param useResiduals dictates whether the difference between the estimated
+#   breech face and fitted plane are returned (residuals) or if the estimates
+#   breech face is simply shifted down by its mean value
+#
+# @return a surface matrix of either "raw" breech face values that are inliers
+#   to the RANSAC-fitted plane or residuals between the fitted plane and
+#   observed values.
+#
+# @examples
+# \dontrun{
+# raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#   x3ptools::sample_x3p(m = 2)
+#
+# raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#  cmcR::preProcess_ransacLevel() %>%
+#  cmcR::preProcess_levelBF(useResiduals = TRUE)
+# }
+#
+# @seealso https://github.com/xhtai/cartridges3D
+# @keywords internal
+#
+# @importFrom stats predict
 
 preProcess_levelBF <- function(ransacFit,
                                useResiduals = TRUE){
@@ -169,29 +169,29 @@ preProcess_ransacLevel <- function(x3p,
   return(x3p)
 }
 
-#' Crop out rows/columns outside of the breech face impression in a cartridge
-#' case scan.
-#' @name preProcess_cropWS
-#'
-#' @param x3p an x3p object containing a surface matrix
-#' @param croppingThresh minimum number of non-NA pixels that need to be in a
-#'   row/column for it to not be cropped out of the surface matrix
-#'
-#' @return a surface matrix with outer rows/columns removed depending on
-#'   croppingThresh
-#'
-#' @examples
-#' \dontrun{
-#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#'   x3ptools::sample_x3p(m = 2)
-#'
-#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
-#'   cmcR::preProcess_ransacLevel() %>%
-#'   cmcR::preProcess_levelBF() %>%
-#'   cmcR::preProcess_cropWS(croppingThresh = 2)
-#' }
-#'
-#' @keywords internal
+# Crop out rows/columns outside of the breech face impression in a cartridge
+# case scan.
+# @name preProcess_cropWS
+#
+# @param x3p an x3p object containing a surface matrix
+# @param croppingThresh minimum number of non-NA pixels that need to be in a
+#   row/column for it to not be cropped out of the surface matrix
+#
+# @return a surface matrix with outer rows/columns removed depending on
+#   croppingThresh
+#
+# @examples
+# \dontrun{
+# raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#   x3ptools::sample_x3p(m = 2)
+#
+# raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
+#   cmcR::preProcess_ransacLevel() %>%
+#   cmcR::preProcess_levelBF() %>%
+#   cmcR::preProcess_cropWS(croppingThresh = 2)
+# }
+#
+# @keywords internal
 
 preProcess_cropWS <- function(x3p,
                               croppingThresh = 1){
@@ -227,46 +227,46 @@ preProcess_cropWS <- function(x3p,
   return(x3p)
 }
 
-#' Detect the radius and center of a firing pin impression circle in a breech
-#' face impression scan using a circular Hough transform.
-#'
-#' @name preProcess_detectFPCircle
-#'
-#' @param x3p an x3p object containing a surface matrix
-#' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
-#'   used to determine where the non-NA pixel count-per-row series attains a
-#'   mode.
-#' @param aggregationFunction function to aggregate all 12 radius estimates
-#'   determined under the initial radius estimation procedure those calculated
-#'   using fpRadiusGridSearch
-#' @param gridGranularity granularity of radius grid used to determine the best
-#'   fitting circle to the surface matrix via the Hough transform method
-#' @param houghScoreQuant quantile cut-off to be used when determining a final
-#'   radius estimate using the score values returned by the imager::hough_circle
-#'   function
-#'
-#' @description This function estimates the radius of a firing pin impression
-#'   within a breech face impression scan. It does so by detecting local maxima
-#'   in the non-NA pixel count by row/col within the scan. To make the algorithm
-#'   more robust, multiple radii estimates are considered by rotating the image
-#'   15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
-#'   non-NA pixel count by row/col. Based on the argument passed to
-#'   aggregationFunction, these radii estimates are reduced to a single, rough
-#'   radius estimate (e.g., minimum was determined to be an effective
-#'   aggregation function in preliminary tests). A grid of radii values centered
-#'   on this estimate are then tested to determine which a final estimate. The
-#'   grid mesh size is determined by the argument gridGranularity. A hough
-#'   transform is applied to the breech face impression scan for each radius
-#'   value in the grid. A final estimate is determined by finding the longest
-#'   consecutive sequence of radii values with high associated hough scores. How
-#'   we determine "high" hough scores is determined by the houghScoreQuant
-#'   argument. Once the longest sequence of high hough score radii values is
-#'   found, the average of these radii values is used as the final radius
-#'   estimate.
-#'
-#' @keywords internal
-#' @importFrom stats quantile
-#' @importFrom rlang .data
+# Detect the radius and center of a firing pin impression circle in a breech
+# face impression scan using a circular Hough transform.
+#
+# @name preProcess_detectFPCircle
+#
+# @param x3p an x3p object containing a surface matrix
+# @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
+#   used to determine where the non-NA pixel count-per-row series attains a
+#   mode.
+# @param aggregationFunction function to aggregate all 12 radius estimates
+#   determined under the initial radius estimation procedure those calculated
+#   using fpRadiusGridSearch
+# @param gridGranularity granularity of radius grid used to determine the best
+#   fitting circle to the surface matrix via the Hough transform method
+# @param houghScoreQuant quantile cut-off to be used when determining a final
+#   radius estimate using the score values returned by the imager::hough_circle
+#   function
+#
+# @description This function estimates the radius of a firing pin impression
+#   within a breech face impression scan. It does so by detecting local maxima
+#   in the non-NA pixel count by row/col within the scan. To make the algorithm
+#   more robust, multiple radii estimates are considered by rotating the image
+#   15, 30, 45, 60, and 75 degrees and again detecting local maxima in the
+#   non-NA pixel count by row/col. Based on the argument passed to
+#   aggregationFunction, these radii estimates are reduced to a single, rough
+#   radius estimate (e.g., minimum was determined to be an effective
+#   aggregation function in preliminary tests). A grid of radii values centered
+#   on this estimate are then tested to determine which a final estimate. The
+#   grid mesh size is determined by the argument gridGranularity. A hough
+#   transform is applied to the breech face impression scan for each radius
+#   value in the grid. A final estimate is determined by finding the longest
+#   consecutive sequence of radii values with high associated hough scores. How
+#   we determine "high" hough scores is determined by the houghScoreQuant
+#   argument. Once the longest sequence of high hough score radii values is
+#   found, the average of these radii values is used as the final radius
+#   estimate.
+#
+# @keywords internal
+# @importFrom stats quantile
+# @importFrom rlang .data
 
 preProcess_detectFPCircle <- function(surfaceMat,
                                       aggregationFunction = mean,
@@ -460,10 +460,10 @@ preProcess_gaussFilter <- function(x3p,
   return(x3p)
 }
 
-#' @name estimateBFRadius
-#'
-#' @keywords internal
-#' @importFrom rlang .data
+# @name estimateBFRadius
+#
+# @keywords internal
+# @importFrom rlang .data
 
 estimateBFRadius <- function(mat,
                              scheme = 3,
@@ -549,33 +549,33 @@ estimateBFRadius <- function(mat,
   return(mat_radiusEstimate)
 }
 
-#' Crop the exterior of a breech face impression surface matrix
-#'
-#' @name preProcess_cropExterior
-#'
-#' @param x3p an x3p object containing the surface matrix of a cartridge case
-#'   scan
-#' @param scheme argument for imager::imgradient
-#' @param high_connectivity argument for imager::label
-#' @param tolerance argument for imager::label
-#' @param radiusOffset number of pixels to add to estimated breech face radius.
-#'   This is commonly a negative value (e.g., -20) to trim the cartridge case
-#'   primer roll-off from the returned, cropped surface matrix.
-#' @param croppingThresh argument for cmcR::preProcess_cropWS
-#' @param agg_function the breech face radius estimation procedure returns
-#'   numerous radius estimates. This argument dictates the function used to
-#'   aggregate these into a final estimate.
-#'
-#' @return An x3p object containing the surface matrix of a breech face
-#'   impression scan where the rows/columns on the exterior of the breech face
-#'   impression have been cropped-out.
-#'
-#' @keywords internal
-#' @description The radius estimation procedure tends to over-estimate the
-#'   desired radius values. As such, a lot of the breech face impression
-#'   "roll-off" is included in the final scan. Excessive roll-off can bias the
-#'   calculation of the CCF. As such, we can manually shrink the radius estimate
-#'   so that little to no roll-off is included in the final processed scan.
+# Crop the exterior of a breech face impression surface matrix
+#
+# @name preProcess_cropExterior
+#
+# @param x3p an x3p object containing the surface matrix of a cartridge case
+#   scan
+# @param scheme argument for imager::imgradient
+# @param high_connectivity argument for imager::label
+# @param tolerance argument for imager::label
+# @param radiusOffset number of pixels to add to estimated breech face radius.
+#   This is commonly a negative value (e.g., -20) to trim the cartridge case
+#   primer roll-off from the returned, cropped surface matrix.
+# @param croppingThresh argument for cmcR::preProcess_cropWS
+# @param agg_function the breech face radius estimation procedure returns
+#   numerous radius estimates. This argument dictates the function used to
+#   aggregate these into a final estimate.
+#
+# @return An x3p object containing the surface matrix of a breech face
+#   impression scan where the rows/columns on the exterior of the breech face
+#   impression have been cropped-out.
+#
+# @keywords internal
+# @description The radius estimation procedure tends to over-estimate the
+#   desired radius values. As such, a lot of the breech face impression
+#   "roll-off" is included in the final scan. Excessive roll-off can bias the
+#   calculation of the CCF. As such, we can manually shrink the radius estimate
+#   so that little to no roll-off is included in the final processed scan.
 
 preProcess_cropExterior <- function(x3p,
                                     scheme = 3,
@@ -628,33 +628,33 @@ preProcess_cropExterior <- function(x3p,
   return(x3p)
 }
 
-#' Filter-out the firing pin impression region of a breech face impression scan
-#'
-#' @name preProcess_filterInterior
-#'
-#' @param x3p an x3p object containing the surface matrix of a cartridge case
-#'   scan
-#' @param scheme argument for imager::imgradient
-#' @param high_connectivity argument for imager::label
-#' @param tolerance argument for imager::label
-#' @param radiusOffset number of pixels to add to estimated firing pin hole
-#'   radius. This is commonly a positive value (e.g., 200) to not only remove
-#'   observations within the firing pin impression hole, but also the plateaued
-#'   region surrounding the hole that does not come into contact with the breech
-#'   face.
-#'
-#' @return An x3p object containing the surface matrix of a breech face
-#'   impression scan where the observations on the interior of the firing pin
-#'   impression hole have been filtered out.
-#' @keywords internal
-#' @note The radius estimation procedure effectively estimates the radius
-#'   of the firing pin hole. Unfortunately, it is often desired that more than
-#'   just observations in firing pin hole are removed. In particular, the
-#'   plateaued region surrounding the firing pin impression hole does not come
-#'   into contact with the breech face of a firearm and is thus unwanted in the
-#'   final, processed scan. The radiusOffset argument must be tuned (around 200
-#'   seems to work well for the Fadul cartridge cases) to remove these unwanted
-#'   observations.
+# Filter-out the firing pin impression region of a breech face impression scan
+#
+# @name preProcess_filterInterior
+#
+# @param x3p an x3p object containing the surface matrix of a cartridge case
+#   scan
+# @param scheme argument for imager::imgradient
+# @param high_connectivity argument for imager::label
+# @param tolerance argument for imager::label
+# @param radiusOffset number of pixels to add to estimated firing pin hole
+#   radius. This is commonly a positive value (e.g., 200) to not only remove
+#   observations within the firing pin impression hole, but also the plateaued
+#   region surrounding the hole that does not come into contact with the breech
+#   face.
+#
+# @return An x3p object containing the surface matrix of a breech face
+#   impression scan where the observations on the interior of the firing pin
+#   impression hole have been filtered out.
+# @keywords internal
+# @note The radius estimation procedure effectively estimates the radius
+#   of the firing pin hole. Unfortunately, it is often desired that more than
+#   just observations in firing pin hole are removed. In particular, the
+#   plateaued region surrounding the firing pin impression hole does not come
+#   into contact with the breech face of a firearm and is thus unwanted in the
+#   final, processed scan. The radiusOffset argument must be tuned (around 200
+#   seems to work well for the Fadul cartridge cases) to remove these unwanted
+#   observations.
 
 preProcess_filterInterior <- function(x3p,
                                       scheme = 3,
@@ -709,6 +709,8 @@ preProcess_filterInterior <- function(x3p,
 
 #' Remove observations from the exterior of interior of a breech face scan
 #'
+#'@name preProcess_crop
+#'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'   scan
 #' @param region dictates whether the observations on the "exterior" or
@@ -748,6 +750,7 @@ preProcess_filterInterior <- function(x3p,
 #'   seems to work well for the Fadul cartridge cases) to remove these unwanted
 #'   observations.
 #' @examples
+#' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 #' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
@@ -764,7 +767,7 @@ preProcess_filterInterior <- function(x3p,
 #' x3pListPlot(list("Original" = fadul1.1,
 #'                  "Exterior Cropped" = fadul1.1_extCropped,
 #'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
-#'
+#'}
 #' @export
 
 preProcess_crop <- function(x3p,
@@ -809,6 +812,7 @@ preProcess_crop <- function(x3p,
 #'   matrix.
 #' @rdname levelBreechFace
 #' @examples
+#' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 #' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
@@ -830,6 +834,7 @@ preProcess_crop <- function(x3p,
 #'                  "Ext. Cropped" = fadul1.1_extCropped,
 #'                  "Ext. & Int. Cropped" = fadul1.1_intCroped,
 #'                  "Cropped and Leveled" = fadul1.1_leveled))
+#'}
 #' @export
 
 preProcess_removeTrend <- function(x3p,

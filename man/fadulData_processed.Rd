@@ -5,9 +5,8 @@
 \alias{fadulData_processed}
 \alias{fadul1.1_processed}
 \alias{fadul1.2_processed}
-\alias{fadul2.1_processed}
-\title{Processed versions of the fadul1.1_raw, fadul1.2_raw, and fadul2.1_raw
-datasets using preProcess_* functions from the cmcR package}
+\title{Processed versions of the fadul1.1_raw and  fadul1.2_raw datasets using
+preProcess_* functions from the cmcR package}
 \format{
 An x3p object containing a surface matrix and metainformation
 concerning the conditions under which the scan was taken \describe{
@@ -27,8 +26,6 @@ capturing device}
 }
 
 An object of class \code{x3p} of length 5.
-
-An object of class \code{x3p} of length 5.
 }
 \source{
 \url{https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d}
@@ -37,8 +34,6 @@ An object of class \code{x3p} of length 5.
 fadul1.1_processed
 
 fadul1.2_processed
-
-fadul2.1_processed
 }
 \description{
 "Fadul 1-1" and "Fadul 1-2" cartridge cases from Fadul et al. (2011). The

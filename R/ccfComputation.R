@@ -7,14 +7,14 @@
 #differently)
 
 
-#' Calculates cross-correlation between two matrices using FFTs
-#'
-#' @name filterViaFFT
-#'
-#'
-#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
-#' @keywords internal
-#'
+# Calculates cross-correlation between two matrices using FFTs
+#
+# @name filterViaFFT
+#
+#
+# @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+# @keywords internal
+#
 #' @importFrom stats fft
 
 filterViaFFT <- function(A, B) {
@@ -44,12 +44,12 @@ filterViaFFT <- function(A, B) {
   return(Re(C))
 }
 
-#' Copies behavior of round() function in MATLAB
-#'
-#' @name round2
-#' @seealso http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
-#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
-#' @keywords internal
+# Copies behavior of round() function in MATLAB
+#
+# @name round2
+# @seealso http://stackoverflow.com/questions/12688717/round-up-from-5-in-r
+# @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+# @keywords internal
 
 round2 = function(x, n) {
   posneg = sign(x)
@@ -60,12 +60,12 @@ round2 = function(x, n) {
   z*posneg
 }
 
-#' Shifts CCF matrix output so that Nyquist frequency is in middle of matrix
-#'
-#' @name fftshift
-#' @seealso http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
-#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
-#' @keywords internal
+# Shifts CCF matrix output so that Nyquist frequency is in middle of matrix
+#
+# @name fftshift
+# @seealso http://stackoverflow.com/questions/38230794/how-to-write-fftshift-and-ifftshift-in-r
+# @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+# @keywords internal
 
 fftshift <- function(input_matrix) {
 
@@ -89,13 +89,13 @@ fftshift <- function(input_matrix) {
 
 }
 
-#' Performs a circular shift based on periodic boundary conditions in a vector
-#'
-#' @name circshift
-#' @seealso http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
-#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
-#' @keywords internal
-#'
+# Performs a circular shift based on periodic boundary conditions in a vector
+#
+# @name circshift
+# @seealso http://stackoverflow.com/questions/18791212/equivalent-to-numpy-roll-in-r
+# @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+# @keywords internal
+#
 #' @importFrom utils head tail
 
 circshift <- function(x, vec) {
@@ -145,14 +145,14 @@ circshift <- function(x, vec) {
 #   }
 # }
 
-#' Computes the location of the maximum CCF value in a CCF map between two
-#' matrices
-#'
-#' @name ccfComparison
-#'
-#' @param ccfMethod implements 3 different methods to calculate the CCF -- all which yield differing CCF values
-#' @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
-#' @keywords internal
+# Computes the location of the maximum CCF value in a CCF map between two
+# matrices
+#
+# @name ccfComparison
+#
+# @param ccfMethod implements 3 different methods to calculate the CCF -- all which yield differing CCF values
+# @seealso cartridges3D package \url{https://github.com/xhtai/cartridges3D}
+# @keywords internal
 
 ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   stopifnot(ccfMethod %in% c("bruteForceReweighted","imager","fft"))
@@ -198,33 +198,33 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   return(ret)
 }
 
-#' @name calcRawCorr
-#'
-#' @description Given the dy,dx values at which CCF_max occurs, this function
-#'   extract from the larger "region" matrix a matrix of the same dimension as
-#'   "cell" with appropriate shifting/scaling relative to the center based on
-#'   the dx,dy arguments. It is possible that the "cell" shaped matrix, after
-#'   shifting by dx,dy, lies outside of the bounds of the region matrix (this is
-#'   because both "cell" and "region" are padded with 0s when calculating the
-#'   CCF). If this occurs, the "cell"-sized matrix that would be extracted from
-#'   "region" is padded with NAs to appropriately reflect the conditions under
-#'   which the CCF_max value was determined. Even with this padding, however,
-#'   there may be a slight mis-match (like one row/col) between the dimensions
-#'   of "cell" and of the matrix extracted from "region," typically because
-#'   "region" has an odd dimension while "cell" has an even dimension or vice
-#'   versa. Thus, the "center" of one of the matrices might not be well-defined
-#'   as a single index. Thus, additional padding/cropping needs to be performed
-#'   in the "cell"-sized matrix extracted from "region." However, we don't know
-#'   whether these rows/cols should pre/post padded/cropped, so all possible
-#'   combinations of padding/cropping are considered. To determine which of
-#'   these these combinations should be ultimately chosen as the final
-#'   "cell"-sized matrix, the tieBreaker argument can be used to determine, for
-#'   example, which "cell"-sized matrix has the highest correlation with "cell"
-#'   (tieBreaker = which.max).
-#'
-#'
-#' @keywords internal
-#'
+# @name calcRawCorr
+#
+# @description Given the dy,dx values at which CCF_max occurs, this function
+#   extract from the larger "region" matrix a matrix of the same dimension as
+#   "cell" with appropriate shifting/scaling relative to the center based on
+#   the dx,dy arguments. It is possible that the "cell" shaped matrix, after
+#   shifting by dx,dy, lies outside of the bounds of the region matrix (this is
+#   because both "cell" and "region" are padded with 0s when calculating the
+#   CCF). If this occurs, the "cell"-sized matrix that would be extracted from
+#   "region" is padded with NAs to appropriately reflect the conditions under
+#   which the CCF_max value was determined. Even with this padding, however,
+#   there may be a slight mis-match (like one row/col) between the dimensions
+#   of "cell" and of the matrix extracted from "region," typically because
+#   "region" has an odd dimension while "cell" has an even dimension or vice
+#   versa. Thus, the "center" of one of the matrices might not be well-defined
+#   as a single index. Thus, additional padding/cropping needs to be performed
+#   in the "cell"-sized matrix extracted from "region." However, we don't know
+#   whether these rows/cols should pre/post padded/cropped, so all possible
+#   combinations of padding/cropping are considered. To determine which of
+#   these these combinations should be ultimately chosen as the final
+#   "cell"-sized matrix, the tieBreaker argument can be used to determine, for
+#   example, which "cell"-sized matrix has the highest correlation with "cell"
+#   (tieBreaker = which.max).
+#
+#
+# @keywords internal
+#
 #' @importFrom stats cor
 
 calcRawCorr <- function(cell,

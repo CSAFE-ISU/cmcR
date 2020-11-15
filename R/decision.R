@@ -1,27 +1,27 @@
-#' Apply CMC classification logic of the original method of Song (2013)
-#'
-#' @name decision_originalMethod_classifyCMCs
-#' @param cellIndex vector/tibble column containing cell indices corresponding
-#'   to a reference cell
-#' @param x vector/tibble column containing x horizontal translation values
-#' @param y vector/tibble column containing y vertical translation values
-#' @param theta vector/tibble column containing theta rotation values
-#' @param corr vector/tibble column containing correlation similarity scores
-#'   between a reference cell and its associated target region
-#' @param xThresh used to classify particular x values "congruent" if they are
-#'   within xThresh of the median x value
-#' @param yThresh used to classify particular y values "congruent" if they are
-#'   within yThresh of the median y value
-#' @param thetaThresh used to classify particular theta values "congruent" if
-#'   they are within thetaThresh of the median theta value
-#' @param corrThresh to classify particular correlation values "congruent" if
-#'   they are at least corrThresh
-#'
-#' @seealso \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}
-#'@note the decision_CMC function internally calls this function if a value of
-#'   tau is not provided
-#'
-#' @keywords internal
+# Apply CMC classification logic of the original method of Song (2013)
+#
+# @name decision_originalMethod_classifyCMCs
+# @param cellIndex vector/tibble column containing cell indices corresponding
+#   to a reference cell
+# @param x vector/tibble column containing x horizontal translation values
+# @param y vector/tibble column containing y vertical translation values
+# @param theta vector/tibble column containing theta rotation values
+# @param corr vector/tibble column containing correlation similarity scores
+#   between a reference cell and its associated target region
+# @param xThresh used to classify particular x values "congruent" if they are
+#   within xThresh of the median x value
+# @param yThresh used to classify particular y values "congruent" if they are
+#   within yThresh of the median y value
+# @param thetaThresh used to classify particular theta values "congruent" if
+#   they are within thetaThresh of the median theta value
+# @param corrThresh to classify particular correlation values "congruent" if
+#   they are at least corrThresh
+#
+# @seealso \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}
+#@note the decision_CMC function internally calls this function if a value of
+#   tau is not provided
+#
+# @keywords internal
 
 decision_originalMethod_classifyCMCs <- function(cellIndex,
                                                  x,
@@ -82,6 +82,7 @@ decision_originalMethod_classifyCMCs <- function(cellIndex,
 #'   method
 #'
 #'@examples
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -100,6 +101,7 @@ decision_originalMethod_classifyCMCs <- function(cellIndex,
 #' dplyr::filter(cmcThetaDistribClassif == "CMC Candidate") %>%
 #' ggplot2::ggplot(ggplot2::aes(x = theta)) +
 #' ggplot2::geom_bar(stat = "count")
+#' }
 #' @importFrom rlang .data
 #' @export
 
@@ -151,6 +153,7 @@ decision_highCMC_cmcThetaDistrib <- function(cellIndex,
 #'   function. It is exported to be used as a diagnostic tool for the High CMC
 #'   method
 #'@examples
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -171,6 +174,7 @@ decision_highCMC_cmcThetaDistrib <- function(cellIndex,
 #' dplyr::filter(cmcThetaDistribClassif == "CMC Candidate") %>%
 #' ggplot2::ggplot(ggplot2::aes(x = theta,fill = thetaCMCIdentif)) +
 #' ggplot2::geom_bar(stat = "count")
+#' }
 #' @importFrom rlang .data
 #' @export
 
@@ -188,38 +192,38 @@ decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
     dplyr::left_join(thetaClassifications,by = "theta")
 }
 
-#'Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
-#'distribution returned by the decision_highCMC_cmcThetaDistrib function
-#'
-#'@name decision_highCMC_classifyCMCs
-#'@param cellIndex vector/tibble column containing cell indices corresponding to
-#'  a reference cell
-#'@param x vector/tibble column containing x horizontal translation values
-#'@param y vector/tibble column containing y vertical translation values
-#'@param theta vector/tibble column containing theta rotation values
-#'@param corr vector/tibble column containing correlation similarity scores
-#'  between a reference cell and its associated target region
-#'@param xThresh used to classify particular x values "congruent" (conditional
-#'  on a particular theta value) if they are within xThresh of the
-#'  theta-specific median x value
-#'@param yThresh used to classify particular y values "congruent" (conditional
-#'  on a particular theta value) if they are within yThresh of the
-#'  theta-specific median y value
-#'@param thetaThresh defines how wide a High CMC mode is allowed to be in the
-#'  CMC-theta distribution before it's considered too diffuse
-#'@param corrThresh to classify particular correlation values "congruent"
-#'  (conditional on a particular theta value) if they are at least corrThresh
-#'@param tau constant used to define a "high" CMC count. This number is
-#'  subtracted from the maximum CMC count achieved in the CMC-theta
-#'  distribution. Theta values with CMC counts above this value are considered
-#'  to have "high" CMC counts.
-#'@seealso
-#'\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
-#'
-#'@note the decision_CMC function internally calls this function if a value of
-#'  tau is provided
-#'@importFrom rlang .data
-#' @keywords internal
+#Apply CMC classification logic of the Tong et al. (2015) to the CMC-theta
+#distribution returned by the decision_highCMC_cmcThetaDistrib function
+#
+#@name decision_highCMC_classifyCMCs
+#@param cellIndex vector/tibble column containing cell indices corresponding to
+#  a reference cell
+#@param x vector/tibble column containing x horizontal translation values
+#@param y vector/tibble column containing y vertical translation values
+#@param theta vector/tibble column containing theta rotation values
+#@param corr vector/tibble column containing correlation similarity scores
+#  between a reference cell and its associated target region
+#@param xThresh used to classify particular x values "congruent" (conditional
+#  on a particular theta value) if they are within xThresh of the
+#  theta-specific median x value
+#@param yThresh used to classify particular y values "congruent" (conditional
+#  on a particular theta value) if they are within yThresh of the
+#  theta-specific median y value
+#@param thetaThresh defines how wide a High CMC mode is allowed to be in the
+#  CMC-theta distribution before it's considered too diffuse
+#@param corrThresh to classify particular correlation values "congruent"
+#  (conditional on a particular theta value) if they are at least corrThresh
+#@param tau constant used to define a "high" CMC count. This number is
+#  subtracted from the maximum CMC count achieved in the CMC-theta
+#  distribution. Theta values with CMC counts above this value are considered
+#  to have "high" CMC counts.
+#@seealso
+#\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
+#
+#@note the decision_CMC function internally calls this function if a value of
+#  tau is provided
+#@importFrom rlang .data
+# @keywords internal
 
 decision_highCMC_classifyCMCs <- function(cellIndex,
                                           x,
@@ -323,6 +327,7 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 #'@seealso
 #'\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
 #'@examples
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -347,6 +352,7 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 #'
 #'comparisonDF %>%
 #' dplyr::filter(originalMethodClassif == "CMC" | highCMCClassif == "CMC")
+#' }
 #'@export
 
 decision_CMC <- function(cellIndex,
@@ -401,42 +407,42 @@ decision_CMC <- function(cellIndex,
   }
 }
 
-#' @name calcMaxCMCTheta
-#'
-#' @param distanceToCMCMaxTieBreaker decides what to do in cases where there are
-#'   consecutive theta values all tied for the max CMC count (no guidance is
-#'   given by Tong et al. (2015) of what to do in this situation). The default
-#'   is to determine the distance between any high CMC theta value and its
-#'   closest CMC max theta value.
-#'
-#'   For example, suppose 3 consecutive theta values each have the max CMC count
-#'   of 17. So the CMC counts around these theta values may look like ...10, 16,
-#'   17, 17, 17, 15, 12... For a highCMC_thresh = 1, note that there is one
-#'   theta value with associated count equal to the high CMC count of 17 - 1 =
-#'   16. The default setting of distanceToCMCMaxTieBreaker = "minDistance" will
-#'   consider the minimum distance between a max CMC theta value and this high
-#'   CMC theta. So in this case, because a theta value with CMC count 17 is
-#'   right next to this high CMC theta value, we would say that this particular
-#'   cartridge case pair "passes" the high CMC criterion, assuming the
-#'   thetaThresh is set to be equal to the grid spacing of the theta values
-#'   considered (3 degrees by default).
-#'
-#'   A slightly more "conservative" option would be to set
-#'   distanceToCMCMaxTieBreaker = "medDistance" take the median of these max CMC
-#'   theta values and apply the high CMC criterion. The example under
-#'   consideration *wouldn't* pass the high CMC criterion due to the particular
-#'   choice of theta grid spacing, thetaThresh, and highCMC_thresh. However,
-#'   different combinations of these arguments may lead to passing the
-#'   criterion.
-#'
-#'   Finally, the most "conservative" option would be to set
-#'   distanceToCMCMaxTieBreaker = "failCriterion" in which we immediately "fail"
-#'   a cartridge case pair if there are any ties for max CMC theta (i.e., "there
-#'   can only be one!" - Highlander).
-#'
-#' @keywords internal
-#'
-#' @importFrom stats median
+# @name calcMaxCMCTheta
+#
+# @param distanceToCMCMaxTieBreaker decides what to do in cases where there are
+#   consecutive theta values all tied for the max CMC count (no guidance is
+#   given by Tong et al. (2015) of what to do in this situation). The default
+#   is to determine the distance between any high CMC theta value and its
+#   closest CMC max theta value.
+#
+#   For example, suppose 3 consecutive theta values each have the max CMC count
+#   of 17. So the CMC counts around these theta values may look like ...10, 16,
+#   17, 17, 17, 15, 12... For a highCMC_thresh = 1, note that there is one
+#   theta value with associated count equal to the high CMC count of 17 - 1 =
+#   16. The default setting of distanceToCMCMaxTieBreaker = "minDistance" will
+#   consider the minimum distance between a max CMC theta value and this high
+#   CMC theta. So in this case, because a theta value with CMC count 17 is
+#   right next to this high CMC theta value, we would say that this particular
+#   cartridge case pair "passes" the high CMC criterion, assuming the
+#   thetaThresh is set to be equal to the grid spacing of the theta values
+#   considered (3 degrees by default).
+#
+#   A slightly more "conservative" option would be to set
+#   distanceToCMCMaxTieBreaker = "medDistance" take the median of these max CMC
+#   theta values and apply the high CMC criterion. The example under
+#   consideration *wouldn't* pass the high CMC criterion due to the particular
+#   choice of theta grid spacing, thetaThresh, and highCMC_thresh. However,
+#   different combinations of these arguments may lead to passing the
+#   criterion.
+#
+#   Finally, the most "conservative" option would be to set
+#   distanceToCMCMaxTieBreaker = "failCriterion" in which we immediately "fail"
+#   a cartridge case pair if there are any ties for max CMC theta (i.e., "there
+#   can only be one!" - Highlander).
+#
+# @keywords internal
+#
+# @importFrom stats median
 
 utils::globalVariables(c("theta","n","distanceToCMCMax"))
 
@@ -503,51 +509,51 @@ calcMaxCMCTheta <- function(cmcPerTheta,
   }
 }
 
-#' Implements "improved" CMC logic on a list of CCF results for a comparison
-#' between two cartridge case scans as proposed by Tong et al. (2015)
-#'
-#' @name cmcFilter_improved
-#'
-#' @description Implements "improved' Congruent Matching Cells logic, as
-#'   proposed by Tong et al. (2015), to the CCF results of a comparison between
-#'   two cartridge case scans.
-#'
-#' @param consensus_function function to aggregate the translation (x and y)
-#'   and rotation (theta) values in the ccfDF data frame to determine
-#'   "consensus" values
-#' @param ccf_thresh minimum correlation threshold to call a cell pair
-#'   "congruent matching"
-#' @param dx_thresh maximum distance from the consensus x value that a cell
-#'   pair can be to be called "congruent matching"
-#' @param dy_thresh  maximum distance from the consensus y value that a cell
-#'   pair can be to be called "congruent matching"
-#' @param thetaThresh maximum distance from the consensus theta value that a
-#'   cell pair can be to be called "congruent matching"
-#' @param missingThetaDecision dictates how function should handle situations
-#'   in which one direction passes the high CMC criterion while another
-#'   direction does not. "replace": replaces theta value in failed direction
-#'   with opposite of theta value in successful direction. "dismiss": only
-#'   counts the initial CMCs in failed direction and high CMCs in successful
-#'   direction. "fail": only counts the initial CMCs in either direction.
-#' @param compareThetas dictates if the consensus theta values
-#'   determined under the initially proposed method should be compared to the
-#'   consensus theta values determined under the High CMC method. In particular,
-#'   determines for each direction whether the consensus theta values determined
-#'   under the two methods are within thetaThresh of each other. It is often
-#'   the case that non-matching cartridge cases, even if they pass the High CMC
-#'   criterion, will have differing consensus theta values under the two
-#'   methods. If this isn't taken into account, non-matches tend to be assigned
-#'   a lot of false positive CMCs under the High CMC method.
-#' @param consensus_function_theta *(OPTIONAL)* function (separate from
-#'   consensus_function) to aggregate the rotation (theta) values in the ccfDF
-#'   data frame to determine "consensus" value
-#'
-#' @seealso
-#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
-#'
-#'@keywords internal
-#' @importFrom stats median
-#' @importFrom rlang .data
+# Implements "improved" CMC logic on a list of CCF results for a comparison
+# between two cartridge case scans as proposed by Tong et al. (2015)
+#
+# @name cmcFilter_improved
+#
+# @description Implements "improved' Congruent Matching Cells logic, as
+#   proposed by Tong et al. (2015), to the CCF results of a comparison between
+#   two cartridge case scans.
+#
+# @param consensus_function function to aggregate the translation (x and y)
+#   and rotation (theta) values in the ccfDF data frame to determine
+#   "consensus" values
+# @param ccf_thresh minimum correlation threshold to call a cell pair
+#   "congruent matching"
+# @param dx_thresh maximum distance from the consensus x value that a cell
+#   pair can be to be called "congruent matching"
+# @param dy_thresh  maximum distance from the consensus y value that a cell
+#   pair can be to be called "congruent matching"
+# @param thetaThresh maximum distance from the consensus theta value that a
+#   cell pair can be to be called "congruent matching"
+# @param missingThetaDecision dictates how function should handle situations
+#   in which one direction passes the high CMC criterion while another
+#   direction does not. "replace": replaces theta value in failed direction
+#   with opposite of theta value in successful direction. "dismiss": only
+#   counts the initial CMCs in failed direction and high CMCs in successful
+#   direction. "fail": only counts the initial CMCs in either direction.
+# @param compareThetas dictates if the consensus theta values
+#   determined under the initially proposed method should be compared to the
+#   consensus theta values determined under the High CMC method. In particular,
+#   determines for each direction whether the consensus theta values determined
+#   under the two methods are within thetaThresh of each other. It is often
+#   the case that non-matching cartridge cases, even if they pass the High CMC
+#   criterion, will have differing consensus theta values under the two
+#   methods. If this isn't taken into account, non-matches tend to be assigned
+#   a lot of false positive CMCs under the High CMC method.
+# @param consensus_function_theta *(OPTIONAL)* function (separate from
+#   consensus_function) to aggregate the rotation (theta) values in the ccfDF
+#   data frame to determine "consensus" value
+#
+# @seealso
+# \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}
+#
+#@keywords internal
+# @importFrom stats median
+# @importFrom rlang .data
 
 utils::globalVariables(c(".","cellIndex","comparison","theta"))
 
@@ -884,7 +890,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 #'  results under the High CMC method.
 #'@examples
 #'data(fadul1.1_processed,fadul1.2_processed)
-#'
+#'\dontrun{
 #'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
 #'                                    ~ comparison_allTogether(fadul1.1_processed,
 #'                                                        fadul1.2_processed,
@@ -922,7 +928,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 #'                                            tau = 1))
 #'
 #'decision_combineDirections(comparisonDF_1to2,comparisonDF_2to1)
-#'
+#'}
 #'@export
 
 decision_combineDirections <- function(reference_v_target_CMCs,
@@ -946,32 +952,30 @@ decision_combineDirections <- function(reference_v_target_CMCs,
   return(cmcResults)
 }
 
-#' Calculates the mode of a vector of numbers
-#'
-#' @name getMode
-#'
-#' @description Calculates the mode of a vector. Can be used as a consensus
-#'   function in cmcR::cmcFilter or cmcR::cmcFilter_improved.
-#'
-#' @param x a numeric vector
-#'
-#' @examples
-#' \dontrun{
-#' #x3p1 and x3p2 are two x3p objects containing processed surface matrices
-#' comparison1 <- cellCCF(x3p1,x3p2) #defaults assumed
-#'
-#' #calculate "initial" cmcs
-#' comparison1$ccfResults %>%
-#'   cmcR::topResultsPerCell() %>%
-#'   cmcR::cmcFilter(consensus_function = median,
-#'                   ccf_thresh = .4,
-#'                   dx_thresh = 20,
-#'                   dy_thresh = dx_thresh,
-#'                   theta_thresh = 3,
-#'                   consensus_function_theta = getMode)
-#' }
-#'
-#' @export
+# Calculates the mode of a vector of numbers
+#
+# @name getMode
+#
+# @description Calculates the mode of a vector. Can be used as a consensus
+#   function in cmcR::cmcFilter or cmcR::cmcFilter_improved.
+#
+# @param x a numeric vector
+#
+# @examples
+# \dontrun{
+# #x3p1 and x3p2 are two x3p objects containing processed surface matrices
+#
+# #calculate "initial" cmcs
+# comparison1$ccfResults %>%
+#   cmcR::topResultsPerCell() %>%
+#   cmcR::cmcFilter(consensus_function = median,
+#                   ccf_thresh = .4,
+#                   dx_thresh = 20,
+#                   dy_thresh = dx_thresh,
+#                   theta_thresh = 3,
+#                   consensus_function_theta = getMode)
+# }
+#@export
 
 getMode <- function(x){
   uniqx <- unique(x)

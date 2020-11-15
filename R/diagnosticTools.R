@@ -20,12 +20,10 @@
 #'   scale_fill_gradientn)
 #' @param guide internal usage
 #' @examples
-#' data(fadul1.1_processed,fadul1.2_processed,fadul2.1_processed)
-#'
+#'\dontrun{
 #' x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
-#'                  "Fadul 1-2" = fadul1.2_processed,
-#'                  "Fadul 2-1" = fadul2.1_processed))
-#'
+#'                  "Fadul 1-2" = fadul1.2_processed))
+#'}
 #' @export
 #'
 #' @importFrom stats setNames median quantile
@@ -152,17 +150,17 @@ x3pListPlot <- function(x3pList,
   return(plts)
 }
 
-#' @name linear_to_matrix
-#' @param index integer vector of indices, must be between 1 and nrow*ncol
-#' @param nrow number of rows, integer value defaults to 7
-#' @param ncol  number of columns, integer value, defaults to number of rows
-#' @param byrow logical value, is linear index folded into matrix by row (default) or by column (`byrow=FALSE`).
-#' @examples
-#' index <- sample(nrow*ncol, 10, replace = TRUE)
-#' linear_to_matrix(index, nrow=4, ncol = 5, byrow=TRUE)
-#'
-#' @keywords internal
-#' @importFrom rlang .data
+# @name linear_to_matrix
+# @param index integer vector of indices, must be between 1 and nrow*ncol
+# @param nrow number of rows, integer value defaults to 7
+# @param ncol  number of columns, integer value, defaults to number of rows
+# @param byrow logical value, is linear index folded into matrix by row (default) or by column (`byrow=FALSE`).
+# @examples
+# index <- sample(nrow*ncol, 10, replace = TRUE)
+# linear_to_matrix(index, nrow=4, ncol = 5, byrow=TRUE)
+#
+# @keywords internal
+# @importFrom rlang .data
 
 linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = ", ") {
   index <- as.integer(index)
@@ -178,12 +176,12 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
   paste0(idx_out_row, sep, idx_out_col)
 }
 
-#' @name arrangeCMCPlot
-#'
-#' @keywords internal
-#'
-#' @importFrom stats median setNames
-#' @importFrom rlang .data
+# @name arrangeCMCPlot
+#
+# @keywords internal
+#
+# @importFrom stats median setNames
+# @importFrom rlang .data
 
 arrangeCMCPlot <- function(referenceScan,
                            targetScan,
@@ -384,6 +382,7 @@ arrangeCMCPlot <- function(referenceScan,
 #'  scale_fill_gradientn)
 #'
 #'@examples
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -427,7 +426,7 @@ arrangeCMCPlot <- function(referenceScan,
 #'        comparisonDF_1to2,
 #'        comparisonDF_2to1,
 #'        corColName = "pairwiseCompCor")
-#'
+#'}
 #'@importFrom utils hasName
 #'@importFrom rlang .data
 #'@export

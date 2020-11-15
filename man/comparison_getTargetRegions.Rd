@@ -32,6 +32,7 @@ Extract regions from a target scan based on associated cells in reference
 scan
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
@@ -43,4 +44,5 @@ dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHe
 dplyr::filter(cellPropMissing <= .85 & regionPropMissing <= .85)
 
 head(cellTibble)
+}
 }

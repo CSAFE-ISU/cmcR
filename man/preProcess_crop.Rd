@@ -64,6 +64,7 @@ seems to work well for the Fadul cartridge cases) to remove these unwanted
 observations.
 }
 \examples{
+\dontrun{
 nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
@@ -80,5 +81,5 @@ fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
 x3pListPlot(list("Original" = fadul1.1,
                  "Exterior Cropped" = fadul1.1_extCropped,
                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
-
+}
 }
