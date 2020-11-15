@@ -182,6 +182,7 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 #
 # @importFrom stats median setNames
 # @importFrom rlang .data
+#' @importFrom stringr str_remove_all
 
 arrangeCMCPlot <- function(referenceScan,
                            targetScan,
@@ -212,13 +213,9 @@ arrangeCMCPlot <- function(referenceScan,
                         names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (.data$lastCol + .data$firstCol)/2,
                   midRow = (.data$lastRow + .data$firstRow)/2,
-                  # cellIndex = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                  #                              floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                  #                              ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                  #                            nrow = ceiling(sqrt(max(cellNum))),
-                  # byrow = TRUE),
                   x3p = rep(x3pNames[1],times = nrow(.)),
-                  theta = rep(0,times = nrow(.)))
+                  theta = rep(0,times = nrow(.)),
+                  cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
   referenceScan_cellGrid <- allCells %>%
     dplyr::mutate(firstRow = (targetScan$header.info$incrementY*1e6)*(.data$firstRow),
@@ -252,13 +249,9 @@ arrangeCMCPlot <- function(referenceScan,
                         names_pattern = "(.+)_(.+)") %>%
     dplyr::mutate(midCol = (.data$topRightCorner_col + .data$bottomLeftCorner_col)/2,
                   midRow = (.data$topRightCorner_row + .data$bottomLeftCorner_row)/2,
-                  # cellIndex = linear_to_matrix(index = (cellNum %% ceiling(sqrt(max(cellNum)))) +
-                  #                              floor((ceiling(sqrt(max(cellNum)))^2 - cellNum)/ceiling(sqrt(max(cellNum))))*ceiling(sqrt(max(cellNum))) +
-                  #                              ifelse(cellNum %% ceiling(sqrt(max(cellNum))) == 0,ceiling(sqrt(max(cellNum))),0),
-                  #                            nrow = ceiling(sqrt(max(cellNum))),
-                  # byrow = TRUE),
                   x3p = rep(x3pNames[2],times = nrow(.)),
-                  theta = .data$theta - median(.data$theta))
+                  theta = .data$theta - median(.data$theta),
+                  cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
   targetScan_rotate <- 90 #- abs(median(allCells %>%
   # dplyr::filter(cmc != "non-CMC") %>%
