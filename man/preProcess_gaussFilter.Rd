@@ -18,6 +18,9 @@ means that wavelength should be a vector of two numbers. In this case, the
 max of these two number will be used for the high pass filter and the min
 for the low pass filter.}
 }
+\value{
+An x3p object containing the Gaussian-filtered surface matrix.
+}
 \description{
 Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
 particular cut-off wavelength.

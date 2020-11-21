@@ -8,13 +8,17 @@ candidate counts}
 decision_highCMC_identifyHighCMCThetas(cmcThetaDistrib, tau = 1)
 }
 \arguments{
-\item{cmcThetaDistrib}{output of the decision_highCMC_cmcThetaDistrib
-function}
+\item{cmcThetaDistrib}{output of the decision_highCMC_cmcThetaDistrib function}
 
 \item{tau}{constant used to define a "high" CMC count. This number is
 subtracted from the maximum CMC count achieved in the CMC-theta
 distribution. Theta values with CMC counts above this value are considered
 to have "high" CMC counts.}
+}
+\value{
+A vector of the same length as the input containing "High" or "Low"
+classification based on whether the associated theta value has a High CMC
+Candidate count.
 }
 \description{
 Classify theta values in CMC-theta distribution as having "High" or "Low" CMC

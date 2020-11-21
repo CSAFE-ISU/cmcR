@@ -24,6 +24,11 @@ and CCF values returned by comparison_fft_ccf}
 
 \item{use}{argument for stats::cor}
 }
+\value{
+A vector of the same length as the input containing correlation values
+at the estimated alignment between each reference cell and its associated
+target region
+}
 \description{
 Calculates correlation between a cell and a matrix of the same dimensions
 extracted from the cell's associated region.

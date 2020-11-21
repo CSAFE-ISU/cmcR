@@ -1,33 +1,35 @@
-#' Plot a list of x3ps
-#' @name x3pListPlot
+#'Plot a list of x3ps
+#'@name x3pListPlot
 #'
-#' @description Plots the surface matrices in a list of x3p objects. Either
-#'   creates one plot faceted by surface matrix or creates individual plots per
-#'   surface matrix and returns them in a list.
+#'@description Plots the surface matrices in a list of x3p objects. Either
+#'  creates one plot faceted by surface matrix or creates individual plots per
+#'  surface matrix and returns them in a list.
 #'
-#' @param x3pList a list of x3p objects. If the x3p objects are named in the
-#'   list, then these names will be included in the title of their respective
-#'   plot
-#' @param type dictates whether one plot faceted by surface matrix or a list of
-#'   plots per surface matrix is returned. The faceted plot will have a
-#'   consistent height scale across all surface matrices.
-#' @param rotate angle (in degrees) to rotate all surface matrices plotted
-#' @param legend.quantiles vector of quantiles to be shown as tick marks on
-#'   legend plot
-#' @param height.colors vector of colors to be passed to scale_fill_gradientn
-#'   that dictates the height value colorscale
-#' @param na.value color to be used for NA values (passed to
-#'   scale_fill_gradientn)
-#' @param guide internal usage
+#'@param x3pList a list of x3p objects. If the x3p objects are named in the
+#'  list, then these names will be included in the title of their respective
+#'  plot
+#'@param type dictates whether one plot faceted by surface matrix or a list of
+#'  plots per surface matrix is returned. The faceted plot will have a
+#'  consistent height scale across all surface matrices.
+#'@param rotate angle (in degrees) to rotate all surface matrices plotted
+#'@param legend.quantiles vector of quantiles to be shown as tick marks on
+#'  legend plot
+#'@param height.colors vector of colors to be passed to scale_fill_gradientn
+#'  that dictates the height value colorscale
+#'@param na.value color to be used for NA values (passed to
+#'  scale_fill_gradientn)
+#'@param guide internal usage
+#'@return A ggplot object or list of ggplot objects showing the surface matrix
+#'  height values.
 #' @examples
 #'\dontrun{
 #' x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
 #'                  "Fadul 1-2" = fadul1.2_processed))
 #'}
-#' @export
+#'@export
 #'
-#' @importFrom stats setNames median quantile
-#' @importFrom rlang .data
+#'@importFrom stats setNames median quantile
+#'@importFrom rlang .data
 
 x3pListPlot <- function(x3pList,
                         type = "faceted",
@@ -358,9 +360,8 @@ arrangeCMCPlot <- function(referenceScan,
 #'@param target_v_reference_CMCs (optional) CMCs for the comparison between the
 #'  target scan and the reference scan. If this is missing, then only the
 #'  original method CMCs will be plotted
-#' @param corColName name of correlation similarity score column used to
-#'   identify the CMCs in the two comparison_*_df data frames (e.g.,
-#'   pairwiseCompCor)
+#'@param corColName name of correlation similarity score column used to identify
+#'  the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)
 #'@param type argument to be passed to cmcR::x3pListPlot function
 #'@param x3pNames (Optional) Names of x3p objects to be included in x3pListPlot
 #'  function
@@ -373,7 +374,8 @@ arrangeCMCPlot <- function(referenceScan,
 #'@param cell.alpha sets alpha of cells (passed to geom_polygon)
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
-#'
+#'@return A list of 4 ggplot objects showing the CMCs identified under both
+#'  decision rules and in both comparison directions.
 #'@examples
 #'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)

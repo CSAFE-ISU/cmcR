@@ -53,6 +53,10 @@ of Song (2013) is applied. This number is subtracted from the maximum CMC
 count achieved in the CMC-theta distribution. Theta values with CMC counts
 above this value are considered to have "high" CMC counts.}
 }
+\value{
+A vector of the same length as the input containing the CMC
+classification under one of the two decision rules.
+}
 \description{
 Applies the decision rules of the original method of Song (2013) or the High
 CMC method of Tong et al. (2015)

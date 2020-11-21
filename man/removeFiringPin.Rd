@@ -32,6 +32,10 @@ fitting circle to the surface matrix via the Hough transform method}
 \item{houghScoreQuant}{quantile cut-off to be used when determining a final
 radius estimate using the score values returned by the imager::hough_circle}
 }
+\value{
+An x3p object containing a surface matrix with the estimated firing
+pin circle pixels replaced with NAs.
+}
 \description{
 Given a surface matrix, estimates and filters any pixels within the estimated
 firing pin impression circle

@@ -37,6 +37,10 @@ scale_fill_gradientn)}
 
 \item{guide}{internal usage}
 }
+\value{
+A ggplot object or list of ggplot objects showing the surface matrix
+height values.
+}
 \description{
 Plots the surface matrices in a list of x3p objects. Either
 creates one plot faceted by surface matrix or creates individual plots per

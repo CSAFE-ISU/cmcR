@@ -40,6 +40,8 @@ breech face is simply shifted down by its mean value}
 "quantile" is set. In this case, tau = .5 and method = "fn" are recommended}
 }
 \value{
+an x3p object containing the leveled surface matrix.
+
 an x3p object containing the leveled cartridge case scan surface
 matrix.
 }

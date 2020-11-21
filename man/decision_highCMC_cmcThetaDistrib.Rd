@@ -16,8 +16,8 @@ decision_highCMC_cmcThetaDistrib(
 )
 }
 \arguments{
-\item{cellIndex}{vector/tibble column containing cell indices corresponding
-to a reference cell}
+\item{cellIndex}{vector/tibble column containing cell indices corresponding to
+a reference cell}
 
 \item{x}{vector/tibble column containing x horizontal translation values}
 
@@ -38,6 +38,11 @@ theta-specific median y value}
 
 \item{corrThresh}{to classify particular correlation values "congruent"
 (conditional on a particular theta value) if they are at least corrThresh}
+}
+\value{
+a vector of the same length as the input containing a "CMC Candidate"
+or "Non-CMC Candidate" classification based on whether the particular
+cellIndex has congruent x,y, and theta features.
 }
 \description{
 Compute CMC-theta distribution for a set of comparison features

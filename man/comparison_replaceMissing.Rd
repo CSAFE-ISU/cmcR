@@ -11,6 +11,10 @@ comparison_replaceMissing(heightValues, replacement = 0)
 
 \item{replacement}{value to replace NAs}
 }
+\value{
+A list of the same length as the input containing x3p objects for
+which NA values have been replaced.
+}
 \description{
 Replace missing values in a scan
 }

@@ -32,9 +32,8 @@ scan and the target scan.}
 target scan and the reference scan. If this is missing, then only the
 original method CMCs will be plotted}
 
-\item{corColName}{name of correlation similarity score column used to
-identify the CMCs in the two comparison_*_df data frames (e.g.,
-pairwiseCompCor)}
+\item{corColName}{name of correlation similarity score column used to identify
+the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)}
 
 \item{type}{argument to be passed to cmcR::x3pListPlot function}
 
@@ -54,6 +53,10 @@ that dictates the height value colorscale}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
+}
+\value{
+A list of 4 ggplot objects showing the CMCs identified under both
+decision rules and in both comparison directions.
 }
 \description{
 Constructs either a single faceted plot or a list of plots

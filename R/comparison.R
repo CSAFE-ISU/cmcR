@@ -264,20 +264,21 @@ comparison_calcPropMissing <- function(heightValues){
     purrr::map_dbl(~ sum(is.na(.$surface.matrix))/length(.$surface.matrix))
 }
 
-#' Extract regions from a target scan based on associated cells in reference
-#' scan
+#'Extract regions from a target scan based on associated cells in reference scan
 #'
-#' @name comparison_getTargetRegions
-#' @param cellHeightValues list/tibble column of x3p objects containing a
-#'   reference scan's cells (as returned by comparison_cellDivision)
-#' @param target x3p object containing a breech face scan to be compared to
-#'   the reference cell.
-#' @param theta degrees that the target scan is to be rotated prior
-#'   extracting regions.
-#' @param regionSizeMultiplier ratio between the area of each target scan
-#'   regions and the reference scan cells (e.g., 9 means that the regions'
-#'   surface matrices will have thrice the number of rows and columns as the
-#'   cells' surface matrices, 4 means twice the number rows and columns, etc.)
+#'@name comparison_getTargetRegions
+#'@param cellHeightValues list/tibble column of x3p objects containing a
+#'  reference scan's cells (as returned by comparison_cellDivision)
+#'@param target x3p object containing a breech face scan to be compared to the
+#'  reference cell.
+#'@param theta degrees that the target scan is to be rotated prior extracting
+#'  regions.
+#'@param regionSizeMultiplier ratio between the area of each target scan regions
+#'  and the reference scan cells (e.g., 9 means that the regions' surface
+#'  matrices will have thrice the number of rows and columns as the cells'
+#'  surface matrices, 4 means twice the number rows and columns, etc.)
+#'@return A list of the same length as the input containing x3p objects from the
+#'  target scan.
 #'@examples
 #'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
@@ -292,7 +293,7 @@ comparison_calcPropMissing <- function(heightValues){
 #'
 #'head(cellTibble)
 #'}
-#' @export
+#'@export
 
 comparison_getTargetRegions <- function(cellHeightValues,
                                         target,
@@ -337,20 +338,23 @@ comparison_getTargetRegions <- function(cellHeightValues,
   return(target_splitRotated)
 }
 
-#' Standardize height values of a scan by centering/scaling by desired
-#' statistics and replacing missing values
+#'Standardize height values of a scan by centering/scaling by desired statistics
+#'and replacing missing values
 #'
-#' @name comparison_standardizeHeights
+#'@name comparison_standardizeHeights
 #'
-#' @param heightValues list/tibble column of x3p objects
-#' @param withRespectTo currently ignored
-#' @param centerBy statistic by which to center (i.e., subtract from) the height
-#'   values
-#' @param scaleBy statistic by which to scale (i.e., divide) the height values
+#'@param heightValues list/tibble column of x3p objects
+#'@param withRespectTo currently ignored
+#'@param centerBy statistic by which to center (i.e., subtract from) the height
+#'  values
+#'@param scaleBy statistic by which to scale (i.e., divide) the height values
 #'
-#' @note this function adds information to the metainformation of the x3p scan
-#'   it is given that is required for calculating, for example, the
-#'   pairwise-complete correlation using the comparison_cor function.
+#'@return A list of the same length as the input containing x3p objects with
+#'  standardized surface matrices
+#'
+#'@note this function adds information to the metainformation of the x3p scan it
+#'  is given that is required for calculating, for example, the
+#'  pairwise-complete correlation using the comparison_cor function.
 #'@examples
 #'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
@@ -368,7 +372,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'head(cellTibble)
 #'}
 #'@importFrom stats sd
-#' @export
+#'@export
 
 comparison_standardizeHeights <- function(heightValues,
                                           withRespectTo = "individualCell",
@@ -392,11 +396,13 @@ comparison_standardizeHeights <- function(heightValues,
   return(heightValues)
 }
 
-#' Replace missing values in a scan
+#'Replace missing values in a scan
 #'
-#' @name comparison_replaceMissing
-#' @param heightValues list/tibble column of x3p objects
-#' @param replacement value to replace NAs
+#'@name comparison_replaceMissing
+#'@param heightValues list/tibble column of x3p objects
+#'@param replacement value to replace NAs
+#'@return A list of the same length as the input containing x3p objects for
+#'  which NA values have been replaced.
 #'@examples
 #'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
@@ -422,7 +428,7 @@ comparison_standardizeHeights <- function(heightValues,
 #'
 #'head(cellTibble)
 #'}
-#' @export
+#'@export
 
 comparison_replaceMissing <- function(heightValues,
                                       replacement = 0){
@@ -444,6 +450,9 @@ comparison_replaceMissing <- function(heightValues,
 #'  reference scan's cells (as returned by comparison_cellDivision)
 #'@param regionHeightValues list/tibble column of x3p objects containing a
 #'  target scan's regions (as returned by comparison_getTargetRegions)
+#'@return A list of the same length as the input containing data frames of the
+#'  translation (x,y) values at which each reference cell is estimated to align
+#'  in its associated target region and the CCF value at this alignment.
 #'@note The FFT is not defined for matrices containing missing values. The
 #'  missing values in the cell and region need to be replaced before using this
 #'  function. See the \link[cmcR]{comparison_replaceMissing} function to replace
@@ -508,6 +517,9 @@ comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
 #'@param fft_ccf_df data frame/tibble column containing the data frame of (x,y)
 #'  and CCF values returned by comparison_fft_ccf
 #'@param use argument for stats::cor
+#'@return A vector of the same length as the input containing correlation values
+#'  at the estimated alignment between each reference cell and its associated
+#'  target region
 #'@examples
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'

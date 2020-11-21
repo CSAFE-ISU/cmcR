@@ -2,8 +2,8 @@
 % Please edit documentation in R/comparison.R
 \name{comparison_standardizeHeights}
 \alias{comparison_standardizeHeights}
-\title{Standardize height values of a scan by centering/scaling by desired
-statistics and replacing missing values}
+\title{Standardize height values of a scan by centering/scaling by desired statistics
+and replacing missing values}
 \usage{
 comparison_standardizeHeights(
   heightValues,
@@ -22,13 +22,17 @@ values}
 
 \item{scaleBy}{statistic by which to scale (i.e., divide) the height values}
 }
+\value{
+A list of the same length as the input containing x3p objects with
+standardized surface matrices
+}
 \description{
-Standardize height values of a scan by centering/scaling by desired
-statistics and replacing missing values
+Standardize height values of a scan by centering/scaling by desired statistics
+and replacing missing values
 }
 \note{
-this function adds information to the metainformation of the x3p scan
-it is given that is required for calculating, for example, the
+this function adds information to the metainformation of the x3p scan it
+is given that is required for calculating, for example, the
 pairwise-complete correlation using the comparison_cor function.
 }
 \examples{

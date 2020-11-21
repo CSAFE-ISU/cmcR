@@ -15,6 +15,10 @@ reference scan's cells (as returned by comparison_cellDivision)}
 target scan's regions (as returned by comparison_getTargetRegions)}
 }
 \value{
+A list of the same length as the input containing data frames of the
+translation (x,y) values at which each reference cell is estimated to align
+in its associated target region and the CCF value at this alignment.
+
 a data frame containing the translation (x,y) at which the CCF was
 maximized in aligning a target scan region to its associated reference scan
 cell.

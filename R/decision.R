@@ -58,28 +58,30 @@ decision_originalMethod_classifyCMCs <- function(cellIndex,
   return(originalMethodClassif)
 }
 
-#' Compute CMC-theta distribution for a set of comparison features
+#'Compute CMC-theta distribution for a set of comparison features
 #'
-#' @name decision_highCMC_cmcThetaDistrib
-#' @param cellIndex vector/tibble column containing cell indices corresponding
-#'   to a reference cell
-#' @param x vector/tibble column containing x horizontal translation values
-#' @param y vector/tibble column containing y vertical translation values
-#' @param theta vector/tibble column containing theta rotation values
-#' @param corr vector/tibble column containing correlation similarity scores
-#'   between a reference cell and its associated target region
-#' @param xThresh used to classify particular x values "congruent" (conditional
-#'   on a particular theta value) if they are within xThresh of the
-#'   theta-specific median x value
-#' @param yThresh used to classify particular y values "congruent" (conditional
-#'   on a particular theta value) if they are within yThresh of the
-#'   theta-specific median y value
-#' @param corrThresh to classify particular correlation values "congruent"
-#'   (conditional on a particular theta value) if they are at least corrThresh
-#'
-#' @note This function is a helper internally called in the decision_CMC
-#'   function. It is exported to be used as a diagnostic tool for the High CMC
-#'   method
+#'@name decision_highCMC_cmcThetaDistrib
+#'@param cellIndex vector/tibble column containing cell indices corresponding to
+#'  a reference cell
+#'@param x vector/tibble column containing x horizontal translation values
+#'@param y vector/tibble column containing y vertical translation values
+#'@param theta vector/tibble column containing theta rotation values
+#'@param corr vector/tibble column containing correlation similarity scores
+#'  between a reference cell and its associated target region
+#'@param xThresh used to classify particular x values "congruent" (conditional
+#'  on a particular theta value) if they are within xThresh of the
+#'  theta-specific median x value
+#'@param yThresh used to classify particular y values "congruent" (conditional
+#'  on a particular theta value) if they are within yThresh of the
+#'  theta-specific median y value
+#'@param corrThresh to classify particular correlation values "congruent"
+#'  (conditional on a particular theta value) if they are at least corrThresh
+#'@return a vector of the same length as the input containing a "CMC Candidate"
+#'  or "Non-CMC Candidate" classification based on whether the particular
+#'  cellIndex has congruent x,y, and theta features.
+#'@note This function is a helper internally called in the decision_CMC
+#'  function. It is exported to be used as a diagnostic tool for the High CMC
+#'  method
 #'
 #'@examples
 #'\dontrun{
@@ -102,8 +104,8 @@ decision_originalMethod_classifyCMCs <- function(cellIndex,
 #' ggplot2::ggplot(ggplot2::aes(x = theta)) +
 #' ggplot2::geom_bar(stat = "count")
 #' }
-#' @importFrom rlang .data
-#' @export
+#'@importFrom rlang .data
+#'@export
 
 decision_highCMC_cmcThetaDistrib <- function(cellIndex,
                                              x,
@@ -137,21 +139,22 @@ decision_highCMC_cmcThetaDistrib <- function(cellIndex,
   return(cmcThetaDistribClassif)
 }
 
-#' Classify theta values in CMC-theta distribution as having "High" or "Low" CMC
-#' candidate counts
+#'Classify theta values in CMC-theta distribution as having "High" or "Low" CMC
+#'candidate counts
 #'
-#' @name decision_highCMC_identifyHighCMCThetas
+#'@name decision_highCMC_identifyHighCMCThetas
 #'
-#' @param cmcThetaDistrib output of the decision_highCMC_cmcThetaDistrib
-#'   function
-#' @param tau constant used to define a "high" CMC count. This number is
-#'   subtracted from the maximum CMC count achieved in the CMC-theta
-#'   distribution. Theta values with CMC counts above this value are considered
-#'   to have "high" CMC counts.
-#'
-#' @note This function is a helper internally called in the decision_CMC
-#'   function. It is exported to be used as a diagnostic tool for the High CMC
-#'   method
+#'@param cmcThetaDistrib output of the decision_highCMC_cmcThetaDistrib function
+#'@param tau constant used to define a "high" CMC count. This number is
+#'  subtracted from the maximum CMC count achieved in the CMC-theta
+#'  distribution. Theta values with CMC counts above this value are considered
+#'  to have "high" CMC counts.
+#'@return A vector of the same length as the input containing "High" or "Low"
+#'  classification based on whether the associated theta value has a High CMC
+#'  Candidate count.
+#'@note This function is a helper internally called in the decision_CMC
+#'  function. It is exported to be used as a diagnostic tool for the High CMC
+#'  method
 #'@examples
 #'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
@@ -175,8 +178,8 @@ decision_highCMC_cmcThetaDistrib <- function(cellIndex,
 #' ggplot2::ggplot(ggplot2::aes(x = theta,fill = thetaCMCIdentif)) +
 #' ggplot2::geom_bar(stat = "count")
 #' }
-#' @importFrom rlang .data
-#' @export
+#'@importFrom rlang .data
+#'@export
 
 decision_highCMC_identifyHighCMCThetas <- function(cmcThetaDistrib,
                                                    tau = 1){
@@ -323,6 +326,8 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 #'  count achieved in the CMC-theta distribution. Theta values with CMC counts
 #'  above this value are considered to have "high" CMC counts.
 #'
+#'@return A vector of the same length as the input containing the CMC
+#'  classification under one of the two decision rules.
 #'@seealso \url{https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193}
 #'@seealso
 #'\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf}

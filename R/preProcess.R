@@ -80,7 +80,7 @@ preProcess_levelBF <- function(ransacFit,
 #' @param returnResiduals dictates whether the difference between the estimated
 #'   breech face and fitted plane are returned (residuals) or if the estimates
 #'   breech face is simply shifted down by its mean value
-#'
+#'@return an x3p object containing the leveled surface matrix.
 #' @note The preProcess_ransacLevel function will throw an error if the final
 #'   plane estimate is rank-deficient (which is relatively unlikely, but
 #'   theoretically possible). Re-run the function (possibly setting a different
@@ -327,29 +327,30 @@ preProcess_detectFPCircle <- function(surfaceMat,
   return(houghCircleLoc)
 }
 
-#' Given a surface matrix, estimates and filters any pixels within the estimated
-#' firing pin impression circle
+#'Given a surface matrix, estimates and filters any pixels within the estimated
+#'firing pin impression circle
 #'
-#' @name preProcess_removeFPCircle
+#'@name preProcess_removeFPCircle
 #'
-#' @param x3p an x3p object containing a surface matrix
-#' @param smootherSize size of average smoother (to be passed to zoo::roll_mean)
-#' @param aggregationFunction function to select initial radius estimate from
-#'   those calculated using fpRadiusGridSearch
-#' @param gridSize size of grid, centered on the initial radius estimate, to be
-#'   used to determine the best fitting circle to the surface matrix via the
-#'   Hough transform method
-#' @param gridGranularity granularity of radius grid used to determine the best
-#'   fitting circle to the surface matrix via the Hough transform method
-#' @param houghScoreQuant quantile cut-off to be used when determining a final
-#'   radius estimate using the score values returned by the imager::hough_circle
+#'@param x3p an x3p object containing a surface matrix
+#'@param smootherSize size of average smoother (to be passed to zoo::roll_mean)
+#'@param aggregationFunction function to select initial radius estimate from
+#'  those calculated using fpRadiusGridSearch
+#'@param gridSize size of grid, centered on the initial radius estimate, to be
+#'  used to determine the best fitting circle to the surface matrix via the
+#'  Hough transform method
+#'@param gridGranularity granularity of radius grid used to determine the best
+#'  fitting circle to the surface matrix via the Hough transform method
+#'@param houghScoreQuant quantile cut-off to be used when determining a final
+#'  radius estimate using the score values returned by the imager::hough_circle
 #'
-#' @note imager treats a matrix as its transpose (i.e., x and y axes are
-#'   swapped). As such, relative to the original surface matrix, the x and y
-#'   columns in the data frame fpImpressionCircle actually correspond to the row
-#'   and column indices at which the center of the firing pin impression circle
-#'   is estiamted to be.
-#'
+#'@note imager treats a matrix as its transpose (i.e., x and y axes are
+#'  swapped). As such, relative to the original surface matrix, the x and y
+#'  columns in the data frame fpImpressionCircle actually correspond to the row
+#'  and column indices at which the center of the firing pin impression circle
+#'  is estiamted to be.
+#'@return An x3p object containing a surface matrix with the estimated firing
+#'  pin circle pixels replaced with NAs.
 #' @examples
 #' \dontrun{
 #' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
@@ -364,9 +365,9 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'                                   gridGranularity = 1,
 #'                                   houghScoreQuant = .9)
 #' }
-#' @rdname removeFiringPin
-#' @importFrom rlang .data
-#' @export
+#'@rdname removeFiringPin
+#'@importFrom rlang .data
+#'@export
 
 preProcess_removeFPCircle <- function(x3p,
                                       aggregationFunction = mean,
@@ -409,7 +410,7 @@ preProcess_removeFPCircle <- function(x3p,
 #'   means that wavelength should be a vector of two numbers. In this case, the
 #'   max of these two number will be used for the high pass filter and the min
 #'   for the low pass filter.
-#'
+#'@return An x3p object containing the Gaussian-filtered surface matrix.
 #' @examples
 #' \dontrun{
 #' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%

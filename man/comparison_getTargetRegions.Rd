@@ -2,8 +2,7 @@
 % Please edit documentation in R/comparison.R
 \name{comparison_getTargetRegions}
 \alias{comparison_getTargetRegions}
-\title{Extract regions from a target scan based on associated cells in reference
-scan}
+\title{Extract regions from a target scan based on associated cells in reference scan}
 \usage{
 comparison_getTargetRegions(
   cellHeightValues,
@@ -16,20 +15,23 @@ comparison_getTargetRegions(
 \item{cellHeightValues}{list/tibble column of x3p objects containing a
 reference scan's cells (as returned by comparison_cellDivision)}
 
-\item{target}{x3p object containing a breech face scan to be compared to
-the reference cell.}
+\item{target}{x3p object containing a breech face scan to be compared to the
+reference cell.}
 
-\item{theta}{degrees that the target scan is to be rotated prior
-extracting regions.}
+\item{theta}{degrees that the target scan is to be rotated prior extracting
+regions.}
 
-\item{regionSizeMultiplier}{ratio between the area of each target scan
-regions and the reference scan cells (e.g., 9 means that the regions'
-surface matrices will have thrice the number of rows and columns as the
-cells' surface matrices, 4 means twice the number rows and columns, etc.)}
+\item{regionSizeMultiplier}{ratio between the area of each target scan regions
+and the reference scan cells (e.g., 9 means that the regions' surface
+matrices will have thrice the number of rows and columns as the cells'
+surface matrices, 4 means twice the number rows and columns, etc.)}
+}
+\value{
+A list of the same length as the input containing x3p objects from the
+target scan.
 }
 \description{
-Extract regions from a target scan based on associated cells in reference
-scan
+Extract regions from a target scan based on associated cells in reference scan
 }
 \examples{
 \dontrun{
