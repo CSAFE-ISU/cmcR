@@ -158,6 +158,58 @@ combinedCMCs_failedOriginal <- cmcR::decision_combineDirections(cellTibble_faile
                                                                 cellTibble_rev,
                                                                 compareThetas = FALSE)
 
+#There's built-in logic to compare the estimated theta values internally to make
+#sure that they approximately opposites of each other. We want to make sure that
+#the contingencies catch when the High CMC criterion fails.
+combinedCMCs_equalThetas <- cmcR::decision_combineDirections(cellTibble,cellTibble)
+
+cellTibble_fakeTheta <- cellTibble %>%
+  dplyr::mutate(theta = 12)
+
+combinedCMCs_fakeTheta <- cmcR::decision_combineDirections(cellTibble,cellTibble_fakeTheta)
+
+#The missingThetaDecision = "dismiss" option is more lenient than the "fail"
+#default. As such, we would expect the number of CMCs returned to be larger than
+#using "fail."
+cellTibble_stricterThresh <- cmcR::comparison_allTogether(x3p2,x3p1,
+                                                          theta = 24,
+                                                          numCells = 64,
+                                                          maxMissingProp = .85) %>%
+  dplyr::mutate(originalMethodClassif = cmcR::decision_CMC(cellIndex = cellIndex,
+                                                           x = x,
+                                                           y = y,
+                                                           theta = theta,
+                                                           corr = pairwiseCompCor,
+                                                           xThresh = 20,
+                                                           corrThresh = .5,
+                                                           thetaThresh = 6),
+                highCMCClassif = cmcR::decision_CMC(cellIndex = cellIndex,
+                                                    x = x,
+                                                    y = y,
+                                                    theta = theta,
+                                                    corr = pairwiseCompCor,
+                                                    xThresh = 20,
+                                                    corrThresh = .9,
+                                                    thetaThresh = 6,
+                                                    tau = 1))
+
+combinedCMCs_stricterThresh <- cmcR::decision_combineDirections(cellTibble,
+                                                                cellTibble_stricterThresh,
+                                                                missingThetaDecision = "dismiss")
+
+#We want to check if there's a tie between multiple, consecutive theta values
+cellTibble_tiedThetas <- cellTibble %>%
+  dplyr::bind_rows(cellTibble %>%
+                     dplyr::mutate(theta = -27),
+                   cellTibble %>%
+                     dplyr::mutate(theta = -21))
+
+combinedCMCs_tiedThetas <- cmcR::decision_combineDirections(cellTibble_tiedThetas,
+                                 cellTibble_failed,
+                                 missingThetaDecision = "dismiss")
+
+cellTibble_tiedThetas %>%
+  dplyr::filter(highCMCClassif == "CMC")
 
 testthat::test_that("decision_ functions work as expected", {
   #cmc counts should be equal for this limited example considering only 1 theta
@@ -182,4 +234,21 @@ testthat::test_that("decision_ functions work as expected", {
   #raising the reference_v_target direction correlation
   testthat::expect_true(identical(combinedCMCs$originalMethodCMCs[[2]],
                                   combinedCMCs_failed$originalMethodCMCs[[2]]))
+
+  #When the estimated theta value in one direction is too far from the estimated
+  #theta value in the other direction (in absolute value), we expect the High
+  #CMC criteria to fail
+  testthat::expect_true(identical(combinedCMCs$originalMethodCMCs[[1]],
+                                  combinedCMCs_equalThetas$highCMCs))
+
+  testthat::expect_true(identical(combinedCMCs$originalMethodCMCs[[1]],
+                                  combinedCMCs_fakeTheta$highCMCs))
+
+  #make sure that using "dismiss" over "fail" for a comparison that in which one
+  #direction fails the High CMC criteria  results in more CMCs
+  testthat::expect_true(identical(combinedCMCs$highCMCs,
+                                  combinedCMCs_stricterThresh$highCMCs))
+
+  testthat::expect_true(identical(dplyr::select(dplyr::filter(cellTibble_tiedThetas,highCMCClassif == "CMC"),c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta)),
+                                  dplyr::select(combinedCMCs_tiedThetas$highCMCs,c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta))))
 })

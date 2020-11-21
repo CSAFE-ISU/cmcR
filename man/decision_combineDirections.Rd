@@ -26,10 +26,9 @@ the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)}
 
 \item{missingThetaDecision}{dictates how function should handle situations in
 which one direction passes the high CMC criterion while another direction
-does not. "replace": replaces theta value in failed direction with opposite
-of theta value in successful direction. "dismiss": only counts the initial
-CMCs in failed direction and high CMCs in successful direction. "fail": only
-counts the initial CMCs in either direction.}
+does not. "dismiss": only counts the initial CMCs in failed direction and
+high CMCs in successful direction. "fail": only counts the initial CMCs in
+either direction and returns the minimum of these two numbers.}
 
 \item{compareThetas}{dictates if the consensus theta values determined under
 the initially proposed method should be compared to the consensus theta

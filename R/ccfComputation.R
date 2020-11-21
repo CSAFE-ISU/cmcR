@@ -310,23 +310,31 @@ calcRawCorr <- function(cell,
       regionCroppedList$rowPost <- regionCroppedRowPost
     }
 
+    #(Note for future: I commented-out these < if conditional statements because
+    #I wasn't able to replicate a situation in which the regionCroppedInitial
+    #rows/cols were/ less than those of the cells after the series of padding if
+    #statements above). I'm not sure if the padding completely removes the need
+    #to check the < conditions for all possible comparisons in perpetuity, so
+    #I'm leaving the code here. However, it drags down the codecov "score" if
+    #there isn't a test that hits it.
+
     #two copies if rows are off
-    if(nrow(regionCroppedInitial) < nrow(cell) & ncol(regionCroppedInitial) == ncol(cell)){
-      rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      regionCroppedRowPre <- rbind(matrix(NA,
-                                          nrow = rowsToPad,
-                                          ncol = ncol(regionCroppedInitial)),
-                                   regionCroppedInitial)
-
-      regionCroppedRowPost <- rbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedInitial)))
-
-      regionCroppedList$rowPre <- regionCroppedRowPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-    }
+    # if(nrow(regionCroppedInitial) < nrow(cell) & ncol(regionCroppedInitial) == ncol(cell)){
+    #   rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
+    #
+    #   regionCroppedRowPre <- rbind(matrix(NA,
+    #                                       nrow = rowsToPad,
+    #                                       ncol = ncol(regionCroppedInitial)),
+    #                                regionCroppedInitial)
+    #
+    #   regionCroppedRowPost <- rbind(regionCroppedInitial,
+    #                                 matrix(NA,
+    #                                        nrow = rowsToPad,
+    #                                        ncol = ncol(regionCroppedInitial)))
+    #
+    #   regionCroppedList$rowPre <- regionCroppedRowPre
+    #   regionCroppedList$rowPost <- regionCroppedRowPost
+    # }
 
     #2 copies if cols are off
     if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
@@ -340,22 +348,22 @@ calcRawCorr <- function(cell,
     }
 
     #2 copies if cols are off
-    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
-      colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      regionCroppedColPre <- cbind(matrix(NA,
-                                          nrow = nrow(regionCroppedInitial),
-                                          ncol = colsToPad),
-                                   regionCroppedInitial)
-
-      regionCroppedColPost <- cbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad))
-
-      regionCroppedList$colPre <- regionCroppedColPre
-      regionCroppedList$colPost <- regionCroppedColPost
-    }
+    # if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) == nrow(cell)){
+    #   colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
+    #
+    #   regionCroppedColPre <- cbind(matrix(NA,
+    #                                       nrow = nrow(regionCroppedInitial),
+    #                                       ncol = colsToPad),
+    #                                regionCroppedInitial)
+    #
+    #   regionCroppedColPost <- cbind(regionCroppedInitial,
+    #                                 matrix(NA,
+    #                                        nrow = nrow(regionCroppedInitial),
+    #                                        ncol = colsToPad))
+    #
+    #   regionCroppedList$colPre <- regionCroppedColPre
+    #   regionCroppedList$colPost <- regionCroppedColPost
+    # }
 
     #4 different copies if both dimensions are too large
     if(ncol(regionCroppedInitial) > ncol(cell) & nrow(regionCroppedInitial) > nrow(cell)){
@@ -382,56 +390,56 @@ calcRawCorr <- function(cell,
     }
 
     #4 different copies if both dimensions are too small
-    if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) < nrow(cell)){
-      colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
-
-      rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
-
-      #both rows and cols pre-padded
-      regionCroppedBothPre <- cbind(matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad),
-                                    regionCroppedInitial)
-      regionCroppedBothPre <- rbind(matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedBothPre)),
-                                    regionCroppedBothPre)
-
-      #rows post-padded and cols pre-padded
-      regionCroppedRowPost <- cbind(matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad),
-                                    regionCroppedInitial)
-      regionCroppedRowPost <- rbind(regionCroppedRowPost,
-                                    matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedRowPost)))
-
-      #rows pre-padded and cols post-padded
-      regionCroppedColPost <- cbind(regionCroppedInitial,
-                                    matrix(NA,
-                                           nrow = nrow(regionCroppedInitial),
-                                           ncol = colsToPad))
-      regionCroppedColPost <- rbind(matrix(NA,
-                                           nrow = rowsToPad,
-                                           ncol = ncol(regionCroppedColPost)),
-                                    regionCroppedColPost)
-
-      #rows and cols both post-padded
-      regionCroppedBothPost <- cbind(regionCroppedInitial,
-                                     matrix(NA,
-                                            nrow = nrow(regionCroppedInitial),
-                                            ncol = colsToPad))
-      regionCroppedBothPost <- rbind(regionCroppedBothPost,
-                                     matrix(NA,
-                                            nrow = rowsToPad,
-                                            ncol = ncol(regionCroppedBothPost)))
-
-      regionCroppedList$bothPre <- regionCroppedBothPre
-      regionCroppedList$rowPost <- regionCroppedRowPost
-      regionCroppedList$colPost <- regionCroppedColPost
-      regionCroppedList$bothPost <- regionCroppedBothPost
-    }
+  #   if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) < nrow(cell)){
+  #     colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
+  #
+  #     rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
+  #
+  #     #both rows and cols pre-padded
+  #     regionCroppedBothPre <- cbind(matrix(NA,
+  #                                          nrow = nrow(regionCroppedInitial),
+  #                                          ncol = colsToPad),
+  #                                   regionCroppedInitial)
+  #     regionCroppedBothPre <- rbind(matrix(NA,
+  #                                          nrow = rowsToPad,
+  #                                          ncol = ncol(regionCroppedBothPre)),
+  #                                   regionCroppedBothPre)
+  #
+  #     #rows post-padded and cols pre-padded
+  #     regionCroppedRowPost <- cbind(matrix(NA,
+  #                                          nrow = nrow(regionCroppedInitial),
+  #                                          ncol = colsToPad),
+  #                                   regionCroppedInitial)
+  #     regionCroppedRowPost <- rbind(regionCroppedRowPost,
+  #                                   matrix(NA,
+  #                                          nrow = rowsToPad,
+  #                                          ncol = ncol(regionCroppedRowPost)))
+  #
+  #     #rows pre-padded and cols post-padded
+  #     regionCroppedColPost <- cbind(regionCroppedInitial,
+  #                                   matrix(NA,
+  #                                          nrow = nrow(regionCroppedInitial),
+  #                                          ncol = colsToPad))
+  #     regionCroppedColPost <- rbind(matrix(NA,
+  #                                          nrow = rowsToPad,
+  #                                          ncol = ncol(regionCroppedColPost)),
+  #                                   regionCroppedColPost)
+  #
+  #     #rows and cols both post-padded
+  #     regionCroppedBothPost <- cbind(regionCroppedInitial,
+  #                                    matrix(NA,
+  #                                           nrow = nrow(regionCroppedInitial),
+  #                                           ncol = colsToPad))
+  #     regionCroppedBothPost <- rbind(regionCroppedBothPost,
+  #                                    matrix(NA,
+  #                                           nrow = rowsToPad,
+  #                                           ncol = ncol(regionCroppedBothPost)))
+  #
+  #     regionCroppedList$bothPre <- regionCroppedBothPre
+  #     regionCroppedList$rowPost <- regionCroppedRowPost
+  #     regionCroppedList$colPost <- regionCroppedColPost
+  #     regionCroppedList$bothPost <- regionCroppedBothPost
+  #   }
   }
 
   #return NA if cor fails.

@@ -603,11 +603,11 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
                                return()
                            }
                          }) %>%
-    purrr::set_names(c("comparison_reference_v_target","comparison_target_v_reference"))
+    purrr::set_names(c("reference_v_target","target_v_reference"))
 
-  if(purrr::is_empty(thetaMax$comparison_reference_v_target) & purrr::is_empty(thetaMax$comparison_target_v_reference)){
-    thetaMax$comparison_target_v_reference <- NA
-    thetaMax$comparison_reference_v_target <- NA
+  if(purrr::is_empty(thetaMax$reference_v_target) & purrr::is_empty(thetaMax$target_v_reference)){
+    thetaMax$target_v_reference <- NA
+    thetaMax$reference_v_target <- NA
   }
 
   #if neither direction passed the high CMC criterion...
@@ -619,149 +619,157 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
   #if one direction didn't pass the high CMC criterion...
   if(any(is.na(thetaMax))){
 
-    #Most "liberal" decision is to replace the missing theta value with the
-    #opposite of the other theta value
+    #Note: getting the missingThetaDecision = "replace" option working would
+    #require re-calculating the CMCs after replacing the missing theta value.
+    #However, this would also require specifying the thresholds used to
+    #determine the CMCs all over again, which is not required for this function
+    #(nor do I think it should be). Perhaps we could use the ellipsis ... to
+    #allow the user to input the thresholds if they set missingThetaDecision =
+    #"replace", but for now we'll keep it commented-out
+
+    # Most "liberal" decision is to replace the missing theta value with the
+    # opposite of the other theta value
     # if(missingThetaDecision == "replace"){
     #   thetaMax[[which(is.na(thetaMax))]] <- -1*thetaMax[[which(!is.na(thetaMax))]]
     # }
 
-    #More "moderate" decision is to dismiss the missing direction and only take
-    #the initial CMCs defined for that direction
+    # More "moderate" decision is to dismiss the missing direction and only take
+    # the initial CMCs defined for that direction
     # else if(missingThetaDecision == "dismiss"){
-    #   #the direction that didn't pass gets assigned initial CMCs:
-    #   highCMCs1 <- originalMethodCMCs[[which(is.na(thetaMax))]] %>%
-    #     dplyr::ungroup() %>%
-    #     dplyr::mutate(direction = rep(names(cmcPerTheta)[which(is.na(thetaMax))],times = nrow(.)))
-    #
-    #   #the direction that passed the high CMC criterion gets all of its high
-    #   #CMCs
-    #   highCMCs2 <- purrr::pmap(.l = list(cmcPerTheta[which(!is.na(thetaMax))],
-    #                                      names(cmcPerTheta)[which(!is.na(thetaMax))],
-    #                                      thetaMax[which(!is.na(thetaMax))]),
-    #                            function(cmcs,compName,th){
-    #                              purrr::map_dfr(th,~ dplyr::filter(cmcs,theta >= . - thetaThresh & theta <= . + thetaThresh)) %>%
-    #                                dplyr::mutate(direction = rep(compName,times = nrow(.)))
-    #                            })
-    #
-    #   highCMCs <- highCMCs2 %>%
-    #     dplyr::bind_rows() %>%
-    #     dplyr::bind_rows(highCMCs1) %>%
-    #     dplyr::distinct() %>%
-    #     dplyr::group_by(cellIndex) %>% #we don't want a cell being double-counted between the two comparisons
-    #     dplyr::filter(ccf == max(ccf, na.rm = TRUE)) %>%
-    #     dplyr::ungroup()
-    #
-    #   #we want to make sure that the modal theta value in one direction is the
-    #   #opposite (or close to the opposite) of the modal theta value in the other
-    #   #direction
-    #   thetaMax_dismissed <- highCMCs %>%
-    #     dplyr::group_by(comparison,theta) %>%
-    #     dplyr::tally() %>%
-    #     dplyr::filter(n == max(n))
-    #
-    #   #it's theoretically possible, albeit improbable, that one direction will
-    #   #pass the high CMC criterion while the other direction fails *and*
-    #   #produces 0 initial CMCs. In this case, we would only take the high CMCs
-    #   #in the one direction. Not including this if statement first would throw
-    #   #an error in the next if statement
-    #   if(nrow(thetaMax_dismissed) == 1){
-    #     return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                 "highCMCs" = highCMCs))
-    #   }
-    #
-    #   #another possibility is that more than one theta in one direction ties for
-    #   #the CMC max count -- we can again determine whether these theta values
-    #   #are "close" to each other (if not, then fail the criterion) and otherwise
-    #   #take their median. Note that if there are three
-    #   else if(nrow(thetaMax_dismissed) > 2){
-    #
-    #     thetaMax_comparison_reference_v_target_diff <- thetaMax_dismissed %>%
-    #       dplyr::filter(direction =="reference_v_target") %>%
-    #       dplyr::arrange(theta) %>%
-    #       dplyr::pull(theta) %>%
-    #       diff()
-    #
-    #     thetaMax_comparison_target_v_reference_diff <- thetaMax_dismissed %>%
-    #       dplyr::filter(direction =="target_v_reference") %>%
-    #       dplyr::arrange(theta) %>%
-    #       dplyr::pull(theta) %>%
-    #       diff()
-    #
-    #     comparison_reference_v_target_failure <- any(thetaMax_comparison_reference_v_target_diff > thetaThresh)
-    #
-    #     comparison_target_v_reference_failure <- any(thetaMax_comparison_target_v_reference_diff > thetaThresh)
-    #
-    #     #in the event of a failure, don't assign any high CMCs
-    #
-    #     if(comparison_reference_v_target_failure | comparison_target_v_reference_failure){
-    #       return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                   "highCMCs" = highCMC_initial))
-    #     }
-    #     #otherwise, take the median of the theta values within their respective
-    #     #directions
-    #     else{
-    #       thetaMax_dismissed <- thetaMax_dismissed %>%
-    #         dplyr::group_by(comparison) %>%
-    #         dplyr::summarise(theta = median(theta))
-    #     }
-    #   }
-    #   #if thetaMax_dismissed has length 2, then we want to make sure that these
-    #   #are actually opposites or close to opposites of each other. If not, then
-    #   #we won't assign any high CMCs to the comparison
-    #   thetaMax_dismissed <- thetaMax_dismissed %>%
-    #     dplyr::ungroup() %>%
-    #     dplyr::arrange(comparison) #%>%
-    #   # dplyr::pull(theta)
-    #
-    #   if(nrow(thetaMax_dismissed) == 1){
-    #
-    #     if(compareThetas){
-    #
-    #       intitialCMCs_nonMissingDirection <- originalMethodCMCs[[which(names(originalMethodCMCs) == thetaMax_dismissed$comparison)]]
-    #
-    #       thetaCompareBool_dismissed <- abs(thetaMax_dismissed$theta - median(intitialCMCs_nonMissingDirection$theta,na.rm = TRUE)) > thetaThresh
-    #
-    #       if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
-    #         return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                     "highCMCs" = highCMC_initial))
-    #
-    #       }
-    #       else{
-    #         return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                     "highCMCs" = highCMCs))
-    #       }
-    #     }
-    #     else{
-    #       return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                   "highCMCs" = highCMCs))
-    #     }
-    #   }
-    #
-    #   if(compareThetas){
-    #     thetaCompareBool_dismissed <- (((abs((thetaMax_dismissed[1,"theta"] - median(originalCMCs_reference_v_target$theta,na.rm = TRUE)))) > thetaThresh) |
-    #                                      (abs((thetaMax_dismissed[2,"theta"] - median(originalCMCs_target_v_reference$theta,na.rm = TRUE))) > thetaThresh))
-    #
-    #     if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
-    #       return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                   "highCMCs" = highCMC_initial))
-    #     }
-    #   }
-    #
-    #   sign(thetaMax$comparison_reference_v_target) == sign(thetaMax$comparison_target_v_reference) & abs(thetaMax$comparison_reference_v_target - -1*thetaMax$comparison_target_v_reference) > thetaThresh
-    #
-    #   if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
-    #      (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > thetaThresh)){
-    #     return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                 "highCMCs" = highCMC_initial))
-    #   }
-    #   # if we've made it this far, then the theta values should be at least to
-    #   # within thetaThresh of being opposites of each other, so we can return
-    #   # the highCMCs without worrying about a disagreement
-    #   else{
-    #     return(list("originalMethodCMCs" = originalMethodCMCs,
-    #                 "highCMCs" = highCMCs))
-    #   }
-    # }
+    if(missingThetaDecision == "dismiss"){
+      #the direction that didn't pass gets assigned initial CMCs:
+      highCMCs_failing <- originalMethodCMCs[[which(is.na(thetaMax))]] %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(direction = names(thetaMax)[which(is.na(thetaMax))]) %>%
+        dplyr::mutate(originalMethodClassif = "CMC",
+                      highCMCClassif = "CMC")
+
+      #the direction that passed the high CMC criterion gets all of its high
+      #CMCs
+      highCMCs_passing <- cmcPerTheta[[which(!is.na(thetaMax))]] %>%
+        dplyr::filter(.data$theta >= thetaMax[[which(!is.na(thetaMax))]] - thetaThresh & .data$theta <= thetaMax[[which(!is.na(thetaMax))]] + thetaThresh & .data$highCMCClassif == "CMC") %>%
+        dplyr::mutate(direction = names(thetaMax)[[which(!is.na(thetaMax))]])
+
+      highCMCs <- highCMCs_passing %>%
+        dplyr::bind_rows() %>%
+        dplyr::bind_rows(highCMCs_failing) %>%
+        dplyr::distinct() %>%
+        dplyr::group_by(.data$cellIndex) %>% #we don't want a cell being double-counted between the two comparisons
+        dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName)))) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(-c(.data$originalMethodClassif,.data$highCMCClassif))
+
+      #we want to make sure that the modal theta value in one direction is the
+      #opposite (or close to the opposite) of the modal theta value in the other
+      #direction
+      thetaMax_dismissed <- highCMCs %>%
+        dplyr::group_by(.data$direction,.data$theta) %>%
+        dplyr::tally() %>%
+        dplyr::filter(.data$n == max(.data$n))
+
+      #it's theoretically possible, albeit improbable, that one direction will
+      #pass the high CMC criterion while the other direction fails *and*
+      #produces 0 initial CMCs. In this case, we would only take the high CMCs
+      #in the one direction. Not including this if statement first would throw
+      #an error in the next if statement
+      if(nrow(thetaMax_dismissed) == 1){
+        return(list("originalMethodCMCs" = originalMethodCMCs,
+                    "highCMCs" = highCMCs))
+      }
+
+      #another possibility is that more than one theta in one direction ties for
+      #the CMC max count -- we can again determine whether these theta values
+      #are "close" to each other (if not, then fail the criterion) and otherwise
+      #take their median. Note that if there are three
+      else if(nrow(thetaMax_dismissed) > 2){
+
+        thetaMax_reference_v_target_diff <- thetaMax_dismissed %>%
+          dplyr::filter(.data$direction =="reference_v_target") %>%
+          dplyr::arrange(.data$theta) %>%
+          dplyr::pull(.data$theta) %>%
+          diff()
+
+        thetaMax_target_v_reference_diff <- thetaMax_dismissed %>%
+          dplyr::filter(.data$direction =="target_v_reference") %>%
+          dplyr::arrange(.data$theta) %>%
+          dplyr::pull(.data$theta) %>%
+          diff()
+
+        reference_v_target_failure <- any(thetaMax_reference_v_target_diff > thetaThresh)
+
+        target_v_reference_failure <- any(thetaMax_target_v_reference_diff > thetaThresh)
+
+        #in the event of a failure, don't assign any high CMCs
+
+        if(reference_v_target_failure | target_v_reference_failure){
+          return(list("originalMethodCMCs" = originalMethodCMCs,
+                      "highCMCs" = highCMC_initial))
+        }
+        #otherwise, take the median of the theta values within their respective
+        #directions
+        else{
+          thetaMax_dismissed <- thetaMax_dismissed %>%
+            dplyr::group_by(.data$direction) %>%
+            dplyr::summarise(theta = median(.data$theta))
+        }
+      }
+      #if thetaMax_dismissed has length 2, then we want to make sure that these
+      #are actually opposites or close to opposites of each other. If not, then
+      #we won't assign any high CMCs to the comparison
+      thetaMax_dismissed <- thetaMax_dismissed %>%
+        dplyr::ungroup() %>%
+        dplyr::arrange(.data$direction) #%>%
+      # dplyr::pull(theta)
+
+      if(nrow(thetaMax_dismissed) == 1){
+
+        if(compareThetas){
+
+          intitialCMCs_nonMissingDirection <- originalMethodCMCs[[which(names(thetaMax) == thetaMax_dismissed$direction)]]
+
+          thetaCompareBool_dismissed <- abs(thetaMax_dismissed$theta - median(intitialCMCs_nonMissingDirection$theta,na.rm = TRUE)) > thetaThresh
+
+          if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
+            return(list("originalMethodCMCs" = originalMethodCMCs,
+                        "highCMCs" = highCMC_initial))
+
+          }
+          else{
+            return(list("originalMethodCMCs" = originalMethodCMCs,
+                        "highCMCs" = highCMCs))
+          }
+        }
+        else{
+          return(list("originalMethodCMCs" = originalMethodCMCs,
+                      "highCMCs" = highCMCs))
+        }
+      }
+
+      if(compareThetas){
+        thetaCompareBool_dismissed <- (((abs((thetaMax_dismissed[1,"theta"] - median(originalCMCs_reference_v_target$theta,na.rm = TRUE)))) > thetaThresh) |
+                                         (abs((thetaMax_dismissed[2,"theta"] - median(originalCMCs_target_v_reference$theta,na.rm = TRUE))) > thetaThresh))
+
+        if(thetaCompareBool_dismissed | is.na(thetaCompareBool_dismissed) | purrr::is_empty(thetaCompareBool_dismissed)){
+          return(list("originalMethodCMCs" = originalMethodCMCs,
+                      "highCMCs" = highCMC_initial))
+        }
+      }
+
+      sign(thetaMax$reference_v_target) == sign(thetaMax$target_v_reference) & abs(thetaMax$reference_v_target - -1*thetaMax$target_v_reference) > thetaThresh
+
+      if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
+         (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > thetaThresh)){
+        return(list("originalMethodCMCs" = originalMethodCMCs,
+                    "highCMCs" = highCMC_initial))
+      }
+      # if we've made it this far, then the theta values should be at least to
+      # within thetaThresh of being opposites of each other, so we can return
+      # the highCMCs without worrying about a disagreement
+      else{
+        return(list("originalMethodCMCs" = originalMethodCMCs,
+                    "highCMCs" = highCMCs))
+      }
+    }
 
     # Most "conservative" decision is to flat-out fail the whole comparison if
     # one direction doesn't pass the high CMC criterion
@@ -789,8 +797,8 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 
   if(compareThetas){
 
-    thetaCompareBool <- (((abs((thetaMax$comparison_reference_v_target - median(originalCMCs_reference_v_target$theta,na.rm = TRUE)))) > thetaThresh) |
-                           (abs((thetaMax$comparison_target_v_reference - median(originalCMCs_target_v_reference$theta,na.rm = TRUE))) > thetaThresh))
+    thetaCompareBool <- (((abs((thetaMax$reference_v_target - median(originalCMCs_reference_v_target$theta,na.rm = TRUE)))) > thetaThresh) |
+                           (abs((thetaMax$target_v_reference - median(originalCMCs_target_v_reference$theta,na.rm = TRUE))) > thetaThresh))
 
     if(thetaCompareBool | is.na(thetaCompareBool) | purrr::is_empty(thetaCompareBool)){
       return(list("originalMethodCMCs" = originalMethodCMCs,
@@ -809,7 +817,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
   #comparisons voted for a consensual theta value of 3. Given the thetaThresh,
   #this should be admissible since they are "close enough" (according to
   #thetaThresh) to each other.
-  if(sign(thetaMax$comparison_reference_v_target) == sign(thetaMax$comparison_target_v_reference) & abs(thetaMax$comparison_reference_v_target - -1*thetaMax$comparison_target_v_reference) > thetaThresh){
+  if(sign(thetaMax$reference_v_target) == sign(thetaMax$target_v_reference) & abs(thetaMax$reference_v_target - -1*thetaMax$target_v_reference) > thetaThresh){
 
     return(list("originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = highCMC_initial))
@@ -818,7 +826,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
   #don't agree with each other. For example, one direction might vote for -27
   #degrees as the consensual theta value while the other votes for 12. Such a
   #comparison shouldn't pass the High CMC criterion.
-  else if((abs((abs(thetaMax$comparison_reference_v_target) - abs(thetaMax$comparison_target_v_reference))) > thetaThresh)){
+  else if((abs((abs(thetaMax$reference_v_target) - abs(thetaMax$target_v_reference))) > thetaThresh)){
     return(list("originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = highCMC_initial))
   }
@@ -862,10 +870,9 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 #'  the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)
 #'@param missingThetaDecision dictates how function should handle situations in
 #'  which one direction passes the high CMC criterion while another direction
-#'  does not. "replace": replaces theta value in failed direction with opposite
-#'  of theta value in successful direction. "dismiss": only counts the initial
-#'  CMCs in failed direction and high CMCs in successful direction. "fail": only
-#'  counts the initial CMCs in either direction.
+#'  does not. "dismiss": only counts the initial CMCs in failed direction and
+#'  high CMCs in successful direction. "fail": only counts the initial CMCs in
+#'  either direction and returns the minimum of these two numbers.
 #'@param compareThetas dictates if the consensus theta values determined under
 #'  the initially proposed method should be compared to the consensus theta
 #'  values determined under the High CMC method. In particular, determines for
