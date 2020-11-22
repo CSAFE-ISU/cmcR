@@ -1,8 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-cmcR
-====
+# cmcR
 
 <!-- badges: start -->
 
@@ -10,6 +9,8 @@ cmcR
 coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master)
 [![Travis build
 status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR)
+[![R build
+status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions)
 <!-- badges: end -->
 
 The cmcR package provides an open-source implementation of the Congruent
@@ -19,8 +20,7 @@ Matching Cells method for cartridge case identification as proposed by
 as well as the “High CMC” method proposed by [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf).
 
-Installation
-------------
+## Installation
 
 <!-- You can install the released version of cmcR from [CRAN](https://CRAN.R-project.org) with: -->
 <!-- ``` r -->
@@ -39,8 +39,7 @@ Cartridge case scan data can be accessed at the [NIST Ballisitics
 Toolmark Research
 Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
-Example
--------
+## Example
 
 We will illustrate the package’s functionality here. Please refer to the
 package vignettes available under the “Articles” tab of the [package
