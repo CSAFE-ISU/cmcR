@@ -3,9 +3,9 @@
 x3p1_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 x3p2_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
 
-x3p1 <- x3ptools::x3p_read(file = x3p1_url)
+x3p1 <- x3ptools::read_x3p(file = x3p1_url)
 
-x3p2 <- x3ptools::x3p_read(file = x3p2_url)
+x3p2 <- x3ptools::read_x3p(file = x3p2_url)
 
 
 tmpfile1 <- tempfile(fileext = ".x3p")
