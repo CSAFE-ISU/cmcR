@@ -358,5 +358,3 @@ cmcPlot(referenceScan = fadul1.1_processed,
         target_v_reference_CMCs = kmComparison_allCMCs_rev,
         x3pNames = c("Fadul 1-1","Fadul 1-2"))
 ```
-
-

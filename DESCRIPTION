@@ -2,7 +2,10 @@ Package: cmcR
 Type: Package
 Title: An Implementation of the Congruent Matching Cells Method for Cartridge Case Identification
 Version: 0.1.0
-Authors@R: c(person("Joe Zemmels <jzemmels@iastate.edu> [aut,cre]"),person("Heike Hofmann <hofmann@iastate.edu> [aut]"),person("Susan VanderPlas <susan.vanderplas@unl.edu> [aut]"))
+Authors@R: 
+    c(person(given = "Joe",family = "Zemmels",role = c("aut","cre"),email = "jzemmels@iastate.edu"),
+      person(given = "Heike",family = "Hofmann",email = "hofmann@iastate.edu",role = "aut"),
+      person(given = "Susan",family = "VanderPlas", email ="susan.vanderplas@unl.edu",role= "aut"))
 Maintainer: Joe Zemmels <jzemmels@iastate.edu>
 Description: An open-source implementation of the Congruent Matching Cells 
     method for cartridge case identification as proposed by Song (2013) as well 
