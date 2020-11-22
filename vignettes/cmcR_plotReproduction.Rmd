@@ -69,8 +69,8 @@ fadul1.2_id <- "DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
 # Code to download breech face impressions:
 nbtrd_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement"
 
-fadul1.1_raw <- x3p_read(file.path(nbtrd_url,fadul1.1_id))
-fadul1.2_raw <- x3p_read(file.path(nbtrd_url,fadul1.2_id))
+fadul1.1_raw <- read_x3p(file.path(nbtrd_url,fadul1.1_id))
+fadul1.2_raw <- read_x3p(file.path(nbtrd_url,fadul1.2_id))
 ```
 
 
@@ -177,7 +177,7 @@ fadul2.1_processed <- fadul2.1_raw %>%
 
 ```{r include=FALSE,eval=FALSE}
 #if we want to include more pairs in the comparison
-fadul2.2 <- x3ptools::x3p_read("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
+fadul2.2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/702956c6-4d7d-4cc5-be62-219b788dc7b0")
 ```
 
 

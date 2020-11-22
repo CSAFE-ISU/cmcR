@@ -334,6 +334,7 @@ knmComparison_thetaData <- knmComparisonFeatures %>%
 
 ```{r include=FALSE,fig.height=1}
 kmComparison_xData_plot <- kmComparison_xData %>%
+  # filter(!is.na(Classification)) %>%
   ggplot() +
   geom_histogram(aes(x = x, 
                      fill = Classification),
@@ -342,14 +343,15 @@ kmComparison_xData_plot <- kmComparison_xData %>%
                  ) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 27),
-                            xmin = kmComparison_xData$med_x - 20.5,
-                            xmax = kmComparison_xData$med_x + 20.5),
+                            xmin = med_x - 20.5,
+                            xmax = med_x + 20.5),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
   scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"x")), 
                      breaks = seq(-100,100,by = 50),
-                     limits = c(-101,101)
+                     limits = c(-101,101),
+                     oob = scales::oob_keep
                      ) +
   scale_y_continuous(limits = c(0,2.5)) +
   ylab("# Cell Pairs") +
@@ -410,8 +412,8 @@ knmComparison_xData_plot <- knmComparison_xData %>%
                  ) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 29),
-                            xmin = knmComparison_xData$med_x - 20,
-                            xmax = knmComparison_xData$med_x + 20),
+                            xmin = med_x - 20,
+                            xmax = med_x + 20),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
@@ -436,8 +438,8 @@ kmComparison_yData_plot <- kmComparison_yData %>%
                  ) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 27),
-                            xmin = kmComparison_xData$med_y - 20,
-                            xmax = kmComparison_xData$med_y + 20),
+                            xmin = med_y - 20,
+                            xmax = med_y + 20),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
@@ -462,8 +464,8 @@ knmComparison_yData_plot <- knmComparison_yData %>%
                  ) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(mapping = aes(y = seq(0,3.5,length.out = 29),
-                            xmin = knmComparison_xData$med_y - 20.5,
-                            xmax = knmComparison_xData$med_y + 20.5),
+                            xmin = med_y - 20.5,
+                            xmax = med_y + 20.5),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
@@ -486,8 +488,8 @@ kmComparison_thetaData_plot <- kmComparison_thetaData %>%
            alpha = .7) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(aes(y = seq(0,12,length.out = 27),
-                  xmin = kmComparison_thetaData$med_theta - 7.5,
-                  xmax = kmComparison_thetaData$med_theta + 7.5),
+                  xmin = med_theta - 7.5,
+                  xmax = med_theta + 7.5),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
@@ -510,8 +512,8 @@ knmComparison_thetaData_plot <- knmComparison_thetaData %>%
            alpha = .7) +
   scale_fill_manual(values = c("#a60b00","#1b03a3")) +
   geom_ribbon(aes(y = seq(0,12,length.out = 29),
-                  xmin = knmComparison_thetaData$med_theta - 6,
-                  xmax = knmComparison_thetaData$med_theta + 6),
+                  xmin = med_theta - 6,
+                  xmax = med_theta + 6),
               fill = "#7570b3",
               alpha = .3) +
   theme_bw() +
