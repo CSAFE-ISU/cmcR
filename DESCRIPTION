@@ -1,8 +1,8 @@
 Package: cmcR
 Type: Package
-Title: An implementation of the Congruent Matching Cells method for cartridge case identification
+Title: An Implementation of the Congruent Matching Cells Method for Cartridge Case Identification
 Version: 0.1.0
-Authors@R: as.person(c("Joe Zemmels <jzemmels@iastate.edu> [aut,cre]","Heike Hofmann <hofmann@iastate.edu> [aut]","Susan VanderPlas <susan.vanderplas@unl.edu> [aut]"))
+Authors@R: c(person("Joe Zemmels <jzemmels@iastate.edu> [aut,cre]"),person("Heike Hofmann <hofmann@iastate.edu> [aut]"),person("Susan VanderPlas <susan.vanderplas@unl.edu> [aut]"))
 Maintainer: Joe Zemmels <jzemmels@iastate.edu>
 Description: An open-source implementation of the Congruent Matching Cells 
     method for cartridge case identification as proposed by Song (2013) as well 
@@ -10,7 +10,7 @@ Description: An open-source implementation of the Congruent Matching Cells
     Provides a wide range of pre, inter, and post-processing options when
     working with cartridge case scan data and their associated comparisons. See
     the cmcR package website for more details and examples.
-License: GPL-3 + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -43,8 +43,6 @@ Suggests:
     covr,
     gridExtra,
     cowplot
-Remotes:
-    https://github.com/heike/x3ptools
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5.0)

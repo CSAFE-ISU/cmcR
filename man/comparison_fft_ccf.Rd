@@ -65,5 +65,5 @@ head()
 }
 }
 \seealso{
-\url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
+\url{https://mathworld.wolfram.com/Cross-CorrelationTheorem.html}
 }

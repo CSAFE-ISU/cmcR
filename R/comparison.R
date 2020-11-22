@@ -457,7 +457,7 @@ comparison_replaceMissing <- function(heightValues,
 #'  missing values in the cell and region need to be replaced before using this
 #'  function. See the \link[cmcR]{comparison_replaceMissing} function to replace
 #'  missing values after standardization.
-#'@seealso \url{(https://mathworld.wolfram.com/Cross-CorrelationTheorem.html)}
+#'@seealso \url{https://mathworld.wolfram.com/Cross-CorrelationTheorem.html}
 #'
 #'@return a data frame containing the translation (x,y) at which the CCF was
 #'  maximized in aligning a target scan region to its associated reference scan
