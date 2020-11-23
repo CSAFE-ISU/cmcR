@@ -1,6 +1,6 @@
 `%>%` <- dplyr::`%>%`
 
-x3p1 <- x3ptools::x3p_read(tmpfile1)
+x3p1 <- x3ptools::read_x3p(tmpfile1)
 
 x3p1_raw <- x3p1
 
@@ -55,7 +55,7 @@ postFilterVar_hp <- var(x3p1_hp$surface.matrix[!is.na(x3p1_hp$surface.matrix)])*
 postFilterVar_bp <- var(x3p1_bp$surface.matrix[!is.na(x3p1_bp$surface.matrix)])*1e12
 
 x3p1 <- x3p1 %>%
-  x3ptools::x3p_sample()
+  x3ptools::sample_x3p()
 
 testthat::test_that("preProcess_ functions work as expected", {
   testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
@@ -90,7 +90,7 @@ testthat::test_that("preProcess_ functions work as expected", {
 #Now check older preProcess functions:
 
 x3p1_downSampled <- x3p1_raw %>%
-  x3ptools::x3p_sample()
+  x3ptools::sample_x3p()
 
 x3p1_downSampled_dim <- dim(x3p1_downSampled$surface.matrix)
 x3p1_downSampled_missing <- sum(is.na(x3p1_downSampled$surface.matrix))

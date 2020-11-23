@@ -13,7 +13,7 @@ x3p1 <- x3p1 %>%
                                method = "fn") %>%
   cmcR::preProcess_gaussFilter(wavelength = c(16,500),
                                filtertype = "bp") %>%
-  x3ptools::x3p_sample()
+  x3ptools::sample_x3p()
 
 x3p2 <- x3p2 %>%
   cmcR::preProcess_crop(region = "exterior",
@@ -25,7 +25,7 @@ x3p2 <- x3p2 %>%
                                method = "fn") %>%
   cmcR::preProcess_gaussFilter(wavelength = c(16,500),
                                filtertype = "bp") %>%
-  x3ptools::x3p_sample()
+  x3ptools::sample_x3p()
 
 #Perform entire comparison procedure explicitly
 cellTibble <- x3p1 %>%
