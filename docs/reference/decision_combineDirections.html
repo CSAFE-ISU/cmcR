@@ -169,10 +169,9 @@ the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)</p></td>
       <th>missingThetaDecision</th>
       <td><p>dictates how function should handle situations in
 which one direction passes the high CMC criterion while another direction
-does not. "replace": replaces theta value in failed direction with opposite
-of theta value in successful direction. "dismiss": only counts the initial
-CMCs in failed direction and high CMCs in successful direction. "fail": only
-counts the initial CMCs in either direction.</p></td>
+does not. "dismiss": only counts the initial CMCs in failed direction and
+high CMCs in successful direction. "fail": only counts the initial CMCs in
+either direction and returns the minimum of these two numbers.</p></td>
     </tr>
     <tr>
       <th>compareThetas</th>

@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>An implementation of the Congruent Matching Cells method for cartridge case identification • cmcR</title>
+<title>An Implementation of the Congruent Matching Cells Method for Cartridge Case Identification • cmcR</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="An implementation of the Congruent Matching Cells method for cartridge case identification">
+<script src="pkgdown.js"></script><meta property="og:title" content="An Implementation of the Congruent Matching Cells Method for Cartridge Case Identification">
 <meta property="og:description" content="An open-source implementation of the Congruent Matching Cells 
     method for cartridge case identification as proposed by Song (2013) as well 
     as an extension of the method proposed by Tong et al. (2015).
@@ -93,17 +93,17 @@
 <!-- install.packages("cmcR") -->
 <!-- ``` -->
 <p>Install the development version from <a href="https://github.com/jzemmels/cmcR">GitHub</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"jzemmels/cmcR"</span><span class="op">)</span></pre></div>
-<p>Cartridge case scan data can be accessed at the <a href="https://tsapps.nist.gov/NRBTD/Studies/Search">NIST Ballisitics and Toolmarks Research Database</a></p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># install.packages("devtools")</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">"jzemmels/cmcR"</span><span class="op">)</span></code></pre></div>
+<p>Cartridge case scan data can be accessed at the <a href="https://tsapps.nist.gov/NRBTD/Studies/Search">NIST Ballisitics Toolmark Research Database</a></p>
 </div>
 <div id="example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example" class="anchor"></a>Example</h2>
 <p>We will illustrate the package’s functionality here. Please refer to the package vignettes available under the “Articles” tab of the <a href="https://csafe-isu.github.io/cmcR/index.html">package website</a> for more information.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">magrittr</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="co">#&gt; </span>
@@ -115,10 +115,10 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     intersect, setdiff, setequal, union</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span></code></pre></div>
 <p>Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2. The <code>read_x3p</code> function from the <a href="https://github.com/heike/x3ptools">x3ptools</a> package can read scans from the <a href="https://tsapps.nist.gov/NRBTD/Studies/Search">NBTRD</a> given the appropriate address. The two scans are read below and visualized using the <a href="https://csafe-isu.github.io/cmcR/reference/x3pListPlot.html"><code>x3pListPlot</code></a> function.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="va">fadul1.1_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">fadul1.1_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
 <span class="co"># Same source comparison</span>
 <span class="va">fadul1.2_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>
 
@@ -130,14 +130,14 @@
 
 <span class="fu"><a href="reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_raw</span>,
                  <span class="st">"Fadul 1-2"</span> <span class="op">=</span> <span class="va">fadul1.2_raw</span><span class="op">)</span>,
-            type <span class="op">=</span> <span class="st">"faceted"</span><span class="op">)</span></pre></div>
+            type <span class="op">=</span> <span class="st">"faceted"</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-2-1.png" width="100%"></p>
 <div id="preprocessing" class="section level3">
 <h3 class="hasAnchor">
 <a href="#preprocessing" class="anchor"></a>Preprocessing</h3>
-<p>To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans from the microscope staging area, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Functions of the form <code>preProcess_*</code> perform the preprocessing procedures. See the <a href="https://csafe-isu.github.io/cmcR/reference/index.html">funtion reference</a> of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we first downsample each scan (by a factor of 4, selecting every other row/column) using the <code>sample_x3p</code> function.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="va">fadul1.1_processed</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span> <span class="op">%&gt;%</span>
+<p>To perform a proper comparison of these two cartridge cases, we need to remove regions that do not come into uniform or consistent contact with the breech face of the firearm. These include the small clusters of pixels in the corners of the two scans from the microscope staging area, and the plateaued region of points around the firing pin impression hole near the center of the scan. A variety of processing procedures are implemented in the cmcR package. Functions of the form <code>preProcess_*</code> perform the preprocessing procedures. See the <a href="https://csafe-isu.github.io/cmcR/reference/index.html">funtion reference</a> of the cmcR package for more information regarding these procedures. As is commonly done when comparing cartridge cases, we downsample each scan (by a factor of 4, selecting every other row/column) using the <code>sample_x3p</code> function.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">fadul1.1_processed</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="reference/preProcess_crop.html">preProcess_crop</a></span><span class="op">(</span>region <span class="op">=</span> <span class="st">"exterior"</span>,
                   radiusOffset <span class="op">=</span> <span class="op">-</span><span class="fl">30</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="reference/preProcess_crop.html">preProcess_crop</a></span><span class="op">(</span>region <span class="op">=</span> <span class="st">"interior"</span>,
@@ -161,7 +161,7 @@
 
 <span class="fu"><a href="reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Processed Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                        <span class="st">"Processed Fadul1-2"</span> <span class="op">=</span> <span class="va">fadul1.2_processed</span><span class="op">)</span>,
-                  type <span class="op">=</span> <span class="st">"faceted"</span><span class="op">)</span></pre></div>
+                  type <span class="op">=</span> <span class="st">"faceted"</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
 </div>
 <div id="cell-based-comparison-procedure" class="section level3">
@@ -169,8 +169,8 @@
 <a href="#cell-based-comparison-procedure" class="anchor"></a>Cell-based comparison procedure</h3>
 <p>Functions of the form <code>comparison_*</code> perform the steps of the cell-based comparison procedure. The data generated from the cell-based comparison procedure are kept in a <a href="https://tibble.tidyverse.org/"><code>tibble</code></a> where one row represents a single cell/region pairing.</p>
 <p>The <code>comparison_cellDivision</code> function divides a scan up into a grid of cells. The <code>cellIndex</code> column represents the <code>row,col</code> location in the original scan each cell inhabits. Each cell is stored as an <code>.x3p</code> object in the <code>cellHeightValues</code> column. The benefit of using a <code>tibble</code> structure is that processes such as removing rows can be accomplished using simple <code>dplyr</code> commands such as <code>filter</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_processed</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_processed</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="reference/comparison_cellDivision.html">comparison_cellDivision</a></span><span class="op">(</span>numCells <span class="op">=</span> <span class="fl">64</span><span class="op">)</span>
 
 <span class="va">cellTibble</span>
@@ -187,10 +187,10 @@
 <span class="co">#&gt;  8 8, 8      &lt;x3p&gt;           </span>
 <span class="co">#&gt;  9 7, 1      &lt;x3p&gt;           </span>
 <span class="co">#&gt; 10 7, 2      &lt;x3p&gt;           </span>
-<span class="co">#&gt; # ... with 54 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 54 more rows</span></code></pre></div>
 <p>The <code>comparison_getTargetRegions</code> function extracts a region from a target scan (in this case Fadul 1-2) to be paired with each cell in the reference scan.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>regionHeightValues <span class="op">=</span> <span class="fu"><a href="reference/comparison_getTargetRegions.html">comparison_getTargetRegions</a></span><span class="op">(</span>cellHeightValues <span class="op">=</span> <span class="va">cellHeightValues</span>,
                                                           target <span class="op">=</span> <span class="va">fadul1.2_processed</span><span class="op">)</span><span class="op">)</span>
 
@@ -208,10 +208,10 @@
 <span class="co">#&gt;  8 8, 8      &lt;x3p&gt;            &lt;x3p&gt;             </span>
 <span class="co">#&gt;  9 7, 1      &lt;x3p&gt;            &lt;x3p&gt;             </span>
 <span class="co">#&gt; 10 7, 2      &lt;x3p&gt;            &lt;x3p&gt;             </span>
-<span class="co">#&gt; # ... with 54 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 54 more rows</span></code></pre></div>
 <p>We want to exclude cells and regions that are mostly missing from the scan. The <code>comparison_calcPropMissing</code> function calculates the proportion of missing values in a surface matrix. The call below excludes rows in which either the cell or region contain more that 85% missing values.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cellPropMissing <span class="op">=</span> <span class="fu"><a href="reference/comparison_calcPropMissing.html">comparison_calcPropMissing</a></span><span class="op">(</span><span class="va">cellHeightValues</span><span class="op">)</span>,
          regionPropMissing <span class="op">=</span> <span class="fu"><a href="reference/comparison_calcPropMissing.html">comparison_calcPropMissing</a></span><span class="op">(</span><span class="va">regionHeightValues</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">cellPropMissing</span> <span class="op">&lt;=</span> <span class="fl">.85</span> <span class="op">&amp;</span> <span class="va">regionPropMissing</span> <span class="op">&lt;=</span> <span class="fl">.85</span><span class="op">)</span>
@@ -231,11 +231,11 @@
 <span class="co">#&gt;  8 3, 1               0.305              0.687</span>
 <span class="co">#&gt;  9 3, 2               0.368              0.605</span>
 <span class="co">#&gt; 10 3, 7               0.243              0.390</span>
-<span class="co">#&gt; # ... with 15 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 15 more rows</span></code></pre></div>
 <p>We can standardize the surface matrix height values by centering/scaling by desired functions (e.g., mean and standard deviation). Also, to apply frequency-domain techniques in comparing each cell and region, the missing values in each scan need to be replaced. These operations are performed in the <code>comparison_standardizeHeightValues</code> and <code>comparison_replaceMissingValues</code> functions.</p>
 <p>Then, the <code>comparison_fft_ccf</code> function estimates the translations required to align the cell and region using the <a href="https://mathworld.wolfram.com/Cross-CorrelationTheorem.html">Cross-Correlation Theorem</a>. The <code>comparison_fft_ccf</code> function returns a data frame of 3 <code>x</code>, <code>y</code>, and <code>fft_ccf</code> values: the <em>x</em>, <em>y</em> estimated translation values at which the CCF<sub>max</sub> value is attained between the cell and region. The <code><a href="https://tidyr.tidyverse.org/reference/nest.html">tidyr::unnest</a></code> function can unpack the data frame into 3 separate columns, if desired.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span>  <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">cellTibble</span>  <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cellHeightValues <span class="op">=</span> <span class="fu"><a href="reference/comparison_standardizeHeights.html">comparison_standardizeHeights</a></span><span class="op">(</span><span class="va">cellHeightValues</span><span class="op">)</span>,
          regionHeightValues <span class="op">=</span> <span class="fu"><a href="reference/comparison_standardizeHeights.html">comparison_standardizeHeights</a></span><span class="op">(</span><span class="va">regionHeightValues</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cellHeightValues_replaced <span class="op">=</span> <span class="fu"><a href="reference/comparison_replaceMissing.html">comparison_replaceMissing</a></span><span class="op">(</span><span class="va">cellHeightValues</span><span class="op">)</span>,
@@ -259,10 +259,10 @@
 <span class="co">#&gt;  8 3, 1        0.323   -53   -79</span>
 <span class="co">#&gt;  9 3, 2        0.284     8   -45</span>
 <span class="co">#&gt; 10 3, 7        0.167    13   -85</span>
-<span class="co">#&gt; # ... with 15 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 15 more rows</span></code></pre></div>
 <p>Because so many missing values need to be replaced, the CCF<sub>max</sub> value calculated in the <code>fft_ccf</code> column using frequency-domain techniques is not a very good similarity score (doesn’t differentiate matches from non-matches well). However, the <code>x</code> and <code>y</code> estimated translations are good estimates of the “true” translation values needed to align the cell and region. To calculate a more accurate similarity score, we can use the pairwise-complete correlation in which only pairs of non-missing pixels are considered in the correlation calculation. This provides a better similarity metric. The pairwise-complete correlation can be calculated with the <code>comparison_cor</code> function.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="va">cellTibble</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cellTibble</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>pairwiseCompCor <span class="op">=</span> <span class="fu"><a href="reference/comparison_cor.html">comparison_cor</a></span><span class="op">(</span><span class="va">cellHeightValues</span>,<span class="va">regionHeightValues</span>,<span class="va">fft_ccf_df</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html">unnest</a></span><span class="op">(</span><span class="va">fft_ccf_df</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">cellIndex</span>,<span class="va">x</span>,<span class="va">y</span>,<span class="va">pairwiseCompCor</span><span class="op">)</span>
@@ -279,10 +279,10 @@
 <span class="co">#&gt;  8 3, 1        -53   -79           0.608</span>
 <span class="co">#&gt;  9 3, 2          8   -45           0.585</span>
 <span class="co">#&gt; 10 3, 7         13   -85           0.450</span>
-<span class="co">#&gt; # ... with 15 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 15 more rows</span></code></pre></div>
 <p>Finally, this entire comparison procedure is to be repeated over a number of rotations of the target scan. The entire cell-based comparison procedure is wrapped in the <code>comparison_allTogether</code> function. The resulting data frame below contains the features that are used in the decision-rule procedure</p>
-<div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="va">kmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
                                        <span class="op">~</span> <span class="fu"><a href="reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                                                                 target <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                                                                 
@@ -302,15 +302,15 @@
 <span class="co">#&gt;  8 3, 1          8    33   0.433           0.761   -30</span>
 <span class="co">#&gt;  9 3, 2         65    66   0.278           0.529   -30</span>
 <span class="co">#&gt; 10 3, 7          7   -12   0.135           0.340   -30</span>
-<span class="co">#&gt; # ... with 517 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 517 more rows</span></code></pre></div>
 </div>
 <div id="decision-rule" class="section level3">
 <h3 class="hasAnchor">
 <a href="#decision-rule" class="anchor"></a>Decision rule</h3>
 <p>The decision rules described in <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> are implemented via the <code>decision_*</code> functions. The two decision rules are referred to as the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> and the High CMC method, respectively. Considering the <code>kmComparisonFeatures</code> data frame returned above, we can interpret both of these decision rules as logic that separates “aberrant” from “homogeneous” similarity features. The two decision rules principally differ in how they define an homogeneity.</p>
 <p>The original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> considers only the similarity features at which the maximum correlation is attained for each cell across all rotations considered. Since there is ambiguity in exactly how the correlation is computed in the original methods, we will consider the features at which specifically the maximum <code>pairwiseCompCor</code> is attained (instead of using the <code>fft_ccf</code> column).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">cellIndex</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html">top_n</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>,wt <span class="op">=</span> <span class="va">pairwiseCompCor</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 27 x 6</span>
@@ -327,10 +327,10 @@
 <span class="co">#&gt;  8 3, 1          3    22   0.439           0.782   -27</span>
 <span class="co">#&gt;  9 2, 2          5    18   0.252           0.697   -27</span>
 <span class="co">#&gt; 10 2, 7          6    -7   0.351           0.721   -27</span>
-<span class="co">#&gt; # ... with 17 more rows</span></pre></div>
+<span class="co">#&gt; # ... with 17 more rows</span></code></pre></div>
 <p>The above set of features can be thought of as the <code>x</code>, <code>y</code>, and <code>theta</code> “votes” that each cell most strongly “believes” to be the correct alignment of the entire scan. If a pair is truly matching, we would expect many of these votes to be similar to each other; indicating that there is an approximate consensus of the true alignment of the entire scan (at least, this is the assumption made in <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a>). In <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a>, the consensus is defined to be the median of the <code>x</code>, <code>y</code>, and <code>theta</code> values in this <code>topVotesPerCell</code> data frame. Cells that are deemed “close” to these consensus values and that have a “large” correlation value are declared Congruent Matching Cells (CMCs). Cells with <code>x</code>, <code>y</code>, and <code>theta</code> values that are within user-defined <em>T</em><sub><em>x</em></sub>, <em>T</em><sub><em>y</em></sub>, and <em>T</em><sub><em>θ</em></sub> thresholds of the consensus <code>x</code>, <code>y</code>, and <code>theta</code> values are considered “close.” If these cells also have a correlation greater than a user-defined <em>T</em><sub>CCF</sub> threshold, then they are considered CMCs. Note that these thresholds are chosen entirely by experimentation in the CMC literature.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="va">kmComparison_originalCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparison_originalCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
                                               x <span class="op">=</span> <span class="va">x</span>,
                                               y <span class="op">=</span> <span class="va">y</span>,
@@ -362,13 +362,13 @@
 <span class="co">#&gt; 14 4, 1         -4    -2   0.360           0.730   -21 CMC                  </span>
 <span class="co">#&gt; 15 4, 8         -7    14   0.257           0.644   -21 CMC                  </span>
 <span class="co">#&gt; 16 1, 6        -13    12   0.296           0.676   -21 CMC                  </span>
-<span class="co">#&gt; 17 6, 1          7    -9   0.513           0.777   -18 CMC</span></pre></div>
+<span class="co">#&gt; 17 6, 1          7    -9   0.513           0.777   -18 CMC</span></code></pre></div>
 <p>One criticism of the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> is that many cell/region pairs exhibit high correlation values at a number of rotations. In particular, a cell/region pair may attain a very high correlation at the “true” theta value, yet attain its maximum correlation at a theta value far from the consensus theta value. The original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> only considers the “top” vote of each cell/region pairing, so it is not sensitive to how that cell/region pairing behaves across multiple rotations.</p>
 <p><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> propose a different decision rule procedure that considers the behavior of cell/region pairings across multiple rotations. This method would come to be called the High CMC method. The procedure involves computing a “CMC-<code>theta</code>” distribution where for each value of <code>theta</code>, the <code>x</code> and <code>y</code> values are compared to consensus <code>x</code> and <code>y</code> values (again, the median) and the correlation values to a minimum threshold. A cell is considered a “CMC candidate” (our language, not theirs) at a particular <code>theta</code> value if its <code>x</code> and <code>y</code> values are within <em>T</em><sub><em>x</em></sub>, <em>T</em><sub><em>y</em></sub> thresholds of the consensus <code>x</code> and <code>y</code> values and the correlation is at least as larges as the <em>T</em><sub>CCF</sub> threshold. This is similar to the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> except that it relaxes the requirement that the top <code>theta</code> value be close to a consensus. Continuing with the voting analogy, think of this as an <a href="https://en.wikipedia.org/wiki/Approval_voting">approval voting system</a> where each cell is allowed to vote for multiple <code>theta</code> values as long as the <code>x</code> and <code>y</code> votes are deemed close to the <code>theta</code>-specific <code>x</code>,<code>y</code> consensuses and the correlation values are sufficiently high.</p>
 <p>The CMC-<code>theta</code> distribution consists of the “CMC candidates” at each value of <code>theta</code>. The assumption made in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> is that, for a truly matching cartridge case pair, a large number of CMC candidates should be concentrated around true <code>theta</code> alignment value. In their words, the CMC-<code>theta</code> distribution should exhibit a “prominent peak” close to the rotation at which the two cartridge cases actually align. Such a prominent peak should not occur for a non-match cartridge case pair.</p>
 <p>The figure below shows an example of a CMC-<code>theta</code> distribution between Fadul 1-1 and Fadul 1-2 constructed using the <code>decision_highCMC_cmcThetaDistrib</code> function. We can clearly see that a mode is attained around -27 to -24 degrees.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit">
-<span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cmcThetaDistribClassif <span class="op">=</span> <span class="fu"><a href="reference/decision_highCMC_cmcThetaDistrib.html">decision_highCMC_cmcThetaDistrib</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
                                                                    x <span class="op">=</span> <span class="va">x</span>,
                                                                    y <span class="op">=</span> <span class="va">y</span>,
@@ -383,12 +383,12 @@
            alpha <span class="op">=</span> <span class="fl">.7</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"CMC Candidate Count"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-12-1.png" width="100%"></p>
 <p>The next step of the High CMC method is to automatically determine if a mode (i.e., a “prominent peak”) exists in a CMC-<code>theta</code> distribution. If we find a mode, then there is evidence that a “true” rotation exists to align the two cartridge cases implying the cartridge cases must be matches (such is the logic employed in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a>). To automatically identify a mode, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> propose determining the range of <code>theta</code> values with “high” CMC candidate counts (if this range is small, then there is likely a mode). They define a “high” CMC candidate count to be <em>C<strong>M</strong>C</em><sub>high</sub> ≡ <em>C<strong>M</strong>C</em><sub>max</sub> − <em>τ</em> where <em>C<strong>M</strong>C</em><sub>max</sub> is the maximum value attained in the CMC-<code>theta</code> distribution (17 in the plot shown above) and <em>τ</em> is a user-defined constant (<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> use <em>τ</em> = 1). Any <code>theta</code> value with associated an associated CMC candidate count at least as large as <em>C<strong>M</strong>C</em><sub>high</sub> have a “high” CMC candidate count while any others have a “low” CMC candidate count.</p>
 <p>The figure below shows the classification of <code>theta</code> values into “High” and “Low” CMC candidate count groups using the <code>decision_highCMC_identifyHighCMCThetas</code> function. The High CMC count threshold is shown as a dashed line at 17 − 1 CMCs. As expected since this cartridge case pair is a match, the High CMC count <code>theta</code> values are all close to each other.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit">
-<span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>cmcThetaDistribClassif <span class="op">=</span> <span class="fu"><a href="reference/decision_highCMC_cmcThetaDistrib.html">decision_highCMC_cmcThetaDistrib</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
                                                                    x <span class="op">=</span> <span class="va">x</span>,
                                                                    y <span class="op">=</span> <span class="va">y</span>,
@@ -408,12 +408,12 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"black"</span>,<span class="st">"gray50"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"CMC Candidate Count"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-13-1.png" width="100%"></p>
 <p>If the range of High CMC count <code>theta</code> values is less than the user-defined <em>T</em><sub><em>θ</em></sub> threshold, then <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> classify all CMC candidates in the identified <code>theta</code> mode as actual CMCs.</p>
 <p>The <code>decision_CMC</code> function classifies CMCs based on this High CMC criterion if a value for <code>tau</code> is given. Note that it internally calls the <code>decision_highCMC_cmcThetaDistrib</code> and <code>decision_highCMC_identifyHighCMCThetas</code> functions (although they are exported as diagnostic tools). A cell may be counted as a CMC for multiple <code>theta</code> values. In these cases, we will only consider the alignment values at which the cell attained its maximum CCF and was classified as a CMC. If the cartridge case pair “fails” the High CMC criterion (i.e., the range of High CMC candidate <code>theta</code> values is deemed too large), every cell will be classified as “non-CMC (failed)” under the High CMC method. When it comes to combining the CMCs from two comparison directions (cartridge case A vs. B and B vs. A), we must treat a cell classified as a non-CMC because the High CMC criterion failed differently from a cell classified as a non-CMC for which the High CMC criterion passed. <!-- [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose using the CMC count determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) as a backup CMC count. --></p>
-<div class="sourceCode" id="cb15"><pre class="downlit">
-<span class="va">kmComparison_highCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparison_highCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>highCMCClassif <span class="op">=</span> <span class="fu"><a href="reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
                                        x <span class="op">=</span> <span class="va">x</span>,
                                        y <span class="op">=</span> <span class="va">y</span>,
@@ -444,10 +444,10 @@
 <span class="co">#&gt; 12 4, 1         -1    23   0.341           0.676   -27 non-CMC (passed)</span>
 <span class="co">#&gt; 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC (passed)</span>
 <span class="co">#&gt; 14 3, 1          3    22   0.439           0.782   -27 CMC             </span>
-<span class="co">#&gt; 15 3, 2         62    54   0.286           0.548   -27 non-CMC (passed)</span></pre></div>
-<p>In summary: the <code>decison_CMC</code> function applies both the decision rules of the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> or the High CMC method of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a>, depending on whether the user specifies a value for the High CMC threshold <code>tau</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit">
-<span class="va">kmComparison_allCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
+<span class="co">#&gt; 15 3, 2         62    54   0.286           0.548   -27 non-CMC (passed)</span></code></pre></div>
+<p>In summary: the <code>decison_CMC</code> function applies either the decision rules of the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> or the High CMC method of <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a>, depending on whether the user specifies a value for the High CMC threshold <code>tau</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparison_allCMCs</span> <span class="op">&lt;-</span> <span class="va">kmComparisonFeatures</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>originalMethodClassif <span class="op">=</span> <span class="fu"><a href="reference/decision_CMC.html">decision_CMC</a></span><span class="op">(</span>cellIndex <span class="op">=</span> <span class="va">cellIndex</span>,
                                               x <span class="op">=</span> <span class="va">x</span>,
                                               y <span class="op">=</span> <span class="va">y</span>,
@@ -487,10 +487,10 @@
 <span class="co">#&gt; 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC         </span>
 <span class="co">#&gt; 14 3, 1          3    22   0.439           0.782   -27 CMC             </span>
 <span class="co">#&gt; 15 3, 2         62    54   0.286           0.548   -27 non-CMC         </span>
-<span class="co">#&gt; # ... with 1 more variable: highCMCClassif &lt;chr&gt;</span></pre></div>
+<span class="co">#&gt; # ... with 1 more variable: highCMCClassif &lt;chr&gt;</span></code></pre></div>
 <p>The set of CMCs computed above are based on assuming Fadul 1-1 as the reference scan and Fadul 1-2 as the target scan. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf">Tong et al. (2015)</a> propose performing the cell-based comparison and decision rule procedures with the roles reversed and combining the results. They indicate that if the High CMC method fails to identify a <code>theta</code> mode in the CMC-<code>theta</code> distribution, then the minimum of the two CMC counts computed under the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> should be used as the CMC count (although they don’t detail how to proceed if a <code>theta</code> mode is identified in only one of the two comparisons).</p>
-<div class="sourceCode" id="cb17"><pre class="downlit">
-<span class="co">#Compare using Fadul 1-2 as reference and Fadul 1-1 as target</span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#Compare using Fadul 1-2 as reference and Fadul 1-1 as target</span>
 <span class="va">kmComparisonFeatures_rev</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
                                            <span class="op">~</span> <span class="fu"><a href="reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                                                                     target <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
@@ -513,10 +513,10 @@
                                               xThresh <span class="op">=</span> <span class="fl">20</span>,
                                               thetaThresh <span class="op">=</span> <span class="fl">6</span>,
                                               corrThresh <span class="op">=</span> <span class="fl">.5</span>,
-                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>The logic required to combine the results in <code>kmComparison_allCMCs</code> and <code>kmComparison_allCMCs_rev</code> can get a little complicated (although entirely doable using <code>dplyr</code> and other <code>tidyverse</code> functions). The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if <em>both</em> directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions – such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a>. The <code>decision_combineDirections</code> function implements the logic to combine the two sets of results, assuming the data frame contains columns named <code>originalMethodClassif</code> and <code>highCMCClassif</code> (as defined above).</p>
-<div class="sourceCode" id="cb18"><pre class="downlit">
-<span class="fu"><a href="reference/decision_combineDirections.html">decision_combineDirections</a></span><span class="op">(</span><span class="va">kmComparison_allCMCs</span>,
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="reference/decision_combineDirections.html">decision_combineDirections</a></span><span class="op">(</span><span class="va">kmComparison_allCMCs</span>,
                            <span class="va">kmComparison_allCMCs_rev</span><span class="op">)</span>
 <span class="co">#&gt; $originalMethodCMCs</span>
 <span class="co">#&gt; $originalMethodCMCs[[1]]</span>
@@ -579,16 +579,16 @@
 <span class="co">#&gt;  8 1, 7         -1     0   0.362           0.880   -24 reference_v_target</span>
 <span class="co">#&gt;  9 7, 7         -5   -16   0.262           0.610    21 target_v_reference</span>
 <span class="co">#&gt; 10 4, 1          2    -1   0.338           0.810    21 target_v_reference</span>
-<span class="co">#&gt; # ... with 14 more rows</span></pre></div>
-<p>The final step is then deciding whether the number of CMCs computed under your preferred method is large enough to declare the cartridge case a match. <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> originally proposed using a CMC count equal to 6 as the decision boundary (i.e., classify “match” if CMC count is greater than or equal to 6). This has been shown to not generalize to other proposed methods and data sets (see, e.g., <a href="https://www.sciencedirect.com/science/article/pii/S0379073817303420?via%3Dihub">Chen et al. (2017)</a>). A more principled approach to choosing the CMC count has not yet been described.</p>
+<span class="co">#&gt; # ... with 14 more rows</span></code></pre></div>
+<p>The final step is to decide whether the number of CMCs computed under your preferred method is large enough to declare the cartridge case a match. <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193">Song (2013)</a> originally proposed using a CMC count equal to 6 as the decision boundary (i.e., classify “match” if CMC count is greater than or equal to 6). This has been shown to not generalize to other proposed methods and data sets (see, e.g., <a href="https://www.sciencedirect.com/science/article/pii/S0379073817303420?via%3Dihub">Chen et al. (2017)</a>). A more principled approach to choosing the CMC count has not yet been described.</p>
 <p>Finally, we can visualize the regions of the scan identified as CMCs.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit">
-<span class="fu"><a href="reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
         targetScan  <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
         reference_v_target_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs</span>,
         target_v_reference_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs_rev</span>,
         x3pNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span>,<span class="st">"Fadul 1-2"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; $originalMethodCMCs_reference_v_target</span></pre></div>
+<span class="co">#&gt; $originalMethodCMCs_reference_v_target</span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-18-1.png" width="100%"></p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $originalMethodCMCs_target_v_reference</span></span></code></pre></div>
@@ -608,8 +608,7 @@
     <div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
+<li>GPL (&gt;= 3)</li>
 </ul>
 </div>
 <div class="developers">
@@ -626,6 +625,7 @@
 <ul class="list-unstyled">
 <li><a href="https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master"><img src="https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://travis-ci.com/CSAFE-ISU/cmcR"><img src="https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://github.com/CSAFE-ISU/cmcR/actions"><img src="https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
 </ul>
 </div>
 </div>

@@ -171,9 +171,8 @@ original method CMCs will be plotted</p></td>
     </tr>
     <tr>
       <th>corColName</th>
-      <td><p>name of correlation similarity score column used to
-identify the CMCs in the two comparison_*_df data frames (e.g.,
-pairwiseCompCor)</p></td>
+      <td><p>name of correlation similarity score column used to identify
+the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)</p></td>
     </tr>
     <tr>
       <th>type</th>
@@ -210,9 +209,14 @@ scale_fill_gradientn)</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A list of 4 ggplot objects showing the CMCs identified under both
+decision rules and in both comparison directions.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
 
 <span class='va'>comparisonDF_1to2</span> <span class='op'>&lt;-</span> <span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dfr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>30</span>,<span class='fl'>30</span>,by <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
                                    <span class='op'>~</span> <span class='fu'><a href='comparison_allTogether.html'>comparison_allTogether</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,
@@ -255,10 +259,7 @@ scale_fill_gradientn)</p></td>
        <span class='va'>comparisonDF_1to2</span>,
        <span class='va'>comparisonDF_2to1</span>,
        corColName <span class='op'>=</span> <span class='st'>"pairwiseCompCor"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; $originalMethodCMCs_reference_v_target</div><div class='img'><img src='cmcPlot-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; 
-#&gt; $originalMethodCMCs_target_v_reference</div><div class='img'><img src='cmcPlot-2.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; 
-#&gt; $highCMC_reference_v_target</div><div class='img'><img src='cmcPlot-3.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; 
-#&gt; $highCMC_target_v_reference</div><div class='img'><img src='cmcPlot-4.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; </div><div class='input'>
+<span class='op'>}</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

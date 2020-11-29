@@ -72,7 +72,8 @@
 
       
 
-      </header><script src="decisionRuleDescription_files/header-attrs-2.4/header-attrs.js"></script><div class="row">
+      </header><script src="decisionRuleDescription_files/header-attrs-2.5.3/header-attrs.js"></script><link href="decisionRuleDescription_files/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet">
+<script src="decisionRuleDescription_files/anchor-sections-1.0.1/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>CMC Decision Rule Description</h1>
@@ -89,19 +90,19 @@
 <h1 class="hasAnchor">
 <a href="#set-up" class="anchor"></a>Set-up</h1>
 <p>This vignette will describe the decision rules used in the original method of <a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868">Song (2013)</a> and the High CMC method of <a href="https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf">Tong et al. (2015)</a>. For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by <a href="https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf">Fadul et al. (2011)</a>. The raw cartridge case scans can be downloaded from the <a href="https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&amp;mt=1&amp;m=3&amp;sp=1">NIST Ballistics Toolmark Research Database</a>. The scans were preprocessed using functions available in the <strong>cmcR</strong> package and are not discussed here. Refer to the <code>fadul_examples.R</code> script available on the <a href="https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw"><strong>cmcR</strong> GitHub page</a> for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the <a href="https://csafe-isu.github.io/cmcR/reference/comparison_allTogether.html"><code>comparison_allTogether</code></a> function on the <strong>cmcR</strong> website for information regarding this procedure.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">gridExtra</span><span class="op">)</span></code></pre></div>
 <p>We will consider comparisons between three cartridge case scans. Fadul 1-1 and Fadul 1-2 are known matches (i.e., were fired from the same firearm) while Fadul 2-1 is a non-match. The comparisons considered are Fadul 1-1 vs. Fadul 1-2 and Fadul 1-1 vs. Fadul 2-1.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_processed"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.2_processed"</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="co">#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2</span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_processed"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.2_processed"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2</span>
 
 <span class="va">fadul2.1_raw</span> <span class="op">&lt;-</span> <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span><span class="op">(</span><span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span><span class="op">)</span>
 
@@ -114,7 +115,7 @@
                                  tau <span class="op">=</span> <span class="fl">.5</span>,
                                  method <span class="op">=</span> <span class="st">"fn"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_sample.html">sample_x3p</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_sample.html">sample_x3p</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The three processed cartridge cases are shown below.</p>
 <p><img src="decisionRuleDescription_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;"></p>
 <p>The cell-based comparison procedure implemented in the <code>comparison_allTogether</code> function returns a data frame/tibble of similarity features between two cartridge case scans. For each cell in the “reference” scan (Fadul 1-1 in this example), the similarity features include</p>

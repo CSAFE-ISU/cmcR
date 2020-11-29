@@ -72,7 +72,8 @@
 
       
 
-      </header><script src="cmcR_plotReproduction_files/header-attrs-2.4/header-attrs.js"></script><div class="row">
+      </header><script src="cmcR_plotReproduction_files/header-attrs-2.5.3/header-attrs.js"></script><link href="cmcR_plotReproduction_files/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet">
+<script src="cmcR_plotReproduction_files/anchor-sections-1.0.1/anchor-sections.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Reproduction of Song et al. (2018) plots using the cmcR package</h1>
@@ -85,15 +86,15 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">magrittr</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-forge.r-project.org/projects/rgl/">rgl</a></span><span class="op">)</span></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-forge.r-project.org/projects/rgl/">rgl</a></span><span class="op">)</span></code></pre></div>
 <!-- TODO: -->
 <!--   - Add hyperlinks to .png images of original plots -->
 <!--   - Add red squares indicating non-CMCs based on topResultsPerCell output -->
@@ -118,20 +119,20 @@
 <div id="cartridge-case-scan-image-figure-1-1" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cartridge-case-scan-image-figure-1-1" class="anchor"></a>Cartridge case scan image (Figure 1.1)</h2>
-<p>The <code>rgl</code> package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an <code>rgl</code> “scene” including placing lights at desired locations and controlling color, surface reflectance, etc. Each <code>rgl</code> scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at <span class="math inline">\((0,0,10)\)</span> and another located “north-by-northwest” of the scan at <span class="math inline">\((-1,2,2)\)</span>. Note that these positions are relative to where the viewer begins - which is somewhere along the <span class="math inline">\(z\)</span>-axis depending on the value provided to the <code>zoom</code> attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There’s truly an arbitrary amount of tinkering one could perform to get the “best” looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the <code>rgl</code> device is opened, the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3ptools::x3p_snapshot</a></code> function saves the device’s current viewpoint as a .png in a local directly called bfScanImages. The same procedure is carried out for the <code>fadul1.2_raw</code> object (not shown).</p>
-<p>To learn more about how various aspects of a scene are constructed, see <a href="https://cran.r-project.org/web/packages/rgl/vignettes/rgl.html">this vignette</a> for the <code>rgl</code> package. For more details on using <code>rgl</code> specifically applied to .x3p files, see the documentation for the <a href="https://github.com/heike/x3ptools"><code>x3ptools</code> package on Github</a>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="va">fadul1.1_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
+<p>The <code>rgl</code> package can be used to visualize the cartridge case scans in 3 dimensions. The code below shows how to construct an <code>rgl</code> “scene” including placing lights at desired locations and controlling color, surface reflectance, etc. Each <code>rgl</code> scene can support up to 8 lights, but two are setup in the scene below - one directly above the scan at <span class="math inline">\((0,0,10)\)</span> and another located “north-by-northwest” of the scan at <span class="math inline">\((-1,2,2)\)</span>. Note that these positions are relative to where the viewer begins - which is somewhere along the <span class="math inline">\(z\)</span>-axis depending on the value provided to the <code>zoom</code> attribute. Based on experimentation, it appears that applying a Gaussian filter to the surface matrix prior to setting up the scene makes the breech face impressions more visually distinct (otherwise, a good deal of noise due to the scanning process makes it difficult to see much structure). There’s truly an arbitrary amount of tinkering one could perform to get the “best” looking scene for a particular cartridge case scan, so in no way is the scene setup shown below generalizable to more cartridge case scans. Ince the <code>rgl</code> device is opened, the <code><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3ptools::x3p_snapshot</a></code> function saves the device’s current viewpoint as a .png in a local directly called bfScanImages (Note: as of 11/22/20, the <code>x3p_snapshot</code> function is only available in the development version of <code>x3ptools</code>). The same procedure is carried out for the <code>fadul1.2_raw</code> object (not shown).</p>
+<p>To learn more about how various aspects of a scene are constructed, see <a href="https://cran.r-project.org/package=rgl">the vignettes</a> for the <code>rgl</code> package. For more details on using <code>rgl</code> specifically applied to .x3p files, see the documentation for the <a href="https://github.com/heike/x3ptools"><code>x3ptools</code> package on Github</a>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">fadul1.1_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
 <span class="co"># Same source comparison</span>
 <span class="va">fadul1.2_id</span> <span class="op">&lt;-</span> <span class="st">"DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"</span>
 
 <span class="co"># Code to download breech face impressions:</span>
 <span class="va">nbtrd_url</span> <span class="op">&lt;-</span> <span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement"</span>
 
-<span class="va">fadul1.1_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">x3p_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">nbtrd_url</span>,<span class="va">fadul1.1_id</span><span class="op">)</span><span class="op">)</span>
-<span class="va">fadul1.2_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">x3p_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">nbtrd_url</span>,<span class="va">fadul1.2_id</span><span class="op">)</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="co">#apply lowpass filter to reduce noise in scan:</span>
+<span class="va">fadul1.1_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">nbtrd_url</span>,<span class="va">fadul1.1_id</span><span class="op">)</span><span class="op">)</span>
+<span class="va">fadul1.2_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="va">nbtrd_url</span>,<span class="va">fadul1.2_id</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#apply lowpass filter to reduce noise in scan:</span>
 <span class="va">surface1</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_raw</span> <span class="op">%&gt;%</span>
   <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span>wavelength <span class="op">=</span> <span class="fl">16</span>,filtertype <span class="op">=</span> <span class="st">"lp"</span><span class="op">)</span>
 <span class="va">surface2</span> <span class="op">&lt;-</span> <span class="va">fadul1.2_raw</span> <span class="op">%&gt;%</span>
@@ -148,8 +149,6 @@
 
 <span class="co">#opens blank "canvas" upon which we can add lights, surfaces, etc.</span>
 <span class="fu"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">open3d</a></span><span class="op">(</span>params <span class="op">=</span> <span class="va">params</span><span class="op">)</span>
-<span class="co">#&gt; wgl </span>
-<span class="co">#&gt;   1</span>
 
 <span class="co">#removes any previously declared lights in scene</span>
 <span class="fu"><a href="https://rdrr.io/pkg/rgl/man/scene.html">rgl.pop</a></span><span class="op">(</span><span class="st">"lights"</span><span class="op">)</span>
@@ -171,21 +170,21 @@
 
 <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_snapshot.html">x3p_snapshot</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span><span class="op">(</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>,
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>,
                        <span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-2.png"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
 </div>
 <div id="processed-cartrige-case-scan-figure-5" class="section level2">
 <h2 class="hasAnchor">
 <a href="#processed-cartrige-case-scan-figure-5" class="anchor"></a>Processed Cartrige Case Scan (Figure 5)</h2>
 <p>Plotting the cartridge case surface matrix in which height values are mapped to a divergent color scheme may help highlight breech face impressions. We can use <code>ggplot2</code> to accomplish this.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_processed"</span>,<span class="st">"fadul1.2_processed"</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="co">#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2</span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"fadul1.1_processed"</span>,<span class="st">"fadul1.2_processed"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#Download a non-matching cartridge case to Fadul 1-1 and Fadul 1-2</span>
 
 <span class="va">fadul2.1_raw</span> <span class="op">&lt;-</span> <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_read.html">read_x3p</a></span><span class="op">(</span><span class="st">"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/8ae0b86d-210a-41fd-ad75-8212f9522f96"</span><span class="op">)</span>
 
@@ -198,22 +197,22 @@
                                  tau <span class="op">=</span> <span class="fl">.5</span>,
                                  method <span class="op">=</span> <span class="st">"fn"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_sample.html">sample_x3p</a></span><span class="op">(</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span>x3pList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+  <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_sample.html">sample_x3p</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span>x3pList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                                  <span class="st">"Fadul 1-2"</span> <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                                  <span class="st">"Fadul 2-1"</span> <span class="op">=</span> <span class="va">fadul2.1_processed</span><span class="op">)</span>,
                   type <span class="op">=</span> <span class="st">"faceted"</span>,
                   rotate <span class="op">=</span> <span class="fl">90</span>,
-                  legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+                  legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
 </div>
 <div id="cmc-plot-figure-4" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cmc-plot-figure-4" class="anchor"></a>CMC Plot (Figure 4)</h2>
 <p>The code below will perform the cell-based comparison procedure and then determine the initial/high CMCs for the known match and known non-match pairs of cartridge cases. The “initial” CMCs are determined based on the originally proposed method from Song (2013) while the “high” CMCs are determined using the “High CMC” method proposed by Tong et al. (2015).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="va">kmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmComparisonFeatures</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">30</span>,by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
                                        <span class="op">~</span> <span class="fu"><a href="../reference/comparison_allTogether.html">comparison_allTogether</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                                                                 target <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                                                                 
@@ -309,10 +308,10 @@
                                               xThresh <span class="op">=</span> <span class="fl">20</span>,
                                               thetaThresh <span class="op">=</span> <span class="fl">6</span>,
                                               corrThresh <span class="op">=</span> <span class="fl">.5</span>,
-                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></pre></div>
+                                              tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>We can then visualize the CMCs for these comparisons. Below are the CMCs determined under the original method of Song (2013).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="va">kmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                             targetScan <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                             reference_v_target_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs</span>,
                             target_v_reference_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs_rev</span>,
@@ -353,11 +352,11 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">8.15</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
 
-<span class="va">km_originalCMCPlot_bothDirections</span></pre></div>
+<span class="va">km_originalCMCPlot_bothDirections</span></code></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
 <p>And the CMCs determined under the High CMC method of Tong et al. (2015).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="va">kmLegend_highCMC</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">kmLegend_highCMC</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span>
                                    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>legend.direction <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">km_highCMC_reference_v_target</span> <span class="op">&lt;-</span> <span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span> 
@@ -386,11 +385,11 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
 
-<span class="va">km_highCMCCMCPlot_bothDirections</span></pre></div>
+<span class="va">km_highCMCCMCPlot_bothDirections</span></code></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 <p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="va">knmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">knmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                             targetScan <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
                             reference_v_target_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs</span>,
                             target_v_reference_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs_rev</span>,
@@ -431,7 +430,7 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span>
 
-<span class="va">knm_cmcPlot_bothDirections</span></pre></div>
+<span class="va">knm_cmcPlot_bothDirections</span></code></pre></div>
 <p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
 </div>
 <div id="references" class="section level2">
