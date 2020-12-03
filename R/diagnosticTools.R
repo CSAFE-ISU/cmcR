@@ -186,8 +186,8 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 # @importFrom rlang .data
 #' @importFrom stringr str_remove_all
 
-arrangeCMCPlot <- function(referenceScan,
-                           targetScan,
+arrangeCMCPlot <- function(reference,
+                           target,
                            allCells,
                            x3pNames,
                            pltType = "faceted",
@@ -197,11 +197,11 @@ arrangeCMCPlot <- function(referenceScan,
                            cell.alpha = .2,
                            na.value = "gray80"){
 
-  targetScan_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (referenceScan$header.info$incrementY*1e6)*(.data$firstRow),
-                  lastRow = (referenceScan$header.info$incrementY*1e6)*(.data$lastRow),
-                  firstCol = (referenceScan$header.info$incrementY*1e6)*(.data$firstCol),
-                  lastCol = (referenceScan$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+  target_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = (reference$header.info$incrementY*1e6)*(.data$firstRow),
+                  lastRow = (reference$header.info$incrementY*1e6)*(.data$lastRow),
+                  firstCol = (reference$header.info$incrementY*1e6)*(.data$firstCol),
+                  lastCol = (reference$header.info$incrementY*1e6)*(.data$lastCol)) %>%
     dplyr::mutate(x_1 = .data$firstCol,
                   y_1 = .data$firstRow,
                   x_2 = .data$lastCol,
@@ -219,23 +219,23 @@ arrangeCMCPlot <- function(referenceScan,
                   theta = rep(0,times = nrow(.)),
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
-  referenceScan_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (targetScan$header.info$incrementY*1e6)*(.data$firstRow),
-                  lastRow = (targetScan$header.info$incrementY*1e6)*(.data$lastRow),
-                  firstCol = (targetScan$header.info$incrementY*1e6)*(.data$firstCol),
-                  lastCol = (targetScan$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+  reference_cellGrid <- allCells %>%
+    dplyr::mutate(firstRow = (target$header.info$incrementY*1e6)*(.data$firstRow),
+                  lastRow = (target$header.info$incrementY*1e6)*(.data$lastRow),
+                  firstCol = (target$header.info$incrementY*1e6)*(.data$firstCol),
+                  lastCol = (target$header.info$incrementY*1e6)*(.data$lastCol)) %>%
     dplyr::mutate(firstRowCentered = .data$firstRow - max(.data$lastRow)/2,
                   lastRowCentered = .data$lastRow - max(.data$lastRow)/2,
                   firstColCentered = .data$firstCol - max(.data$lastCol)/2,
                   lastColCentered = .data$lastCol - max(.data$lastCol)/2) %>%
-    dplyr::mutate(topLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (targetScan$header.info$incrementY*1e6)*.data$x/2,
-                  topLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (targetScan$header.info$incrementY*1e6)*.data$y/2,
-                  topRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (targetScan$header.info$incrementY*1e6)*.data$x/2,
-                  topRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (targetScan$header.info$incrementY*1e6)*.data$y/2,
-                  bottomRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (targetScan$header.info$incrementY*1e6)*.data$x/2,
-                  bottomRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (targetScan$header.info$incrementY*1e6)*.data$y/2,
-                  bottomLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (targetScan$header.info$incrementY*1e6)*.data$x/2,
-                  bottomLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (targetScan$header.info$incrementY*1e6)*.data$y/2) %>%
+    dplyr::mutate(topLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
+                  topLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
+                  topRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
+                  topRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
+                  bottomRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
+                  bottomRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
+                  bottomLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
+                  bottomLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2) %>%
     #this is redundant, but are the names attributed to the x and y columns are
     #set-up down below, so I won't change it
     dplyr::mutate(x_1 = .data$topLeftCorner_col,
@@ -255,15 +255,15 @@ arrangeCMCPlot <- function(referenceScan,
                   theta = .data$theta - median(.data$theta),
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
-  targetScan_rotate <- 90 #- abs(median(allCells %>%
+  target_rotate <- 90 #- abs(median(allCells %>%
   # dplyr::filter(cmc != "non-CMC") %>%
   # dplyr::pull(theta)))
 
-  x3pPlt <- x3pListPlot(x3pList = list(referenceScan,targetScan) %>%
+  x3pPlt <- x3pListPlot(x3pList = list(reference,target) %>%
                           setNames(x3pNames),
                         type = pltType,
                         rotate = c(90,
-                                   ifelse(is.na(targetScan_rotate),90,targetScan_rotate)),
+                                   ifelse(is.na(target_rotate),90,target_rotate)),
                         legend.quantiles = legend.quantiles,
                         height.colors = height.colors,
                         na.value = na.value,
@@ -273,22 +273,22 @@ arrangeCMCPlot <- function(referenceScan,
 
     x3pPlt <- x3pPlt +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = targetScan_cellGrid,
+      ggplot2::geom_polygon(data = target_cellGrid,
                             mapping = ggplot2::aes(x = .data$x,
                                                    y = .data$y,
                                                    group = .data$cellIndex,
                                                    fill = .data$cmc),
                             alpha = cell.alpha,
                             size = 2) +
-      ggplot2::geom_polygon(data = referenceScan_cellGrid,
+      ggplot2::geom_polygon(data = reference_cellGrid,
                             mapping = ggplot2::aes(x = .data$x,
                                                    y = .data$y,
                                                    group = .data$cellIndex,
                                                    fill = .data$cmc),
                             alpha = cell.alpha,
                             size = 2) +
-      ggplot2::geom_text(data = dplyr::bind_rows(targetScan_cellGrid,
-                                                 referenceScan_cellGrid),
+      ggplot2::geom_text(data = dplyr::bind_rows(target_cellGrid,
+                                                 reference_cellGrid),
                          ggplot2::aes(x = .data$midCol,
                                       y = .data$midRow,
                                       label = .data$cellIndex,
@@ -303,7 +303,7 @@ arrangeCMCPlot <- function(referenceScan,
   else if(pltType == "list"){
     x3pPlt[[1]] <- x3pPlt[[1]] +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = targetScan_cellGrid,
+      ggplot2::geom_polygon(data = target_cellGrid,
                             mapping = ggplot2::aes(x = .data$x,
                                                    y = .data$y,
                                                    group = .data$cellIndex,
@@ -312,7 +312,7 @@ arrangeCMCPlot <- function(referenceScan,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
-      ggplot2::geom_text(data = targetScan_cellGrid,
+      ggplot2::geom_text(data = target_cellGrid,
                          ggplot2::aes(x = .data$midCol,
                                       y = .data$midRow,
                                       label = .data$cellIndex,
@@ -324,7 +324,7 @@ arrangeCMCPlot <- function(referenceScan,
 
     x3pPlt[[2]] <- x3pPlt[[2]] +
       ggnewscale::new_scale_fill() +
-      ggplot2::geom_polygon(data = referenceScan_cellGrid,
+      ggplot2::geom_polygon(data = reference_cellGrid,
                             mapping = ggplot2::aes(x = .data$x,
                                                    y = .data$y,
                                                    group = .data$cellIndex,
@@ -333,7 +333,7 @@ arrangeCMCPlot <- function(referenceScan,
                             size = 2) +
       ggplot2::scale_colour_manual(values = cell.colors,
                                    aesthetics = c("fill","colour")) +
-      ggplot2::geom_text(data = referenceScan_cellGrid,
+      ggplot2::geom_text(data = reference_cellGrid,
                          ggplot2::aes(x = .data$midCol,
                                       y = .data$midRow,
                                       label = .data$cellIndex,
@@ -353,8 +353,8 @@ arrangeCMCPlot <- function(referenceScan,
 #'@description Constructs either a single faceted plot or a list of plots
 #'  depicting the CMCs/non-CMCs under the initially proposed and High CMC
 #'  methods for a pair of cartridge case scans
-#'@param referenceScan an x3p object
-#'@param targetScan a different x3p object
+#'@param reference an x3p object
+#'@param target a different x3p object
 #'@param reference_v_target_CMCs CMCs for the comparison between the reference
 #'  scan and the target scan.
 #'@param target_v_reference_CMCs (optional) CMCs for the comparison between the
@@ -426,20 +426,20 @@ arrangeCMCPlot <- function(referenceScan,
 #'@importFrom rlang .data
 #'@export
 
-cmcPlot <- function(referenceScan,
-                    targetScan,
+cmcPlot <- function(reference,
+                    target,
                     reference_v_target_CMCs,
                     target_v_reference_CMCs = reference_v_target_CMCs,
                     corColName = "pairwiseCompCor",
                     type = "faceted",
-                    x3pNames = c("referenceScan","targetScan"),
+                    x3pNames = c("reference","target"),
                     legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                     height.colors = c("#1B1B1B","#404040","#7B7B7B","#B0B0B0","#DBDBDB","#F7F7F7","#E4E4E4","#C5C5C5","#999999","#717171","#4E4E4E"),
                     cell.colors = c("#a50026","#313695"),
                     cell.alpha = .2,
                     na.value = "gray80"){
 
-  referenceScan_cellCorners <- referenceScan %>%
+  reference_cellCorners <- reference %>%
     comparison_cellDivision() %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
@@ -456,7 +456,7 @@ cmcPlot <- function(referenceScan,
                  stringsAsFactors = FALSE)
     })
 
-  targetScan_cellCorners <- targetScan %>%
+  target_cellCorners <- target %>%
     comparison_cellDivision() %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
@@ -496,11 +496,11 @@ cmcPlot <- function(referenceScan,
   allInitialCells_reference_v_target <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
     dplyr::mutate(cmc = ifelse(.data$originalMethodClassif == "CMC","Original Method CMC","non-CMC")) %>%
     dplyr::mutate(cmc = factor(.data$cmc,levels = c("non-CMC","Original Method CMC"))) %>%
-    dplyr::left_join(referenceScan_cellCorners,
+    dplyr::left_join(reference_cellCorners,
                      by = "cellIndex")
 
-  originalMethodCMCsPlt_reference_v_target <- arrangeCMCPlot(referenceScan = referenceScan,
-                                                             targetScan = targetScan,
+  originalMethodCMCsPlt_reference_v_target <- arrangeCMCPlot(reference = reference,
+                                                             target = target,
                                                              allCells = allInitialCells_reference_v_target,
                                                              x3pNames = x3pNames,
                                                              pltType = type,
@@ -539,11 +539,11 @@ cmcPlot <- function(referenceScan,
   allInitialCells_target_v_reference <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
     dplyr::mutate(cmc = ifelse(.data$originalMethodClassif == "CMC","Original Method CMC","non-CMC")) %>%
     dplyr::mutate(cmc = factor(.data$cmc,levels = c("non-CMC","Original Method CMC"))) %>%
-    dplyr::left_join(referenceScan_cellCorners,
+    dplyr::left_join(reference_cellCorners,
                      by = "cellIndex")
 
-  originalMethodCMCsPlt_target_v_reference <- arrangeCMCPlot(referenceScan = targetScan,
-                                                             targetScan = referenceScan,
+  originalMethodCMCsPlt_target_v_reference <- arrangeCMCPlot(reference = target,
+                                                             target = reference,
                                                              allCells = allInitialCells_target_v_reference,
                                                              x3pNames = rev(x3pNames),
                                                              pltType = type,
@@ -576,11 +576,11 @@ cmcPlot <- function(referenceScan,
                                                           non_highCMCs_reference_v_target) %>%
     dplyr::mutate(cmc = ifelse(.data$highCMCClassif == "CMC","High CMC","non-CMC")) %>%
     dplyr::mutate(cmc = factor(.data$cmc,levels = c("non-CMC","High CMC"))) %>%
-    dplyr::left_join(referenceScan_cellCorners,
+    dplyr::left_join(reference_cellCorners,
                      by = "cellIndex")
 
-  highCMCPlt_reference_v_target <- arrangeCMCPlot(referenceScan = referenceScan,
-                                                  targetScan = targetScan,
+  highCMCPlt_reference_v_target <- arrangeCMCPlot(reference = reference,
+                                                  target = target,
                                                   allCells = highCMC_plotData_reference_v_target,
                                                   x3pNames = x3pNames,
                                                   pltType = type,
@@ -606,11 +606,11 @@ cmcPlot <- function(referenceScan,
                                                           non_highCMCs_target_v_reference) %>%
     dplyr::mutate(cmc = ifelse(.data$highCMCClassif == "CMC","High CMC","non-CMC")) %>%
     dplyr::mutate(cmc = factor(.data$cmc,levels = c("non-CMC","High CMC"))) %>%
-    dplyr::left_join(targetScan_cellCorners,
+    dplyr::left_join(target_cellCorners,
                      by = "cellIndex")
 
-  highCMCPlt_target_v_reference <- arrangeCMCPlot(referenceScan = targetScan,
-                                                  targetScan = referenceScan,
+  highCMCPlt_target_v_reference <- arrangeCMCPlot(reference = target,
+                                                  target = reference,
                                                   allCells = highCMC_plotData_target_v_reference,
                                                   x3pNames = rev(x3pNames),
                                                   pltType = type,

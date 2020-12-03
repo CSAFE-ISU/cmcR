@@ -297,8 +297,8 @@ knmComparison_allCMCs_rev <- knmComparisonFeatures_rev %>%
 We can then visualize the CMCs for these comparisons. Below are the CMCs determined under the original method of Song (2013).
 
 ```{r}
-kmCMCPlot <- cmcR::cmcPlot(referenceScan = fadul1.1_processed,
-                            targetScan = fadul1.2_processed,
+kmCMCPlot <- cmcR::cmcPlot(reference = fadul1.1_processed,
+                            target = fadul1.2_processed,
                             reference_v_target_CMCs = kmComparison_allCMCs,
                             target_v_reference_CMCs = kmComparison_allCMCs_rev,
                             type = "faceted",
@@ -380,8 +380,8 @@ km_highCMCCMCPlot_bothDirections
 The known non-match pair didn't yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).
 
 ```{r}
-knmCMCPlot <- cmcR::cmcPlot(referenceScan = fadul1.1_processed,
-                            targetScan = fadul2.1_processed,
+knmCMCPlot <- cmcR::cmcPlot(reference = fadul1.1_processed,
+                            target = fadul2.1_processed,
                             reference_v_target_CMCs = knmComparison_allCMCs,
                             target_v_reference_CMCs = knmComparison_allCMCs_rev,
                             type = "faceted",

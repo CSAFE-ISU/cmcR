@@ -5,13 +5,13 @@
 \title{Visualize initial and high CMCs for a cartridge case pair comparison}
 \usage{
 cmcPlot(
-  referenceScan,
-  targetScan,
+  reference,
+  target,
   reference_v_target_CMCs,
   target_v_reference_CMCs = reference_v_target_CMCs,
   corColName = "pairwiseCompCor",
   type = "faceted",
-  x3pNames = c("referenceScan", "targetScan"),
+  x3pNames = c("reference", "target"),
   legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
   height.colors = c("#1B1B1B", "#404040", "#7B7B7B", "#B0B0B0", "#DBDBDB", "#F7F7F7",
     "#E4E4E4", "#C5C5C5", "#999999", "#717171", "#4E4E4E"),
@@ -21,9 +21,9 @@ cmcPlot(
 )
 }
 \arguments{
-\item{referenceScan}{an x3p object}
+\item{reference}{an x3p object}
 
-\item{targetScan}{a different x3p object}
+\item{target}{a different x3p object}
 
 \item{reference_v_target_CMCs}{CMCs for the comparison between the reference
 scan and the target scan.}
