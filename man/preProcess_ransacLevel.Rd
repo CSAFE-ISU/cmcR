@@ -2,7 +2,6 @@
 % Please edit documentation in R/preProcess.R
 \name{preProcess_ransacLevel}
 \alias{preProcess_ransacLevel}
-\alias{preProcess_removeTrend}
 \title{Finds plane of breechface marks using the RANSAC method}
 \usage{
 preProcess_ransacLevel(
@@ -12,12 +11,9 @@ preProcess_ransacLevel(
   iters = 300,
   returnResiduals = TRUE
 )
-
-preProcess_removeTrend(x3p, statistic = "mean", ...)
 }
 \arguments{
-\item{x3p}{an x3p object containing the surface matrix of a cartridge case
-scan}
+\item{x3p}{an x3p object containing a surface matrix}
 
 \item{ransacInlierThresh}{threshold to declare an observed value close to the
 fitted plane an "inlier". A smaller value will yield a more stable
@@ -33,22 +29,12 @@ stable breech face estimate)}
 \item{returnResiduals}{dictates whether the difference between the estimated
 breech face and fitted plane are returned (residuals) or if the estimates
 breech face is simply shifted down by its mean value}
-
-\item{statistic}{either "mean" or "quantile"}
-
-\item{...}{arguments to be set in the quantreg::rq function if statistic =
-"quantile" is set. In this case, tau = .5 and method = "fn" are recommended}
 }
 \value{
 an x3p object containing the leveled surface matrix.
-
-an x3p object containing the leveled cartridge case scan surface
-matrix.
 }
 \description{
 Finds plane of breechface marks using the RANSAC method
-
-Level a breech face impression surface matrix by a conditional statistics
 }
 \note{
 Given input depths (in microns), find best-fitting plane using
@@ -72,29 +58,6 @@ fittedPlane <- raw_x3p$surface.matrix \%>\%
                     iters = 150)
 }
 
-\dontrun{
-nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
-fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
-
-fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
-fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
-                                       region = "exterior",
-                                       radiusOffset = -20)
-
-fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
-                                      region = "interior",
-                                      radiusOffset = 200)
-
-fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,
-                                           statistic = "quantile",
-                                           tau = .5,
-                                           method = "fn")
-
-x3pListPlot(list("Original" = fadul1.1,
-                 "Ext. Cropped" = fadul1.1_extCropped,
-                 "Ext. & Int. Cropped" = fadul1.1_intCroped,
-                 "Cropped and Leveled" = fadul1.1_leveled))
-}
 }
 \seealso{
 https://github.com/xhtai/cartridges3D

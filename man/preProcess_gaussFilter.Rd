@@ -27,14 +27,14 @@ particular cut-off wavelength.
 }
 \examples{
 \dontrun{
-raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
-x3ptools::sample_x3p(m = 2)
-
-raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
-  cmcR::preProcess_ransacLevel() \%>\%
-  cmcR::preProcess_levelBF() \%>\%
-  cmcR::preProcess_cropWS() \%>\%
-  cmcR::preProcess_removeFPCircle() \%>\%
+x3p_processed <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
+  cmcR::preProcess_crop(region = "exterior",
+                        radiusOffset = -20) \%>\%
+  cmcR::preProcess_crop(region = "interior",
+                        radiusOffset = 200) \%>\%
+  cmcR::preProcess_removeTrend(statistic = "quantile",
+                               tau = .5,
+                               method = "fn") \%>\%
   cmcR::preProcess_gaussFilter(wavelength = c(16,500),
                                filtertype = "bp")
 }

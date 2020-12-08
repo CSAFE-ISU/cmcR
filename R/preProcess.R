@@ -100,7 +100,6 @@ preProcess_levelBF <- function(ransacFit,
 #' @seealso
 #'   https://github.com/xhtai/cartridges3D
 #' @export
-#' @rdname levelBreechFace
 #' @importFrom stats lm predict
 
 preProcess_ransacLevel <- function(x3p,
@@ -413,14 +412,14 @@ preProcess_removeFPCircle <- function(x3p,
 #'@return An x3p object containing the Gaussian-filtered surface matrix.
 #' @examples
 #' \dontrun{
-#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#' x3ptools::sample_x3p(m = 2)
-#'
-#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
-#'   cmcR::preProcess_ransacLevel() %>%
-#'   cmcR::preProcess_levelBF() %>%
-#'   cmcR::preProcess_cropWS() %>%
-#'   cmcR::preProcess_removeFPCircle() %>%
+#' x3p_processed <- x3ptools::read_x3p("path/to/file.x3p") %>%
+#'   cmcR::preProcess_crop(region = "exterior",
+#'                         radiusOffset = -20) %>%
+#'   cmcR::preProcess_crop(region = "interior",
+#'                         radiusOffset = 200) %>%
+#'   cmcR::preProcess_removeTrend(statistic = "quantile",
+#'                                tau = .5,
+#'                                method = "fn") %>%
 #'   cmcR::preProcess_gaussFilter(wavelength = c(16,500),
 #'                                filtertype = "bp")
 #' }
@@ -708,48 +707,51 @@ preProcess_filterInterior <- function(x3p,
   return(x3p_clone)
 }
 
-#' Remove observations from the exterior of interior of a breech face scan
+#'Remove observations from the exterior of interior of a breech face scan
 #'
 #'@name preProcess_crop
 #'
-#' @param x3p an x3p object containing the surface matrix of a cartridge case
-#'   scan
-#' @param region dictates whether the observations on the "exterior" or
-#'   "interior" of the scan are removed
-#' @param radiusOffset the procedures used to detect the interior/exterior of
-#'   the scan tend to under/overestimate the radius of the region of interest,
-#'   respectively. The number passed to this argument is added to the radius
-#'   estimate as an offset.
-#' @param croppingThresh minimum number of non-NA pixels that need to be in a
-#'   row/column for it to not be cropped out of the breech face scan exterior
-#' @param agg_function the breech face radius estimation procedure returns a
-#'   number of radius estimates. This argument dictates the function used to
-#'   aggregate these into a final estimate.
-#' @param scheme argument for imager::imgradient
-#' @param high_connectivity argument for imager::label
-#' @param tolerance argument for imager::label
-#' @param radiusOffset number of pixels to add to estimated breech face radius.
-#'   This is commonly a negative value (e.g., -20) to trim the cartridge case
-#'   primer roll-off from the returned, cropped surface matrix
+#'@param x3p an x3p object containing the surface matrix of a cartridge case
+#'  scan
+#'@param region dictates whether the observations on the "exterior" or
+#'  "interior" of the scan are removed
+#'@param radiusOffset the procedures used to detect the interior/exterior of the
+#'  scan tend to under/overestimate the radius of the region of interest,
+#'  respectively. The number passed to this argument is added to the radius
+#'  estimate as an offset.
+#'@param croppingThresh minimum number of non-NA pixels that need to be in a
+#'  row/column for it to not be cropped out of the breech face scan exterior
+#'@param agg_function the breech face radius estimation procedure returns a
+#'  number of radius estimates. This argument dictates the function used to
+#'  aggregate these into a final estimate.
+#'@param scheme argument for imager::imgradient
+#'@param high_connectivity argument for imager::label
+#'@param tolerance argument for imager::label
+#'@param radiusOffset number of pixels to add to estimated breech face radius.
+#'  This is commonly a negative value (e.g., -20 for region = "exterior") to
+#'  trim the cartridge case primer roll-off from the returned, cropped surface
+#'  matrix or a positive value (e.g., 200 for region = "interior") to remove
+#'  observations around the firing pin impression hole.
 #'
-#' @return An x3p object containing the surface matrix of a breech face
-#'   impression scan where the observations on the exterior/interior of the
-#'   breech face scan surface.
+#'@return An x3p object containing the surface matrix of a breech face
+#'  impression scan where the observations on the exterior/interior of the
+#'  breech face scan surface.
 #'
-#' @note The radius estimation procedure tends to over-estimate the desired
-#'   radius values. As such, a lot of the breech face impression "roll-off" is
-#'   included in the final scan. Excessive roll-off can bias the calculation of
-#'   the CCF. As such, we can manually shrink the radius estimate so that little
-#'   to no roll-off is included in the final processed scan.
+#'@note The radius estimation procedure tends to over-estimate the desired
+#'  radius values. As such, a lot of the breech face impression "roll-off" is
+#'  included in the final scan. Excessive roll-off can bias the calculation of
+#'  the CCF. As such, we can manually shrink the radius estimate (-20 or -30
+#'  seems to work well for the Fadul cartridge cases) so that little to no
+#'  roll-off is included in the final processed scan.
 #'
-#' @note The radius estimation procedure is effective at estimating the radius
-#'   of the firing pin hole. Unfortunately, it is often desired that more than
-#'   just observations in firing pin hole are removed. In particular, the
-#'   plateaued region surrounding the firing pin impression hole does not come
-#'   into contact with the breech face of a firearm and is thus unwanted in the
-#'   final, processed scan. The radiusOffset argument must be tuned (around 200
-#'   seems to work well for the Fadul cartridge cases) to remove these unwanted
-#'   observations.
+#'@note The radius estimation procedure is effective at estimating the radius of
+#'  the firing pin hole. Unfortunately, it is often desired that more than just
+#'  observations in firing pin hole are removed. In particular, the plateaued
+#'  region surrounding the firing pin impression hole does not come into contact
+#'  with the breech face of a firearm and is thus unwanted in the final,
+#'  processed scan. The radiusOffset argument must be tuned (around 200 seems to
+#'  work well for the Fadul cartridge cases) to remove these unwanted
+#'  observations.
 #' @examples
 #' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
@@ -758,7 +760,7 @@ preProcess_filterInterior <- function(x3p,
 #' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 #'
 #' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
-#'                                        radiusOffset = -20,
+#'                                        radiusOffset = -30,
 #'                                        region = "exterior")
 #'
 #' fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
@@ -769,7 +771,7 @@ preProcess_filterInterior <- function(x3p,
 #'                  "Exterior Cropped" = fadul1.1_extCropped,
 #'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
 #'}
-#' @export
+#'@export
 
 preProcess_crop <- function(x3p,
                             region = "exterior",
@@ -801,7 +803,7 @@ preProcess_crop <- function(x3p,
   }
 }
 
-#' Level a breech face impression surface matrix by a conditional statistics
+#' Level a breech face impression surface matrix by a conditional statistic
 #'
 #' @name preProcess_removeTrend
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
@@ -811,7 +813,6 @@ preProcess_crop <- function(x3p,
 #'   "quantile" is set. In this case, tau = .5 and method = "fn" are recommended
 #' @return an x3p object containing the leveled cartridge case scan surface
 #'   matrix.
-#' @rdname levelBreechFace
 #' @examples
 #' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"

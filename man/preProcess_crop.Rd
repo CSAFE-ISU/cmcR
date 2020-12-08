@@ -23,8 +23,10 @@ scan}
 "interior" of the scan are removed}
 
 \item{radiusOffset}{number of pixels to add to estimated breech face radius.
-This is commonly a negative value (e.g., -20) to trim the cartridge case
-primer roll-off from the returned, cropped surface matrix}
+This is commonly a negative value (e.g., -20 for region = "exterior") to
+trim the cartridge case primer roll-off from the returned, cropped surface
+matrix or a positive value (e.g., 200 for region = "interior") to remove
+observations around the firing pin impression hole.}
 
 \item{croppingThresh}{minimum number of non-NA pixels that need to be in a
 row/column for it to not be cropped out of the breech face scan exterior}
@@ -51,16 +53,17 @@ Remove observations from the exterior of interior of a breech face scan
 The radius estimation procedure tends to over-estimate the desired
 radius values. As such, a lot of the breech face impression "roll-off" is
 included in the final scan. Excessive roll-off can bias the calculation of
-the CCF. As such, we can manually shrink the radius estimate so that little
-to no roll-off is included in the final processed scan.
+the CCF. As such, we can manually shrink the radius estimate (-20 or -30
+seems to work well for the Fadul cartridge cases) so that little to no
+roll-off is included in the final processed scan.
 
-The radius estimation procedure is effective at estimating the radius
-of the firing pin hole. Unfortunately, it is often desired that more than
-just observations in firing pin hole are removed. In particular, the
-plateaued region surrounding the firing pin impression hole does not come
-into contact with the breech face of a firearm and is thus unwanted in the
-final, processed scan. The radiusOffset argument must be tuned (around 200
-seems to work well for the Fadul cartridge cases) to remove these unwanted
+The radius estimation procedure is effective at estimating the radius of
+the firing pin hole. Unfortunately, it is often desired that more than just
+observations in firing pin hole are removed. In particular, the plateaued
+region surrounding the firing pin impression hole does not come into contact
+with the breech face of a firearm and is thus unwanted in the final,
+processed scan. The radiusOffset argument must be tuned (around 200 seems to
+work well for the Fadul cartridge cases) to remove these unwanted
 observations.
 }
 \examples{
@@ -71,7 +74,7 @@ fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 
 fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
-                                       radiusOffset = -20,
+                                       radiusOffset = -30,
                                        region = "exterior")
 
 fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
