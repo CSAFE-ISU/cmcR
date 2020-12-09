@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
       </span>
     </div>
 
@@ -177,21 +177,14 @@ each cell and its associated target scan region (after rotating the target
 scan by theta degrees)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
 
 <span class='va'>cellTibble</span> <span class='op'>&lt;-</span> <span class='fu'>comparison_allTogether</span><span class='op'>(</span>reference <span class='op'>=</span> <span class='va'>fadul1.1_processed</span>,target <span class='op'>=</span> <span class='va'>fadul1.2_processed</span><span class='op'>)</span>
 
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>cellTibble</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 6 x 6</span><span>
-#&gt;   cellIndex     x     y fft_ccf pairwiseCompCor theta
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>           </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>1</span><span> 8, 6         -</span><span style='color: #BB0000;'>7</span><span>   -</span><span style='color: #BB0000;'>23</span><span>   0.241           0.509     0
-#&gt; </span><span style='color: #555555;'>2</span><span> 7, 7         55    31   0.186           0.331     0
-#&gt; </span><span style='color: #555555;'>3</span><span> 7, 8         53    53   0.191           0.490     0
-#&gt; </span><span style='color: #555555;'>4</span><span> 6, 8        -</span><span style='color: #BB0000;'>23</span><span>   -</span><span style='color: #BB0000;'>60</span><span>   0.166           0.345     0
-#&gt; </span><span style='color: #555555;'>5</span><span> 5, 8         -</span><span style='color: #BB0000;'>3</span><span>    13   0.175           0.368     0
-#&gt; </span><span style='color: #555555;'>6</span><span> 4, 1        -</span><span style='color: #BB0000;'>14</span><span>   -</span><span style='color: #BB0000;'>48</span><span>   0.209           0.417     0</div><div class='input'>
-</div></span></pre>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Replace missing values in a scan — comparison_replaceMissing • cmcR</title>
+<title>Level a breech face impression surface matrix by a conditional statistic — preProcess_removeTrend • cmcR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Replace missing values in a scan — comparison_replaceMissing" />
-<meta property="og:description" content="Replace missing values in a scan" />
+<meta property="og:title" content="Level a breech face impression surface matrix by a conditional statistic — preProcess_removeTrend" />
+<meta property="og:description" content="Level a breech face impression surface matrix by a conditional statistic" />
 
 
 
@@ -118,59 +118,64 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Replace missing values in a scan</h1>
+    <h1>Level a breech face impression surface matrix by a conditional statistic</h1>
     
-    <div class="hidden name"><code>comparison_replaceMissing.Rd</code></div>
+    <div class="hidden name"><code>preProcess_removeTrend.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Replace missing values in a scan</p>
+    <p>Level a breech face impression surface matrix by a conditional statistic</p>
     </div>
 
-    <pre class="usage"><span class='fu'>comparison_replaceMissing</span><span class='op'>(</span><span class='va'>heightValues</span>, replacement <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>preProcess_removeTrend</span><span class='op'>(</span><span class='va'>x3p</span>, statistic <span class='op'>=</span> <span class='st'>"mean"</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>heightValues</th>
-      <td><p>list/tibble column of x3p objects</p></td>
+      <th>x3p</th>
+      <td><p>an x3p object containing the surface matrix of a cartridge case
+scan</p></td>
     </tr>
     <tr>
-      <th>replacement</th>
-      <td><p>value to replace NAs</p></td>
+      <th>statistic</th>
+      <td><p>either "mean" or "quantile"</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>arguments to be set in the quantreg::rq function if statistic =
+"quantile" is set. In this case, tau = .5 and method = "fn" are recommended</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of the same length as the input containing x3p objects for
-which NA values have been replaced.</p>
+    <p>an x3p object containing the leveled cartridge case scan surface
+matrix.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
+<span class='va'>nbtrd_link</span> <span class='op'>&lt;-</span> <span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"</span>
+<span class='va'>fadul1.1_link</span> <span class='op'>&lt;-</span> <span class='st'>"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
 
-<span class='va'>cellTibble</span> <span class='op'>&lt;-</span> <span class='va'>fadul1.1_processed</span> <span class='op'>%&gt;%</span>
-<span class='fu'><a href='comparison_cellDivision.html'>comparison_cellDivision</a></span><span class='op'>(</span>numCells <span class='op'>=</span> <span class='fl'>64</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>regionHeightValues <span class='op'>=</span>
-             <span class='fu'><a href='comparison_getTargetRegions.html'>comparison_getTargetRegions</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span>,
-                                         target <span class='op'>=</span> <span class='va'>fadul1.2_processed</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellPropMissing <span class='op'>=</span>
-                 <span class='fu'><a href='comparison_calcPropMissing.html'>comparison_calcPropMissing</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-              regionPropMissing <span class='op'>=</span>
-           <span class='fu'><a href='comparison_calcPropMissing.html'>comparison_calcPropMissing</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>cellPropMissing</span> <span class='op'>&lt;=</span> <span class='fl'>.85</span> <span class='op'>&amp;</span> <span class='va'>regionPropMissing</span> <span class='op'>&lt;=</span> <span class='fl'>.85</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span>
-              <span class='fu'><a href='comparison_standardizeHeights.html'>comparison_standardizeHeights</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-             regionHeightValues <span class='op'>=</span>
-        <span class='fu'><a href='comparison_standardizeHeights.html'>comparison_standardizeHeights</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span>
-                  <span class='fu'>comparison_replaceMissing</span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-             regionHeightValues <span class='op'>=</span>
-                <span class='fu'>comparison_replaceMissing</span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>fadul1.1</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>nbtrd_link</span>,<span class='va'>fadul1.1_link</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>fadul1.1_extCropped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1</span>,
+                                       region <span class='op'>=</span> <span class='st'>"exterior"</span>,
+                                       radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>20</span><span class='op'>)</span>
 
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>cellTibble</span><span class='op'>)</span>
+<span class='va'>fadul1.1_intCroped</span> <span class='op'>&lt;-</span> <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,
+                                      region <span class='op'>=</span> <span class='st'>"interior"</span>,
+                                      radiusOffset <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span>
+
+<span class='va'>fadul1.1_leveled</span> <span class='op'>&lt;-</span> <span class='fu'>preProcess_removeTrend</span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,
+                                           statistic <span class='op'>=</span> <span class='st'>"quantile"</span>,
+                                           tau <span class='op'>=</span> <span class='fl'>.5</span>,
+                                           method <span class='op'>=</span> <span class='st'>"fn"</span><span class='op'>)</span>
+
+<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Original"</span> <span class='op'>=</span> <span class='va'>fadul1.1</span>,
+                 <span class='st'>"Ext. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,
+                 <span class='st'>"Ext. &amp; Int. Cropped"</span> <span class='op'>=</span> <span class='va'>fadul1.1_intCroped</span>,
+                 <span class='st'>"Cropped and Leveled"</span> <span class='op'>=</span> <span class='va'>fadul1.1_leveled</span><span class='op'>)</span><span class='op'>)</span>
 <span class='op'>}</span>
 </div></pre>
   </div>

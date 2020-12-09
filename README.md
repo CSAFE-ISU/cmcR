@@ -28,7 +28,7 @@ al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.0
 <!-- ``` -->
 
 Install the development version from
-[GitHub](https://github.com/jzemmels/cmcR) with:
+[GitHub](https://github.com/CSAFE-ISU/cmcR) with:
 
 ``` r
 # install.packages("devtools")
@@ -128,9 +128,11 @@ fadul1.2_processed <- fadul1.2_raw  %>%
   preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
-x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
-                       "Processed Fadul1-2" = fadul1.2_processed),
-                  type = "faceted")
+processedScans <- x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
+                                   "Processed Fadul1-2" = fadul1.2_processed),
+                              type = "faceted")
+
+processedScans
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
@@ -806,27 +808,18 @@ described.
 Finally, we can visualize the regions of the scan identified as CMCs.
 
 ``` r
-cmcPlot(reference = fadul1.1_processed,
-        target  = fadul1.2_processed,
-        reference_v_target_CMCs = kmComparison_allCMCs,
-        target_v_reference_CMCs = kmComparison_allCMCs_rev,
-        x3pNames = c("Fadul 1-1","Fadul 1-2"))
-#> $originalMethodCMCs_reference_v_target
+cmcPlots <- cmcPlot(reference = fadul1.1_processed,
+                    target  = fadul1.2_processed,
+                    reference_v_target_CMCs = kmComparison_allCMCs,
+                    target_v_reference_CMCs = kmComparison_allCMCs_rev,
+                    x3pNames = c("Fadul 1-1","Fadul 1-2"))
+
+gridExtra::grid.arrange(cmcPlots[[1]],
+                        cmcPlots[[2]],
+                        cmcPlots[[3]],
+                        cmcPlots[[4]],
+                        ncol = 1,
+                        nrow = 4)
 ```
 
 <img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
-
-    #> 
-    #> $originalMethodCMCs_target_v_reference
-
-<img src="man/figures/README-unnamed-chunk-18-2.png" width="100%" />
-
-    #> 
-    #> $highCMC_reference_v_target
-
-<img src="man/figures/README-unnamed-chunk-18-3.png" width="100%" />
-
-    #> 
-    #> $highCMC_target_v_reference
-
-<img src="man/figures/README-unnamed-chunk-18-4.png" width="100%" />

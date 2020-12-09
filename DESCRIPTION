@@ -1,7 +1,7 @@
 Package: cmcR
 Type: Package
 Title: An Implementation of the Congruent Matching Cells Method for Cartridge Case Identification
-Version: 0.1.0
+Version: 0.1.2
 Authors@R: 
     c(person(given = "Joe",family = "Zemmels",role = c("aut","cre"),email = "jzemmels@iastate.edu"),
       person(given = "Heike",family = "Hofmann",email = "hofmann@iastate.edu",role = "aut"),
@@ -39,6 +39,7 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
+    markdown,
     testthat,
     DT,
     magick,

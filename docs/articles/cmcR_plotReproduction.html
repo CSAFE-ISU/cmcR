@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
       </span>
     </div>
 
@@ -95,26 +95,10 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-forge.r-project.org/projects/rgl/">rgl</a></span><span class="op">)</span></code></pre></div>
-<!-- TODO: -->
-<!--   - Add hyperlinks to .png images of original plots -->
-<!--   - Add red squares indicating non-CMCs based on topResultsPerCell output -->
-<!--   - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too. -->
-<!--   - Try linear scale first -->
-<!--   - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.) -->
-<!--   - CCF map plot - show custom labels -- show 0, min, and max -->
-<!--   This vignette will give `R` code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the `cmcR` package. -->
 <div id="set-up" class="section level2">
 <h2 class="hasAnchor">
 <a href="#set-up" class="anchor"></a>Set-up</h2>
 <p>For the sake of an example we will consider 3 cartridge cases are from Fadul et al. (2011). The data are openly available from the <a href="https://tsapps.nist.gov/NRBTD/">NIST Ballistics Toolmark Research Database</a>. Specifically, we will consider the comparisons between “Fadul 1-1” and “Fadul 1-2” (available <a href="https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/681f3cdf-8b1c-418a-af71-f52fd235e3da">here</a>) and “Fadul 2-1” (available <a href="https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/12e0f761-2528-4e7b-8600-360bbb788537">here</a>). Note that Fadul 1-1 and Fadul 1-2 are known to have been fired from the same firearm while Fadul 2-1 was fired from a different firearm.</p>
-<p><!-- The pseudocode below shows how you can read an x3p file into `R` and perform the necessary pre-processing procedures on the surface matrix therein before applying the CMC method. Note that the package defaults (as of 4/13/20) are to perform the following: --></p>
-<p><!-- 1. Downsample the surface matrix by a factor of 4 (i.e., sample every other row/column from the surface matrix) --></p>
-<p><!-- 2. Identify the breech face impression height value in the surface matrix using the RANSAC (Random Sample Consensus method). --></p>
-<p><!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `highSelectionThresh` threshold. --></p>
-<p><!-- 4. Remove rows/columns on the exterior of the resulting breech face impression surface matrix. --></p>
-<p><!-- 5. Detect and remove any observations within the firing pin impression circle on the interior of the breech face impression surface matrix. --></p>
-<p><!-- 6. Apply a Gaussian bandpass filter to the resulting surface matrix with wavelength cutoffs 16 and 250 microns $(\mu m)$. --></p>
-<p><!-- This is all done within the `selectBFImpression_sample_x3p` function. See [the documentation](https://jzemmels.github.io/cmcR/reference/selectBFImpression_sample_x3p.html) for this function for more information. Note that the RANSAC method relies on randomly sampling points from the surface matrix. Thus results have been seen to vary, albeit slightly, between applications. Thus, a seed is set for reproducibility purposes. --></p>
 </div>
 <div id="cartridge-case-scan-image-figure-1-1" class="section level2">
 <h2 class="hasAnchor">
@@ -172,10 +156,11 @@
 
 <span class="fu"><a href="https://rdrr.io/pkg/rgl/man/rgl.open.html">rgl.close</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>,
-                       <span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-2.png"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<code class="sourceCode R"><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/animation.html">image_append</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-1.png"</span><span class="op">)</span>,
+                       <span class="fu">magick</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/magick/reference/editing.html">image_read</a></span><span class="op">(</span><span class="st">"bfScanImages/fadul1-2.png"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># magick::image_write(path = "unprocessedScans.png",image = plt)</span></code></pre></div>
+<p><img src="https://github.com/jzemmels/vignetteImages/blob/main/unprocessedScans.png?raw=true" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div id="processed-cartrige-case-scan-figure-5" class="section level2">
 <h2 class="hasAnchor">
@@ -193,19 +178,21 @@
                   radiusOffset <span class="op">=</span> <span class="op">-</span><span class="fl">30</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/preProcess_crop.html">preProcess_crop</a></span><span class="op">(</span>region <span class="op">=</span> <span class="st">"interior"</span>,
                   radiusOffset <span class="op">=</span> <span class="fl">200</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="../reference/preProcess_ransacLevel.html">preProcess_removeTrend</a></span><span class="op">(</span>statistic <span class="op">=</span> <span class="st">"quantile"</span>,
+  <span class="fu"><a href="../reference/preProcess_removeTrend.html">preProcess_removeTrend</a></span><span class="op">(</span>statistic <span class="op">=</span> <span class="st">"quantile"</span>,
                                  tau <span class="op">=</span> <span class="fl">.5</span>,
                                  method <span class="op">=</span> <span class="st">"fn"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">x3ptools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/x3ptools/man/x3p_sample.html">sample_x3p</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span>x3pList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+<code class="sourceCode R"><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/x3pListPlot.html">x3pListPlot</a></span><span class="op">(</span>x3pList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"Fadul 1-1"</span> <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
                                  <span class="st">"Fadul 1-2"</span> <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                                  <span class="st">"Fadul 2-1"</span> <span class="op">=</span> <span class="va">fadul2.1_processed</span><span class="op">)</span>,
                   type <span class="op">=</span> <span class="st">"faceted"</span>,
                   rotate <span class="op">=</span> <span class="fl">90</span>,
-                  legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
+                  legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">.01</span>,<span class="fl">.2</span>,<span class="fl">.5</span>,<span class="fl">.8</span>,<span class="fl">.99</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># ggsave("processedScans.png",plot = plt)</span></code></pre></div>
+<p><img src="https://github.com/jzemmels/vignetteImages/blob/main/processedScans.png?raw=true" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div id="cmc-plot-figure-4" class="section level2">
 <h2 class="hasAnchor">
@@ -311,8 +298,8 @@
                                               tau <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>We can then visualize the CMCs for these comparisons. Below are the CMCs determined under the original method of Song (2013).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">kmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
-                            targetScan <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
+<code class="sourceCode R"><span class="va">kmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                            target <span class="op">=</span> <span class="va">fadul1.2_processed</span>,
                             reference_v_target_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs</span>,
                             target_v_reference_CMCs <span class="op">=</span> <span class="va">kmComparison_allCMCs_rev</span>,
                             type <span class="op">=</span> <span class="st">"faceted"</span>,
@@ -352,8 +339,8 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">8.15</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.05</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
 
-<span class="va">km_originalCMCPlot_bothDirections</span></code></pre></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<span class="co"># ggsave("kmOriginalmethodCMCs.png",km_originalCMCPlot_bothDirections)</span></code></pre></div>
+<p><img src="https://github.com/jzemmels/vignetteImages/blob/main/kmOriginalmethodCMCs.png?raw=true" width="600" style="display: block; margin: auto;"></p>
 <p>And the CMCs determined under the High CMC method of Tong et al. (2015).</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">kmLegend_highCMC</span> <span class="op">&lt;-</span> <span class="fu">cowplot</span><span class="fu">::</span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/get_legend.html">get_legend</a></span><span class="op">(</span><span class="va">kmCMCPlot</span><span class="op">$</span><span class="va">highCMC_reference_v_target</span> <span class="op">+</span>
@@ -385,12 +372,12 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.25</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 1-2"</span><span class="op">)</span>
 
-<span class="va">km_highCMCCMCPlot_bothDirections</span></code></pre></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+<span class="co"># ggsave("kmHighCMCs.png",km_highCMCCMCPlot_bothDirections)</span></code></pre></div>
+<p><img src="https://github.com/jzemmels/vignetteImages/blob/main/kmHighCMCs.png?raw=true" width="600" style="display: block; margin: auto;"></p>
 <p>The known non-match pair didn’t yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">knmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>referenceScan <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
-                            targetScan <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
+<code class="sourceCode R"><span class="va">knmCMCPlot</span> <span class="op">&lt;-</span> <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/cmcPlot.html">cmcPlot</a></span><span class="op">(</span>reference <span class="op">=</span> <span class="va">fadul1.1_processed</span>,
+                            target <span class="op">=</span> <span class="va">fadul2.1_processed</span>,
                             reference_v_target_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs</span>,
                             target_v_reference_CMCs <span class="op">=</span> <span class="va">knmComparison_allCMCs_rev</span>,
                             type <span class="op">=</span> <span class="st">"faceted"</span>,
@@ -430,8 +417,8 @@
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">8.65</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span><span class="st">"text"</span>,x <span class="op">=</span> <span class="fl">7.45</span>,y <span class="op">=</span> <span class="fl">4</span>,size <span class="op">=</span> <span class="fl">5</span>,label <span class="op">=</span> <span class="st">"Fadul 2-1"</span><span class="op">)</span>
 
-<span class="va">knm_cmcPlot_bothDirections</span></code></pre></div>
-<p><img src="cmcR_plotReproduction_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<span class="co"># ggsave("knmOriginalMethodCMCs.png",knm_cmcPlot_bothDirections)</span></code></pre></div>
+<p><img src="https://github.com/jzemmels/vignetteImages/blob/main/knmOriginalMethodCMCs.png?raw=true" width="600" style="display: block; margin: auto;"></p>
 </div>
 <div id="references" class="section level2">
 <h2 class="hasAnchor">

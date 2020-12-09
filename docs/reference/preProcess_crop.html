@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
       </span>
     </div>
 
@@ -154,8 +154,10 @@ scan</p></td>
     <tr>
       <th>radiusOffset</th>
       <td><p>number of pixels to add to estimated breech face radius.
-This is commonly a negative value (e.g., -20) to trim the cartridge case
-primer roll-off from the returned, cropped surface matrix</p></td>
+This is commonly a negative value (e.g., -20 for region = "exterior") to
+trim the cartridge case primer roll-off from the returned, cropped surface
+matrix or a positive value (e.g., 200 for region = "interior") to remove
+observations around the firing pin impression hole.</p></td>
     </tr>
     <tr>
       <th>croppingThresh</th>
@@ -192,15 +194,16 @@ breech face scan surface.</p>
     <p>The radius estimation procedure tends to over-estimate the desired
 radius values. As such, a lot of the breech face impression "roll-off" is
 included in the final scan. Excessive roll-off can bias the calculation of
-the CCF. As such, we can manually shrink the radius estimate so that little
-to no roll-off is included in the final processed scan.</p>
-<p>The radius estimation procedure is effective at estimating the radius
-of the firing pin hole. Unfortunately, it is often desired that more than
-just observations in firing pin hole are removed. In particular, the
-plateaued region surrounding the firing pin impression hole does not come
-into contact with the breech face of a firearm and is thus unwanted in the
-final, processed scan. The radiusOffset argument must be tuned (around 200
-seems to work well for the Fadul cartridge cases) to remove these unwanted
+the CCF. As such, we can manually shrink the radius estimate (-20 or -30
+seems to work well for the Fadul cartridge cases) so that little to no
+roll-off is included in the final processed scan.</p>
+<p>The radius estimation procedure is effective at estimating the radius of
+the firing pin hole. Unfortunately, it is often desired that more than just
+observations in firing pin hole are removed. In particular, the plateaued
+region surrounding the firing pin impression hole does not come into contact
+with the breech face of a firearm and is thus unwanted in the final,
+processed scan. The radiusOffset argument must be tuned (around 200 seems to
+work well for the Fadul cartridge cases) to remove these unwanted
 observations.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -211,7 +214,7 @@ observations.</p>
 <span class='va'>fadul1.1</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>nbtrd_link</span>,<span class='va'>fadul1.1_link</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='va'>fadul1.1_extCropped</span> <span class='op'>&lt;-</span> <span class='fu'>preProcess_crop</span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1</span>,
-                                       radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>20</span>,
+                                       radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>30</span>,
                                        region <span class='op'>=</span> <span class='st'>"exterior"</span><span class='op'>)</span>
 
 <span class='va'>fadul1.1_extIntCropped</span> <span class='op'>&lt;-</span> <span class='fu'>preProcess_crop</span><span class='op'>(</span>x3p <span class='op'>=</span> <span class='va'>fadul1.1_extCropped</span>,

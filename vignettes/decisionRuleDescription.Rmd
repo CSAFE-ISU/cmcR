@@ -12,13 +12,14 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval=FALSE
 )
 ```
 
 This vignette will describe the decision rules used in the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and the High CMC method of [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf). For illustrative purposes, we will consider a comparison between a known match and known non-match pair of cartridge cases from the stuy performed by [Fadul et al. (2011)](https://www.ncjrs.gov/pdffiles1/nij/grants/237960.pdf). The raw cartridge case scans can be downloaded from the [NIST Ballistics Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1). The scans were preprocessed using functions available in the **cmcR** package and are not discussed here. Refer to the `fadul_examples.R` script available on the [**cmcR** GitHub page](https://github.com/CSAFE-ISU/cmcR/tree/master/data-raw) for how these scans were preprocessed. We will also not discuss how similarity features are extracted from two processed scans. Refer to the documentation of the [`comparison_allTogether`](https://csafe-isu.github.io/cmcR/reference/comparison_allTogether.html) function on the **cmcR** website for information regarding this procedure.
 
-```{r setup,message=FALSE,warning=FALSE}
+```{r setup,message=FALSE,warning=TRUE}
 library(cmcR)
 library(dplyr)
 library(ggplot2)
@@ -53,9 +54,16 @@ fadul2.1_processed <- fadul2.1_raw %>%
 
 The three processed cartridge cases are shown below.
 
-```{r, echo=FALSE,fig.width = 7, fig.align = 'center'}
-cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
-                       "Fadul 1-2" = fadul1.2_processed))
+```{r, echo=FALSE, fig.align = 'center'}
+plt <- cmcR::x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
+                       "Fadul 1-2" = fadul1.2_processed,
+                       "Fadul 2-1" = fadul2.1_processed))
+
+# ggsave("derivatives/cmcPlot.png")
+```
+
+```{r, echo=FALSE,eval=TRUE,out.width=600,fig.align="center"}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/cmcPlot.png?raw=true")
 ```
 
 
@@ -334,7 +342,6 @@ knmComparison_thetaData <- knmComparisonFeatures %>%
 
 ```{r include=FALSE,fig.height=1}
 kmComparison_xData_plot <- kmComparison_xData %>%
-  # filter(!is.na(Classification)) %>%
   ggplot() +
   geom_histogram(aes(x = x, 
                      fill = Classification),
@@ -419,7 +426,7 @@ knmComparison_xData_plot <- knmComparison_xData %>%
   theme_bw() +
   scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"x")), 
                      breaks = seq(-100,100,by = 50),
-                     limits = c(-101,101)
+                     limits = c(-101,101),na.value = 0
                      ) +
   scale_y_continuous(limits = c(0,2.5)) +
   ylab("# Cell Pairs") +
@@ -445,7 +452,7 @@ kmComparison_yData_plot <- kmComparison_yData %>%
   theme_bw() +
   scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"y")), 
                      breaks = seq(-100,100,by = 50),
-                     limits = c(-101,101)
+                     limits = c(-101,101),na.value = 0
                      ) +
   scale_y_continuous(limits = c(0,2.5)) +
   ylab("# Cell Pairs") +
@@ -471,7 +478,7 @@ knmComparison_yData_plot <- knmComparison_yData %>%
   theme_bw() +
   scale_x_continuous(expression(paste("Estimated horizontal translation ",Delta,"y")), 
                      breaks = seq(-100,100,by = 50),
-                     limits = c(-101,101)
+                     limits = c(-101,101),oob = scales::squish
                      ) +
   scale_y_continuous(limits = c(0,2.5)) +
   ylab("# Cell Pairs") +
@@ -606,7 +613,7 @@ knmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 2-1`
 ```
 
 
-```{r warning=FALSE,message=FALSE,echo=FALSE,fig.width = 8, fig.align = 'center'}
+```{r warning=TRUE,message=FALSE,echo=FALSE,fig.width = 8, fig.align = 'center'}
 horizontalTranslation_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 2.5,label = "  Horizontal \n Translation") +
   theme_void()
@@ -627,28 +634,39 @@ blank_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 2,label = " ") +
   theme_void() 
 
-gridExtra::grid.arrange(kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-1`,
-                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
-                        knmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 2-1`,
-                        horizontalTranslation_label,
-                        kmComparison_xData_plot,
-                        knmComparison_xData_plot,
-                        verticalTranslation_label,
-                        kmComparison_yData_plot,
-                        knmComparison_yData_plot,
-                        rotation_label,
-                        kmComparison_thetaData_plot,
-                        knmComparison_thetaData_plot,
-                        pairwiseCompCor_label,
-                        kmComparison_pairwiseCompCorData_plot,
-                        knmComparison_pairwiseCompCorData_plot,
-                        blank_label,
-                        blank_label,
-                        pltLegend_horizontal,
-                        heights = unit(c(7,4,4,4,4,2),units = "null"),
-                        widths = unit(c(1,1.5,1.5),"null"))
-
+# Some internal call to is.na within grid.arrange is throwing a warning for the
+# pairwiseCompCor_label since it contains an expression. Since this isn't
+# anything wrong with vignette, we'll just suppress it
+suppressWarnings({
+  plt <- gridExtra::arrangeGrob(kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-1`,
+                                 kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
+                                 knmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 2-1`,
+                                 horizontalTranslation_label,
+                                 kmComparison_xData_plot,
+                                 knmComparison_xData_plot,
+                                 verticalTranslation_label,
+                                 kmComparison_yData_plot,
+                                 knmComparison_yData_plot,
+                                 rotation_label,
+                                 kmComparison_thetaData_plot,
+                                 knmComparison_thetaData_plot,
+                                 pairwiseCompCor_label,
+                                 kmComparison_pairwiseCompCorData_plot,
+                                 knmComparison_pairwiseCompCorData_plot,
+                                 blank_label,
+                                 blank_label,
+                                 pltLegend_horizontal,
+                                 heights = unit(c(7,4,4,4,4,2),units = "null"),
+                                 widths = unit(c(1,1.5,1.5),units = "null"))
+  
+  # ggsave("derivatives/originalMethodResults.png",plt)
+})
 ```
+
+```{r, echo=FALSE,eval=TRUE,out.width=600,fig.align="center"}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/originalMethodResults.png?raw=true")
+```
+
 
 The first step in the High CMC method is to count the CMCs under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) in both comparison "directions," meaning each scan plays the role as the "reference" and "target" scan. After these CMCs are counted, [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) propose using the minimum of the 2 CMC counts as an initial CMC count prior to applying the High CMC decision rule. The figure below shows the behavior of the $x_i, y_i, \theta_i$, and $CCF_{\max,i}$ values in each direction via a [parallel-coordinates plot](https://en.wikipedia.org/wiki/Parallel_coordinates), which is useful for visualizing multi-dimensional data sets. Each connected path represents a single cell/region pair. The purple regions again represent the acceptable regions that are sufficiently "close" to the reference values (or above .5 in the case of the CCF). Paths that only traverse through purple regions are deemed congruent under the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868) and are colored blue. We can see that 19 cells are deemed congruent for the comparison in which Fadul 1-1 is treated as the reference while 18 are considered congruent in the other direction. As such, the initial CMC count used for the High CMC method would be 18.
 
@@ -925,7 +943,7 @@ knmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 2-1`
   annotate(geom = "text",x = 3300/2,y = 3100/2,label = "Fadul 2-1",size = 4)
 ```
 
-```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
+```{r,warning=TRUE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
 
 reference_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 4.5,label = expression(paste(underline("Reference")))) +
@@ -950,27 +968,36 @@ originalCMC_comparison1to2_label <- ggplot() +
 originalCMC_comparison2to1_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 4,label = "18 CMCs") +
   theme_void()
+# Some internal call to is.na within grid.arrange is throwing a warning for the
+# pairwiseCompCor_label since it contains an expression. Since this isn't
+# anything wrong with vignette, we'll just suppress it
+suppressWarnings({
+  plt <- gridExtra::arrangeGrob(reference_label,
+                                target_label,
+                                originalMethod_label,
+                                originalCMC_count_label,
+                                kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-1`,
+                                kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
+                                originalMethod_comparison1to2_pcp,
+                                originalCMC_comparison1to2_label,
+                                kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`,
+                                kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1`,
+                                originalMethod_comparison2to1_pcp,
+                                originalCMC_comparison2to1_label,
+                                blank_label,
+                                blank_label,
+                                pltLegend_horizontal,
+                                blank_label,
+                                heights = unit(c(2,9,9,2),units = "null"),
+                                widths = unit(c(2,2,2,1),"null")
+  )
+  
+  # ggsave("derivatives/originalMethodPCP.png",plt)
+})
+```
 
-
-gridExtra::grid.arrange(reference_label,
-                        target_label,
-                        originalMethod_label,
-                        originalCMC_count_label,
-                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-1`,
-                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_reference_v_target$`Fadul 1-2`,
-                        originalMethod_comparison1to2_pcp,
-                        originalCMC_comparison1to2_label,
-                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-2`,
-                        kmCMCPlot_list_comparison1to2$originalMethodCMCs_target_v_reference$`Fadul 1-1`,
-                        originalMethod_comparison2to1_pcp,
-                        originalCMC_comparison2to1_label,
-                        blank_label,
-                        blank_label,
-                        pltLegend_horizontal,
-                        blank_label,
-                        heights = unit(c(2,9,9,2),units = "null"),
-                        widths = unit(c(2,2,2,1),"null")
-                        )
+```{r, echo=FALSE,eval=TRUE,out.width=600,fig.align="center"}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/originalMethodPCP.png?raw=true")
 ```
 By considering only the "top vote" of each cell as is done in the decision rule of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868), information is lost regarding other registration phases for which a cell might also rank highly. As [Tong et al. (2015)](https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf) observe:
 
@@ -1231,7 +1258,7 @@ highCMC_comparison1to2_theta30 <- highCMC_congruentData_comparison1to2_lowCMC %>
                               expression("CCF"[max])))
 ```
 
-```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
+```{r,warning=TRUE,message=FALSE,echo=FALSE,fig.width = 7, fig.align = 'center'}
 
 highCMC_comparison1to2_cmcTheta <- bind_rows(kmComparisonFeatures %>%
             mutate(direction = "Fadul 1-1 vs. Fadul 1-2",
@@ -1263,23 +1290,33 @@ thetaNeg24_label <- ggplot() +
 theta30_label <- ggplot() +
   annotate("text",x = 1,y = 1,size = 4,label = expression(paste(theta," = 30"))) +
   theme_void()
+# Some internal call to is.na within grid.arrange is throwing a warning for the
+# pairwiseCompCor_label since it contains an expression. Since this isn't
+# anything wrong with vignette, we'll just suppress it
+suppressWarnings({
+  plt <- ggplot(data.frame(a = 1)) +
+    theme_void() +
+    coord_cartesian(xlim = c(1,30),
+                    ylim = c(1,30),
+                    expand = FALSE) +
+    annotation_custom(ggplotGrob(highCMC_comparison1to2_cmcTheta),xmin = 6,xmax = 24,ymin = 1,ymax = 30) +
+    annotation_custom(ggplotGrob(highCMC_comparison1to2_thetaNeg24),xmin = 1,xmax = 6,ymin = 4,ymax = 14) +
+    annotation_custom(ggplotGrob(thetaNeg24_label),xmin = 1,xmax = 6,ymin = 10.5,ymax = 16) +
+    annotation_custom(pltLegend_vertical_leftAligned,xmin = 2.5,xmax = 3,ymin = 2,ymax = 3) +
+    annotation_custom(ggplotGrob(highCMC_comparison1to2_theta30),xmin = 24,xmax = 29,ymin = 4,ymax = 14) +
+    annotation_custom(ggplotGrob(theta30_label),xmin = 24,xmax = 29,ymin = 10.5,ymax = 16) +
+    annotation_custom(pltLegend_vertical_rightAligned,xmin = 27,xmax = 27.75,ymin = 2,ymax = 3) +
+    geom_path(data = data.frame(x = c(6,10),y = c(9,9)),
+              aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed")) +
+    geom_path(data = data.frame(x = c(23,24.1),y = c(9,9)),
+              aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed",ends = "first"))
+  
+  # ggsave("derivatives/highCMCDistribution.png",plt)
+})
+```
 
-ggplot(data.frame(a = 1)) +
-  theme_void() +
-  coord_cartesian(xlim = c(1,30),
-                  ylim = c(1,30),
-                  expand = FALSE) +
-  annotation_custom(ggplotGrob(highCMC_comparison1to2_cmcTheta),xmin = 6,xmax = 24,ymin = 1,ymax = 30) +
-  annotation_custom(ggplotGrob(highCMC_comparison1to2_thetaNeg24),xmin = 1,xmax = 6,ymin = 4,ymax = 14) +
-  annotation_custom(ggplotGrob(thetaNeg24_label),xmin = 1,xmax = 6,ymin = 10.5,ymax = 16) +
-  annotation_custom(pltLegend_vertical_leftAligned,xmin = 2.5,xmax = 3,ymin = 2,ymax = 3) +
-  annotation_custom(ggplotGrob(highCMC_comparison1to2_theta30),xmin = 24,xmax = 29,ymin = 4,ymax = 14) +
-  annotation_custom(ggplotGrob(theta30_label),xmin = 24,xmax = 29,ymin = 10.5,ymax = 16) +
-  annotation_custom(pltLegend_vertical_rightAligned,xmin = 27,xmax = 27.75,ymin = 2,ymax = 3) +
-  geom_path(data = data.frame(x = c(6,10),y = c(9,9)),
-            aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed")) +
-  geom_path(data = data.frame(x = c(23,24.1),y = c(9,9)),
-            aes(x = x, y = y), size = 1, arrow = arrow(length = unit(.02, "npc"), type = "closed",ends = "first"))
+```{r,echo=FALSE,eval=TRUE,out.width=600,fig.align="center"}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/highCMCDistribution.png?raw=true")
 ```
 
 

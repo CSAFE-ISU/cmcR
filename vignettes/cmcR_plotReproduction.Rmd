@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
 collapse = TRUE,
-comment = "#>"
+comment = "#>",
+eval=FALSE
 )
 ```
 
@@ -25,35 +26,9 @@ library(x3ptools)
 library(rgl)
 ```
   
-<!-- TODO: -->
-<!--   - Add hyperlinks to .png images of original plots -->
-<!--   - Add red squares indicating non-CMCs based on topResultsPerCell output -->
-<!--   - For RGL images - high contrast lighting. Use x3p_lighter(). Look into rgl for different lighting choices too. -->
-<!--   - Try linear scale first -->
-<!--   - create custom scale function where breaks happen at quintiles (median == white, max and min are dark orange and dark blue, respectively.) -->
-<!--   - CCF map plot - show custom labels -- show 0, min, and max -->
-
-<!--   This vignette will give `R` code to reproduce (at least qualitatively if not precisely) plots in Tong et al. (2018) using the `cmcR` package. -->
-  
 ## Set-up
   
 For the sake of an example we will consider 3 cartridge cases are from Fadul et al. (2011). The data are openly available from the [NIST Ballistics Toolmark Research Database](https://tsapps.nist.gov/NRBTD/). Specifically, we will consider the comparisons between "Fadul 1-1" and "Fadul 1-2" (available [here](https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/681f3cdf-8b1c-418a-af71-f52fd235e3da)) and "Fadul 2-1" (available [here](https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/12e0f761-2528-4e7b-8600-360bbb788537)). Note that Fadul 1-1 and Fadul 1-2 are known to have been fired from the same firearm while Fadul 2-1 was fired from a different firearm.
-  
-  <!-- The pseudocode below shows how you can read an x3p file into `R` and perform the necessary pre-processing procedures on the surface matrix therein before applying the CMC method. Note that the package defaults (as of 4/13/20) are to perform the following: -->
-
-  <!-- 1. Downsample the surface matrix by a factor of 4 (i.e., sample every other row/column from the surface matrix) -->
-
-  <!-- 2. Identify the breech face impression height value in the surface matrix using the RANSAC (Random Sample Consensus method). -->
-
-  <!-- 3. Take the residuals between the RANSAC-fitted plane and the observed values in the surface matrix within a small `highSelectionThresh` threshold. -->
-
-  <!-- 4. Remove rows/columns on the exterior of the resulting breech face impression surface matrix. -->
-
-  <!-- 5. Detect and remove any observations within the firing pin impression circle on the interior of the breech face impression surface matrix. -->
-
-  <!-- 6. Apply a Gaussian bandpass filter to the resulting surface matrix with wavelength cutoffs 16 and 250 microns $(\mu m)$. -->
-
-  <!-- This is all done within the `selectBFImpression_sample_x3p` function. See [the documentation](https://jzemmels.github.io/cmcR/reference/selectBFImpression_sample_x3p.html) for this function for more information. Note that the RANSAC method relies on randomly sampling points from the surface matrix. Thus results have been seen to vary, albeit slightly, between applications. Thus, a seed is set for reproducibility purposes. -->
 
 ## Cartridge case scan image (Figure 1.1)
 
@@ -144,10 +119,16 @@ rgl.close()
 ```
 
 ```{r}
-magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
-                       magick::image_read("bfScanImages/fadul1-2.png"))) %>%
-  plot()
+plt <- magick::image_append(c(magick::image_read("bfScanImages/fadul1-1.png"),
+                       magick::image_read("bfScanImages/fadul1-2.png")))
+
+# magick::image_write(path = "unprocessedScans.png",image = plt)
 ```
+
+```{r,echo=FALSE,fig.align="center",out.width=600,eval=TRUE}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/unprocessedScans.png?raw=true")
+```
+
 
 ## Processed Cartrige Case Scan (Figure 5)
 
@@ -182,13 +163,19 @@ fadul2.2 <- x3ptools::read_x3p("https://tsapps.nist.gov/NRBTD/Studies/CartridgeM
 
 
 ```{r}
-cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1_processed,
+plt <- cmcR::x3pListPlot(x3pList = list("Fadul 1-1" = fadul1.1_processed,
                                  "Fadul 1-2" = fadul1.2_processed,
                                  "Fadul 2-1" = fadul2.1_processed),
                   type = "faceted",
                   rotate = 90,
                   legend.quantiles = c(0,.01,.2,.5,.8,.99,1))
+
+# ggsave("processedScans.png",plot = plt)
 ```
+```{r,echo=FALSE,fig.align="center",out.width=600,eval=TRUE}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/processedScans.png?raw=true")
+```
+
 
 ## CMC Plot (Figure 4)
 
@@ -338,7 +325,10 @@ km_originalCMCPlot_bothDirections <- ggplot(data.frame(a = 1)) +
   annotate("text",x = 7.05,y = 8.15,size = 5,label = "Fadul 1-2") +
   annotate("text",x = 7.05,y = 4,size = 5,label = "Fadul 1-2")
 
-km_originalCMCPlot_bothDirections
+# ggsave("kmOriginalmethodCMCs.png",km_originalCMCPlot_bothDirections)
+```
+```{r,echo=FALSE,fig.align="center",out.width=600,eval=TRUE}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/kmOriginalmethodCMCs.png?raw=true")
 ```
 
 And the CMCs determined under the High CMC method of Tong et al. (2015).
@@ -373,9 +363,11 @@ km_highCMCCMCPlot_bothDirections <- ggplot(data.frame(a = 1)) +
   annotate("text",x = 7.25,y = 8.65,size = 5,label = "Fadul 1-2") +
   annotate("text",x = 7.25,y = 4,size = 5,label = "Fadul 1-2")
 
-km_highCMCCMCPlot_bothDirections
+# ggsave("kmHighCMCs.png",km_highCMCCMCPlot_bothDirections)
 ```
-
+```{r,echo=FALSE,fig.align="center",out.width=600,eval=TRUE}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/kmHighCMCs.png?raw=true")
+```
 
 The known non-match pair didn't yield any high CMCs, so we can only visualize the CMCs identified under the original method of Song (2013).
 
@@ -421,7 +413,10 @@ knm_cmcPlot_bothDirections <- ggplot(data.frame(a = 1)) +
   annotate("text",x = 7.45,y = 8.65,size = 5,label = "Fadul 2-1") +
   annotate("text",x = 7.45,y = 4,size = 5,label = "Fadul 2-1")
 
-knm_cmcPlot_bothDirections
+# ggsave("knmOriginalMethodCMCs.png",knm_cmcPlot_bothDirections)
+```
+```{r,echo=FALSE,fig.align="center",out.width=600,eval=TRUE}
+knitr::include_graphics("https://github.com/jzemmels/vignetteImages/blob/main/knmOriginalMethodCMCs.png?raw=true")
 ```
 
 ## References

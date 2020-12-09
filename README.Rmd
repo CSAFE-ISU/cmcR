@@ -31,7 +31,7 @@ The cmcR package provides an open-source implementation of the Congruent Matchin
 <!-- install.packages("cmcR") -->
 <!-- ``` -->
 
-Install the development version from [GitHub](https://github.com/jzemmels/cmcR) with:
+Install the development version from [GitHub](https://github.com/CSAFE-ISU/cmcR) with:
 
 ``` r
 # install.packages("devtools")
@@ -96,10 +96,13 @@ fadul1.2_processed <- fadul1.2_raw  %>%
   preProcess_gaussFilter() %>%
   x3ptools::sample_x3p()
 
-x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
-                       "Processed Fadul1-2" = fadul1.2_processed),
-                  type = "faceted")
+processedScans <- x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
+                                   "Processed Fadul1-2" = fadul1.2_processed),
+                              type = "faceted")
+
+processedScans
 ```
+
 
 ### Cell-based comparison procedure
 
@@ -351,10 +354,17 @@ The final step is to decide whether the number of CMCs computed under your prefe
 
 Finally, we can visualize the regions of the scan identified as CMCs.
 
-```{r}
-cmcPlot(reference = fadul1.1_processed,
-        target  = fadul1.2_processed,
-        reference_v_target_CMCs = kmComparison_allCMCs,
-        target_v_reference_CMCs = kmComparison_allCMCs_rev,
-        x3pNames = c("Fadul 1-1","Fadul 1-2"))
+```{r, fig.height=16}
+cmcPlots <- cmcPlot(reference = fadul1.1_processed,
+                    target  = fadul1.2_processed,
+                    reference_v_target_CMCs = kmComparison_allCMCs,
+                    target_v_reference_CMCs = kmComparison_allCMCs_rev,
+                    x3pNames = c("Fadul 1-1","Fadul 1-2"))
+
+gridExtra::grid.arrange(cmcPlots[[1]],
+                        cmcPlots[[2]],
+                        cmcPlots[[3]],
+                        cmcPlots[[4]],
+                        ncol = 1,
+                        nrow = 4)
 ```

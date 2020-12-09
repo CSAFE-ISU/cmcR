@@ -45,10 +45,11 @@ scan by theta degrees)
 Performs all steps in the cell-based comparison procedure.
 }
 \examples{
+\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- comparison_allTogether(reference = fadul1.1_processed,target = fadul1.2_processed)
 
 head(cellTibble)
-
+}
 }

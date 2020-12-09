@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Replace missing values in a scan — comparison_replaceMissing • cmcR</title>
+<title>Finds plane of breechface marks using the RANSAC method — preProcess_ransacLevel • cmcR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Replace missing values in a scan — comparison_replaceMissing" />
-<meta property="og:description" content="Replace missing values in a scan" />
+<meta property="og:title" content="Finds plane of breechface marks using the RANSAC method — preProcess_ransacLevel" />
+<meta property="og:description" content="Finds plane of breechface marks using the RANSAC method" />
 
 
 
@@ -118,60 +118,83 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Replace missing values in a scan</h1>
+    <h1>Finds plane of breechface marks using the RANSAC method</h1>
     
-    <div class="hidden name"><code>comparison_replaceMissing.Rd</code></div>
+    <div class="hidden name"><code>preProcess_ransacLevel.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Replace missing values in a scan</p>
+    <p>Finds plane of breechface marks using the RANSAC method</p>
     </div>
 
-    <pre class="usage"><span class='fu'>comparison_replaceMissing</span><span class='op'>(</span><span class='va'>heightValues</span>, replacement <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>preProcess_ransacLevel</span><span class='op'>(</span>
+  <span class='va'>x3p</span>,
+  ransacInlierThresh <span class='op'>=</span> <span class='fl'>1e-06</span>,
+  ransacFinalSelectThresh <span class='op'>=</span> <span class='fl'>2e-05</span>,
+  iters <span class='op'>=</span> <span class='fl'>300</span>,
+  returnResiduals <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>heightValues</th>
-      <td><p>list/tibble column of x3p objects</p></td>
+      <th>x3p</th>
+      <td><p>an x3p object containing a surface matrix</p></td>
     </tr>
     <tr>
-      <th>replacement</th>
-      <td><p>value to replace NAs</p></td>
+      <th>ransacInlierThresh</th>
+      <td><p>threshold to declare an observed value close to the
+fitted plane an "inlier". A smaller value will yield a more stable
+estimate.</p></td>
+    </tr>
+    <tr>
+      <th>ransacFinalSelectThresh</th>
+      <td><p>once the RANSAC plane is fitted based on the
+ransacInlierThresh, this argument dictates which observations are selected
+as the final breech face estimate.</p></td>
+    </tr>
+    <tr>
+      <th>iters</th>
+      <td><p>number of candidate planes to fit (higher value yields more
+stable breech face estimate)</p></td>
+    </tr>
+    <tr>
+      <th>returnResiduals</th>
+      <td><p>dictates whether the difference between the estimated
+breech face and fitted plane are returned (residuals) or if the estimates
+breech face is simply shifted down by its mean value</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of the same length as the input containing x3p objects for
-which NA values have been replaced.</p>
+    <p>an x3p object containing the leveled surface matrix.</p>
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+
+    <p>Given input depths (in microns), find best-fitting plane using
+RANSAC. This should be the plane that the breechface marks are on. Adapted
+from cartridges3D::findPlaneRansac function. This a modified version of the
+findPlaneRansac function available in the cartridges3D package on GitHub.</p>
+<p>The preProcess_ransacLevel function will throw an error if the final
+plane estimate is rank-deficient (which is relatively unlikely, but
+theoretically possible). Re-run the function (possibly setting a different
+seed) if this occurs.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>https://github.com/xhtai/cartridges3D</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
+<span class='va'>raw_x3p</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='st'>"path/to/file.x3p"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>sample_x3p</a></span><span class='op'>(</span>m <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
 
-<span class='va'>cellTibble</span> <span class='op'>&lt;-</span> <span class='va'>fadul1.1_processed</span> <span class='op'>%&gt;%</span>
-<span class='fu'><a href='comparison_cellDivision.html'>comparison_cellDivision</a></span><span class='op'>(</span>numCells <span class='op'>=</span> <span class='fl'>64</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>regionHeightValues <span class='op'>=</span>
-             <span class='fu'><a href='comparison_getTargetRegions.html'>comparison_getTargetRegions</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span>,
-                                         target <span class='op'>=</span> <span class='va'>fadul1.2_processed</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellPropMissing <span class='op'>=</span>
-                 <span class='fu'><a href='comparison_calcPropMissing.html'>comparison_calcPropMissing</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-              regionPropMissing <span class='op'>=</span>
-           <span class='fu'><a href='comparison_calcPropMissing.html'>comparison_calcPropMissing</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>cellPropMissing</span> <span class='op'>&lt;=</span> <span class='fl'>.85</span> <span class='op'>&amp;</span> <span class='va'>regionPropMissing</span> <span class='op'>&lt;=</span> <span class='fl'>.85</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span>
-              <span class='fu'><a href='comparison_standardizeHeights.html'>comparison_standardizeHeights</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-             regionHeightValues <span class='op'>=</span>
-        <span class='fu'><a href='comparison_standardizeHeights.html'>comparison_standardizeHeights</a></span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/mutate.html'>mutate</a></span><span class='op'>(</span>cellHeightValues <span class='op'>=</span>
-                  <span class='fu'>comparison_replaceMissing</span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>cellHeightValues</span><span class='op'>)</span>,
-             regionHeightValues <span class='op'>=</span>
-                <span class='fu'>comparison_replaceMissing</span><span class='op'>(</span>heightValues <span class='op'>=</span> <span class='va'>regionHeightValues</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>cellTibble</span><span class='op'>)</span>
+<span class='va'>fittedPlane</span> <span class='op'>&lt;-</span> <span class='va'>raw_x3p</span><span class='op'>$</span><span class='va'>surface.matrix</span> <span class='op'>%&gt;%</span>
+  <span class='fu'>preProcess_ransacLevel</span><span class='op'>(</span>ransacInlierThresh <span class='op'>=</span> <span class='fl'>10</span><span class='op'>^</span><span class='op'>(</span><span class='op'>-</span><span class='fl'>5</span><span class='op'>)</span>,
+                    ransacFinalSelectThresh <span class='op'>=</span> <span class='fl'>2</span><span class='op'>*</span><span class='fl'>10</span><span class='op'>^</span><span class='op'>(</span><span class='op'>-</span><span class='fl'>5</span><span class='op'>)</span>,
+                    iters <span class='op'>=</span> <span class='fl'>150</span><span class='op'>)</span>
 <span class='op'>}</span>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

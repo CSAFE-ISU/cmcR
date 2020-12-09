@@ -606,12 +606,13 @@ comparison_cor <- function(cellHeightValues,
 #'  scan by theta degrees)
 #'
 #'@examples
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- comparison_allTogether(reference = fadul1.1_processed,target = fadul1.2_processed)
 #'
 #'head(cellTibble)
-#'
+#'}
 #'@importFrom rlang .data
 #'@export
 
