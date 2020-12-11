@@ -1,17 +1,43 @@
 ## Resubmission
 This is a resubmission.
-The previous submission was rejected with the following message from Professor Ligges:
+The previous submission was rejected with the following comments:
 
-"We see
+"Please reduce the length of the title to less than 65 characters."
 
-* checking re-building of vignette outputs ... [454s] OK
+ The title is now 56 characters long.
 
-which is somewhat long as the test also run 400 sec on a bi-arch platform.
+"Please always write package names, software names and API (application
+programming interface) names in single quotes in title and description.
+e.g: --> 'cmcR'"
 
+ I have added quotations around 'Congruent Matching Cells.' To my knowledge, there is not another package name, software name, or API referenced in the title or description.
 
-Please reduce."
+'Please write references in the description of the DESCRIPTION file in
+the form
+authors (year) <doi:...>
+authors (year) <arXiv:...>
+authors (year, ISBN:...)
+or if those are not available: authors (year) <https:...>
+with no space after 'doi:', 'arXiv:', 'https:' and angle brackets for
+auto-linking.
+(If you want to add a title as well please put it in quotes: "Title")'
 
-The build time for the vignettes has been reduced by changing the way certain plots are constructed (which was the major bottleneck in the previous version of the package).
+ I have added to the description appropriate links to Song (2013) (note that the URL is the only available identifying information, so I had to use it instead of a DOI, etc.) and Tong et al. (2015) (which does have a DOI).
+
+'\dontrun{} should only be used if the example really cannot be executed
+(e.g. because of missing additional software, missing API keys, ...) by
+the user. That's why wrapping examples in \dontrun{} adds the comment
+("# Not run:") as a warning for the user.
+Does not seem necessary.
+
+Please unwrap the examples if they are executable in < 5 sec, or create
+additionally small toy examples to allow automatic testing.
+(You could also replace \dontrun{} with \donttest, if it takes longer
+than 5 sec to be executed, but it would be preferable to have automatic
+checks for functions. Otherwise, you can also write some tests.)'
+ 
+ I have removed \dontrun{} from examples that take < 5 seconds to run (total example run time on my local machine is now 46.5 seconds). The remaining examples involve downloading large 3D scans from a remote database and processing them and thus take more than 5 seconds. These scans are too large in their unprocessed format to include with the package (at least to keep the package size below 5 MB), but I have included 2 processed scans in the data directory that are of reasonable size. The tests I have in the tests directory perform the automatic testing that Dr. Seyer references in his comment, so removing \dontrun{} around the time-intensive examples for the sake of testing would be redundant.
+
 
 ## Test environments
 * local R installation: release
@@ -25,13 +51,10 @@ The build time for the vignettes has been reduced by changing the way certain pl
 0 errors | 0 warnings | 1 note
 
 1 note is:
-Possibly mis-spelled words in DESCRIPTION:
-  al (13:55)
-  cmcR (16:9)
-  et (13:52)
-  pre (14:30)
-
-This is the same note as in the previous submission. The short of it is that these are not mis-spelled words.
+checking for future file timestamps ... NOTE
+  unable to verify current time
+  
+This note appears to be caused by the world clock API that is internally queried by check(), so it is not in my power to change (reference: <https://stackoverflow.com/questions/63613301/r-cmd-check-note-unable-to-verify-current-time>).
 
 #Previous cran-comments
 ## Resubmission
