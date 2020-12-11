@@ -49,13 +49,22 @@ seed) if this occurs.
 }
 \examples{
 \dontrun{
-raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
-  x3ptools::sample_x3p(m = 2)
+nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
-fittedPlane <- raw_x3p$surface.matrix \%>\%
-  preProcess_ransacLevel(ransacInlierThresh = 10^(-5),
-                    ransacFinalSelectThresh = 2*10^(-5),
-                    iters = 150)
+fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+
+fadul1.1_ransacLeveled <- fadul1.1 \%>\%
+                     preProcess_crop(region = "exterior",
+                                     radiusOffset = -30) \%>\%
+                     preProcess_crop(region = "interior",
+                                     radiusOffset = 200) \%>\%
+                     preProcess_removeTrend(statistic = "quantile",
+                                            tau = .5,
+                                            method = "fn")
+
+x3pListPlot(list("Original" = fadul1.1,
+                 "RANSAC Leveled" = fadul1.1_ransacLeveled),type = "list")
 }
 
 }

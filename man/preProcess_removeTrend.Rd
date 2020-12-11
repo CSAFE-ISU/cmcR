@@ -23,6 +23,8 @@ matrix.
 Level a breech face impression surface matrix by a conditional statistic
 }
 \examples{
+
+#Process fadul1.1 "from scratch" (takes > 5 seconds to run)
 \dontrun{
 nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
@@ -30,7 +32,7 @@ fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
                                        region = "exterior",
-                                       radiusOffset = -20)
+                                       radiusOffset = -30)
 
 fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
                                       region = "interior",

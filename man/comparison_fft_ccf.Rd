@@ -35,7 +35,6 @@ missing values after standardization.
 }
 \examples{
 
-\dontrun{
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
@@ -62,7 +61,7 @@ dplyr::mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues,
 cellTibble \%>\%
 tidyr::unnest(cols = fft_ccf_df) \%>\%
 head()
-}
+
 }
 \seealso{
 \url{https://mathworld.wolfram.com/Cross-CorrelationTheorem.html}

@@ -169,14 +169,13 @@ swapcellRangeAxes <- function(cellRange){
 #'   the breech face scan of that cell.
 #'
 #'@examples
-#'\dontrun{
 #'data(fadul1.1_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
 #' comparison_cellDivision(numCells = 64)
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@importFrom rlang .data
 #' @export
 
@@ -247,7 +246,6 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 #' @return a vector of the same length as the input containing the proportion of
 #'   missing values in each x3p object's breech face scan.
 #'@examples
-#'\dontrun{
 #'data(fadul1.1_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
@@ -255,7 +253,7 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 #' dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues))
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@importFrom rlang .data
 #' @export
 
@@ -280,7 +278,7 @@ comparison_calcPropMissing <- function(heightValues){
 #'@return A list of the same length as the input containing x3p objects from the
 #'  target scan.
 #'@examples
-#'\dontrun{
+#'
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
@@ -292,7 +290,7 @@ comparison_calcPropMissing <- function(heightValues){
 #'dplyr::filter(cellPropMissing <= .85 & regionPropMissing <= .85)
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@export
 
 comparison_getTargetRegions <- function(cellHeightValues,
@@ -356,7 +354,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'  is given that is required for calculating, for example, the
 #'  pairwise-complete correlation using the comparison_cor function.
 #'@examples
-#'\dontrun{
+#'
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
@@ -370,7 +368,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'              regionHeightValues = comparison_standardizeHeights(heightValues = regionHeightValues))
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@importFrom stats sd
 #'@export
 
@@ -404,7 +402,7 @@ comparison_standardizeHeights <- function(heightValues,
 #'@return A list of the same length as the input containing x3p objects for
 #'  which NA values have been replaced.
 #'@examples
-#'\dontrun{
+#'
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
@@ -427,7 +425,7 @@ comparison_standardizeHeights <- function(heightValues,
 #'                 comparison_replaceMissing(heightValues = regionHeightValues))
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@export
 
 comparison_replaceMissing <- function(heightValues,
@@ -465,7 +463,6 @@ comparison_replaceMissing <- function(heightValues,
 #'
 #'@examples
 #'
-#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
@@ -492,7 +489,7 @@ comparison_replaceMissing <- function(heightValues,
 #'cellTibble %>%
 #' tidyr::unnest(cols = fft_ccf_df) %>%
 #' head()
-#' }
+#'
 #'@export
 comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
   ccfList <- purrr::map2(cellHeightValues,
@@ -523,7 +520,6 @@ comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
 #'@examples
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
-#'\dontrun{
 #'cellTibble <- fadul1.1_processed %>%
 #' comparison_cellDivision(numCells = 64) %>%
 #' dplyr::mutate(regionHeightValues =
@@ -549,7 +545,7 @@ comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
 #'                                                fft_ccf_df))
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@export
 
 comparison_cor <- function(cellHeightValues,
@@ -606,13 +602,13 @@ comparison_cor <- function(cellHeightValues,
 #'  scan by theta degrees)
 #'
 #'@examples
-#'\dontrun{
+#'
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- comparison_allTogether(reference = fadul1.1_processed,target = fadul1.2_processed)
 #'
 #'head(cellTibble)
-#'}
+#'
 #'@importFrom rlang .data
 #'@export
 

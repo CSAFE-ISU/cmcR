@@ -88,14 +88,23 @@ preProcess_levelBF <- function(ransacFit,
 
 #' @examples
 #' \dontrun{
-#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#'   x3ptools::sample_x3p(m = 2)
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
-#' fittedPlane <- raw_x3p$surface.matrix %>%
-#'   preProcess_ransacLevel(ransacInlierThresh = 10^(-5),
-#'                     ransacFinalSelectThresh = 2*10^(-5),
-#'                     iters = 150)
-#' }
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+#'
+#' fadul1.1_ransacLeveled <- fadul1.1 %>%
+#'                      preProcess_crop(region = "exterior",
+#'                                      radiusOffset = -30) %>%
+#'                      preProcess_crop(region = "interior",
+#'                                      radiusOffset = 200) %>%
+#'                      preProcess_removeTrend(statistic = "quantile",
+#'                                             tau = .5,
+#'                                             method = "fn")
+#'
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "RANSAC Leveled" = fadul1.1_ransacLeveled),type = "list")
+#'}
 #'
 #' @seealso
 #'   https://github.com/xhtai/cartridges3D
@@ -352,19 +361,31 @@ preProcess_detectFPCircle <- function(surfaceMat,
 #'  pin circle pixels replaced with NAs.
 #' @examples
 #' \dontrun{
-#' raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#' x3ptools::sample_x3p(m = 2)
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 #'
-#' raw_x3p$surface.matrix <- raw_x3p$surface.matrix %>%
-#'   cmcR::preProcess_ransacLevel() %>%
-#'   cmcR::preProcess_levelBF() %>%
-#'   cmcR::preProcess_cropExterior() %>%
-#'   cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
-#'                                   smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-#'                                   gridGranularity = 1,
-#'                                   houghScoreQuant = .9)
-#' }
-#'@rdname removeFiringPin
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+#'
+#' fadul1.1_labelCropped <- fadul1.1 %>%
+#'                      preProcess_crop(region = "exterior",
+#'                                      radiusOffset = -30) %>%
+#'                      preProcess_crop(region = "interior",
+#'                                      radiusOffset = 200) %>%
+#'                      preProcess_removeTrend(statistic = "quantile",
+#'                                             tau = .5,
+#'                                             method = "fn")
+#'
+#' fadul1.1_houghCropped <- fadul1.1 %>%
+#'                           x3ptools::x3p_sample() %>%
+#'                           preProcess_ransacLevel() %>%
+#'                           preProcess_crop(region = "exterior",
+#'                                           radiusOffset = -30) %>%
+#'                           preProcess_removeFPCircle()
+#'
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "Cropped by Labeling" = fadul1.1_labelCropped,
+#'                  "Cropped by Hough" = fadul1.1_houghCropped),type = "list")
+#'}
 #'@importFrom rlang .data
 #'@export
 
@@ -398,35 +419,56 @@ preProcess_removeFPCircle <- function(x3p,
   return(x3p)
 }
 
-#' Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
-#' particular cut-off wavelength.
-#' @name preProcess_gaussFilter
+#'Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
+#'particular cut-off wavelength.
+#'@name preProcess_gaussFilter
 #'
-#' @param x3p an x3p object containing a surface matrix
-#' @param wavelength cut-off wavelength
-#' @param filtertype specifies whether a low pass, "lp", high pass, "hp", or
-#'   bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
-#'   means that wavelength should be a vector of two numbers. In this case, the
-#'   max of these two number will be used for the high pass filter and the min
-#'   for the low pass filter.
+#'@param x3p an x3p object containing a surface matrix
+#'@param wavelength cut-off wavelength
+#'@param filtertype specifies whether a low pass, "lp", high pass, "hp", or
+#'  bandpass, "bp" filter is to be used. Note that setting filterype = "bp"
+#'  means that wavelength should be a vector of two numbers. In this case, the
+#'  max of these two number will be used for the high pass filter and the min
+#'  for the low pass filter.
 #'@return An x3p object containing the Gaussian-filtered surface matrix.
 #' @examples
-#' \dontrun{
-#' x3p_processed <- x3ptools::read_x3p("path/to/file.x3p") %>%
-#'   cmcR::preProcess_crop(region = "exterior",
-#'                         radiusOffset = -20) %>%
-#'   cmcR::preProcess_crop(region = "interior",
-#'                         radiusOffset = 200) %>%
-#'   cmcR::preProcess_removeTrend(statistic = "quantile",
-#'                                tau = .5,
-#'                                method = "fn") %>%
-#'   cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-#'                                filtertype = "bp")
-#' }
+#' data(fadul1.1_processed)
 #'
-#' @seealso
-#' https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
-#' @export
+#' #Applying the function to fadul1.1_processed (note that this scan has already
+#' #  been Gaussian filtered)
+#' cmcR::preProcess_gaussFilter(fadul1.1_processed)
+#'
+#' #As a part of the recommended preprocessing pipeline (take > 5 sec to run):
+#' \dontrun{
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+#'
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+#'                                        region = "exterior",
+#'                                        radiusOffset = -30)
+#'
+#' fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
+#'                                       region = "interior",
+#'                                       radiusOffset = 200)
+#'
+#' fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,
+#'                                            statistic = "quantile",
+#'                                            tau = .5,
+#'                                            method = "fn")
+#' fadul1.1_filtered <- preProcess_gaussFilter(x3p = fadul1.1_leveled,
+#'                                             wavelength = c(16,500),
+#'                                             filtertype = "bp")
+#'
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "Ext. & Int. Cropped" = fadul1.1_intCroped,
+#'                  "Cropped and Leveled" = fadul1.1_leveled,
+#'                  "Filtered" = fadul1.1_filtered),type = "list")
+#'}
+#'
+#'@seealso
+#'https://www.mathworks.com/matlabcentral/fileexchange/61003-filt2-2d-geospatial-data-filter?focused=7181587&tab=example
+#'@export
 
 preProcess_gaussFilter <- function(x3p,
                                    wavelength = c(16,500),
@@ -559,7 +601,7 @@ estimateBFRadius <- function(mat,
 # @param high_connectivity argument for imager::label
 # @param tolerance argument for imager::label
 # @param radiusOffset number of pixels to add to estimated breech face radius.
-#   This is commonly a negative value (e.g., -20) to trim the cartridge case
+#   This is commonly a negative value (e.g., -30) to trim the cartridge case
 #   primer roll-off from the returned, cropped surface matrix.
 # @param croppingThresh argument for cmcR::preProcess_cropWS
 # @param agg_function the breech face radius estimation procedure returns
@@ -728,7 +770,7 @@ preProcess_filterInterior <- function(x3p,
 #'@param high_connectivity argument for imager::label
 #'@param tolerance argument for imager::label
 #'@param radiusOffset number of pixels to add to estimated breech face radius.
-#'  This is commonly a negative value (e.g., -20 for region = "exterior") to
+#'  This is commonly a negative value (e.g., -30 for region = "exterior") to
 #'  trim the cartridge case primer roll-off from the returned, cropped surface
 #'  matrix or a positive value (e.g., 200 for region = "interior") to remove
 #'  observations around the firing pin impression hole.
@@ -740,7 +782,7 @@ preProcess_filterInterior <- function(x3p,
 #'@note The radius estimation procedure tends to over-estimate the desired
 #'  radius values. As such, a lot of the breech face impression "roll-off" is
 #'  included in the final scan. Excessive roll-off can bias the calculation of
-#'  the CCF. As such, we can manually shrink the radius estimate (-20 or -30
+#'  the CCF. As such, we can manually shrink the radius estimate (-30 or -30
 #'  seems to work well for the Fadul cartridge cases) so that little to no
 #'  roll-off is included in the final processed scan.
 #'
@@ -753,6 +795,8 @@ preProcess_filterInterior <- function(x3p,
 #'  work well for the Fadul cartridge cases) to remove these unwanted
 #'  observations.
 #' @examples
+#'
+#' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
 #' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 #' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
@@ -814,6 +858,8 @@ preProcess_crop <- function(x3p,
 #' @return an x3p object containing the leveled cartridge case scan surface
 #'   matrix.
 #' @examples
+#'
+#' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
 #' \dontrun{
 #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 #' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
@@ -821,7 +867,7 @@ preProcess_crop <- function(x3p,
 #' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
 #' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
 #'                                        region = "exterior",
-#'                                        radiusOffset = -20)
+#'                                        radiusOffset = -30)
 #'
 #' fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
 #'                                       region = "interior",

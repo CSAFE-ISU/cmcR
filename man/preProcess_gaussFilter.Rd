@@ -26,17 +26,38 @@ Performs a low, high, or bandpass Gaussian filter on a surface matrix with a
 particular cut-off wavelength.
 }
 \examples{
+data(fadul1.1_processed)
+
+#Applying the function to fadul1.1_processed (note that this scan has already
+#  been Gaussian filtered)
+cmcR::preProcess_gaussFilter(fadul1.1_processed)
+
+#As a part of the recommended preprocessing pipeline (take > 5 sec to run):
 \dontrun{
-x3p_processed <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
-  cmcR::preProcess_crop(region = "exterior",
-                        radiusOffset = -20) \%>\%
-  cmcR::preProcess_crop(region = "interior",
-                        radiusOffset = 200) \%>\%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
-                               tau = .5,
-                               method = "fn") \%>\%
-  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                               filtertype = "bp")
+nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+
+fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+                                       region = "exterior",
+                                       radiusOffset = -30)
+
+fadul1.1_intCroped <- preProcess_crop(x3p = fadul1.1_extCropped,
+                                      region = "interior",
+                                      radiusOffset = 200)
+
+fadul1.1_leveled <- preProcess_removeTrend(x3p = fadul1.1_intCroped,
+                                           statistic = "quantile",
+                                           tau = .5,
+                                           method = "fn")
+fadul1.1_filtered <- preProcess_gaussFilter(x3p = fadul1.1_leveled,
+                                            wavelength = c(16,500),
+                                            filtertype = "bp")
+
+x3pListPlot(list("Original" = fadul1.1,
+                 "Ext. & Int. Cropped" = fadul1.1_intCroped,
+                 "Cropped and Leveled" = fadul1.1_leveled,
+                 "Filtered" = fadul1.1_filtered),type = "list")
 }
 
 }

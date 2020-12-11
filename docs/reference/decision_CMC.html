@@ -214,7 +214,7 @@ classification under one of the two decision rules.</p>
 <p><a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf'>https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf</a></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>fadul1.1_processed</span>,<span class='va'>fadul1.2_processed</span><span class='op'>)</span>
 
 <span class='va'>comparisonDF</span> <span class='op'>&lt;-</span> <span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dfr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span><span class='op'>(</span><span class='op'>-</span><span class='fl'>30</span>,<span class='fl'>30</span>,by <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>,
@@ -239,8 +239,21 @@ classification under one of the two decision rules.</p>
 
 <span class='va'>comparisonDF</span> <span class='op'>%&gt;%</span>
 <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/filter.html'>filter</a></span><span class='op'>(</span><span class='va'>originalMethodClassif</span> <span class='op'>==</span> <span class='st'>"CMC"</span> <span class='op'>|</span> <span class='va'>highCMCClassif</span> <span class='op'>==</span> <span class='st'>"CMC"</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 27 x 8</span><span>
+#&gt;    cellIndex     x     y fft_ccf pairwiseCompCor theta originalMethodC~
+#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>           </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>           
+#&gt; </span><span style='color: #555555;'> 1</span><span> 2, 1         17     9   0.202           0.829   -</span><span style='color: #BB0000;'>30</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 2</span><span> 2, 4         16    11   0.204           0.620   -</span><span style='color: #BB0000;'>30</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 3</span><span> 2, 5         16     5   0.194           0.542   -</span><span style='color: #BB0000;'>30</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 4</span><span> 1, 5         21     4   0.229           0.527   -</span><span style='color: #BB0000;'>30</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 5</span><span> 6, 1        -</span><span style='color: #BB0000;'>13</span><span>    26   0.436           0.760   -</span><span style='color: #BB0000;'>27</span><span> non-CMC         
+#&gt; </span><span style='color: #555555;'> 6</span><span> 5, 1         -</span><span style='color: #BB0000;'>6</span><span>    23   0.333           0.720   -</span><span style='color: #BB0000;'>27</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 7</span><span> 5, 8         -</span><span style='color: #BB0000;'>8</span><span>   -</span><span style='color: #BB0000;'>12</span><span>   0.244           0.602   -</span><span style='color: #BB0000;'>27</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 8</span><span> 3, 1          3    22   0.439           0.782   -</span><span style='color: #BB0000;'>27</span><span> CMC             
+#&gt; </span><span style='color: #555555;'> 9</span><span> 3, 8          1    -</span><span style='color: #BB0000;'>6</span><span>   0.333           0.600   -</span><span style='color: #BB0000;'>27</span><span> non-CMC         
+#&gt; </span><span style='color: #555555;'>10</span><span> 2, 2          5    18   0.252           0.697   -</span><span style='color: #BB0000;'>27</span><span> CMC             
+#&gt; </span><span style='color: #555555;'># ... with 17 more rows, and 1 more variable: highCMCClassif </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span></div><div class='input'><span class='co'># }</span>
+</div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -64,8 +64,9 @@ results are data frames withcolumns called "originalMethodClassif" and
 Song (2013) and the High CMC method of Tong et al. (2015) (see example).
 }
 \examples{
-data(fadul1.1_processed,fadul1.2_processed)
 \dontrun{
+data(fadul1.1_processed,fadul1.2_processed)
+
 comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
                                    ~ comparison_allTogether(fadul1.1_processed,
                                                        fadul1.2_processed,

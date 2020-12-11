@@ -22,10 +22,10 @@
 #'@return A ggplot object or list of ggplot objects showing the surface matrix
 #'  height values.
 #' @examples
-#'\dontrun{
+#'data(fadul1.1_processed,fadul1.2_processed)
+#'
 #' x3pListPlot(list("Fadul 1-1" = fadul1.1_processed,
 #'                  "Fadul 1-2" = fadul1.2_processed))
-#'}
 #'@export
 #'
 #'@importFrom stats setNames median quantile
@@ -377,7 +377,8 @@ arrangeCMCPlot <- function(reference,
 #'@return A list of 4 ggplot objects showing the CMCs identified under both
 #'  decision rules and in both comparison directions.
 #'@examples
-#'\dontrun{
+#'#Takes > 5 seconds to run
+#'\donttest{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -553,12 +554,12 @@ cmcPlot <- function(reference,
                                                              cell.alpha = cell.alpha,
                                                              na.value = na.value)
 
-    if(!hasName(reference_v_target_CMCs,"highCMCClassif") | !hasName(target_v_reference_CMCs,"highCMCClassif")){
+  if(!hasName(reference_v_target_CMCs,"highCMCClassif") | !hasName(target_v_reference_CMCs,"highCMCClassif")){
 
-      return(list("originalMethodCMCs_reference_v_target" = originalMethodCMCsPlt_reference_v_target,
-                  "originalMethodCMCs_target_v_reference" = originalMethodCMCsPlt_target_v_reference))
+    return(list("originalMethodCMCs_reference_v_target" = originalMethodCMCsPlt_reference_v_target,
+                "originalMethodCMCs_target_v_reference" = originalMethodCMCsPlt_target_v_reference))
 
-    }
+  }
 
   #If the necessary data to construct the High CMCs were given, then plot them
   #too.

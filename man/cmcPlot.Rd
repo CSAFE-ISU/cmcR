@@ -64,7 +64,8 @@ depicting the CMCs/non-CMCs under the initially proposed and High CMC
 methods for a pair of cartridge case scans
 }
 \examples{
-\dontrun{
+#Takes > 5 seconds to run
+\donttest{
 data(fadul1.1_processed,fadul1.2_processed)
 
 comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),

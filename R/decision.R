@@ -901,8 +901,9 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 #'  not indicate whether/how results are combined and (2) the combined CMC
 #'  results under the High CMC method.
 #'@examples
-#'data(fadul1.1_processed,fadul1.2_processed)
 #'\dontrun{
+#'data(fadul1.1_processed,fadul1.2_processed)
+#'
 #'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
 #'                                    ~ comparison_allTogether(fadul1.1_processed,
 #'                                                        fadul1.2_processed,

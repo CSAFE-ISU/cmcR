@@ -49,16 +49,29 @@ is estiamted to be.
 }
 \examples{
 \dontrun{
-raw_x3p <- x3ptools::read_x3p("path/to/file.x3p") \%>\%
-x3ptools::sample_x3p(m = 2)
+nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
 
-raw_x3p$surface.matrix <- raw_x3p$surface.matrix \%>\%
-  cmcR::preProcess_ransacLevel() \%>\%
-  cmcR::preProcess_levelBF() \%>\%
-  cmcR::preProcess_cropExterior() \%>\%
-  cmcR::preProcess_removeFPCircle(aggregationFunction = mean,
-                                  smootherSize = 2*round((.1*nrow(surfaceMat)/2)) + 1,
-                                  gridGranularity = 1,
-                                  houghScoreQuant = .9)
+fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+
+fadul1.1_labelCropped <- fadul1.1 \%>\%
+                     preProcess_crop(region = "exterior",
+                                     radiusOffset = -30) \%>\%
+                     preProcess_crop(region = "interior",
+                                     radiusOffset = 200) \%>\%
+                     preProcess_removeTrend(statistic = "quantile",
+                                            tau = .5,
+                                            method = "fn")
+
+fadul1.1_houghCropped <- fadul1.1 \%>\%
+                          x3ptools::x3p_sample() \%>\%
+                          preProcess_ransacLevel() \%>\%
+                          preProcess_crop(region = "exterior",
+                                          radiusOffset = -30) \%>\%
+                          preProcess_removeFPCircle()
+
+x3pListPlot(list("Original" = fadul1.1,
+                 "Cropped by Labeling" = fadul1.1_labelCropped,
+                 "Cropped by Hough" = fadul1.1_houghCropped),type = "list")
 }
 }

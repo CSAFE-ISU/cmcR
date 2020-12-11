@@ -124,7 +124,7 @@ firing pin impression circle" />
     <h1>Given a surface matrix, estimates and filters any pixels within the estimated
 firing pin impression circle</h1>
     
-    <div class="hidden name"><code>removeFiringPin.Rd</code></div>
+    <div class="hidden name"><code>preProcess_removeFPCircle.Rd</code></div>
     </div>
 
     <div class="ref-description">
@@ -188,19 +188,34 @@ and column indices at which the center of the firing pin impression circle
 is estiamted to be.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>raw_x3p</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='st'>"path/to/file.x3p"</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-<span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>sample_x3p</a></span><span class='op'>(</span>m <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
+<span class='va'>nbtrd_link</span> <span class='op'>&lt;-</span> <span class='st'>"https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"</span>
+<span class='va'>fadul1.1_link</span> <span class='op'>&lt;-</span> <span class='st'>"DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"</span>
 
-<span class='va'>raw_x3p</span><span class='op'>$</span><span class='va'>surface.matrix</span> <span class='op'>&lt;-</span> <span class='va'>raw_x3p</span><span class='op'>$</span><span class='va'>surface.matrix</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'><a href='preProcess_ransacLevel.html'>preProcess_ransacLevel</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_levelBF</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_cropExterior</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
-  <span class='fu'>cmcR</span><span class='fu'>::</span><span class='fu'>preProcess_removeFPCircle</span><span class='op'>(</span>aggregationFunction <span class='op'>=</span> <span class='va'>mean</span>,
-                                  smootherSize <span class='op'>=</span> <span class='fl'>2</span><span class='op'>*</span><span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='op'>(</span><span class='fl'>.1</span><span class='op'>*</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>surfaceMat</span><span class='op'>)</span><span class='op'>/</span><span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> <span class='fl'>1</span>,
-                                  gridGranularity <span class='op'>=</span> <span class='fl'>1</span>,
-                                  houghScoreQuant <span class='op'>=</span> <span class='fl'>.9</span><span class='op'>)</span>
-<span class='op'>}</span>
+<span class='va'>fadul1.1</span> <span class='op'>&lt;-</span> <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_read.html'>read_x3p</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste0</a></span><span class='op'>(</span><span class='va'>nbtrd_link</span>,<span class='va'>fadul1.1_link</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='va'>fadul1.1_labelCropped</span> <span class='op'>&lt;-</span> <span class='va'>fadul1.1</span> <span class='op'>%&gt;%</span>
+                     <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>region <span class='op'>=</span> <span class='st'>"exterior"</span>,
+                                     radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>30</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+                     <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>region <span class='op'>=</span> <span class='st'>"interior"</span>,
+                                     radiusOffset <span class='op'>=</span> <span class='fl'>200</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+                     <span class='fu'><a href='preProcess_removeTrend.html'>preProcess_removeTrend</a></span><span class='op'>(</span>statistic <span class='op'>=</span> <span class='st'>"quantile"</span>,
+                                            tau <span class='op'>=</span> <span class='fl'>.5</span>,
+                                            method <span class='op'>=</span> <span class='st'>"fn"</span><span class='op'>)</span>
+
+<span class='va'>fadul1.1_houghCropped</span> <span class='op'>&lt;-</span> <span class='va'>fadul1.1</span> <span class='op'>%&gt;%</span>
+                          <span class='fu'>x3ptools</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/x3ptools/man/x3p_sample.html'>x3p_sample</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+                          <span class='fu'><a href='preProcess_ransacLevel.html'>preProcess_ransacLevel</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+                          <span class='fu'><a href='preProcess_crop.html'>preProcess_crop</a></span><span class='op'>(</span>region <span class='op'>=</span> <span class='st'>"exterior"</span>,
+                                          radiusOffset <span class='op'>=</span> <span class='op'>-</span><span class='fl'>30</span><span class='op'>)</span> <span class='op'>%&gt;%</span>
+                          <span class='fu'>preProcess_removeFPCircle</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='fu'><a href='x3pListPlot.html'>x3pListPlot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Original"</span> <span class='op'>=</span> <span class='va'>fadul1.1</span>,
+                 <span class='st'>"Cropped by Labeling"</span> <span class='op'>=</span> <span class='va'>fadul1.1_labelCropped</span>,
+                 <span class='st'>"Cropped by Hough"</span> <span class='op'>=</span> <span class='va'>fadul1.1_houghCropped</span><span class='op'>)</span>,type <span class='op'>=</span> <span class='st'>"list"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; $Original</div><div class='img'><img src='preProcess_removeFPCircle-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; 
+#&gt; $`Cropped by Labeling`</div><div class='img'><img src='preProcess_removeFPCircle-2.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; 
+#&gt; $`Cropped by Hough`</div><div class='img'><img src='preProcess_removeFPCircle-3.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; </div><div class='input'><span class='co'># }</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
