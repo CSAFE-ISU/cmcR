@@ -37,7 +37,8 @@ x3pListPlot <- function(x3pList,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                         na.value = "gray80",
-                        guide = "colorbar"){
+                        guide = "colorbar",
+                        polar = FALSE){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
@@ -69,7 +70,7 @@ x3pListPlot <- function(x3pList,
                                       dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
 
                                       dat <- dat %>%
-                                        setNames(paste0(names(dat)," [",round(dat,3),"]"))
+                                        setNames(paste0(names(dat)," [",round(dat,1),"]"))
 
                                       return(dat)
                                     },
@@ -77,15 +78,16 @@ x3pListPlot <- function(x3pList,
                                     guide = guide) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_minimal() +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                     axis.text.x = ggplot2::element_blank(),
-                     axis.ticks.x = ggplot2::element_blank(),
-                     axis.title.y = ggplot2::element_blank(),
-                     axis.text.y = ggplot2::element_blank(),
-                     axis.ticks.y = ggplot2::element_blank(),
-                     panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank(),
-                     panel.background = ggplot2::element_blank()) +
+      ggplot2::theme(
+        axis.title.x = ggplot2::element_blank(),
+        #                axis.text.x = ggplot2::element_blank(),
+        #                axis.ticks.x = ggplot2::element_blank(),
+        #                axis.title.y = ggplot2::element_blank(),
+        #                axis.text.y = ggplot2::element_blank(),
+        #                axis.ticks.y = ggplot2::element_blank(),
+        panel.grid.major = ggplot2::element_blank(),
+        panel.grid.minor = ggplot2::element_blank(),
+        panel.background = ggplot2::element_blank()) +
       ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(2.5,"in"),
                                                       label.theme = ggplot2::element_text(size = 8),
                                                       title.theme = ggplot2::element_text(size = 10),
@@ -94,6 +96,30 @@ x3pListPlot <- function(x3pList,
                       colour = 'none') +
       ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
       ggplot2::facet_wrap(~ x3p)
+
+    if(polar){
+      ranges <- ggplot_build(plts)$layout$panel_params[[1]][c('x.range', 'y.range')]
+      sizes <- sapply(ranges, diff)
+      aspect <- sizes[1] / sizes[2]
+
+      suppressMessages({
+        plts <- plts +
+          ggplot2::facet_wrap(~ x3p,ncol = 1) +
+          ggplot2::coord_flip(expand = FALSE) +
+          ggplot2::theme_bw() +
+          ggplot2::theme_update(aspect.ratio = aspect) +
+          ggplot2::theme(legend.position = "top") +
+          ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = grid::unit(4,"in"),
+                                                          barheight = grid::unit(.1,"in"),
+                                                          label.theme = ggplot2::element_text(size = 8),
+                                                          title.theme = ggplot2::element_text(size = 10),
+                                                          frame.colour = "black",
+                                                          ticks.colour = "black"),
+                          colour =  'none')
+      })
+    }
+
+    return(plts)
   }
   else if(type == "list"){
     plts <- purrr::pmap(.l = list(x3pList,
@@ -111,7 +137,7 @@ x3pListPlot <- function(x3pList,
                                           height = .data$value*1e6) %>%
                             dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
-                          surfaceMat_df %>%
+                          plt <- surfaceMat_df %>%
                             ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
                             ggplot2::geom_raster(ggplot2::aes(fill = .data$height))  +
                             ggplot2::scale_fill_gradientn(colours = height.colors,
@@ -120,7 +146,7 @@ x3pListPlot <- function(x3pList,
                                                             dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
 
                                                             dat <- dat %>%
-                                                              setNames(paste0(names(dat)," [",round(dat,3),"]"))
+                                                              setNames(paste0(names(dat)," [",round(dat,1),"]"))
 
                                                             return(dat)
                                                           },
@@ -128,17 +154,18 @@ x3pListPlot <- function(x3pList,
                                                           guide = guide) +
                             ggplot2::theme_minimal() +
                             ggplot2::coord_fixed(expand = FALSE) +
-                            ggplot2::theme(axis.title.x = ggplot2::element_blank(),
-                                           axis.text.x = ggplot2::element_blank(),
-                                           axis.ticks.x = ggplot2::element_blank(),
-                                           axis.title.y = ggplot2::element_blank(),
-                                           axis.text.y = ggplot2::element_blank(),
-                                           axis.ticks.y = ggplot2::element_blank(),
-                                           panel.grid.major = ggplot2::element_blank(),
-                                           panel.grid.minor = ggplot2::element_blank(),
-                                           panel.background = ggplot2::element_blank(),
-                                           plot.title = ggplot2::element_text(hjust = .5,
-                                                                              size = 11)) +
+                            ggplot2::theme(
+                              # axis.title.x = ggplot2::element_blank(),
+                              #              axis.text.x = ggplot2::element_blank(),
+                              #              axis.ticks.x = ggplot2::element_blank(),
+                              #              axis.title.y = ggplot2::element_blank(),
+                              #              axis.text.y = ggplot2::element_blank(),
+                              #              axis.ticks.y = ggplot2::element_blank(),
+                              panel.grid.major = ggplot2::element_blank(),
+                              panel.grid.minor = ggplot2::element_blank(),
+                              panel.background = ggplot2::element_blank(),
+                              plot.title = ggplot2::element_text(hjust = .5,
+                                                                 size = 11)) +
                             ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(3,"in"),
                                                                             label.theme = ggplot2::element_text(size = 8),
                                                                             title.theme = ggplot2::element_text(size = 10),
@@ -147,9 +174,33 @@ x3pListPlot <- function(x3pList,
                                             colour =  'none') +
                             ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
                             ggplot2::ggtitle(name)
+
+                          if(polar){
+                            ranges <- ggplot_build(plt)$layout$panel_params[[1]][c('x.range', 'y.range')]
+                            sizes <- sapply(ranges, diff)
+                            aspect <- sizes[1] / sizes[2]
+
+                            suppressMessages({
+                              plt <- plt +
+                                ggplot2::facet_wrap(~ x3p,ncol = 1) +
+                                ggplot2::coord_flip(expand = FALSE) +
+                                ggplot2::theme_bw() +
+                                ggplot2::theme_update(aspect.ratio = aspect,
+                                                      legend.position = "top") +
+                                ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = grid::unit(4,"in"),
+                                                                                barheight = grid::unit(.1,"in"),
+                                                                                label.theme = ggplot2::element_text(size = 8),
+                                                                                title.theme = ggplot2::element_text(size = 10),
+                                                                                frame.colour = "black",
+                                                                                ticks.colour = "black"),
+                                                colour =  'none')
+                            })
+                          }
+                          return(plt)
                         })
+
+    return(plts)
   }
-  return(plts)
 }
 
 # @name linear_to_matrix
@@ -195,7 +246,8 @@ arrangeCMCPlot <- function(reference,
                            height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                            cell.colors = c("#a50026","#313695"),
                            cell.alpha = .2,
-                           na.value = "gray80"){
+                           na.value = "gray80",
+                           polar = FALSE){
 
   target_cellGrid <- allCells %>%
     dplyr::mutate(firstRow = (reference$header.info$incrementY*1e6)*(.data$firstRow),
@@ -255,19 +307,69 @@ arrangeCMCPlot <- function(reference,
                   theta = .data$theta - median(.data$theta),
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
-  target_rotate <- 90 #- abs(median(allCells %>%
-  # dplyr::filter(cmc != "non-CMC") %>%
-  # dplyr::pull(theta)))
+  if(!polar){
+    target_rotate <- 90 #- abs(median(allCells %>%
+    # dplyr::filter(cmc != "non-CMC") %>%
+    # dplyr::pull(theta)))
 
-  x3pPlt <- x3pListPlot(x3pList = list(reference,target) %>%
-                          setNames(x3pNames),
-                        type = pltType,
-                        rotate = c(90,
-                                   ifelse(is.na(target_rotate),90,target_rotate)),
-                        legend.quantiles = legend.quantiles,
-                        height.colors = height.colors,
-                        na.value = na.value,
-                        guide = "none")
+    x3pPlt <- x3pListPlot(x3pList = list(reference,target) %>%
+                            setNames(x3pNames),
+                          type = pltType,
+                          rotate = c(90,
+                                     ifelse(is.na(target_rotate),90,target_rotate)),
+                          legend.quantiles = legend.quantiles,
+                          height.colors = height.colors,
+                          na.value = na.value,
+                          guide = "none")
+  }
+  else{
+
+    x3pPlt <- x3pListPlot(x3pList = list(reference %>%
+                                           x3ptools::x3p_rotate(angle = 90) %>%
+                                           x3ptools::x3p_flip_y() %>%
+                                           x3ptools::x3p_rotate(270),
+                                         target %>%
+                                           x3ptools::x3p_rotate(angle = 90) %>%
+                                           x3ptools::x3p_flip_y() %>%
+                                           x3ptools::x3p_rotate(270)) %>%
+                            setNames(x3pNames),
+                          type = pltType,
+                          # rotate = c(90,
+                          #            ifelse(is.na(target_rotate),90,target_rotate)),
+                          legend.quantiles = legend.quantiles,
+                          height.colors = height.colors,
+                          na.value = na.value,
+                          guide = "none")
+
+    if(pltType == "faceted"){
+      ranges <- ggplot_build(x3pPlt)$layout$panel_params[[1]][c('x.range', 'y.range')]
+      sizes <- sapply(ranges, diff)
+      aspect <- sizes[1] / sizes[2]
+
+      suppressMessages({
+        x3pPlt <- x3pPlt +
+          ggplot2::facet_wrap(~ x3p,ncol = 1) +
+          ggplot2::coord_flip(expand = FALSE) +
+          ggplot2::theme_update(aspect.ratio = aspect)
+      })
+    }
+    else{
+      x3pPlt <- x3pPlt %>%
+        purrr::map(~ {
+          ranges <- ggplot_build(.)$layout$panel_params[[1]][c('x.range', 'y.range')]
+          sizes <- sapply(ranges, diff)
+          aspect <- sizes[1] / sizes[2]
+
+          suppressMessages({
+            . +
+              ggplot2::facet_wrap(~ x3p,ncol = 1) +
+              ggplot2::coord_flip(expand = FALSE) +
+              ggplot2::theme_update(aspect.ratio = aspect)
+          })
+        })
+    }
+
+  }
 
   if(pltType == "faceted"){
 
@@ -374,6 +476,8 @@ arrangeCMCPlot <- function(reference,
 #'@param cell.alpha sets alpha of cells (passed to geom_polygon)
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
+#'@param polar boolean indicating whether the surface matrices are polar
+#'  transformed cartridge case surfaces
 #'@return A list of 4 ggplot objects showing the CMCs identified under both
 #'  decision rules and in both comparison directions.
 #'@examples
@@ -431,6 +535,7 @@ cmcPlot <- function(reference,
                     target,
                     reference_v_target_CMCs,
                     target_v_reference_CMCs = reference_v_target_CMCs,
+                    numCells = 64,
                     corColName = "pairwiseCompCor",
                     type = "faceted",
                     x3pNames = c("reference","target"),
@@ -438,10 +543,19 @@ cmcPlot <- function(reference,
                     height.colors = c("#1B1B1B","#404040","#7B7B7B","#B0B0B0","#DBDBDB","#F7F7F7","#E4E4E4","#C5C5C5","#999999","#717171","#4E4E4E"),
                     cell.colors = c("#a50026","#313695"),
                     cell.alpha = .2,
-                    na.value = "gray80"){
+                    na.value = "gray80",
+                    polar = FALSE){
+
+  if(polar){
+    reference_v_target_CMCs <- reference_v_target_CMCs %>%
+      dplyr::mutate(theta = 0)
+
+    target_v_reference_CMCs <- target_v_reference_CMCs %>%
+      dplyr::mutate(theta = 0)
+  }
 
   reference_cellCorners <- reference %>%
-    comparison_cellDivision() %>%
+    comparison_cellDivision(numCells = numCells) %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
         stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
@@ -449,16 +563,27 @@ cmcPlot <- function(reference,
         unlist() %>%
         as.numeric()
 
-      data.frame(cellIndex = ..1,
-                 firstRow = idNum[1],
-                 lastRow = idNum[2],
-                 firstCol = idNum[3],
-                 lastCol = idNum[4],
-                 stringsAsFactors = FALSE)
+
+      if(polar){
+        data.frame(cellIndex = ..1,
+                   firstRow = idNum[3],
+                   lastRow = idNum[4],
+                   firstCol = idNum[1],
+                   lastCol = idNum[2],
+                   stringsAsFactors = FALSE)
+      }
+      else{
+        data.frame(cellIndex = ..1,
+                   firstRow = idNum[1],
+                   lastRow = idNum[2],
+                   firstCol = idNum[3],
+                   lastCol = idNum[4],
+                   stringsAsFactors = FALSE)
+      }
     })
 
   target_cellCorners <- target %>%
-    comparison_cellDivision() %>%
+    comparison_cellDivision(numCells = numCells) %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
         stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
@@ -466,12 +591,22 @@ cmcPlot <- function(reference,
         unlist() %>%
         as.numeric()
 
-      data.frame(cellIndex = ..1,
-                 firstRow = idNum[1],
-                 lastRow = idNum[2],
-                 firstCol = idNum[3],
-                 lastCol = idNum[4],
-                 stringsAsFactors = FALSE)
+      if(polar){
+        data.frame(cellIndex = ..1,
+                   firstRow = idNum[3],
+                   lastRow = idNum[4],
+                   firstCol = idNum[1],
+                   lastCol = idNum[2],
+                   stringsAsFactors = FALSE)
+      }
+      else{
+        data.frame(cellIndex = ..1,
+                   firstRow = idNum[1],
+                   lastRow = idNum[2],
+                   firstCol = idNum[3],
+                   lastCol = idNum[4],
+                   stringsAsFactors = FALSE)
+      }
     })
 
   if(nrow(reference_v_target_CMCs) == 0){
@@ -509,7 +644,8 @@ cmcPlot <- function(reference,
                                                              height.colors = height.colors,
                                                              cell.colors = cell.colors,
                                                              cell.alpha = cell.alpha,
-                                                             na.value = na.value)
+                                                             na.value = na.value,
+                                                             polar = polar)
 
   #If only data for one comparison direction were given, only plot the original
   #method CMCs in that direction
@@ -552,7 +688,8 @@ cmcPlot <- function(reference,
                                                              height.colors = height.colors,
                                                              cell.colors = cell.colors,
                                                              cell.alpha = cell.alpha,
-                                                             na.value = na.value)
+                                                             na.value = na.value,
+                                                             polar = polar)
 
   if(!hasName(reference_v_target_CMCs,"highCMCClassif") | !hasName(target_v_reference_CMCs,"highCMCClassif")){
 

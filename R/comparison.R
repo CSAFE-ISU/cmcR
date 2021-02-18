@@ -17,7 +17,8 @@ extractCellbyCornerLocs <- function(cornerLocs,
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B
   splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
-                                              cornerLocs[["left"]]:cornerLocs[["right"]]]
+                                              cornerLocs[["left"]]:cornerLocs[["right"]]] %>%
+    as.matrix
 
   if(nrow(splitRotatedSurfaceMat) != ncol(splitRotatedSurfaceMat)){ #if the matrix isn't square...
 
@@ -317,9 +318,14 @@ comparison_getTargetRegions <- function(cellHeightValues,
   target_splitRotated <-
     purrr::map(.x = target_regionIndices,
                function(cornerIndices){
-                 regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
-                                                         rotatedSurfaceMat = target_surfaceMat_rotated,
-                                                         mat2Dim = dim(target$surface.matrix))
+                 if(cornerIndices["left"] < cornerIndices["right"] & cornerIndices["top"] < cornerIndices["bottom"]){
+                   regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
+                                                           rotatedSurfaceMat = target_surfaceMat_rotated,
+                                                           mat2Dim = dim(target$surface.matrix))
+                 }
+                 else{
+                   regionMatrix <- matrix(NA)
+                 }
 
                  region_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
 
@@ -331,7 +337,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
                  region_x3p$header.info$sizeX <- nrow(regionMatrix)
 
                  return(region_x3p)
-               } )
+               })
 
   return(target_splitRotated)
 }

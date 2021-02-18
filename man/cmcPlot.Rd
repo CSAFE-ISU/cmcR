@@ -17,7 +17,8 @@ cmcPlot(
     "#E4E4E4", "#C5C5C5", "#999999", "#717171", "#4E4E4E"),
   cell.colors = c("#a50026", "#313695"),
   cell.alpha = 0.2,
-  na.value = "gray80"
+  na.value = "gray80",
+  polar = FALSE
 )
 }
 \arguments{
@@ -53,6 +54,9 @@ that dictates the height value colorscale}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
+
+\item{polar}{boolean indicating whether the surface matrices are polar
+transformed cartridge case surfaces}
 }
 \value{
 A list of 4 ggplot objects showing the CMCs identified under both
