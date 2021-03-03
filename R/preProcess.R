@@ -232,6 +232,11 @@ preProcess_cropWS <- function(x3p,
   x3p$header.info$sizeX <- nrow(surfaceMatCropped)
   x3p$header.info$sizeY <- ncol(surfaceMatCropped)
 
+  minCroppingValues <- c("row" = min(which(rowSum >= croppingThresh)),
+                         "col" = min(which(colSum >= croppingThresh)))
+
+  x3p$cmcR.info$exteriorCroppingValues <- minCroppingValues
+
   return(x3p)
 }
 
@@ -577,7 +582,7 @@ estimateBFRadius <- function(mat,
                   "radiusEstimate" = mat_radiusEstimate))
     }
 
-    mat_radiusEstimate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
+    mat_radiusEstimateCandidate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
       dplyr::mutate(x = 1:nrow(.)) %>%
       dplyr::filter(.data$y != 0) %>%
       dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
@@ -588,6 +593,10 @@ estimateBFRadius <- function(mat,
       dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
       dplyr::pull(.data$radEstimate) %>%
       agg_function(na.rm = TRUE)
+
+    if(mat_radiusEstimateCandidate >= min(dim(mat)/4) & mat_radiusEstimateCandidate <= min(dim(mat)/2)){
+      mat_radiusEstimate <- mat_radiusEstimateCandidate
+    }
   }
 
   return(list("centerEstimate" = mat_bfRegionCenter,
@@ -629,7 +638,8 @@ preProcess_cropExterior <- function(x3p,
                                     radiusOffset = 0,
                                     croppingThresh = 1,
                                     roughEstimate = FALSE,
-                                    agg_function = median){
+                                    agg_function = median,
+                                    ...){
   mat <- x3p$surface.matrix
 
   mat_estimates <- estimateBFRadius(mat = mat,
@@ -683,6 +693,12 @@ preProcess_cropExterior <- function(x3p,
       agg_function(na.rm = TRUE)
   }
 
+  optionalInput <- list(...)
+  if(length(optionalInput[[1]]) > 0 & !all(unlist(optionalInput[[1]]) == -1)){
+    mat_centerEstimateRow <- unlist(optionalInput)[[1]]
+    mat_centerEstimateCol <- unlist(optionalInput)[[2]]
+  }
+
   exteriorIndices <- expand.grid(row = 1:nrow(mat),col = 1:ncol(mat)) %>%
     dplyr::filter((row - mat_centerEstimateRow)^2 + (col - mat_centerEstimateCol)^2 > mat_radiusEstimate^2) %>%
     as.matrix()
@@ -729,7 +745,8 @@ preProcess_filterInterior <- function(x3p,
                                       scheme = 3,
                                       high_connectivity = FALSE,
                                       tolerance = 0,
-                                      radiusOffset = 0){
+                                      radiusOffset = 0,
+                                      ...){
   mat <- x3p$surface.matrix
 
   mat_bfRegion <- mat
@@ -759,6 +776,12 @@ preProcess_filterInterior <- function(x3p,
     sqrt() %>%
     round() %>%
     magrittr::add(radiusOffset)
+
+  optionalInput <- list(...)
+  if(length(optionalInput[[1]]) > 0 & !all(unlist(optionalInput[[1]]) == -1) & !is.null(x3p$cmcR.info$exteriorCroppingValues)){
+    mat_bfRegionfpHoleCenter[1] <- unlist(optionalInput)[[1]] - x3p$cmcR.info$exteriorCroppingValues[1]
+    mat_bfRegionfpHoleCenter[2] <- unlist(optionalInput)[[2]] - x3p$cmcR.info$exteriorCroppingValues[2]
+  }
 
   interiorIndices <- expand.grid(row = 1:nrow(mat_bfRegion),col = 1:ncol(mat_bfRegion)) %>%
     dplyr::filter((row - mat_bfRegionfpHoleCenter[1])^2 + (col - mat_bfRegionfpHoleCenter[2])^2 <= mat_bfRegionfpHoleRadiusEstim^2) %>%
@@ -852,17 +875,22 @@ preProcess_crop <- function(x3p,
                             scheme = 3,
                             high_connectivity = FALSE,
                             tolerance = 0,
-                            roughEstimateExterior = FALSE){
+                            roughEstimateExterior = FALSE,
+                            ...){
   #test that region is "exterior" or "interior"
 
+  optionalInput <- list(...)
+
   if(region == "exterior"){
-    x3p <- preProcess_cropExterior(x3p,
+    x3p <- preProcess_cropExterior(x3p = x3p,
                                    radiusOffset = radiusOffset,
                                    high_connectivity = high_connectivity,
                                    tolerance = tolerance,
                                    croppingThresh = croppingThresh,
                                    roughEstimate = roughEstimateExterior,
-                                   agg_function = agg_function)
+                                   agg_function = agg_function,
+                                   scheme = scheme,
+                                   optionalInput)
 
     return(x3p)
   }
@@ -870,7 +898,9 @@ preProcess_crop <- function(x3p,
     x3p <- preProcess_filterInterior(x3p,
                                      radiusOffset = radiusOffset,
                                      high_connectivity = high_connectivity,
-                                     tolerance = tolerance)
+                                     tolerance = tolerance,
+                                     scheme = scheme,
+                                     optionalInput)
 
     return(x3p)
   }
