@@ -438,10 +438,11 @@ cmcPlot <- function(reference,
                     height.colors = c("#1B1B1B","#404040","#7B7B7B","#B0B0B0","#DBDBDB","#F7F7F7","#E4E4E4","#C5C5C5","#999999","#717171","#4E4E4E"),
                     cell.colors = c("#a50026","#313695"),
                     cell.alpha = .2,
+                    numCells = 64,
                     na.value = "gray80"){
 
   reference_cellCorners <- reference %>%
-    comparison_cellDivision() %>%
+    comparison_cellDivision(numCells = numCells) %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
         stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
@@ -458,7 +459,7 @@ cmcPlot <- function(reference,
     })
 
   target_cellCorners <- target %>%
-    comparison_cellDivision() %>%
+    comparison_cellDivision(numCells = numCells) %>%
     purrr::pmap_dfr(~ {
       idNum <- ..2$cmcR.info$cellRange %>%
         stringr::str_extract_all(string = ..2$cmcR.info$cellRange,
