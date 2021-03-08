@@ -348,9 +348,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'@name comparison_standardizeHeights
 #'
 #'@param heightValues list/tibble column of x3p objects
-#'@param withRespectTo either "individualCell", meaning centering/scaling
-#'  statistics are calculated independently per cell, or "entireScan", meaning
-#'  centering/scaling statistics are calculated aggregate across all cells
+#'@param withRespectTo currently ignored
 #'@param centerBy statistic by which to center (i.e., subtract from) the height
 #'  values
 #'@param scaleBy statistic by which to scale (i.e., divide) the height values
@@ -385,62 +383,21 @@ comparison_standardizeHeights <- function(heightValues,
                                           centerBy = mean,
                                           scaleBy = sd){
 
-  if(withRespectTo == "entireScan"){
-    centerByVal <- heightValues %>%
-      purrr::map(function(x3p){
+  heightValues <- heightValues %>%
+    purrr::map(function(x3p){
 
-        as.vector(x3p$surface.matrix[!is.na(x3p$surface.matrix)])
+      x3p$cmcR.info$centerBy <- centerBy
+      x3p$cmcR.info$centerByVal <- centerBy(x3p$surface.matrix,na.rm = TRUE)
 
-      }) %>%
-      unlist() %>%
-      centerBy()
+      x3p$cmcR.info$scaleBy <- scaleBy
+      x3p$cmcR.info$scaleByVal <- scaleBy(x3p$surface.matrix,na.rm = TRUE)
 
-    scaleByVal <- heightValues %>%
-      purrr::map(function(x3p){
+      x3p$surface.matrix <- (x3p$surface.matrix - centerBy(x3p$surface.matrix,na.rm = TRUE))/scaleBy(x3p$surface.matrix,na.rm = TRUE)
 
-        as.vector(x3p$surface.matrix[!is.na(x3p$surface.matrix)])
+      return(x3p)
+    })
 
-      }) %>%
-      unlist() %>%
-      scaleBy()
-
-    heightValues <- heightValues %>%
-      purrr::map(function(x3p){
-
-        x3p$cmcR.info$centerBy <- centerBy
-        x3p$cmcR.info$centerByVal <- centerByVal
-
-        x3p$cmcR.info$scaleBy <- scaleBy
-        x3p$cmcR.info$scaleByVal <- scaleByVal
-
-        x3p$surface.matrix <- (x3p$surface.matrix - centerByVal)/scaleByVal
-
-        return(x3p)
-      })
-
-    return(heightValues)
-  }
-  else if(withRespectTo == "individualCell"){
-
-    heightValues <- heightValues %>%
-      purrr::map(function(x3p){
-
-        x3p$cmcR.info$centerBy <- centerBy
-        x3p$cmcR.info$centerByVal <- centerBy(x3p$surface.matrix,na.rm = TRUE)
-
-        x3p$cmcR.info$scaleBy <- scaleBy
-        x3p$cmcR.info$scaleByVal <- scaleBy(x3p$surface.matrix,na.rm = TRUE)
-
-        x3p$surface.matrix <- (x3p$surface.matrix - centerBy(x3p$surface.matrix,na.rm = TRUE))/scaleBy(x3p$surface.matrix,na.rm = TRUE)
-
-        return(x3p)
-      })
-
-    return(heightValues)
-  }
-  else{
-    return(heightValues)
-  }
+  return(heightValues)
 }
 
 #'Replace missing values in a scan
@@ -497,9 +454,6 @@ comparison_replaceMissing <- function(heightValues,
 #'  reference scan's cells (as returned by comparison_cellDivision)
 #'@param regionHeightValues list/tibble column of x3p objects containing a
 #'  target scan's regions (as returned by comparison_getTargetRegions)
-#'@param ccfMethod algorithm to calculate the cross-correlation. Either "fft",
-#'  which uses the Cross-Correlation Theorem (see link below), or "imager",
-#'  which uses the imager::correlate function
 #'@return A list of the same length as the input containing data frames of the
 #'  translation (x,y) values at which each reference cell is estimated to align
 #'  in its associated target region and the CCF value at this alignment.
@@ -543,12 +497,12 @@ comparison_replaceMissing <- function(heightValues,
 #' head()
 #'
 #'@export
-comparison_fft_ccf <- function(cellHeightValues,regionHeightValues,ccfMethod = "fft"){
+comparison_fft_ccf <- function(cellHeightValues,regionHeightValues){
   ccfList <- purrr::map2(cellHeightValues,
                          regionHeightValues,
                          ~ ccfComparison(mat1 = .x$surface.matrix,
                                          mat2 = .y$surface.matrix,
-                                         ccfMethod = ccfMethod))
+                                         ccfMethod = "fft"))
 
   return(ccfList)
 }

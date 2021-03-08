@@ -176,19 +176,16 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   #   return(data.frame("ccf" = resp$ccfReweighted,"x" = resp$offsetx,"y" = resp$offsety))
   # }
   #
-  if(ccfMethod == "imager"){
-    resp <- imager::correlate(im = imager::as.cimg(mat2),
-                              filter = imager::as.cimg(mat1),
-                              normalise = TRUE) %>%
-      imager::imrotate(cx = nrow(.)/2,
-                       cy = ncol(.)/2,
-                       angle = 180) %>%
-      as.matrix()
-  }
+  # else if(ccfMethod == "imager"){
+  #   resp <- imager::correlate(im = imager::as.cimg(mat2),
+  #                             filter = imager::as.cimg(mat1),
+  #                             normalise = TRUE) %>%
+  #     as.matrix()
+  # }
 
-  else if(ccfMethod == "fft"){
+  # else if(ccfMethod == "fft"){
   resp <- filterViaFFT(mat1, mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-  }
+  # }
 
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]
