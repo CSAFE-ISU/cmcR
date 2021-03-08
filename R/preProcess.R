@@ -514,8 +514,11 @@ estimateBFRadius <- function(mat,
                              angle = 0,
                              interpolation = 0,
                              boundary = 0,
-                             roughEstimate = FALSE,
                              agg_function = median){
+  # print(angle)
+  # if(angle == -100){
+  # browser()
+  # }
 
   matFake <- (mat*1e5) + 1 #scale and shift all non-NA pixels up 1 (meter)
   matFakeRotated <- matFake %>%
@@ -555,43 +558,37 @@ estimateBFRadius <- function(mat,
   mat_segmented[mat_segmented != exteriorLabel] <- -1
   mat_segmented[mat_segmented == exteriorLabel] <- -2
 
-  mat_radiusInitialEstim <- round(sqrt(sum(mat_segmented == -1)/pi))
+  mat_segmentedEdges <- mat_segmented %>%
+    imager::as.cimg() %>%
+    imager::imgradient(axes = "xy",
+                       scheme = scheme) %>%
+    imager::enorm() %>%
+    imager::add() %>%
+    as.matrix()
 
-  mat_bfRegionCenter <- round(colMeans(which(mat_segmented == -1,arr.ind = TRUE)))
+  mat_segmentedEdgesMidRow <- mat_segmentedEdges[floor(nrow(mat_segmentedEdges)/2),]
 
-  mat_radiusEstimate <- mat_radiusInitialEstim
-
-  if(!roughEstimate){
-    mat_segmentedEdges <- mat_segmented %>%
-      imager::as.cimg() %>%
-      imager::imgradient(axes = "xy",
-                         scheme = scheme) %>%
-      imager::enorm() %>%
-      imager::add() %>%
-      as.matrix()
-
-    mat_segmentedEdgesMidRow <- mat_segmentedEdges[mat_bfRegionCenter[1],]
-
-    if(sum(mat_segmentedEdgesMidRow > 0) < 2){
-      return(list("centerEstimate" = mat_bfRegionCenter,
-                  "radiusEstimate" = mat_radiusEstimate))
-    }
-
-    mat_radiusEstimate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
-      dplyr::mutate(x = 1:nrow(.)) %>%
-      dplyr::filter(.data$y != 0) %>%
-      dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
-      dplyr::mutate(x_diff = abs(.data$x - .data$x_lag)) %>%
-      dplyr::top_n(n = 1,wt = .data$x_diff) %>%
-      dplyr::summarise(x_lag = agg_function(.data$x_lag),
-                       x = agg_function(.data$x)) %>%
-      dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
-      dplyr::pull(.data$radEstimate) %>%
-      agg_function(na.rm = TRUE)
+  if(sum(mat_segmentedEdgesMidRow > 0) < 2){
+    return(NA)
   }
 
-  return(list("centerEstimate" = mat_bfRegionCenter,
-              "radiusEstimate" = mat_radiusEstimate))
+  mat_radiusEstimate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
+    dplyr::mutate(x = 1:nrow(.)) %>%
+    dplyr::filter(.data$y != 0) %>%
+    dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
+    dplyr::mutate(x_diff = abs(.data$x - .data$x_lag)) %>%
+    dplyr::top_n(n = 1,wt = .data$x_diff) %>%
+    dplyr::summarise(x_lag = agg_function(.data$x_lag),
+                     x = agg_function(.data$x)) %>%
+    dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
+    dplyr::pull(.data$radEstimate) %>%
+    agg_function(na.rm = TRUE)
+
+  if(all(2*mat_radiusEstimate < max(nrow(mat)/2,ncol(mat)/2))){
+    return(NA)
+  }
+
+  return(mat_radiusEstimate)
 }
 
 # Crop the exterior of a breech face impression surface matrix
@@ -628,25 +625,16 @@ preProcess_cropExterior <- function(x3p,
                                     tolerance = 0,
                                     radiusOffset = 0,
                                     croppingThresh = 1,
-                                    roughEstimate = FALSE,
                                     agg_function = median){
   mat <- x3p$surface.matrix
 
-  mat_estimates <- estimateBFRadius(mat = mat,
-                                    scheme = scheme,
-                                    high_connectivity = high_connectivity,
-                                    tolerance = tolerance,
-                                    angle = 0,
-                                    roughEstimate = roughEstimate,
-                                    agg_function = agg_function)
-
-  if(all(!is.na(mat_estimates))){
-    mat_radiusEstimate <- mat_estimates$radiusEstimate %>%
-      magrittr::add(radiusOffset)
-
-    mat_centerEstimateRow <- mat_estimates$centerEstimate[1]
-    mat_centerEstimateCol <- mat_estimates$centerEstimate[2]
-  }
+  mat_radiusEstimate <- estimateBFRadius(mat = mat,
+                                         scheme = scheme,
+                                         high_connectivity = high_connectivity,
+                                         tolerance = tolerance,
+                                         angle = 0,
+                                         agg_function = agg_function) %>%
+    magrittr::add(radiusOffset)
 
   #the edges of some cartridge case scans aren't prominent, so the radius
   #estimate obtained above might not be accurate. The estimateBFRadius function
@@ -656,35 +644,20 @@ preProcess_cropExterior <- function(x3p,
   #estimating the radius per rotation. Since this is computationally more
   #expensive, we only want to do this if necessary (i.e., if the initial radius
   #estimate came back NA).
-
-  if(all(is.na(mat_estimates)) | !roughEstimate){
-    mat_estimates <- purrr::map(seq(-180,180,by = 20),
-                                ~ estimateBFRadius(mat = mat,
-                                                   scheme = scheme,
-                                                   high_connectivity = high_connectivity,
-                                                   tolerance = tolerance,
-                                                   angle = .,
-                                                   roughEstimate = roughEstimate,
-                                                   agg_function = agg_function)) %>%
-      purrr::discard(.p = ~ all(is.na(.))) %>%
-      purrr::compact()
-
-    mat_radiusEstimate <- mat_estimates %>%
-      purrr::map_dbl(~ .$radiusEstimate) %>%
+  if(is.na(mat_radiusEstimate)){
+    mat_radiusEstimate <- purrr::map_dbl(seq(-180,180,by = 20),
+                                         ~ estimateBFRadius(mat = mat,
+                                                            scheme = scheme,
+                                                            high_connectivity = high_connectivity,
+                                                            tolerance = tolerance,
+                                                            angle = .,
+                                                            agg_function = agg_function)) %>%
       agg_function(na.rm = TRUE) %>%
       magrittr::add(radiusOffset)
-
-    mat_centerEstimateRow <- mat_estimates %>%
-      purrr::map_dbl(~ .$centerEstimate[1]) %>%
-      agg_function(na.rm = TRUE)
-
-    mat_centerEstimateCol <- mat_estimates %>%
-      purrr::map_dbl(~ .$centerEstimate[2]) %>%
-      agg_function(na.rm = TRUE)
   }
 
   exteriorIndices <- expand.grid(row = 1:nrow(mat),col = 1:ncol(mat)) %>%
-    dplyr::filter((row - mat_centerEstimateRow)^2 + (col - mat_centerEstimateCol)^2 > mat_radiusEstimate^2) %>%
+    dplyr::filter((row - nrow(mat)/2)^2 + (col - ncol(mat)/2)^2 > mat_radiusEstimate^2) %>%
     as.matrix()
 
   mat_interior <- mat
@@ -851,8 +824,7 @@ preProcess_crop <- function(x3p,
                             agg_function = median,
                             scheme = 3,
                             high_connectivity = FALSE,
-                            tolerance = 0,
-                            roughEstimateExterior = FALSE){
+                            tolerance = 0){
   #test that region is "exterior" or "interior"
 
   if(region == "exterior"){
@@ -861,7 +833,6 @@ preProcess_crop <- function(x3p,
                                    high_connectivity = high_connectivity,
                                    tolerance = tolerance,
                                    croppingThresh = croppingThresh,
-                                   roughEstimate = roughEstimateExterior,
                                    agg_function = agg_function)
 
     return(x3p)
