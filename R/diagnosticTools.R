@@ -37,10 +37,13 @@ x3pListPlot <- function(x3pList,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                         na.value = "gray80",
-                        guide = "colorbar"){
+                        guide = "colorbar",
+                        ...){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
+
+  optionalInput <- list(...)
 
   if(type == "faceted"){
     surfaceMat_df <- purrr::pmap_dfr(.l = list(x3pList,
@@ -255,15 +258,10 @@ arrangeCMCPlot <- function(reference,
                   theta = .data$theta - median(.data$theta),
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
-  target_rotate <- 90 #- abs(median(allCells %>%
-  # dplyr::filter(cmc != "non-CMC") %>%
-  # dplyr::pull(theta)))
-
   x3pPlt <- x3pListPlot(x3pList = list(reference,target) %>%
                           setNames(x3pNames),
                         type = pltType,
-                        rotate = c(90,
-                                   ifelse(is.na(target_rotate),90,target_rotate)),
+                        rotate = c(90,90 + median(allCells$theta)),
                         legend.quantiles = legend.quantiles,
                         height.colors = height.colors,
                         na.value = na.value,
