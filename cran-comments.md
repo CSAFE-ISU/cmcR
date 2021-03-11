@@ -1,4 +1,23 @@
 ## Resubmission
+
+This is a minor, yet necessary, package update that fixes bugs in the package's plotting functions x3pListPlot and cmcPlot.
+
+## Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+## R CMD check results
+
+0 errors v | 0 warnings v | 0 notes v
+
+R CMC check succeeded
+
+#Previous cran-comments
+
+## Resubmission
 This is a resubmission.
 The previous submission was rejected with the following comments:
 
@@ -87,7 +106,6 @@ Possibly mis-spelled words in DESCRIPTION:
 
 This is the same note as in the previous submission. The short of it is that these are not mis-spelled words.
 
-#Previous cran-comments
 ## Resubmission
 This is a resubmission.
 The previous submission failed the automatic check due to a warning thrown while running the vignette.
