@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.4</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -72,8 +72,7 @@
 
       
 
-      </header><script src="cmcR_plotReproduction_files/header-attrs-2.5.3/header-attrs.js"></script><link href="cmcR_plotReproduction_files/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet">
-<script src="cmcR_plotReproduction_files/anchor-sections-1.0.1/anchor-sections.js"></script><div class="row">
+      </header><script src="cmcR_plotReproduction_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Reproduction of Song et al. (2018) plots using the cmcR package</h1>
@@ -88,13 +87,13 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">cmcR</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">magrittr</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org">magrittr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/heike/x3ptools">x3ptools</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-forge.r-project.org/projects/rgl/">rgl</a></span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmurdoch/rgl">rgl</a></span><span class="op">)</span></code></pre></div>
 <div id="set-up" class="section level2">
 <h2 class="hasAnchor">
 <a href="#set-up" class="anchor"></a>Set-up</h2>
@@ -122,7 +121,7 @@
 <span class="va">surface2</span> <span class="op">&lt;-</span> <span class="va">fadul1.2_raw</span> <span class="op">%&gt;%</span>
   <span class="fu">cmcR</span><span class="fu">::</span><span class="fu"><a href="../reference/preProcess_gaussFilter.html">preProcess_gaussFilter</a></span><span class="op">(</span>wavelength <span class="op">=</span> <span class="fl">16</span>,filtertype <span class="op">=</span> <span class="st">"lp"</span><span class="op">)</span>
 
-<span class="va">params</span> <span class="op">&lt;-</span> <span class="fu">rgl</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">r3dDefaults</a></span>
+<span class="va">params</span> <span class="op">&lt;-</span> <span class="fu">rgl</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/rgl/man/open3d.html">r3dDefaults</a></span>
 
 <span class="va">zoom</span> <span class="op">=</span> <span class="fl">.7</span>
 <span class="va">size</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">300</span>,<span class="fl">300</span><span class="op">)</span>
@@ -132,7 +131,7 @@
 <span class="va">params</span><span class="op">$</span><span class="va">zoom</span> <span class="op">&lt;-</span> <span class="va">zoom</span>
 
 <span class="co">#opens blank "canvas" upon which we can add lights, surfaces, etc.</span>
-<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/par3d.html">open3d</a></span><span class="op">(</span>params <span class="op">=</span> <span class="va">params</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/rgl/man/open3d.html">open3d</a></span><span class="op">(</span>params <span class="op">=</span> <span class="va">params</span><span class="op">)</span>
 
 <span class="co">#removes any previously declared lights in scene</span>
 <span class="fu"><a href="https://rdrr.io/pkg/rgl/man/scene.html">rgl.pop</a></span><span class="op">(</span><span class="st">"lights"</span><span class="op">)</span>

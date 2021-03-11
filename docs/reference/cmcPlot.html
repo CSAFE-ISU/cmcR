@@ -74,7 +74,7 @@ methods for a pair of cartridge case scans" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.4</span>
       </span>
     </div>
 
@@ -82,7 +82,7 @@ methods for a pair of cartridge case scans" />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -144,6 +144,7 @@ methods for a pair of cartridge case scans</p>
     <span class='st'>"#E4E4E4"</span>, <span class='st'>"#C5C5C5"</span>, <span class='st'>"#999999"</span>, <span class='st'>"#717171"</span>, <span class='st'>"#4E4E4E"</span><span class='op'>)</span>,
   cell.colors <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"#a50026"</span>, <span class='st'>"#313695"</span><span class='op'>)</span>,
   cell.alpha <span class='op'>=</span> <span class='fl'>0.2</span>,
+  numCells <span class='op'>=</span> <span class='fl'>64</span>,
   na.value <span class='op'>=</span> <span class='st'>"gray80"</span>
 <span class='op'>)</span></pre>
 
@@ -201,6 +202,11 @@ that dictates the height value colorscale</p></td>
     <tr>
       <th>cell.alpha</th>
       <td><p>sets alpha of cells (passed to geom_polygon)</p></td>
+    </tr>
+    <tr>
+      <th>numCells</th>
+      <td><p>the size of the grid used to compare the reference and target
+scans. Must be a perfect square.</p></td>
     </tr>
     <tr>
       <th>na.value</th>
