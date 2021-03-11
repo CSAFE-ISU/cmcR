@@ -37,13 +37,10 @@ x3pListPlot <- function(x3pList,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                         na.value = "gray80",
-                        guide = "colorbar",
-                        ...){
+                        guide = "colorbar"){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
-
-  optionalInput <- list(...)
 
   if(type == "faceted"){
     surfaceMat_df <- purrr::pmap_dfr(.l = list(x3pList,
@@ -370,6 +367,8 @@ arrangeCMCPlot <- function(reference,
 #'@param cell.colors vector of 2 colors for plotting non-matching and matching
 #'  (in that order) cells
 #'@param cell.alpha sets alpha of cells (passed to geom_polygon)
+#'@param numCells the size of the grid used to compare the reference and target
+#'  scans. Must be a perfect square.
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
 #'@return A list of 4 ggplot objects showing the CMCs identified under both

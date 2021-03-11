@@ -17,6 +17,7 @@ cmcPlot(
     "#E4E4E4", "#C5C5C5", "#999999", "#717171", "#4E4E4E"),
   cell.colors = c("#a50026", "#313695"),
   cell.alpha = 0.2,
+  numCells = 64,
   na.value = "gray80"
 )
 }
@@ -50,6 +51,9 @@ that dictates the height value colorscale}
 (in that order) cells}
 
 \item{cell.alpha}{sets alpha of cells (passed to geom_polygon)}
+
+\item{numCells}{the size of the grid used to compare the reference and target
+scans. Must be a perfect square.}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
