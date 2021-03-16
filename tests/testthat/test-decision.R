@@ -1,31 +1,8 @@
+
 `%>%` <- dplyr::`%>%`
 
 x3p1 <- x3ptools::read_x3p(tmpfile1)
 x3p2 <- x3ptools::read_x3p(tmpfile2)
-
-x3p1 <- x3p1 %>%
-  cmcR::preProcess_crop(region = "exterior",
-                        radiusOffset = -30) %>%
-  cmcR::preProcess_crop(region = "interior",
-                        radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
-                               tau = .5,
-                               method = "fn") %>%
-  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                               filtertype = "bp") %>%
-  x3ptools::sample_x3p()
-
-x3p2 <- x3p2 %>%
-  cmcR::preProcess_crop(region = "exterior",
-                        radiusOffset = -30) %>%
-  cmcR::preProcess_crop(region = "interior",
-                        radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
-                               tau = .5,
-                               method = "fn") %>%
-  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                               filtertype = "bp") %>%
-  x3ptools::sample_x3p()
 
 cellTibble <- cmcR::comparison_allTogether(x3p1,x3p2,
                                            theta = -24,
@@ -205,8 +182,8 @@ cellTibble_tiedThetas <- cellTibble %>%
                      dplyr::mutate(theta = -21))
 
 combinedCMCs_tiedThetas <- cmcR::decision_combineDirections(cellTibble_tiedThetas,
-                                 cellTibble_failed,
-                                 missingThetaDecision = "dismiss")
+                                                            cellTibble_failed,
+                                                            missingThetaDecision = "dismiss")
 
 cellTibble_tiedThetas %>%
   dplyr::filter(highCMCClassif == "CMC")

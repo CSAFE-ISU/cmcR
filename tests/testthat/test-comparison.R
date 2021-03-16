@@ -3,45 +3,21 @@
 x3p1 <- x3ptools::read_x3p(tmpfile1)
 x3p2 <- x3ptools::read_x3p(tmpfile2)
 
-x3p1 <- x3p1 %>%
-  cmcR::preProcess_crop(region = "exterior",
-                        radiusOffset = -30) %>%
-  cmcR::preProcess_crop(region = "interior",
-                        radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
-                               tau = .5,
-                               method = "fn") %>%
-  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                               filtertype = "bp") %>%
-  x3ptools::sample_x3p()
-
-x3p2 <- x3p2 %>%
-  cmcR::preProcess_crop(region = "exterior",
-                        radiusOffset = -30) %>%
-  cmcR::preProcess_crop(region = "interior",
-                        radiusOffset = 200) %>%
-  cmcR::preProcess_removeTrend(statistic = "quantile",
-                               tau = .5,
-                               method = "fn") %>%
-  cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                               filtertype = "bp") %>%
-  x3ptools::sample_x3p()
-
 #Perform entire comparison procedure explicitly
 cellTibble <- x3p1 %>%
   cmcR::comparison_cellDivision(numCells = 64) %>%
   dplyr::mutate(regionHeightValues = cmcR::comparison_getTargetRegions(cellHeightValues = cellHeightValues,
-                                                          target = x3p2,
-                                                          theta = 0)) %>%
+                                                                       target = x3p2,
+                                                                       theta = 0)) %>%
   dplyr::mutate(cellPropMissing = cmcR::comparison_calcPropMissing(cellHeightValues),
-         regionPropMissing = cmcR::comparison_calcPropMissing(regionHeightValues)) %>%
+                regionPropMissing = cmcR::comparison_calcPropMissing(regionHeightValues)) %>%
   dplyr::filter(cellPropMissing <= .85 & regionPropMissing <= .85) %>%
   dplyr::mutate(cellHeightValues = cmcR::comparison_standardizeHeights(cellHeightValues),
-         regionHeightValues = cmcR::comparison_standardizeHeights(regionHeightValues)) %>%
+                regionHeightValues = cmcR::comparison_standardizeHeights(regionHeightValues)) %>%
   dplyr::mutate(cellHeightValues_replaced = cmcR::comparison_replaceMissing(cellHeightValues),
-         regionHeightValues_replaced = cmcR::comparison_replaceMissing(regionHeightValues)) %>%
+                regionHeightValues_replaced = cmcR::comparison_replaceMissing(regionHeightValues)) %>%
   dplyr::mutate(fft_ccf_df = cmcR::comparison_fft_ccf(cellHeightValues = cellHeightValues_replaced,
-                                         regionHeightValues = regionHeightValues_replaced))  %>%
+                                                      regionHeightValues = regionHeightValues_replaced))  %>%
   dplyr::mutate(pairwiseCompCor = cmcR::comparison_cor(cellHeightValues,regionHeightValues,fft_ccf_df)) %>%
   tidyr::unnest(fft_ccf_df) %>%
   dplyr::mutate(theta = 0)
