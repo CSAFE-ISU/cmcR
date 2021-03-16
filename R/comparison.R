@@ -13,51 +13,118 @@
 
 extractCellbyCornerLocs <- function(cornerLocs,
                                     rotatedSurfaceMat,
-                                    mat2Dim){
+                                    mat2Dim,
+                                    polar = FALSE){
+
+  #in extreme cases where the reference and target scans are extremely different
+  #in size (somewhat common in the polar domain - e.g., if the reference is a
+  #lot taller than the target), a reference cell may not have a coherent region
+  #the target
+  if(all(cornerLocs[["top"]] > mat2Dim[1] & cornerLocs[["bottom"]] > mat2Dim[1]) |
+     all(cornerLocs[["left"]] > mat2Dim[2] & cornerLocs[["right"]] > mat2Dim[2]) |
+     all(cornerLocs[["top"]] < 1 & cornerLocs[["bottom"]] < 1) |
+     all(cornerLocs[["left"]] < 1 & cornerLocs[["right"]] < 1)){
+    return(matrix(NA,
+                  nrow = cornerLocs[["bottom"]] - cornerLocs[["top"]] + 1,
+                  ncol = cornerLocs[["right"]] - cornerLocs[["left"]] + 1))
+  }
+
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B
-  splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
-                                              cornerLocs[["left"]]:cornerLocs[["right"]]] %>%
-    as.matrix
+  splitRotatedSurfaceMat <- rotatedSurfaceMat[max(cornerLocs[["top"]],1):min(cornerLocs[["bottom"]],mat2Dim[1]),
+                                              max(cornerLocs[["left"]],1):min(cornerLocs[["right"]],mat2Dim[2])]
 
-  if(nrow(splitRotatedSurfaceMat) != ncol(splitRotatedSurfaceMat)){ #if the matrix isn't square...
+  if(!polar){
 
-    #if the rows need padding...
-    if(nrow(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+    if(nrow(splitRotatedSurfaceMat) != ncol(splitRotatedSurfaceMat)){ #if the matrix isn't square...
 
-      rowsToPad <- ncol(splitRotatedSurfaceMat) - nrow(splitRotatedSurfaceMat)
-      rowPadder <- matrix(NA,nrow = rowsToPad,ncol = ncol(splitRotatedSurfaceMat))
+      #if the rows need padding...
+      if(nrow(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
 
-      #if the split comes from the top of the overall matrix...
-      if(cornerLocs[["top"]] == 1){
-        splitRotatedSurfaceMat <- rbind(rowPadder,
-                                        splitRotatedSurfaceMat)
+        rowsToPad <- ncol(splitRotatedSurfaceMat) - nrow(splitRotatedSurfaceMat)
+        rowPadder <- matrix(NA,nrow = rowsToPad,ncol = ncol(splitRotatedSurfaceMat))
+
+        #if the split comes from the top of the overall matrix...
+        if(cornerLocs[["top"]] == 1){
+          splitRotatedSurfaceMat <- rbind(rowPadder,
+                                          splitRotatedSurfaceMat)
+        }
+
+        #if the split comes from the bottom of the overall matrix....
+        if(cornerLocs[["bottom"]] == mat2Dim[1]){
+          splitRotatedSurfaceMat <- rbind(splitRotatedSurfaceMat,
+                                          rowPadder)
+        }
       }
 
-      #if the split comes from the bottom of the overall matrix....
-      if(cornerLocs[["bottom"]] == mat2Dim[1]){
-        splitRotatedSurfaceMat <- rbind(splitRotatedSurfaceMat,
-                                        rowPadder)
+      #if the cols need padding...
+      if(ncol(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+
+        colsToPad <- nrow(splitRotatedSurfaceMat) - ncol(splitRotatedSurfaceMat)
+        colPadder <- matrix(NA,ncol = colsToPad,nrow = nrow(splitRotatedSurfaceMat))
+
+        #if the split comes from the left side of the overall matrix...
+        if(cornerLocs[["left"]] == 1){
+          splitRotatedSurfaceMat <- cbind(colPadder,
+                                          splitRotatedSurfaceMat)
+        }
+        #if the split comes from the right side of the overall matrix....
+        if(cornerLocs[["right"]] == mat2Dim[2]){
+          splitRotatedSurfaceMat <- cbind(splitRotatedSurfaceMat,
+                                          colPadder)
+        }
       }
     }
+  }
+  else if(polar){#if we're in the polar domain and can enforce periodic boundary constraints...
 
-    #if the cols need padding...
-    if(ncol(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
-
-      colsToPad <- nrow(splitRotatedSurfaceMat) - ncol(splitRotatedSurfaceMat)
-      colPadder <- matrix(NA,ncol = colsToPad,nrow = nrow(splitRotatedSurfaceMat))
-
-      #if the split comes from the left side of the overall matrix...
-      if(cornerLocs[["left"]] == 1){
-        splitRotatedSurfaceMat <- cbind(colPadder,
-                                        splitRotatedSurfaceMat)
-      }
-      #if the split comes from the right side of the overall matrix....
-      if(cornerLocs[["right"]] == mat2Dim[2]){
-        splitRotatedSurfaceMat <- cbind(splitRotatedSurfaceMat,
-                                        colPadder)
-      }
+    if(cornerLocs[["top"]] < 1){
+      rowPadder <- matrix(NA,nrow = abs(cornerLocs[["top"]]) + 1,
+                          ncol = ncol(splitRotatedSurfaceMat))
+      splitRotatedSurfaceMat <- rbind(rowPadder,
+                                      splitRotatedSurfaceMat)
+      #also pad the original matrix for the column performed below
+      rowPadder <- matrix(NA,nrow = abs(cornerLocs[["top"]]) + 1,
+                          ncol = ncol(rotatedSurfaceMat))
+      rotatedSurfaceMat <- rbind(rowPadder,
+                                 rotatedSurfaceMat)
+      #update top index (which was negative if we're in this conditional
+      #statement) to reflect the fact that the original matrix has been padded
+      cornerLocs[["top"]] <- 1
+      cornerLocs[["bottom"]] <- cornerLocs[["bottom"]] + nrow(rowPadder)
     }
+    if(cornerLocs[["bottom"]] > nrow(rotatedSurfaceMat)){
+      rowPadder <- matrix(NA,nrow = cornerLocs[["bottom"]] - nrow(rotatedSurfaceMat),
+                          ncol = ncol(splitRotatedSurfaceMat))
+      splitRotatedSurfaceMat <- rbind(splitRotatedSurfaceMat,
+                                      rowPadder)
+      #also pad the original matrix for the column performed below
+      rowPadder <- matrix(NA,nrow = cornerLocs[["bottom"]] - nrow(rotatedSurfaceMat),
+                          ncol = ncol(rotatedSurfaceMat))
+      rotatedSurfaceMat <- rbind(rotatedSurfaceMat,
+                                 rowPadder)
+      #update bottom index (which was larger than the number of rows in the
+      #original matrix if we're in this conditional statement) to reflect the
+      #fact that the original matrix has been padded
+      # cornerLocs[["bottom"]] <- nrow(rotatedSurfaceMat)
+    }
+    #if the desired region goes off the left side of the scan
+    if(cornerLocs[["left"]] < 1){
+      # Grab observations from the right-hand side of the original matrix
+      colPadder <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
+                                     (ncol(rotatedSurfaceMat) + cornerLocs[["left"]]):ncol(rotatedSurfaceMat)]
+      splitRotatedSurfaceMat <- cbind(colPadder,
+                                      splitRotatedSurfaceMat)
+    }
+    #if the desired region goes off the right side of the scan
+    if(cornerLocs[["right"]] > ncol(rotatedSurfaceMat)){
+      # Grab observations from the left-hand side of the original matrix
+      colPadder <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
+                                     1:(cornerLocs[["right"]] - ncol(rotatedSurfaceMat))]
+      splitRotatedSurfaceMat <- cbind(splitRotatedSurfaceMat,
+                                      colPadder)
+    }
+
   }
 
   return(splitRotatedSurfaceMat)
@@ -102,6 +169,7 @@ getMat2SplitIndices <- function(cellRanges,
                                 cellSideLengths,
                                 mat2Dim,
                                 sidelengthMultiplier,
+                                polar = FALSE,
                                 ...){
   mat2_splitCorners <- cellRanges %>%
     #pull all numbers from cellRange strings:
@@ -122,20 +190,22 @@ getMat2SplitIndices <- function(cellRanges,
                       ceiling(xyLoc["x"] + sidelengthMultiplier*sideLength["row"]/2)) %>%
                     setNames(c("left","right","top","bottom"))
 
-                  #replace negative indices with 1 (left/upper-most cells):
-                  expandedCellCorners[expandedCellCorners <= 0] <- 1
-                  #replace indices greater than the maximum index with the
-                  #maximum index (right/bottom-most cells): Note that imager
-                  #treats the rows of a matrix as the "x" axis and the columns
-                  #as the "y" axis, contrary to intuition - effectively treating
-                  #a matrix as its transpose. As such, we need
-                  #to swap the dimensions for when we subset the image further
-                  #down in the function
-                  if(expandedCellCorners[c("right")] > mat2Dim[2]){
-                    expandedCellCorners[c("right")] <- mat2Dim[2]
-                  }
-                  if(expandedCellCorners[c("bottom")] > mat2Dim[1]){
-                    expandedCellCorners[c("bottom")] <- mat2Dim[1]
+                  if(!polar){
+                    #replace negative indices with 1 (left/upper-most cells):
+                    expandedCellCorners[expandedCellCorners <= 0] <- 1
+                    #replace indices greater than the maximum index with the
+                    #maximum index (right/bottom-most cells): Note that imager
+                    #treats the rows of a matrix as the "x" axis and the columns
+                    #as the "y" axis, contrary to intuition - effectively treating
+                    #a matrix as its transpose. As such, we need
+                    #to swap the dimensions for when we subset the image further
+                    #down in the function
+                    if(expandedCellCorners[c("right")] > mat2Dim[2]){
+                      expandedCellCorners[c("right")] <- mat2Dim[2]
+                    }
+                    if(expandedCellCorners[c("bottom")] > mat2Dim[1]){
+                      expandedCellCorners[c("bottom")] <- mat2Dim[1]
+                    }
                   }
 
                   return(expandedCellCorners)
@@ -297,7 +367,8 @@ comparison_calcPropMissing <- function(heightValues){
 comparison_getTargetRegions <- function(cellHeightValues,
                                         target,
                                         theta = 0,
-                                        regionSizeMultiplier = 9){
+                                        regionSizeMultiplier = 9,
+                                        polar = FALSE){
 
   cellSideLengths <- cellHeightValues %>%
     purrr::map(~ c("row" = nrow(.$surface.matrix),
@@ -309,7 +380,8 @@ comparison_getTargetRegions <- function(cellHeightValues,
   target_regionIndices <- getMat2SplitIndices(cellRanges = cellRange,
                                               cellSideLengths = cellSideLengths,
                                               mat2Dim = dim(target$surface.matrix),
-                                              sidelengthMultiplier = floor(sqrt(regionSizeMultiplier)))
+                                              sidelengthMultiplier = floor(sqrt(regionSizeMultiplier)),
+                                              polar = polar)
 
   target_surfaceMat_rotated <- rotateSurfaceMatrix(target$surface.matrix,
                                                    theta = theta)
@@ -321,7 +393,8 @@ comparison_getTargetRegions <- function(cellHeightValues,
                  if(cornerIndices["left"] < cornerIndices["right"] & cornerIndices["top"] < cornerIndices["bottom"]){
                    regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
                                                            rotatedSurfaceMat = target_surfaceMat_rotated,
-                                                           mat2Dim = dim(target$surface.matrix))
+                                                           mat2Dim = dim(target$surface.matrix),
+                                                           polar = polar)
                  }
                  else{
                    regionMatrix <- matrix(NA)
