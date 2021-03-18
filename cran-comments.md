@@ -11,7 +11,7 @@ if the resource is not available or has changed (and not give a check warning no
 
 This needs correction whether or not the resource recovers."
 
-Explanation of changes: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error because of a test that relies on the internet. It's unclear whether this was due to a time-out, a lack of internet access, or some other reason. In any case, this (minor) test is now skipped on CRAN. 
+Explanation of changes: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear whether this was due to a time-out, a lack of internet access, or some other reason. In any case, this (minor) test is now skipped on CRAN.
 
 ## Test environments
 * local R installation: release

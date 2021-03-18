@@ -298,8 +298,8 @@ comparison_getTargetRegions <- function(cellHeightValues,
                                         theta = 0,
                                         regionSizeMultiplier = 9){
 
-  stopifnot("Scan resolutions must be equal" = (cellHeightValues[[1]]$header.info$incrementX == target$header.info$incrementX) &
-              (cellHeightValues[[1]]$header.info$incrementY == target$header.info$incrementY))
+  stopifnot("Scan resolutions must be equal" = all.equal(cellHeightValues[[1]]$header.info$incrementX,target$header.info$incrementX) &
+              all.equal(cellHeightValues[[1]]$header.info$incrementY, target$header.info$incrementY))
 
   cellSideLengths <- cellHeightValues %>%
     purrr::map(~ c("row" = nrow(.$surface.matrix),
