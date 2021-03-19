@@ -2,7 +2,7 @@
 
 This is a resubmission.
 
-The previous version was rejected with the following comments:
+The previous version was failed with the following comments from Professor Ripley:
 
 "It seems we need to remind you of the CRAN policy:
 
@@ -11,7 +11,7 @@ if the resource is not available or has changed (and not give a check warning no
 
 This needs correction whether or not the resource recovers."
 
-Explanation of changes: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear whether this was due to a time-out, a lack of internet access, or some other reason. In any case, this (minor) test is now skipped on CRAN.
+Explanation of corrections: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear from the log files specifically why this error occurs and I have been unable to replicate the problem in any other test environment. This test is now skipped on CRAN.
 
 ## Test environments
 * local R installation: release
@@ -22,18 +22,7 @@ Explanation of changes: Certain builds of the package (on r-devel-windows-ix86+x
 
 ## R CMD check results
 
-0 errors v | 1 warning | 0 notes v
-
-Warning:
-
-Found the following (possibly) invalid URLs:
-  URL: https://doi.org/10.1088/0957-0233/25/6/064005
-    From: inst/doc/decisionRuleDescription.html
-    Status: Error
-    Message: libcurl error code 35:
-      	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
-      	
-Explanation of warning: This is not an invalid URL. I changed the URL used previously to link to this particular article to the more permanent DOI link, yet the warning persists.
+0 errors v | 0 warnings | 0 notes v
 
 #Previous cran-comments
 

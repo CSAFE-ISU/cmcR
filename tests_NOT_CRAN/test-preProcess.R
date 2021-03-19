@@ -1,71 +1,78 @@
 `%>%` <- dplyr::`%>%`
 
 testthat::test_that("preProcess_ functions work as expected", {
+
   testthat::skip_on_cran()
   testthat::skip_if_offline()
 
-  x3p1_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
-  # x3p2_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
+  if(identical(Sys.getenv("NOT_CRAN"), "true")){
 
-  suppressWarnings({
-    x3p1 <- x3ptools::read_x3p(file = x3p1_url)
-    # x3p2 <- x3ptools::read_x3p(file = x3p2_url)
-  })
+    x3p1_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+    # x3p2_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
 
-  x3p1_raw <- x3p1
+    suppressWarnings({
+      x3p1 <- x3ptools::read_x3p(file = x3p1_url)
+      # x3p2 <- x3ptools::read_x3p(file = x3p2_url)
+    })
 
-  x3p1_raw_dim <- dim(x3p1$surface.matrix)
-  x3p1_raw_missing <- sum(is.na(x3p1$surface.matrix))
+    x3p1_raw <- x3p1
 
-  x3p1 <- x3p1 %>%
-    cmcR::preProcess_crop(region = "exterior",
-                          radiusOffset = -30)
+    x3p1_raw_dim <- dim(x3p1$surface.matrix)
+    x3p1_raw_missing <- sum(is.na(x3p1$surface.matrix))
 
-  #cropping exterior should reduce dimension, but remove NAs on exterior of scan
-  x3p1_extCrop_dim <- dim(x3p1$surface.matrix)
-  x3p1_extCrop_missing <- sum(is.na(x3p1$surface.matrix))
+    x3p1 <- x3p1 %>%
+      cmcR::preProcess_crop(region = "exterior",
+                            radiusOffset = -30)
 
-  #remove firing pin observations
-  x3p1 <- x3p1 %>%
-    cmcR::preProcess_crop(region = "interior",
-                          radiusOffset = 200)
+    #cropping exterior should reduce dimension, but remove NAs on exterior of scan
+    x3p1_extCrop_dim <- dim(x3p1$surface.matrix)
+    x3p1_extCrop_missing <- sum(is.na(x3p1$surface.matrix))
 
-  x3p1_intCrop_dim <- dim(x3p1$surface.matrix)
-  x3p1_intCrop_missing <- sum(is.na(x3p1$surface.matrix))
+    #remove firing pin observations
+    x3p1 <- x3p1 %>%
+      cmcR::preProcess_crop(region = "interior",
+                            radiusOffset = 200)
 
-  x3p1_preDeTrend_var <- var(x3p1$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
+    x3p1_intCrop_dim <- dim(x3p1$surface.matrix)
+    x3p1_intCrop_missing <- sum(is.na(x3p1$surface.matrix))
 
-  x3p1_preDeTrend_missingIndices <- which(is.na(x3p1$surface.matrix))
+    x3p1_preDeTrend_var <- var(x3p1$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
 
-  #remove conditional/median
-  x3p1_meanDeTrend <- x3p1 %>%
-    cmcR::preProcess_removeTrend(statistic = "mean")
+    x3p1_preDeTrend_missingIndices <- which(is.na(x3p1$surface.matrix))
 
-  x3p1_medianDeTrend <- x3p1 %>%
-    cmcR::preProcess_removeTrend(statistic = "quantile",
-                                 tau = .5,
-                                 method = "fn")
+    #remove conditional/median
+    x3p1_meanDeTrend <- x3p1 %>%
+      cmcR::preProcess_removeTrend(statistic = "mean")
 
-  x3p1_meanDeTrend_var <- var(x3p1_meanDeTrend$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
-  x3p1_medianDeTrend_var <- var(x3p1_medianDeTrend$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
+    x3p1_medianDeTrend <- x3p1 %>%
+      cmcR::preProcess_removeTrend(statistic = "quantile",
+                                   tau = .5,
+                                   method = "fn")
 
-  #Pass Gaussian filter over scan
-  x3p1_lp <- x3p1_medianDeTrend %>%
-    cmcR::preProcess_gaussFilter(wavelength = c(16),
-                                 filtertype = "lp")
-  x3p1_hp <- x3p1_medianDeTrend %>%
-    cmcR::preProcess_gaussFilter(wavelength = c(500),
-                                 filtertype = "hp")
-  x3p1_bp <- x3p1_medianDeTrend %>%
-    cmcR::preProcess_gaussFilter(wavelength = c(16,500),
-                                 filtertype = "bp")
+    x3p1_meanDeTrend_var <- var(x3p1_meanDeTrend$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
+    x3p1_medianDeTrend_var <- var(x3p1_medianDeTrend$surface.matrix[!is.na(x3p1$surface.matrix)])*1e12
 
-  postFilterVar_lp <- var(x3p1_lp$surface.matrix[!is.na(x3p1_lp$surface.matrix)])*1e12
-  postFilterVar_hp <- var(x3p1_hp$surface.matrix[!is.na(x3p1_hp$surface.matrix)])*1e12
-  postFilterVar_bp <- var(x3p1_bp$surface.matrix[!is.na(x3p1_bp$surface.matrix)])*1e12
+    #Pass Gaussian filter over scan
+    x3p1_lp <- x3p1_medianDeTrend %>%
+      cmcR::preProcess_gaussFilter(wavelength = c(16),
+                                   filtertype = "lp")
+    x3p1_hp <- x3p1_medianDeTrend %>%
+      cmcR::preProcess_gaussFilter(wavelength = c(500),
+                                   filtertype = "hp")
+    x3p1_bp <- x3p1_medianDeTrend %>%
+      cmcR::preProcess_gaussFilter(wavelength = c(16,500),
+                                   filtertype = "bp")
 
-  x3p1 <- x3p1 %>%
-    x3ptools::sample_x3p()
+    postFilterVar_lp <- var(x3p1_lp$surface.matrix[!is.na(x3p1_lp$surface.matrix)])*1e12
+    postFilterVar_hp <- var(x3p1_hp$surface.matrix[!is.na(x3p1_hp$surface.matrix)])*1e12
+    postFilterVar_bp <- var(x3p1_bp$surface.matrix[!is.na(x3p1_bp$surface.matrix)])*1e12
+
+    x3p1 <- x3p1 %>%
+      x3ptools::sample_x3p()
+
+
+    message("Skipping downloading of remote scan on CRAN.")
+  }
 
   # if(x3p1$cmcR.info$skipPreprocess == 1){
   #   testthat::skip()
