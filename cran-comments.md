@@ -1,8 +1,81 @@
 ## Resubmission
 
-This is a resubmission.
+This is a resubmission following a failed Version 0.1.5 resubmission. Version 0.1.5 was an attempt to fix a problem identified in an email from Professor Ripley regarding a failing test in version 0.1.4 of cmcR (see details below). Version 0.1.5 fixed the problem identified by Professor Ripley, yet did not pass the automatic CRAN tests 9see details below). Version 0.1.6 addresses the causes (2 Notes) for the failed Version 0.1.5 submission.
 
-The previous version was failed with the following comments from Professor Ripley:
+## Version 0.1.6 Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+## Version 0.1.6 R CMD check results
+
+0 errors v | 0 warnings | 0 notes
+
+### Version 0.1.5 submission 2 Notes
+
+Following is an explanation of the 2 Notes from the attempted submission of version 0.1.5.
+
+#### Note 1
+
+"Found the following (possibly) invalid URLs:
+  URL: https://doi.org/10.1088/0957-0233/25/6/064005
+    From: inst/doc/decisionRuleDescription.html
+    Status: 403
+    Message: Forbidden
+  URL: https://nvlpubs.nist.gov/nistpubs/jres/120/jres.120.008.pdf
+    From: inst/doc/decisionRuleDescription.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/
+    From: inst/doc/cmcR_plotReproduction.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/Details/2d9cc51f-6f66-40a0-973a-a9292dbee36d
+    From: man/fadulData_processed.Rd
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/12e0f761-2528-4e7b-8600-360bbb788537
+    From: inst/doc/cmcR_plotReproduction.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/Studies/Firearm/Details/681f3cdf-8b1c-418a-af71-f52fd235e3da
+    From: inst/doc/cmcR_plotReproduction.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/Studies/Search
+    From: README.md
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/NRBTD/Studies/Studies/Details/e7a8aab8-8d5a-44ac-b2be-f0de7c2ca505?nm=True&mt=1&m=3&sp=1
+    From: inst/doc/decisionRuleDescription.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=910868
+    From: inst/doc/decisionRuleDescription.html
+    Status: 404
+    Message: Not Found
+  URL: https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193
+    From: DESCRIPTION
+          man/decision_CMC.Rd
+          README.md
+    Status: 404
+    Message: Not Found"
+
+Explanation of Note 1: None of these are invalid URLs. The one DOI is a valid DOI while the other URLs link to a U.S. government agency database.
+
+#### Note 2
+
+"* checking top-level files ... NOTE
+Non-standard file/directory found at top level:
+  ‘tests_NOT_CRAN’"
+  
+Explanation of Note 2: This was a non-standard folder structure used to avoid running a test that failed on CRAN (see comment from Professor Ripley concerning version 0.1.4 submission below). I realize that this was not an effective solution to skip this test, and have since implemented a solution using testthat::skip_on_cran.
+
+### Version 0.1.4 comments from Professor Ripley
+
+A previous version, version 0.1.4, was rejected with the following comments from Professor Ripley:
 
 "It seems we need to remind you of the CRAN policy:
 
@@ -11,21 +84,9 @@ if the resource is not available or has changed (and not give a check warning no
 
 This needs correction whether or not the resource recovers."
 
-Explanation of corrections: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear from the log files specifically why this error occurs and I have been unable to replicate the problem in any other test environment. This test is now skipped on CRAN.
-
-## Test environments
-* local R installation: release
-* ubuntu 16.04 (on travis-ci): release
-* win-builder: devel
-* GitHub Actions (windows): release
-* GitHub Actions (ubuntu-20.04): release, devel
-
-## R CMD check results
-
-0 errors v | 0 warnings | 0 notes v
+Explanation of changes addressing Professor Ripley's comments: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear from the log files specifically why this error occurs and we have been unable to replicate the problem in any other test environment. This test is now skipped on CRAN.
 
 #Previous cran-comments
-
 
 ## Resubmission
 
