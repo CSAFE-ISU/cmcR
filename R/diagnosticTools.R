@@ -308,9 +308,10 @@ arrangeCMCPlot <- function(reference,
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
   if(!polar){
-    target_rotate <- 90 #- abs(median(allCells %>%
-    # dplyr::filter(cmc != "non-CMC") %>%
-    # dplyr::pull(theta)))
+    target_rotate <- 90 + {allCells %>%
+        dplyr::filter(cmc != "non-CMC") %>%
+        dplyr::pull(theta)  %>%
+        median()}
 
     x3pPlt <- x3pListPlot(x3pList = list(reference,target) %>%
                             setNames(x3pNames),

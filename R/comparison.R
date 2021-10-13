@@ -20,8 +20,8 @@ extractCellbyCornerLocs <- function(cornerLocs,
   #in size (somewhat common in the polar domain - e.g., if the reference is a
   #lot taller than the target), a reference cell may not have a coherent region
   #the target
-  if(all(cornerLocs[["top"]] > mat2Dim[1] & cornerLocs[["bottom"]] > mat2Dim[1]) |
-     all(cornerLocs[["left"]] > mat2Dim[2] & cornerLocs[["right"]] > mat2Dim[2]) |
+  if(all(cornerLocs[["top"]] >= mat2Dim[1] & cornerLocs[["bottom"]] >= mat2Dim[1]) |
+     all(cornerLocs[["left"]] >= mat2Dim[2] & cornerLocs[["right"]] >= mat2Dim[2]) |
      all(cornerLocs[["top"]] < 1 & cornerLocs[["bottom"]] < 1) |
      all(cornerLocs[["left"]] < 1 & cornerLocs[["right"]] < 1)){
     return(matrix(NA,
@@ -30,7 +30,9 @@ extractCellbyCornerLocs <- function(cornerLocs,
   }
 
   #perform the appropriate subsetting of image A to create a list of larger
-  #cells than those in image B
+  #cells than those in image B. There's a good chance that the
+  #splitRotatedSurfaceMat object will need to be padded in various ways, which
+  #is done in the rest of the function
   splitRotatedSurfaceMat <- rotatedSurfaceMat[max(cornerLocs[["top"]],1):min(cornerLocs[["bottom"]],mat2Dim[1]),
                                               max(cornerLocs[["left"]],1):min(cornerLocs[["right"]],mat2Dim[2])]
 
