@@ -9,6 +9,7 @@ cmcPlot(
   target,
   reference_v_target_CMCs,
   target_v_reference_CMCs = reference_v_target_CMCs,
+  numCells = 64,
   corColName = "pairwiseCompCor",
   type = "faceted",
   x3pNames = c("reference", "target"),

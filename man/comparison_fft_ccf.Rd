@@ -5,7 +5,7 @@
 \title{Estimate translation alignment between a cell/region pair based on the
 Cross-Correlation Theorem.}
 \usage{
-comparison_fft_ccf(cellHeightValues, regionHeightValues)
+comparison_fft_ccf(cellHeightValues, regionHeightValues, ccfMethod = "fft")
 }
 \arguments{
 \item{cellHeightValues}{list/tibble column of x3p objects containing a
@@ -13,6 +13,10 @@ reference scan's cells (as returned by comparison_cellDivision)}
 
 \item{regionHeightValues}{list/tibble column of x3p objects containing a
 target scan's regions (as returned by comparison_getTargetRegions)}
+
+\item{ccfMethod}{algorithm to calculate the cross-correlation. Either "fft",
+which uses the Cross-Correlation Theorem (see link below), or "imager",
+which uses the imager::correlate function}
 }
 \value{
 A list of the same length as the input containing data frames of the

@@ -12,7 +12,9 @@ preProcess_crop(
   agg_function = median,
   scheme = 3,
   high_connectivity = FALSE,
-  tolerance = 0
+  tolerance = 0,
+  roughEstimateExterior = FALSE,
+  ...
 )
 }
 \arguments{

@@ -15,7 +15,9 @@ comparison_standardizeHeights(
 \arguments{
 \item{heightValues}{list/tibble column of x3p objects}
 
-\item{withRespectTo}{currently ignored}
+\item{withRespectTo}{either "individualCell", meaning centering/scaling
+statistics are calculated independently per cell, or "entireScan", meaning
+centering/scaling statistics are calculated aggregate across all cells}
 
 \item{centerBy}{statistic by which to center (i.e., subtract from) the height
 values}
