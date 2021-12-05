@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Codecov test coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master)
-[![Travis build status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR)
+<!-- [![Travis build status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR) -->
 [![R build status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions)
 <!-- badges: end -->
 

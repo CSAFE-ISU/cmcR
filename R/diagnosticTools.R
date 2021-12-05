@@ -48,8 +48,13 @@ x3pListPlot <- function(x3pList,
                                                names(x3pList),
                                                rotate),
                                      function(x3p,name,theta){
-                                       x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
+                                       x3p$surface.matrix <- rotateSurfaceMatrix_noCrop(x3p$surface.matrix,
                                                                                  theta = theta + 180) #+180 to stay with what rotate_x3p would output
+
+                                       x3p <- preProcess_cropWS(x3p)
+
+                                       x3p$header.info$sizeY <- ncol(x3p$surface.matrix)
+                                       x3p$header.info$sizeX <- nrow(x3p$surface.matrix)
 
                                        x3p %>%
                                          x3ptools::x3p_to_df() %>%
@@ -126,8 +131,10 @@ x3pListPlot <- function(x3pList,
                                   names(x3pList),
                                   rotate),
                         function(x3p,name,theta){
-                          x3p$surface.matrix <- rotateSurfaceMatrix(x3p$surface.matrix,
+                          x3p$surface.matrix <- rotateSurfaceMatrix_noCrop(x3p$surface.matrix,
                                                                     theta = theta + 180) #+180 to stay with what rotate_x3p would output
+                          x3p$header.info$sizeY <- ncol(x3p$surface.matrix)
+                          x3p$header.info$sizeX <- nrow(x3p$surface.matrix)
 
                           surfaceMat_df <- x3p %>%
                             x3ptools::x3p_to_df() %>%
@@ -203,6 +210,27 @@ x3pListPlot <- function(x3pList,
   }
 }
 
+# helper function for x3pListPlot. Rotates a surface matrix, but doesn't crop
+# back to the original surface matrix's dimensions.
+rotateSurfaceMatrix_noCrop <- function(surfaceMat,
+         theta = 0,
+         interpolation = 0){
+  surfaceMatFake <- (surfaceMat*10^5) + 1 #scale and shift all non-NA pixels up 1 (meter)
+  # imFakeRotated <- :bilinearInterpolation(imFake,theta)
+  surfaceMatFakeRotated <- surfaceMatFake %>%
+    imager::as.cimg() %>%
+    imager::imrotate(angle = theta,
+                     interpolation = interpolation, #linear interpolation,
+                     boundary = 0) %>% #pad boundary with 0s (dirichlet condition)
+    as.matrix()
+
+  surfaceMatFakeRotated[surfaceMatFakeRotated == 0] <- NA
+  #shift all of the legitimate pixels back down by 1:
+  surfaceMatRotated <- (surfaceMatFakeRotated - 1)/(10^5)
+
+  return(surfaceMatRotated)
+}
+
 # @name linear_to_matrix
 # @param index integer vector of indices, must be between 1 and nrow*ncol
 # @param nrow number of rows, integer value defaults to 7
@@ -250,10 +278,10 @@ arrangeCMCPlot <- function(reference,
                            polar = FALSE){
 
   target_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (reference$header.info$incrementY*1e6)*(.data$firstRow),
-                  lastRow = (reference$header.info$incrementY*1e6)*(.data$lastRow),
-                  firstCol = (reference$header.info$incrementY*1e6)*(.data$firstCol),
-                  lastCol = (reference$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+    dplyr::mutate(firstRow = (target$header.info$incrementY*1e6)*(.data$firstRow),
+                  lastRow = (target$header.info$incrementY*1e6)*(.data$lastRow),
+                  firstCol = (target$header.info$incrementY*1e6)*(.data$firstCol),
+                  lastCol = (target$header.info$incrementY*1e6)*(.data$lastCol)) %>%
     dplyr::mutate(x_1 = .data$firstCol,
                   y_1 = .data$firstRow,
                   x_2 = .data$lastCol,
@@ -272,10 +300,10 @@ arrangeCMCPlot <- function(reference,
                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 
   reference_cellGrid <- allCells %>%
-    dplyr::mutate(firstRow = (target$header.info$incrementY*1e6)*(.data$firstRow),
-                  lastRow = (target$header.info$incrementY*1e6)*(.data$lastRow),
-                  firstCol = (target$header.info$incrementY*1e6)*(.data$firstCol),
-                  lastCol = (target$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+    dplyr::mutate(firstRow = (reference$header.info$incrementY*1e6)*(.data$firstRow),
+                  lastRow = (reference$header.info$incrementY*1e6)*(.data$lastRow),
+                  firstCol = (reference$header.info$incrementY*1e6)*(.data$firstCol),
+                  lastCol = (reference$header.info$incrementY*1e6)*(.data$lastCol)) %>%
     dplyr::mutate(firstRowCentered = .data$firstRow - max(.data$lastRow)/2,
                   lastRowCentered = .data$lastRow - max(.data$lastRow)/2,
                   firstColCentered = .data$firstCol - max(.data$lastCol)/2,
@@ -677,7 +705,7 @@ cmcPlot <- function(reference,
   allInitialCells_target_v_reference <- dplyr::bind_rows(originalMethodCMCs,nonoriginalMethodCMCs) %>%
     dplyr::mutate(cmc = ifelse(.data$originalMethodClassif == "CMC","Original Method CMC","non-CMC")) %>%
     dplyr::mutate(cmc = factor(.data$cmc,levels = c("non-CMC","Original Method CMC"))) %>%
-    dplyr::left_join(reference_cellCorners,
+    dplyr::left_join(target_cellCorners,
                      by = "cellIndex")
 
   originalMethodCMCsPlt_target_v_reference <- arrangeCMCPlot(reference = target,
