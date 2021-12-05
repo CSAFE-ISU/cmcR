@@ -6,11 +6,9 @@
 <!-- badges: start -->
 
 [![Codecov test
-coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master)
-[![Travis build
-status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR)
+coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://app.codecov.io/gh/CSAFE-ISU/cmcR?branch=master/)
 [![R build
-status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions)
+status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions/)
 <!-- badges: end -->
 
 The cmcR package provides an open-source implementation of the Congruent
@@ -60,6 +58,7 @@ library(dplyr)
 #>     intersect, setdiff, setequal, union
 library(ggplot2)
 library(x3ptools)
+#> Warning: package 'x3ptools' was built under R version 4.1.2
 ```
 
 Consider the known match cartridge case pair Fadul 1-1 and Fadul 1-2.
@@ -649,23 +648,23 @@ kmComparison_allCMCs <- kmComparisonFeatures %>%
 kmComparison_allCMCs %>%
   slice(21:35)
 #> # A tibble: 15 x 8
-#>    cellIndex     x     y fft_ccf pairwiseCompCor theta originalMethodC~
-#>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl> <chr>           
-#>  1 1, 3         20    23   0.314           0.671   -30 non-CMC         
-#>  2 1, 4         21    13   0.221           0.576   -30 non-CMC         
-#>  3 1, 5         21     4   0.229           0.527   -30 CMC             
-#>  4 1, 6         22     1   0.228           0.547   -30 non-CMC         
-#>  5 1, 7         22   -14   0.339           0.856   -30 non-CMC         
-#>  6 7, 7        -22   -43   0.214           0.364   -27 non-CMC         
-#>  7 7, 8          3   -55   0.202           0.471   -27 non-CMC         
-#>  8 6, 1        -13    26   0.436           0.760   -27 non-CMC         
-#>  9 6, 8        -13    -9   0.268           0.577   -27 non-CMC         
-#> 10 5, 1         -6    23   0.333           0.720   -27 CMC             
-#> 11 5, 8         -8   -12   0.244           0.602   -27 CMC             
-#> 12 4, 1         -1    23   0.341           0.676   -27 non-CMC         
-#> 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC         
-#> 14 3, 1          3    22   0.439           0.782   -27 CMC             
-#> 15 3, 2         62    54   0.286           0.548   -27 non-CMC         
+#>    cellIndex     x     y fft_ccf pairwiseCompCor theta originalMethodClassif
+#>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl> <chr>                
+#>  1 1, 3         20    23   0.314           0.671   -30 non-CMC              
+#>  2 1, 4         21    13   0.221           0.576   -30 non-CMC              
+#>  3 1, 5         21     4   0.229           0.527   -30 CMC                  
+#>  4 1, 6         22     1   0.228           0.547   -30 non-CMC              
+#>  5 1, 7         22   -14   0.339           0.856   -30 non-CMC              
+#>  6 7, 7        -22   -43   0.214           0.364   -27 non-CMC              
+#>  7 7, 8          3   -55   0.202           0.471   -27 non-CMC              
+#>  8 6, 1        -13    26   0.436           0.760   -27 non-CMC              
+#>  9 6, 8        -13    -9   0.268           0.577   -27 non-CMC              
+#> 10 5, 1         -6    23   0.333           0.720   -27 CMC                  
+#> 11 5, 8         -8   -12   0.244           0.602   -27 CMC                  
+#> 12 4, 1         -1    23   0.341           0.676   -27 non-CMC              
+#> 13 4, 8         -3   -10   0.239           0.578   -27 non-CMC              
+#> 14 3, 1          3    22   0.439           0.782   -27 CMC                  
+#> 15 3, 2         62    54   0.286           0.548   -27 non-CMC              
 #> # ... with 1 more variable: highCMCClassif <chr>
 ```
 

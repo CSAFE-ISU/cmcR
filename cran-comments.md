@@ -1,5 +1,24 @@
 ## Resubmission
 
+The previous submission had a note that of (possibly) invalid URLs. As explained below, two of these thinks indeed needed updating while the rest have been noted previously and deemed valid.
+
+### Explanation of changes
+
+Two links on the README.md file required updating. Specifically, the codecov address is now https://app.codecov.io/gh/CSAFE-ISU/cmcR?branch=master while the Travis-CI link has been removed.
+
+The other URLs included in the note link to U.S. government websites. Each of these have been checked and link to the appropriate webpage.
+
+## Version 0.1.8 Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+#Previous cran-comments
+
+## Resubmission
+
 The previous submission did not automatically pass the CRAN checks because I had not updated the package version. The package was previously archived on 2021-07-12 because it requires a previously archived package x3ptools that has since been reinstated to CRAN. No other changes have been made to the package other than updating the package version to 0.1.7.
 
 ## Version 0.1.7 Test environments
@@ -12,9 +31,6 @@ The previous submission did not automatically pass the CRAN checks because I had
 ## Version 0.1.7 R CMD check results
 
 0 errors v | 0 warnings | 0 notes
-
-
-#Previous cran-comments
 
 ## Resubmission
 
