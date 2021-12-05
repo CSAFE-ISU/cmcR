@@ -1,5 +1,38 @@
 ## Resubmission
 
+The previous submission did not automatically pass the CRAN checks because I had not updated the package version. The package was previously archived on 2021-07-12 because it requires a previously archived package x3ptools that has since been reinstated to CRAN. No other changes have been made to the package other than updating the package version to 0.1.7.
+
+## Version 0.1.7 Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+## Version 0.1.7 R CMD check results
+
+0 errors v | 0 warnings | 0 notes
+
+
+#Previous cran-comments
+
+## Resubmission
+
+This is a resubmission of cmcR version 0.1.6. cmcR was removed from CRAN because a package upon which it relies, x3ptools, was removed from CRAN on 2021-06-27. The x3ptools issue has been fixed and x3ptools is now available on CRAN. There have been no changes to cmcR since its initial acceptance onto CRAN on 2021-04-05, so this submission is merely meant to reinstate it on CRAN.
+
+## Version 0.1.6 Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+## Version 0.1.6 R CMD check results
+
+0 errors v | 0 warnings | 0 notes
+
+## Resubmission
+
 This is a resubmission following a failed Version 0.1.5 resubmission. Version 0.1.5 was an attempt to fix a problem identified in an email from Professor Ripley regarding a failing test in version 0.1.4 of cmcR (see details below). Version 0.1.5 fixed the problem identified by Professor Ripley, yet did not pass the automatic CRAN tests 9see details below). Version 0.1.6 addresses the causes (2 Notes) for the failed Version 0.1.5 submission.
 
 ## Version 0.1.6 Test environments
@@ -85,8 +118,6 @@ if the resource is not available or has changed (and not give a check warning no
 This needs correction whether or not the resource recovers."
 
 Explanation of changes addressing Professor Ripley's comments: Certain builds of the package (on r-devel-windows-ix86+x86_64 and r-release-windows-ix86+x86_64) produced a "cannot open URL" error due to a test that relies on downloading files from a U.S. government database. It's unclear from the log files specifically why this error occurs and we have been unable to replicate the problem in any other test environment. This test is now skipped on CRAN.
-
-#Previous cran-comments
 
 ## Resubmission
 
