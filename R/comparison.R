@@ -411,6 +411,9 @@ comparison_getTargetRegions <- function(cellHeightValues,
                  region_x3p$header.info$sizeY <- ncol(regionMatrix)
                  region_x3p$header.info$sizeX <- nrow(regionMatrix)
 
+                 region_x3p$cmcR.info$regionIndices <- cornerIndices %>%
+                   set_names(c("colStart","colEnd","rowStart","rowEnd"))
+
                  return(region_x3p)
                })
 
