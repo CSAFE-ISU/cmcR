@@ -290,6 +290,184 @@ cellGridPlot <- function(x3p,
 
 }
 
+targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,target){
+
+  targetScanRows <- alignedTargetCell$cmcR.info$regionIndices[c(3)] + alignedTargetCell$cmcR.info$regionRows - 1
+  targetScanCols <- alignedTargetCell$cmcR.info$regionIndices[c(1)] + alignedTargetCell$cmcR.info$regionCols - 1
+
+  rotatedMask <- cmcR:::rotateSurfaceMatrix(target$surface.matrix,theta)
+
+  rowPad <- 0
+  colPad <- 0
+
+  if(targetScanRows[1] <= 0){
+
+    rowPad <- abs(targetScanRows[1]) + 1
+
+    rotatedMask <- rbind(matrix(NA,nrow = rowPad,ncol = ncol(rotatedMask)),
+                         rotatedMask)
+
+    targetScanRows <- targetScanRows + rowPad
+  }
+
+  if(targetScanCols[1] <= 0){
+
+    colPad <- abs(targetScanCols[1]) + 1
+
+    rotatedMask <- cbind(matrix(NA,nrow = nrow(rotatedMask),ncol = colPad),
+                         rotatedMask)
+
+    targetScanCols <- targetScanCols + colPad
+  }
+
+  if(targetScanRows[2] > nrow(rotatedMask)){
+
+    rowPad <- targetScanRows[2] - nrow(rotatedMask)
+
+    rotatedMask <- rbind(rotatedMask,
+                         matrix(NA,nrow = rowPad,ncol = ncol(rotatedMask)))
+
+  }
+
+  if(targetScanCols[2] > ncol(rotatedMask)){
+
+    colPad <- targetScanCols[2] - ncol(rotatedMask)
+
+    rotatedMask <- cbind(rotatedMask,
+                         matrix(NA,nrow = nrow(rotatedMask),ncol = colPad))
+
+  }
+
+  rotatedMask[targetScanRows[1]:targetScanRows[2],targetScanCols[1]:targetScanCols[2]] <- 100
+
+  rotatedMask <- cmcR:::rotateSurfaceMatrix_noCrop(rotatedMask,theta = -1*theta)
+  #make a copy that isn't going to have the target cell indices added so that we
+  #know exactly how many rows/cols we need to translate everything to get back to
+  #the original scan indices
+  rotatedMaskCopy <- rotatedMask#cmcR:::rotateSurfaceMatrix_noCrop(rotatedMaskCopy,theta = 0)#-1*(-30))
+
+  rotatedMaskCopy[rotatedMaskCopy == 100] <- NA
+
+  newColPad <- 0
+  newRowPad <- 0
+  if(theta != 0){
+
+    # the cells that are rotated may have been "shifted" due to the cropping
+    # performed above relative to the unrotated target scan's indices -- for
+    # example, padding the rotatedMask to the left requires a correction after
+    # rotating. Unfortunately, because the cells are rotated, the padding done in
+    # the rotated domain doesn't come out to be nice (dRow,dCol) translations in
+    # the unrotated domain. We need to perform some trig to determine what
+    # (dRow,dCol) in the rotated domain translates to in the unrotated domain.
+
+    # In the rotated domain:
+    #    ------------* <<- the location of target cell after padding in rotatedMask
+    #    |    ^dx^
+    #    |
+    #    | <- dy
+    #    |
+    #    * <<- where the target cell *should* be relative to the rotated target's indices
+    #
+
+    # no consider rotating this whole space, then the dx, dy will be "tilted" by
+    # some theta and we will need to calculate via trig what the correct dx', dy'
+    # are in the original, unrotated domain. Draw a diagram with a rotated dx, dy
+    # by some theta and draw a straight line between the two * above and you
+    # should be able to work out the following formulas again
+
+    #TODO: pay attention to the necessary signs (up/down/left/right) of the
+    #corrections below
+    psi <- atan2(rowPad,colPad)
+    hyp <- sqrt(colPad^2 + rowPad^2)
+    phi <- pi/2 - (theta*pi/180 + psi)
+
+    newColPad <- sin(phi)*hyp
+    newRowPad <- cos(phi)*hyp
+
+  }
+
+  ret <- rotatedMask %>%
+    imager::as.cimg() %>%
+    as.data.frame() %>%
+    mutate(xnew = y,
+           ynew = x) %>%
+    select(-c(x,y)) %>%
+    rename(x=xnew,y=ynew) %>%
+    mutate(x = x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
+           # x = x - newColPad,
+           y = y - min(which(rowSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
+           # y = y - newRowPad,
+           # y = max(y) - y
+           y = nrow(target$surface.matrix) - y
+    ) %>%
+    filter(value == 100) %>%
+    select(-value) %>%
+    group_by(x,y) %>%
+    distinct() %>%
+    mutate(cellIndex = cellIndex,
+           theta = theta,
+           cmcClassif = cmcClassif)
+
+  return(ret)
+
+}
+
+cmcPlot <- function(reference,
+                        target,
+                        cmcClassifs,
+                        cmcCol = "originalMethod"){
+
+    #check that the necessary columns are in cmcClassifs
+
+    stopifnot("Make sure that there is a column called 'alignedTargetCell' that is the result of the comparison_alignedTargetCell() function." = any(str_detect(names(cmcClassifs),"alignedTargetCell")))
+
+    stopifnot("Make sure that there is a column called 'cellIndex'" = any(str_detect(names(cmcClassifs),"cellIndex")))
+
+    stopifnot("Make sure that there is a column called 'theta'" = any(str_detect(names(cmcClassifs),"theta")))
+
+    stopifnot("Make sure there is a column called 'pairwiseCompCor'" = any(str_detect(names(cmcClassifs),"pairwiseCompCor")))
+
+    # get the indices for the necessary columns
+    targetCellCol <- which(str_detect(names(cmcClassifs),"alignedTargetCell"))
+
+    cellIndexCol <- which(str_detect(names(cmcClassifs),"cellIndex"))
+
+    thetaCol <- which(str_detect(names(cmcClassifs),"theta"))
+
+    cmcIndexCol <- which(str_detect(names(cmcClassifs),cmcCol))
+
+    cmcClassifs <- cmcClassifs %>%
+      group_by(cellIndex) %>%
+      filter(pairwiseCompCor == max(pairwiseCompCor))
+
+    targetCellData <- cmcClassifs %>%
+      select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
+      pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
+                                   cellIndex = ..2,
+                                   theta = ..3,
+                                   cmcClassif = ..4,
+                                   target = target))
+
+
+    plt <- cmcR::x3pListPlot(list(target))
+
+    plt <- plt +
+      ggnewscale::new_scale_fill() +
+      geom_raster(data = targetCellData,
+                  aes(x = x,y = y,fill = cmcClassif),
+                  alpha = .2) +
+      scale_fill_manual(values = c("#313695","#a50026")) +
+      geom_text(data = targetCellData %>%
+                  group_by(cellIndex) %>%
+                  summarise(x = mean(x),
+                            y = mean(y),
+                            theta = unique(theta)),
+                aes(x=x,y=y,label = cellIndex,angle = -1*theta))
+
+    return(plt)
+
+}
+
 # @name arrangeCMCPlot
 #
 # @keywords internal
