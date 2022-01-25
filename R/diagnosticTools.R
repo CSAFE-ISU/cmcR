@@ -33,63 +33,62 @@
 
 x3pListPlot <- function(x3pList,
                         type = "faceted",
-                        rotate = 0,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                        na.value = "gray80",
-                        guide = "colorbar",
-                        polar = FALSE){
+                        na.value = "gray80"){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
 
   if(type == "faceted"){
     surfaceMat_df <- purrr::pmap_dfr(.l = list(x3pList,
-                                               names(x3pList),
-                                               rotate),
-                                     function(x3p,name,theta){
-                                       x3p$surface.matrix <- rotateSurfaceMatrix_noCrop(x3p$surface.matrix,
-                                                                                 theta = theta + 180) #+180 to stay with what rotate_x3p would output
+                                               names(x3pList)),
+                                     function(x3p,name){
 
-                                       x3p <- preProcess_cropWS(x3p)
-
-                                       x3p$header.info$sizeY <- ncol(x3p$surface.matrix)
-                                       x3p$header.info$sizeX <- nrow(x3p$surface.matrix)
+                                       x3p$header.info$incrementX <- 1
+                                       x3p$header.info$incrementY <- 1
 
                                        x3p %>%
                                          x3ptools::x3p_to_df() %>%
-                                         dplyr::mutate(value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                                         dplyr::mutate(x = .data$x*1e6,
-                                                       y = .data$y*1e6,
-                                                       height = .data$value*1e6) %>%
+                                         #perform some transformations on the
+                                         #x,y values so that the plot is
+                                         #representative of the actual surface
+                                         #matrix (i.e., element [1,1] of the
+                                         #surface matrix is in the top-left
+                                         #corner)
+                                         dplyr::mutate(xnew = max(y) - y,
+                                                       ynew = max(x) - x,
+                                                       value = .data$value - median(.data$value,na.rm = TRUE)) %>%
+                                         dplyr::select(-c(x,y)) %>%
+                                         dplyr::rename(x=xnew,
+                                                       y=ynew) %>%
                                          dplyr::mutate(x3p = rep(name,times = nrow(.)))
                                      }) %>%
       dplyr::mutate(x3p = factor(.data$x3p,levels = names(x3pList)))
 
     plts <- surfaceMat_df %>%
       ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = .data$height))  +
+      ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
       ggplot2::scale_fill_gradientn(colours = height.colors,
-                                    values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                    values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                     breaks = function(lims){
-                                      dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
+                                      dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
 
                                       dat <- dat %>%
                                         setNames(paste0(names(dat)," [",round(dat,1),"]"))
 
                                       return(dat)
                                     },
-                                    na.value = na.value,
-                                    guide = guide) +
+                                    na.value = na.value) +
       ggplot2::coord_fixed(expand = FALSE) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
         axis.title.x = ggplot2::element_blank(),
-        #                axis.text.x = ggplot2::element_blank(),
-        #                axis.ticks.x = ggplot2::element_blank(),
-        #                axis.title.y = ggplot2::element_blank(),
-        #                axis.text.y = ggplot2::element_blank(),
-        #                axis.ticks.y = ggplot2::element_blank(),
+        axis.text.x = ggplot2::element_blank(),
+        axis.ticks.x = ggplot2::element_blank(),
+        axis.title.y = ggplot2::element_blank(),
+        axis.text.y = ggplot2::element_blank(),
+        axis.ticks.y = ggplot2::element_blank(),
         panel.grid.major = ggplot2::element_blank(),
         panel.grid.minor = ggplot2::element_blank(),
         panel.background = ggplot2::element_blank()) +
@@ -102,72 +101,53 @@ x3pListPlot <- function(x3pList,
       ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
       ggplot2::facet_wrap(~ x3p)
 
-    if(polar){
-      ranges <- ggplot_build(plts)$layout$panel_params[[1]][c('x.range', 'y.range')]
-      sizes <- sapply(ranges, diff)
-      aspect <- sizes[1] / sizes[2]
-
-      suppressMessages({
-        plts <- plts +
-          ggplot2::facet_wrap(~ x3p,ncol = 1) +
-          ggplot2::coord_flip(expand = FALSE) +
-          ggplot2::theme_bw() +
-          ggplot2::theme_update(aspect.ratio = aspect) +
-          ggplot2::theme(legend.position = "top") +
-          ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = grid::unit(4,"in"),
-                                                          barheight = grid::unit(.1,"in"),
-                                                          label.theme = ggplot2::element_text(size = 8),
-                                                          title.theme = ggplot2::element_text(size = 10),
-                                                          frame.colour = "black",
-                                                          ticks.colour = "black"),
-                          colour =  'none')
-      })
-    }
-
     return(plts)
   }
   else if(type == "list"){
     plts <- purrr::pmap(.l = list(x3pList,
-                                  names(x3pList),
-                                  rotate),
-                        function(x3p,name,theta){
-                          x3p$surface.matrix <- rotateSurfaceMatrix_noCrop(x3p$surface.matrix,
-                                                                    theta = theta + 180) #+180 to stay with what rotate_x3p would output
-                          x3p$header.info$sizeY <- ncol(x3p$surface.matrix)
-                          x3p$header.info$sizeX <- nrow(x3p$surface.matrix)
+                                  names(x3pList)),
+                        function(x3p,name){
 
                           surfaceMat_df <- x3p %>%
                             x3ptools::x3p_to_df() %>%
+                            #perform some transformations on the
+                            #x,y values so that the plot is
+                            #representative of the actual surface
+                            #matrix (i.e., element [1,1] of the
+                            #surface matrix is in the top-left
+                            #corner)
+                            dplyr::mutate(xnew = max(y) - y,
+                                          ynew = max(x) - x,
+                                          value = .data$value - median(.data$value,na.rm = TRUE)) %>%
+                            dplyr::select(-c(x,y)) %>%
+                            dplyr::rename(x=xnew,
+                                          y=ynew) %>%
                             dplyr::mutate(value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                            dplyr::mutate(x = .data$x*1e6,
-                                          y = .data$y*1e6,
-                                          height = .data$value*1e6) %>%
                             dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
                           plt <- surfaceMat_df %>%
                             ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
-                            ggplot2::geom_raster(ggplot2::aes(fill = .data$height))  +
+                            ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
                             ggplot2::scale_fill_gradientn(colours = height.colors,
-                                                          values = scales::rescale(quantile(surfaceMat_df$height,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                                          values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                                           breaks = function(lims){
-                                                            dat <- quantile(surfaceMat_df$height,legend.quantiles,na.rm = TRUE)
+                                                            dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
 
                                                             dat <- dat %>%
                                                               setNames(paste0(names(dat)," [",round(dat,1),"]"))
 
                                                             return(dat)
                                                           },
-                                                          na.value = na.value,
-                                                          guide = guide) +
+                                                          na.value = na.value) +
                             ggplot2::theme_minimal() +
                             ggplot2::coord_fixed(expand = FALSE) +
                             ggplot2::theme(
-                              # axis.title.x = ggplot2::element_blank(),
-                              #              axis.text.x = ggplot2::element_blank(),
-                              #              axis.ticks.x = ggplot2::element_blank(),
-                              #              axis.title.y = ggplot2::element_blank(),
-                              #              axis.text.y = ggplot2::element_blank(),
-                              #              axis.ticks.y = ggplot2::element_blank(),
+                              axis.title.x = ggplot2::element_blank(),
+                              axis.text.x = ggplot2::element_blank(),
+                              axis.ticks.x = ggplot2::element_blank(),
+                              axis.title.y = ggplot2::element_blank(),
+                              axis.text.y = ggplot2::element_blank(),
+                              axis.ticks.y = ggplot2::element_blank(),
                               panel.grid.major = ggplot2::element_blank(),
                               panel.grid.minor = ggplot2::element_blank(),
                               panel.background = ggplot2::element_blank(),
@@ -180,29 +160,8 @@ x3pListPlot <- function(x3pList,
                                                                             ticks.colour = "black"),
                                             colour =  'none') +
                             ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
-                            ggplot2::ggtitle(name)
+                            ggplot2::labs(title = name)
 
-                          if(polar){
-                            ranges <- ggplot_build(plt)$layout$panel_params[[1]][c('x.range', 'y.range')]
-                            sizes <- sapply(ranges, diff)
-                            aspect <- sizes[1] / sizes[2]
-
-                            suppressMessages({
-                              plt <- plt +
-                                ggplot2::facet_wrap(~ x3p,ncol = 1) +
-                                ggplot2::coord_flip(expand = FALSE) +
-                                ggplot2::theme_bw() +
-                                ggplot2::theme_update(aspect.ratio = aspect,
-                                                      legend.position = "top") +
-                                ggplot2::guides(fill = ggplot2::guide_colourbar(barwidth = grid::unit(4,"in"),
-                                                                                barheight = grid::unit(.1,"in"),
-                                                                                label.theme = ggplot2::element_text(size = 8),
-                                                                                title.theme = ggplot2::element_text(size = 10),
-                                                                                frame.colour = "black",
-                                                                                ticks.colour = "black"),
-                                                colour =  'none')
-                            })
-                          }
                           return(plt)
                         })
 
@@ -213,8 +172,8 @@ x3pListPlot <- function(x3pList,
 # helper function for x3pListPlot. Rotates a surface matrix, but doesn't crop
 # back to the original surface matrix's dimensions.
 rotateSurfaceMatrix_noCrop <- function(surfaceMat,
-         theta = 0,
-         interpolation = 0){
+                                       theta = 0,
+                                       interpolation = 0){
   surfaceMatFake <- (surfaceMat*10^5) + 1 #scale and shift all non-NA pixels up 1 (meter)
   # imFakeRotated <- :bilinearInterpolation(imFake,theta)
   surfaceMatFakeRotated <- surfaceMatFake %>%
@@ -255,6 +214,80 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
     idx_out_row <- ((index-1) %% nrow) + 1
   }
   paste0(idx_out_row, sep, idx_out_col)
+}
+
+#' Plot a scan partitioned into a grid of cells.
+#'
+#' @name cellGridPlot
+#'
+#' @export
+
+cellGridPlot <- function(x3p,
+                         numCells = 64,
+                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
+                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
+                         na.value = "gray80"){
+
+  surfaceMat_df <- x3p %>%
+    #TODO: there's a more efficient way to do the following that doesn't require
+    #splitting the scan up only to recombine it immediately.
+    comparison_cellDivision(numCells = numCells) %>%
+    purrr::pmap_dfr(~ {
+
+      ..2 %>%
+        x3p_to_df() %>%
+        mutate(cellIndex = ..1)
+
+    }) %>%
+    dplyr::mutate(value = value - median(value,na.rm = TRUE)) %>%
+    tidyr::separate(col = cellIndex,into = c("row","col"),sep = ", ") %>%
+    dplyr::mutate(col = as.numeric(col),
+           row = as.numeric(row),
+           xnew = max(y) - y,
+           ynew = max(x) - x) %>%
+    dplyr::select(-c(x,y)) %>%
+    dplyr::rename(x=xnew,
+           y=ynew)
+
+  plt <- surfaceMat_df %>%
+    ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
+    ggplot2::scale_fill_gradientn(colours = height.colors,
+                                  values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                  breaks = function(lims){
+                                    dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
+
+                                    dat <- dat %>%
+                                      setNames(paste0(names(dat)," [",round(dat,1),"]"))
+
+                                    return(dat)
+                                  },
+                                  na.value = na.value) +
+    ggplot2::theme_minimal() +
+    ggplot2::coord_fixed(expand = FALSE) +
+    ggplot2::theme(
+      axis.title = ggplot2::element_blank(),
+      axis.text = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.background = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      strip.text = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(hjust = .5,
+                                         size = 11)) +
+    ggplot2::guides(fill = ggplot2::guide_colourbar(barheight = grid::unit(3,"in"),
+                                                    label.theme = ggplot2::element_text(size = 8),
+                                                    title.theme = ggplot2::element_text(size = 10),
+                                                    frame.colour = "black",
+                                                    ticks.colour = "black"),
+                    colour =  'none') +
+    ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
+    facet_grid(rows = vars(row),
+               cols = vars(col))
+
+  return(plt)
+
 }
 
 # @name arrangeCMCPlot

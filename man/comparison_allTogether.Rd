@@ -9,7 +9,9 @@ comparison_allTogether(
   target,
   theta = 0,
   numCells = 64,
-  maxMissingProp = 0.85
+  maxMissingProp = 0.85,
+  regionSizeMultiplier = 9,
+  returnX3Ps = FALSE
 )
 }
 \arguments{
@@ -26,7 +28,15 @@ regions.}
 be a perfect square (49, 64, 81, etc.)}
 
 \item{maxMissingProp}{maximum proportion of missing values allowed for each
-cell/region.
+cell/region.}
+
+\item{regionSizeMultiplier}{an integer indicating the ratio between the areas
+of each target region and reference cell. Must be a perfect square (4, 9,
+16, etc.)}
+
+\item{returnX3Ps}{boolean to return the cellHeightValues and
+alignedTargetCells for each cell index. Note that setting this argument to
+TRUE significantly increases the size of the returned object.
 
 data(fadul1.1_processed,fadul1.2_processed)
 

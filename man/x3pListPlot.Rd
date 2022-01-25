@@ -7,13 +7,10 @@
 x3pListPlot(
   x3pList,
   type = "faceted",
-  rotate = 0,
   legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
   height.colors = rev(c("#7f3b08", "#b35806", "#e08214", "#fdb863", "#fee0b6",
     "#f7f7f7", "#d8daeb", "#b2abd2", "#8073ac", "#542788", "#2d004b")),
-  na.value = "gray80",
-  guide = "colorbar",
-  polar = FALSE
+  na.value = "gray80"
 )
 }
 \arguments{
@@ -25,8 +22,6 @@ plot}
 plots per surface matrix is returned. The faceted plot will have a
 consistent height scale across all surface matrices.}
 
-\item{rotate}{angle (in degrees) to rotate all surface matrices plotted}
-
 \item{legend.quantiles}{vector of quantiles to be shown as tick marks on
 legend plot}
 
@@ -35,6 +30,8 @@ that dictates the height value colorscale}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
+
+\item{rotate}{angle (in degrees) to rotate all surface matrices plotted}
 
 \item{guide}{internal usage}
 }
