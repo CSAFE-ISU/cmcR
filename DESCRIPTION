@@ -35,7 +35,8 @@ Imports:
     quantreg,
     tibble,
     tidyr,
-    rlang
+    rlang,
+    patchwork
 Suggests: 
     knitr,
     rmarkdown,

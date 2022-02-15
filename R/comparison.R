@@ -594,7 +594,6 @@ comparison_fft_ccf <- function(cellHeightValues,regionHeightValues,ccfMethod = "
 # (dx,dy), extracts a matrix from the target region of the same dimension as the
 # reference cell that the estimated translation indicates has the highest
 # similarity to the reference cell.
-
 extractTargetCell <- function(cell,
                               region,
                               dx = 0,
@@ -603,8 +602,14 @@ extractTargetCell <- function(cell,
                               m2 = 0,
                               sd1 = 1,
                               sd2 = 1){
-  cell <- (cell - m1)/sd1
-  region <- (region - m2)/sd2
+  # this isn't necessary because what is passed to comparison_alignedTargetCell
+  # are the cell/region already standardized:
+
+  #cell <- (cell - m1)/sd1
+  # region <- (region - m2)/sd2
+
+  # cell <- cell*sd1 + m1
+  # region <- region*sd2 + m2
 
   #pad the region as it was when the CCF was calculated using the FFT method:
   regionPadded <- matrix(NA,

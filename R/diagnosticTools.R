@@ -34,6 +34,7 @@
 x3pListPlot <- function(x3pList,
                         type = "faceted",
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
+                        height.quantiles = c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                         na.value = "gray80"){
   if(purrr::is_empty(names(x3pList))){
@@ -68,11 +69,11 @@ x3pListPlot <- function(x3pList,
 
     plts <- surfaceMat_df %>%
       ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
+      ggplot2::geom_raster(ggplot2::aes(fill = .data$value))  +
       ggplot2::scale_fill_gradientn(colours = height.colors,
-                                    values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                    values = scales::rescale(quantile(surfaceMat_df$value,height.quantiles,na.rm = TRUE)),
                                     breaks = function(lims){
-                                      dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
+                                      dat <- quantile(surfaceMat_df$value,legend.quantiles,na.rm = TRUE)
 
                                       dat <- dat %>%
                                         setNames(paste0(names(dat)," [",round(dat,1),"]"))
@@ -127,11 +128,11 @@ x3pListPlot <- function(x3pList,
 
                           plt <- surfaceMat_df %>%
                             ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
-                            ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
+                            ggplot2::geom_raster(ggplot2::aes(fill = .data$value))  +
                             ggplot2::scale_fill_gradientn(colours = height.colors,
-                                                          values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                                          values = scales::rescale(quantile(surfaceMat_df$value,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                                           breaks = function(lims){
-                                                            dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
+                                                            dat <- quantile(surfaceMat_df$value,legend.quantiles,na.rm = TRUE)
 
                                                             dat <- dat %>%
                                                               setNames(paste0(names(dat)," [",round(dat,1),"]"))
@@ -242,20 +243,20 @@ cellGridPlot <- function(x3p,
     dplyr::mutate(value = value - median(value,na.rm = TRUE)) %>%
     tidyr::separate(col = cellIndex,into = c("row","col"),sep = ", ") %>%
     dplyr::mutate(col = as.numeric(col),
-           row = as.numeric(row),
-           xnew = max(y) - y,
-           ynew = max(x) - x) %>%
+                  row = as.numeric(row),
+                  xnew = max(y) - y,
+                  ynew = max(x) - x) %>%
     dplyr::select(-c(x,y)) %>%
     dplyr::rename(x=xnew,
-           y=ynew)
+                  y=ynew)
 
   plt <- surfaceMat_df %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
-    ggplot2::geom_raster(ggplot2::aes(fill = .data$value*1e6))  +
+    ggplot2::geom_raster(ggplot2::aes(fill = .data$value))  +
     ggplot2::scale_fill_gradientn(colours = height.colors,
-                                  values = scales::rescale(quantile(surfaceMat_df$value*1e6,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
+                                  values = scales::rescale(quantile(surfaceMat_df$value,c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),na.rm = TRUE)),
                                   breaks = function(lims){
-                                    dat <- quantile(surfaceMat_df$value*1e6,legend.quantiles,na.rm = TRUE)
+                                    dat <- quantile(surfaceMat_df$value,legend.quantiles,na.rm = TRUE)
 
                                     dat <- dat %>%
                                       setNames(paste0(names(dat)," [",round(dat,1),"]"))
@@ -412,60 +413,125 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
 
 }
 
+#' Plot CMCs
+#' @name cmcPlot
+#' @export
+#' @importFrom patchwork wrap_plots
 cmcPlot <- function(reference,
-                        target,
-                        cmcClassifs,
-                        cmcCol = "originalMethod"){
+                    target,
+                    cmcClassifs,
+                    cmcCol = "originalMethod"){
 
-    #check that the necessary columns are in cmcClassifs
+  #check that the necessary columns are in cmcClassifs
 
-    stopifnot("Make sure that there is a column called 'alignedTargetCell' that is the result of the comparison_alignedTargetCell() function." = any(str_detect(names(cmcClassifs),"alignedTargetCell")))
+  stopifnot("Make sure that there is a column called 'cellHeightValues' that is the result of the comparison_alignedTargetCell() function." = any(str_detect(names(cmcClassifs),"cellHeightValues")))
 
-    stopifnot("Make sure that there is a column called 'cellIndex'" = any(str_detect(names(cmcClassifs),"cellIndex")))
+  stopifnot("Make sure that there is a column called 'alignedTargetCell' that is the result of the comparison_alignedTargetCell() function." = any(str_detect(names(cmcClassifs),"alignedTargetCell")))
 
-    stopifnot("Make sure that there is a column called 'theta'" = any(str_detect(names(cmcClassifs),"theta")))
+  stopifnot("Make sure that there is a column called 'cellIndex'" = any(str_detect(names(cmcClassifs),"cellIndex")))
 
-    stopifnot("Make sure there is a column called 'pairwiseCompCor'" = any(str_detect(names(cmcClassifs),"pairwiseCompCor")))
+  stopifnot("Make sure that there is a column called 'theta'" = any(str_detect(names(cmcClassifs),"theta")))
 
-    # get the indices for the necessary columns
-    targetCellCol <- which(str_detect(names(cmcClassifs),"alignedTargetCell"))
+  stopifnot("Make sure there is a column called 'pairwiseCompCor'" = any(str_detect(names(cmcClassifs),"pairwiseCompCor")))
 
-    cellIndexCol <- which(str_detect(names(cmcClassifs),"cellIndex"))
+  # get the indices for the necessary columns
+  referenceCellCol <- which(str_detect(names(cmcClassifs),"cellHeightValues"))
 
-    thetaCol <- which(str_detect(names(cmcClassifs),"theta"))
+  targetCellCol <- which(str_detect(names(cmcClassifs),"alignedTargetCell"))
 
-    cmcIndexCol <- which(str_detect(names(cmcClassifs),cmcCol))
+  cellIndexCol <- which(str_detect(names(cmcClassifs),"cellIndex"))
 
-    cmcClassifs <- cmcClassifs %>%
-      group_by(cellIndex) %>%
-      filter(pairwiseCompCor == max(pairwiseCompCor))
+  thetaCol <- which(str_detect(names(cmcClassifs),"theta"))
 
-    targetCellData <- cmcClassifs %>%
-      select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
-      pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
-                                   cellIndex = ..2,
-                                   theta = ..3,
-                                   cmcClassif = ..4,
-                                   target = target))
+  cmcIndexCol <- which(str_detect(names(cmcClassifs),cmcCol))
 
+  cmcClassifs <- cmcClassifs %>%
+    group_by(cellIndex) %>%
+    filter(pairwiseCompCor == max(pairwiseCompCor))
 
-    plt <- cmcR::x3pListPlot(list(target))
+  targetCellData <- cmcClassifs %>%
+    select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
+    pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
+                                 cellIndex = ..2,
+                                 theta = ..3,
+                                 cmcClassif = ..4,
+                                 target = target))
 
-    plt <- plt +
-      ggnewscale::new_scale_fill() +
-      geom_raster(data = targetCellData,
-                  aes(x = x,y = y,fill = cmcClassif),
-                  alpha = .2) +
-      scale_fill_manual(values = c("#313695","#a50026")) +
-      geom_text(data = targetCellData %>%
-                  group_by(cellIndex) %>%
-                  summarise(x = mean(x),
-                            y = mean(y),
-                            theta = unique(theta)),
-                aes(x=x,y=y,label = cellIndex,angle = -1*theta))
+  referenceCells <- cmcClassifs %>%
+    pull(referenceCellCol)
 
-    return(plt)
+  cellData <- cmcClassifs %>%
+    select(c(cellIndexCol,referenceCellCol,cmcIndexCol)) %>%
+    pmap_dfr(~ {
 
+      cellInds <- ..2$cmcR.info$cellRange %>%
+        str_remove("rows: ") %>%
+        str_remove("cols: ") %>%
+        str_split(pattern = ", ")
+
+      cellInds_rows <- str_split(cellInds[[1]][1]," - ")[[1]]
+      cellInds_cols <- str_split(cellInds[[1]][2]," - ")[[1]]
+
+      return(data.frame(rowStart = as.numeric(cellInds_rows[1]),
+                        rowEnd = as.numeric(cellInds_rows[2]),
+                        colStart = as.numeric(cellInds_cols[1]),
+                        colEnd = as.numeric(cellInds_cols[2])) %>%
+               mutate(cellIndex = ..1,
+                      originalMethod = ..3))
+
+    }) %>%
+    mutate(rowStart = max(rowEnd) - rowStart,
+           rowEnd = max(rowEnd) - rowEnd,
+           colMean = map2_dbl(colStart,colEnd,~ mean(c(.x,.y))),
+           rowMean = map2_dbl(rowStart,rowEnd,~ mean(c(.x,.y)))) %>%
+    rename(cmcClassif = cmcCol)
+
+  refPlt <- x3pListPlot(list("reference" = reference),
+                        height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7',
+                                                                     '#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
+    ggnewscale::new_scale_fill() +
+    geom_rect(data = cellData,
+              aes(xmin = colStart,xmax = colEnd,ymin = rowStart,ymax = rowEnd,fill = cmcClassif),
+              alpha = .2,
+              inherit.aes = FALSE) +
+    scale_fill_manual(values = c("#313695","#a50026")) +
+    geom_text(data = cellData,
+              aes(x = colMean,y = rowMean,label = cellIndex),inherit.aes = FALSE) +
+    guides(fill = ggplot2::guide_legend(order = 1)) +
+    theme(
+      legend.direction = "horizontal"
+      ) +
+    labs(fill = "CMC Classif.")
+
+  cmcLegend <- ggplotify::as.ggplot(cowplot::get_legend(refPlt)$grobs[[1]])
+
+  refPlt <- refPlt +
+    theme(legend.position = "none")
+
+  # refPlt <- cmcR::x3pListPlot(list(reference) %>% set_names("reference"),
+  #                             height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
+  #   theme(legend.position = "none")
+
+  plt <- cmcR::x3pListPlot(list("target" = target),
+                           height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
+    theme(legend.position = "none")
+
+  plt <- plt +
+    ggnewscale::new_scale_fill() +
+    geom_raster(data = targetCellData,
+                aes(x = x,y = y,fill = cmcClassif),
+                alpha = .2) +
+    scale_fill_manual(values = c("#313695","#a50026")) +
+    geom_text(data = targetCellData %>%
+                group_by(cellIndex) %>%
+                summarise(x = mean(x),
+                          y = mean(y),
+                          theta = unique(theta)),
+              aes(x=x,y=y,label = cellIndex,angle = -1*theta))
+
+  # library(patchwork)
+  # return((refPlt | plt))
+  return(patchwork::wrap_plots(refPlt,plt,cmcLegend,nrow = 2,heights = c(1,.1)))
 }
 
 # @name arrangeCMCPlot
@@ -488,10 +554,10 @@ cmcPlot <- function(reference,
 #                            na.value = "gray80"){
 #
 #   target_cellGrid <- allCells %>%
-#     dplyr::mutate(firstRow = (reference$header.info$incrementY*1e6)*(.data$firstRow),
-#                   lastRow = (reference$header.info$incrementY*1e6)*(.data$lastRow),
-#                   firstCol = (reference$header.info$incrementY*1e6)*(.data$firstCol),
-#                   lastCol = (reference$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+#     dplyr::mutate(firstRow = (reference$header.info$incrementY)*(.data$firstRow),
+#                   lastRow = (reference$header.info$incrementY)*(.data$lastRow),
+#                   firstCol = (reference$header.info$incrementY)*(.data$firstCol),
+#                   lastCol = (reference$header.info$incrementY)*(.data$lastCol)) %>%
 #     dplyr::mutate(x_1 = .data$firstCol,
 #                   y_1 = .data$firstRow,
 #                   x_2 = .data$lastCol,
@@ -510,22 +576,22 @@ cmcPlot <- function(reference,
 #                   cellIndex = stringr::str_remove_all(string = cellIndex,pattern = " "))
 #
 #   reference_cellGrid <- allCells %>%
-#     dplyr::mutate(firstRow = (target$header.info$incrementY*1e6)*(.data$firstRow),
-#                   lastRow = (target$header.info$incrementY*1e6)*(.data$lastRow),
-#                   firstCol = (target$header.info$incrementY*1e6)*(.data$firstCol),
-#                   lastCol = (target$header.info$incrementY*1e6)*(.data$lastCol)) %>%
+#     dplyr::mutate(firstRow = (target$header.info$incrementY)*(.data$firstRow),
+#                   lastRow = (target$header.info$incrementY)*(.data$lastRow),
+#                   firstCol = (target$header.info$incrementY)*(.data$firstCol),
+#                   lastCol = (target$header.info$incrementY)*(.data$lastCol)) %>%
 #     dplyr::mutate(firstRowCentered = .data$firstRow - max(.data$lastRow)/2,
 #                   lastRowCentered = .data$lastRow - max(.data$lastRow)/2,
 #                   firstColCentered = .data$firstCol - max(.data$lastCol)/2,
 #                   lastColCentered = .data$lastCol - max(.data$lastCol)/2) %>%
-#     dplyr::mutate(topLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
-#                   topLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
-#                   topRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
-#                   topRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
-#                   bottomRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
-#                   bottomRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2,
-#                   bottomLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY*1e6)*.data$x/2,
-#                   bottomLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY*1e6)*.data$y/2) %>%
+#     dplyr::mutate(topLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY)*.data$x/2,
+#                   topLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY)*.data$y/2,
+#                   topRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$lastRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY)*.data$x/2,
+#                   topRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$lastRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY)*.data$y/2,
+#                   bottomRightCorner_col = .data$lastColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY)*.data$x/2,
+#                   bottomRightCorner_row = .data$lastColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY)*.data$y/2,
+#                   bottomLeftCorner_col = .data$firstColCentered*cos((.data$theta - median(.data$theta))*(pi/180)) - .data$firstRowCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastCol)/2 - (target$header.info$incrementY)*.data$x/2,
+#                   bottomLeftCorner_row = .data$firstColCentered*sin((.data$theta - median(.data$theta))*(pi/180)) + .data$firstRowCentered*cos((.data$theta - median(.data$theta))*(pi/180)) + max(.data$lastRow)/2 - (target$header.info$incrementY)*.data$y/2) %>%
 #     #this is redundant, but are the names attributed to the x and y columns are
 #     #set-up down below, so I won't change it
 #     dplyr::mutate(x_1 = .data$topLeftCorner_col,

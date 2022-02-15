@@ -760,7 +760,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
         }
       }
 
-      sign(thetaMax$reference_v_target) == sign(thetaMax$target_v_reference) & abs(thetaMax$reference_v_target - -1*thetaMax$target_v_reference) > thetaThresh
+      # sign(thetaMax$reference_v_target) == sign(thetaMax$target_v_reference) & abs(thetaMax$reference_v_target - -1*thetaMax$target_v_reference) > thetaThresh
 
       if((sign(thetaMax_dismissed[1,"theta"]) == sign(thetaMax_dismissed[2,"theta"]) & sign(thetaMax_dismissed[1,"theta"]) != 0 & sign(thetaMax_dismissed[2,"theta"]) != 0) |
          (abs((abs(thetaMax_dismissed[1,"theta"]) - abs(thetaMax_dismissed[2,"theta"]))) > thetaThresh)){
