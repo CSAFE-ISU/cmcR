@@ -651,8 +651,11 @@ extractTargetCell <- function(cell,
     return(list("regionCropped" = regionCroppedShifted,
                 "centerRow" = alignedCenter[1] + 2,
                 "centerCol" = alignedCenter[2] + 2,
-                "regionRows" = c((alignedRows[1] + 2),(alignedRows[2] + 2)),
-                "regionCols" = c((alignedCols[1] + 2),(alignedCols[2] + 2))))
+                "regionRows" = c(max(1,(alignedRows[1] + 2)),min(nrow(region),(alignedRows[2] + 2))),
+                "regionCols" = c(max(1,(alignedCols[1] + 2)),min(ncol(region),(alignedCols[2] + 2)))
+                ))
+                # "regionRows" = c((alignedRows[1] + 2),(alignedRows[2] + 2)),
+                # "regionCols" = c((alignedCols[1] + 2),(alignedCols[2] + 2))))
 
   }
   if(any(dim(regionCroppedShifted) != dim(cell))){
@@ -832,9 +835,11 @@ extractTargetCell <- function(cell,
 
 comparison_alignedTargetCell <- function(cellHeightValues,
                                          regionHeightValues,
+                                         target,
+                                         theta,
                                          fft_ccf_df){
 
-  targeCells <- purrr::pmap(.l = list(cellHeightValues,
+  targetCells <- purrr::pmap(.l = list(cellHeightValues,
                                       regionHeightValues,
                                       fft_ccf_df),
                             function(cell,region,translations){
@@ -847,8 +852,88 @@ comparison_alignedTargetCell <- function(cellHeightValues,
                                                               m2 = region$cmcR.info$centerByVal,
                                                               sd2 = region$cmcR.info$scaleByVal)
 
+                              # if all we care about is extracting the cell from
+                              # the target region, not from the whole scan:
+
+                              # ret <- region
+                              # ret$surface.matrix <- targetCell$regionCropped
+                              # ret$header.info$sizeX <- nrow(targetCell$regionCropped)
+                              # ret$header.info$sizeY <- ncol(targetCell$regionCropped)
+                              #
+                              # ret$cmcR.info$centerRow <- targetCell$centerRow
+                              # ret$cmcR.info$centerCol <- targetCell$centerCol
+                              #
+                              # ret$cmcR.info$regionRows <- targetCell$regionRows
+                              # ret$cmcR.info$regionCols <- targetCell$regionCols
+                              #
+                              # return(ret)
+
+                              # the information in region$cmcR.info and
+                              # targetCell can be put together to determine
+                              # exactl which rows/cols of the theta-rotated
+                              # target the aligned target cell occupies
+                              targetScanRows <- region$cmcR.info$regionIndices[c(3)] + targetCell$regionRows - 1
+                              targetScanCols <- region$cmcR.info$regionIndices[c(1)] + targetCell$regionCols - 1
+
+                              # standardize the target scan according to the
+                              # region to ensure that the extracted cell
+                              # contains the same values as the aligned region
+                              targetStandard <- (target$surface.matrix - region$cmcR.info$centerByVal)/region$cmcR.info$scaleByVal
+                              # rotate the target by the theta used when
+                              # aligning
+                              rotatedMask <- rotateSurfaceMatrix(targetStandard,theta)
+
+                              rowPad <- 0
+                              colPad <- 0
+
+                              # the target scan rows/cols may be less than the 1
+                              # or greater than the dimension of the target. We
+                              # will need to pad the rotated mask to get the
+                              # correct cell
+                              if(targetScanRows[1] <= 0){
+
+                                rowPad <- abs(targetScanRows[1]) + 1
+
+                                rotatedMask <- rbind(matrix(NA,nrow = rowPad,ncol = ncol(rotatedMask)),
+                                                     rotatedMask)
+
+                                targetScanRows <- targetScanRows + rowPad
+                              }
+
+                              if(targetScanCols[1] <= 0){
+
+                                colPad <- abs(targetScanCols[1]) + 1
+
+                                rotatedMask <- cbind(matrix(NA,nrow = nrow(rotatedMask),ncol = colPad),
+                                                     rotatedMask)
+
+                                targetScanCols <- targetScanCols + colPad
+                              }
+
+                              if(targetScanRows[2] > nrow(rotatedMask)){
+
+                                rowPad <- targetScanRows[2] - nrow(rotatedMask)
+
+                                rotatedMask <- rbind(rotatedMask,
+                                                     matrix(NA,nrow = rowPad,ncol = ncol(rotatedMask)))
+
+                              }
+
+                              if(targetScanCols[2] > ncol(rotatedMask)){
+
+                                colPad <- targetScanCols[2] - ncol(rotatedMask)
+
+                                rotatedMask <- cbind(rotatedMask,
+                                                     matrix(NA,nrow = nrow(rotatedMask),ncol = colPad))
+
+                              }
+
+                              # create a new x3p object to contain the aligned
+                              # target cell
                               ret <- region
-                              ret$surface.matrix <- targetCell$regionCropped
+                              ret$surface.matrix <- matrix(rotatedMask[targetScanRows[1]:targetScanRows[2],targetScanCols[1]:targetScanCols[2]],
+                                                           nrow = nrow(targetCell$regionCropped),
+                                                           ncol = ncol(targetCell$regionCropped))
                               ret$header.info$sizeX <- nrow(targetCell$regionCropped)
                               ret$header.info$sizeY <- ncol(targetCell$regionCropped)
 
@@ -858,10 +943,12 @@ comparison_alignedTargetCell <- function(cellHeightValues,
                               ret$cmcR.info$regionRows <- targetCell$regionRows
                               ret$cmcR.info$regionCols <- targetCell$regionCols
 
+
+
                               return(ret)
                             })
 
-  return(targeCells)
+  return(targetCells)
 }
 
 
@@ -1006,7 +1093,11 @@ comparison_allTogether <- function(reference,
                   regionHeightValues_replaced = comparison_replaceMissing(.data$regionHeightValues)) %>%
     dplyr::mutate(fft_ccf_df = comparison_fft_ccf(cellHeightValues = .data$cellHeightValues_replaced,
                                                   regionHeightValues = .data$regionHeightValues_replaced)) %>%
-    dplyr::mutate(alignedTargetCell = comparison_alignedTargetCell(.data$cellHeightValues,.data$regionHeightValues,.data$fft_ccf_df)) %>%
+    dplyr::mutate(alignedTargetCell = comparison_alignedTargetCell(cellHeightValues = .data$cellHeightValues,
+                                                                   regionHeightValues = .data$regionHeightValues,
+                                                                   target = target,
+                                                                   theta = theta,
+                                                                   fft_ccf_df = .data$fft_ccf_df)) %>%
     dplyr::mutate(jointlyMissing = map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,~ sum(is.na(.x$surface.matrix) & is.na(.y$surface.matrix))),
                   pairwiseCompCor = map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
                                              ~ cor(c(.x$surface.matrix),c(.y$surface.matrix),
