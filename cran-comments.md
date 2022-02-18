@@ -1,6 +1,7 @@
 ## Resubmission
 
-The previous submission had a note that of (possibly) invalid URLs. As explained below, two of these thinks indeed needed updating while the rest have been noted previously and deemed valid.
+There was an "Additional issue" while running an example that included a donttest tag.
+This issue has been resolved by changing this example tag to dontrun.
 
 ### Explanation of changes
 
@@ -16,6 +17,23 @@ The other URLs included in the note link to U.S. government websites. Each of th
 * GitHub Actions (ubuntu-20.04): release, devel
 
 #Previous cran-comments
+
+## Resubmission
+
+The previous submission had a note that of (possibly) invalid URLs. As explained below, two of these thinks indeed needed updating while the rest have been noted previously and deemed valid.
+
+### Explanation of changes
+
+Two links on the README.md file required updating. Specifically, the codecov address is now https://app.codecov.io/gh/CSAFE-ISU/cmcR?branch=master while the Travis-CI link has been removed.
+
+The other URLs included in the note link to U.S. government websites. Each of these have been checked and link to the appropriate webpage.
+
+## Version 0.1.8 Test environments
+* local R installation: release
+* ubuntu 16.04 (on travis-ci): release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
 
 ## Resubmission
 

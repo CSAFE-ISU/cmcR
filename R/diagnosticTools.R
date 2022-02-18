@@ -375,7 +375,7 @@ arrangeCMCPlot <- function(reference,
 #'  decision rules and in both comparison directions.
 #'@examples
 #'#Takes > 5 seconds to run
-#'\donttest{
+#'\dontrun{
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
@@ -414,11 +414,11 @@ arrangeCMCPlot <- function(reference,
 #'                                            corr = pairwiseCompCor,
 #'                                            tau = 1))
 #'
-#'cmcPlot(fadul1.1_processed,
-#'        fadul1.2_processed,
-#'        comparisonDF_1to2,
-#'        comparisonDF_2to1,
-#'        corColName = "pairwiseCompCor")
+#'plt <- cmcPlot(fadul1.1_processed,
+#'               fadul1.2_processed,
+#'               comparisonDF_1to2,
+#'               comparisonDF_2to1,
+#'               corColName = "pairwiseCompCor")
 #'}
 #'@importFrom utils hasName
 #'@importFrom rlang .data
