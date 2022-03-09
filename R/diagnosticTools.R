@@ -36,7 +36,7 @@ x3pListPlot <- function(x3pList,
                         legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                         height.quantiles = c(0,.01,.025,.1,.25,.5,.75,0.9,.975,.99,1),
                         height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                        na.value = "gray80"){
+                        na.value = "gray65"){
   if(purrr::is_empty(names(x3pList))){
     x3pList <- setNames(x3pList,paste0("x3p",1:length(x3pList)))
   }
@@ -227,7 +227,7 @@ cellGridPlot <- function(x3p,
                          numCells = 64,
                          legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                          height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
-                         na.value = "gray80"){
+                         na.value = "gray65"){
 
   surfaceMat_df <- x3p %>%
     #TODO: there's a more efficient way to do the following that doesn't require
@@ -420,6 +420,7 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
 cmcPlot <- function(reference,
                     target,
                     cmcClassifs,
+                    type = "faceted",
                     cmcCol = "originalMethod"){
 
   #check that the necessary columns are in cmcClassifs
@@ -531,6 +532,12 @@ cmcPlot <- function(reference,
 
   # library(patchwork)
   # return((refPlt | plt))
+  if(type == "list"){
+    return(list("reference" = refPlt,
+                "target" = plt,
+                "legend" = cmcLegend))
+  }
+
   return(patchwork::wrap_plots(refPlt,plt,cmcLegend,nrow = 2,heights = c(1,.1)))
 }
 
