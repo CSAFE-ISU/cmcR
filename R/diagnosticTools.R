@@ -390,22 +390,22 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
   ret <- rotatedMask %>%
     imager::as.cimg() %>%
     as.data.frame() %>%
-    mutate(xnew = y,
+    dplyr::mutate(xnew = y,
            ynew = x) %>%
-    select(-c(x,y)) %>%
-    rename(x=xnew,y=ynew) %>%
-    mutate(x = x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
+    dplyr::select(-c(x,y)) %>%
+    dplyr::rename(x=xnew,y=ynew) %>%
+    dplyr::mutate(x = x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
            # x = x - newColPad,
            y = y - min(which(rowSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
            # y = y - newRowPad,
            # y = max(y) - y
            y = nrow(target$surface.matrix) - y
     ) %>%
-    filter(value == 100) %>%
-    select(-value) %>%
+    dplyr::filter(value == 100) %>%
+    dplyr::select(-value) %>%
     group_by(x,y) %>%
-    distinct() %>%
-    mutate(cellIndex = cellIndex,
+    dplyr::distinct() %>%
+    dplyr::mutate(cellIndex = cellIndex,
            theta = theta,
            cmcClassif = cmcClassif)
 
@@ -447,28 +447,28 @@ cmcPlot <- function(reference,
   cmcIndexCol <- which(str_detect(names(cmcClassifs),cmcCol))
 
   cmcClassifs <- cmcClassifs %>%
-    group_by(cellIndex) %>%
-    filter(pairwiseCompCor == max(pairwiseCompCor))
+    dplyr::group_by(cellIndex) %>%
+    dplyr::filter(pairwiseCompCor == max(pairwiseCompCor))
 
   targetCellData <- cmcClassifs %>%
-    select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
-    pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
+    dplyr::select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
+    purrr::pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
                                  cellIndex = ..2,
                                  theta = ..3,
                                  cmcClassif = ..4,
                                  target = target))
 
   referenceCells <- cmcClassifs %>%
-    pull(referenceCellCol)
+    dplyr::pull(referenceCellCol)
 
   cellData <- cmcClassifs %>%
-    select(c(cellIndexCol,referenceCellCol,cmcIndexCol)) %>%
-    pmap_dfr(~ {
+    dplyr::select(c(cellIndexCol,referenceCellCol,cmcIndexCol)) %>%
+    purrr::pmap_dfr(~ {
 
       cellInds <- ..2$cmcR.info$cellRange %>%
-        str_remove("rows: ") %>%
-        str_remove("cols: ") %>%
-        str_split(pattern = ", ")
+        stringr::str_remove("rows: ") %>%
+        stringr::str_remove("cols: ") %>%
+        stringr::str_split(pattern = ", ")
 
       cellInds_rows <- str_split(cellInds[[1]][1]," - ")[[1]]
       cellInds_cols <- str_split(cellInds[[1]][2]," - ")[[1]]
@@ -477,58 +477,58 @@ cmcPlot <- function(reference,
                         rowEnd = as.numeric(cellInds_rows[2]),
                         colStart = as.numeric(cellInds_cols[1]),
                         colEnd = as.numeric(cellInds_cols[2])) %>%
-               mutate(cellIndex = ..1,
+               dplyr::mutate(cellIndex = ..1,
                       originalMethod = ..3))
 
     }) %>%
-    mutate(rowStart = max(rowEnd) - rowStart,
+    dplyr::mutate(rowStart = max(rowEnd) - rowStart,
            rowEnd = max(rowEnd) - rowEnd,
            colMean = map2_dbl(colStart,colEnd,~ mean(c(.x,.y))),
            rowMean = map2_dbl(rowStart,rowEnd,~ mean(c(.x,.y)))) %>%
-    rename(cmcClassif = cmcCol)
+    dplyr::rename(cmcClassif = cmcCol)
 
   refPlt <- x3pListPlot(list("reference" = reference),
                         height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7',
                                                                      '#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
     ggnewscale::new_scale_fill() +
-    geom_rect(data = cellData,
-              aes(xmin = colStart,xmax = colEnd,ymin = rowStart,ymax = rowEnd,fill = cmcClassif),
+    ggplot2::geom_rect(data = cellData,
+                       ggplot2::aes(xmin = colStart,xmax = colEnd,ymin = rowStart,ymax = rowEnd,fill = cmcClassif),
               alpha = .2,
               inherit.aes = FALSE) +
-    scale_fill_manual(values = c("#313695","#a50026")) +
-    geom_text(data = cellData,
-              aes(x = colMean,y = rowMean,label = cellIndex),inherit.aes = FALSE) +
-    guides(fill = ggplot2::guide_legend(order = 1)) +
-    theme(
+    ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
+    ggplot2::geom_text(data = cellData,
+                       ggplot2::aes(x = colMean,y = rowMean,label = cellIndex),inherit.aes = FALSE) +
+    ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
+    ggplot2::theme(
       legend.direction = "horizontal"
       ) +
-    labs(fill = "CMC Classif.")
+    ggplot2::labs(fill = "CMC Classif.")
 
   cmcLegend <- ggplotify::as.ggplot(cowplot::get_legend(refPlt)$grobs[[1]])
 
   refPlt <- refPlt +
-    theme(legend.position = "none")
+    ggplot2::theme(legend.position = "none")
 
   # refPlt <- cmcR::x3pListPlot(list(reference) %>% set_names("reference"),
   #                             height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
   #   theme(legend.position = "none")
 
-  plt <- cmcR::x3pListPlot(list("target" = target),
+  plt <- x3pListPlot(list("target" = target),
                            height.colors = colorspace::desaturate(rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')))) +
-    theme(legend.position = "none")
+    ggplot2::theme(legend.position = "none")
 
   plt <- plt +
     ggnewscale::new_scale_fill() +
-    geom_raster(data = targetCellData,
-                aes(x = x,y = y,fill = cmcClassif),
+    ggplot2::geom_raster(data = targetCellData,
+                         ggplot2::aes(x = x,y = y,fill = cmcClassif),
                 alpha = .2) +
-    scale_fill_manual(values = c("#313695","#a50026")) +
-    geom_text(data = targetCellData %>%
-                group_by(cellIndex) %>%
-                summarise(x = mean(x),
+    ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
+    ggplot2::geom_text(data = targetCellData %>%
+                dplyr::group_by(cellIndex) %>%
+                  dplyr::summarise(x = mean(x),
                           y = mean(y),
                           theta = unique(theta)),
-              aes(x=x,y=y,label = cellIndex,angle = -1*theta))
+              ggplot2::aes(x=x,y=y,label = cellIndex,angle = -1*theta))
 
   # library(patchwork)
   # return((refPlt | plt))
