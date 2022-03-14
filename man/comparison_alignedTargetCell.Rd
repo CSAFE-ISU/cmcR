@@ -5,7 +5,13 @@
 \title{Extract a matrix from the target region of the same dimension as the reference
 cell depending on the estimated translation calculated from comparison_fft_ccf}
 \usage{
-comparison_alignedTargetCell(cellHeightValues, regionHeightValues, fft_ccf_df)
+comparison_alignedTargetCell(
+  cellHeightValues,
+  regionHeightValues,
+  target,
+  theta,
+  fft_ccf_df
+)
 }
 \arguments{
 \item{cellHeightValues}{list/tibble column of x3p objects containing a

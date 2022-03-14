@@ -10,7 +10,7 @@ cellGridPlot(
   legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
   height.colors = rev(c("#7f3b08", "#b35806", "#e08214", "#fdb863", "#fee0b6",
     "#f7f7f7", "#d8daeb", "#b2abd2", "#8073ac", "#542788", "#2d004b")),
-  na.value = "gray80"
+  na.value = "gray65"
 )
 }
 \description{

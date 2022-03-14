@@ -4,7 +4,13 @@
 \alias{cmcPlot}
 \title{Plot CMCs}
 \usage{
-cmcPlot(reference, target, cmcClassifs, cmcCol = "originalMethod")
+cmcPlot(
+  reference,
+  target,
+  cmcClassifs,
+  type = "faceted",
+  cmcCol = "originalMethod"
+)
 }
 \description{
 Plot CMCs
