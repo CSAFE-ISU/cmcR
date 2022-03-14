@@ -34,7 +34,7 @@ Install the development version from [GitHub](https://github.com/CSAFE-ISU/cmcR)
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jzemmels/cmcR")
+devtools::install_github("jzemmels/cmcR@dev")
 ```
 Cartridge case scan data can be accessed at the [NIST Ballisitics Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
