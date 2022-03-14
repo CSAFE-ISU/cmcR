@@ -422,7 +422,7 @@ arrangeCMCPlot <- function(reference,
 #'}
 #'@importFrom utils hasName
 #'@importFrom rlang .data
-#'@importFrom stringr string_detect
+#'@importFrom stringr str_detect
 #'@export
 
 cmcPlot <- function(reference,
