@@ -421,7 +421,8 @@ cmcPlot <- function(reference,
                     target,
                     cmcClassifs,
                     type = "faceted",
-                    cmcCol = "originalMethod"){
+                    cmcCol = "originalMethod",
+                    corrCol = "pairwiseCompCor"){
 
   #check that the necessary columns are in cmcClassifs
 
@@ -433,7 +434,7 @@ cmcPlot <- function(reference,
 
   stopifnot("Make sure that there is a column called 'theta'" = any(stringr::str_detect(names(cmcClassifs),"theta")))
 
-  stopifnot("Make sure there is a column called 'pairwiseCompCor'" = any(stringr::str_detect(names(cmcClassifs),"pairwiseCompCor")))
+  stopifnot(paste0("Make sure there is a column called ",corrCol) = any(stringr::str_detect(names(cmcClassifs),corrCol)))
 
   # get the indices for the necessary columns
   referenceCellCol <- which(stringr::str_detect(names(cmcClassifs),"cellHeightValues"))
@@ -448,7 +449,7 @@ cmcPlot <- function(reference,
 
   cmcClassifs <- cmcClassifs %>%
     dplyr::group_by(cellIndex) %>%
-    dplyr::filter(pairwiseCompCor == max(pairwiseCompCor))
+    dplyr::filter(!!as.name(corrCol) == max(!!as.name(corrCol)))
 
   targetCellData <- cmcClassifs %>%
     dplyr::select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
