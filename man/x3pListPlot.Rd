@@ -26,6 +26,9 @@ consistent height scale across all surface matrices.}
 \item{legend.quantiles}{vector of quantiles to be shown as tick marks on
 legend plot}
 
+\item{height.quantiles}{vector of quantiles associated with each color defined
+in the height.colors argument}
+
 \item{height.colors}{vector of colors to be passed to scale_fill_gradientn
 that dictates the height value colorscale}
 

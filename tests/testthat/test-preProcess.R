@@ -60,9 +60,9 @@ if(!exists("skipPreprocess")){
     x3ptools::sample_x3p()
 
   testthat::test_that("preProcess_ functions work as expected", {
-    if(x3p1$cmcR.info$skipPreprocess == 1){
-      testthat::skip()
-    }
+    # if(x3p1$cmcR.info$skipPreprocess == 1){
+    #   testthat::skip()
+    # }
 
     testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
     testthat::expect_true(x3p1_extCrop_missing <= x3p1_raw_missing)
@@ -117,9 +117,9 @@ if(!exists("skipPreprocess")){
   x3p1_fpCircleRemoved_var <- var(x3p1_fpCircleRemoved$surface.matrix[!is.na(x3p1_fpCircleRemoved$surface.matrix)])
 
   testthat::test_that("Legacy preProcess_ functions work as expected", {
-    if(x3p1$cmcR.info$skipPreprocess == 1){
-      testthat::skip()
-    }
+    # if(x3p1$cmcR.info$skipPreprocess == 1){
+    #   testthat::skip()
+    # }
 
     #applying RANSAC method shouldn't affect dimension, but should introduce more
     #NAs

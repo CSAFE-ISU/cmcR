@@ -26,6 +26,9 @@ tryCatch({
 
   skipPreprocess <<- 1
 
+  x3p1$cmcR.info$skipPreprocess <- 1
+  x3p2$cmcR.info$skipPreprocess <- 1
+
   tmpfile1 <<- tempfile(fileext = ".x3p")
   tmpfile2 <<- tempfile(fileext = ".x3p")
 

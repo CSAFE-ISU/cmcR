@@ -370,7 +370,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
                  region_x3p$header.info$sizeY <- ncol(regionMatrix)
                  region_x3p$header.info$sizeX <- nrow(regionMatrix)
                  region_x3p$cmcR.info$regionIndices <- cornerIndices %>%
-                   set_names(c("colStart","colEnd","rowStart","rowEnd"))
+                   purrr::set_names(c("colStart","colEnd","rowStart","rowEnd"))
                  return(region_x3p)
                })
 
@@ -822,6 +822,10 @@ extractTargetCell <- function(cell,
 #'  reference scan's cells (as returned by comparison_cellDivision)
 #'@param regionHeightValues list/tibble column of x3p objects containing a
 #'  target scan's regions (as returned by comparison_getTargetRegions)
+#'@param target the scan to which each cell in the partitioned scan was
+#'  compared.
+#'@param theta the theta (rotation) value associated with each cellHeightValues,
+#'  regionHeightValues pairing
 #'@param fft_ccf_df data frame/tibble column containing the data frame of (x,y)
 #'  and CCF values returned by comparison_fft_ccf
 #'
@@ -1078,15 +1082,15 @@ comparison_allTogether <- function(reference,
   ret <- reference %>%
     comparison_cellDivision(numCells)  %>%
     dplyr::mutate(cellPropMissing = comparison_calcPropMissing(.data$cellHeightValues),
-                  refMissingCount = map_dbl(.data$cellHeightValues,~ sum(is.na(.$surface.matrix)))) %>%
+                  refMissingCount = purrr::map_dbl(.data$cellHeightValues,~ sum(is.na(.$surface.matrix)))) %>%
     dplyr::filter(.data$cellPropMissing <= maxMissingProp) %>%
     dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = .data$cellHeightValues,
                                                                    target = target,
                                                                    theta = theta,
                                                                    regionSizeMultiplier = regionSizeMultiplier)) %>%
-    mutate(targMissingProp = cmcR::comparison_calcPropMissing(.data$regionHeightValues),
-           targMissingCount = map_dbl(.data$regionHeightValues,~ sum(is.na(.$surface.matrix)))) %>%
-    dplyr::filter(.data$targeMissingProp <= maxMissingProp) %>%
+    dplyr::mutate(targMissingProp = comparison_calcPropMissing(.data$regionHeightValues),
+           targMissingCount = purrr::map_dbl(.data$regionHeightValues,~ sum(is.na(.$surface.matrix)))) %>%
+    dplyr::filter(.data$targMissingProp <= maxMissingProp) %>%
     dplyr::mutate(cellHeightValues = comparison_standardizeHeights(.data$cellHeightValues),
                   regionHeightValues = comparison_standardizeHeights(.data$regionHeightValues)) %>%
     dplyr::mutate(cellHeightValues_replaced = comparison_replaceMissing(.data$cellHeightValues),
@@ -1098,8 +1102,8 @@ comparison_allTogether <- function(reference,
                                                                    target = target,
                                                                    theta = theta,
                                                                    fft_ccf_df = .data$fft_ccf_df)) %>%
-    dplyr::mutate(jointlyMissing = map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,~ sum(is.na(.x$surface.matrix) & is.na(.y$surface.matrix))),
-                  pairwiseCompCor = map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
+    dplyr::mutate(jointlyMissing = purrr::map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,~ sum(is.na(.x$surface.matrix) & is.na(.y$surface.matrix))),
+                  pairwiseCompCor = purrr::map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
                                              ~ cor(c(.x$surface.matrix),c(.y$surface.matrix),
                                                    use = "pairwise.complete.obs"))) %>%
     tidyr::unnest(.data$fft_ccf_df) %>%

@@ -2,16 +2,36 @@
 % Please edit documentation in R/diagnosticTools.R
 \name{cmcPlot}
 \alias{cmcPlot}
-\title{Plot CMCs}
+\title{Plot Congruent Matching Cells results for a pair of cartridge cases.}
 \usage{
 cmcPlot(
   reference,
   target,
   cmcClassifs,
   type = "faceted",
-  cmcCol = "originalMethod"
+  corrCol = "pairwiseCompCor"
 )
 }
+\arguments{
+\item{reference}{the scan that is partitioned into a grid of cells}
+
+\item{target}{the scan to which each reference cell is compared during the
+cell-based comparison procedure}
+
+\item{cmcClassifs}{a data frame containing columns cellHeightValues,
+alignedTargetCell, cellIndex, theta, and user-defined cmcCol & corrCol}
+
+\item{type}{the form of the returned plot object(s). Either "faceted," meaning
+the reference and target plot will be shown side-by-side or "list" meaning
+each element of the plot (referece, target, and legend) will be returned
+separately as elements of a list}
+
+\item{corrCol}{name of column containing correlation values for each cell.
+Defaults to "pairwiseCompCor," but "fft_ccf" is a common alternative.}
+
+\item{cmcCol}{name of column containing CMC classifications as returned by the
+decision_CMC function. Defaults to "originalMethod"}
+}
 \description{
-Plot CMCs
+Plot Congruent Matching Cells results for a pair of cartridge cases.
 }

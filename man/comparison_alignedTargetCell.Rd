@@ -20,6 +20,12 @@ reference scan's cells (as returned by comparison_cellDivision)}
 \item{regionHeightValues}{list/tibble column of x3p objects containing a
 target scan's regions (as returned by comparison_getTargetRegions)}
 
+\item{target}{the scan to which each cell in the partitioned scan was
+compared.}
+
+\item{theta}{the theta (rotation) value associated with each cellHeightValues,
+regionHeightValues pairing}
+
 \item{fft_ccf_df}{data frame/tibble column containing the data frame of (x,y)
 and CCF values returned by comparison_fft_ccf}
 }

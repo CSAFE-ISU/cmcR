@@ -36,7 +36,8 @@ Imports:
     tibble,
     tidyr,
     rlang,
-    patchwork
+    patchwork,
+    ggplotify
 Suggests: 
     knitr,
     rmarkdown,
