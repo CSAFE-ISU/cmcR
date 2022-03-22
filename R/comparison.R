@@ -259,7 +259,7 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 
   cellTibble <- tibble::tibble(cellNum = 1:numCells,
                                cellHeightValues = splitSurfaceMat) %>%
-    dplyr::mutate(cellIndex = linear_to_matrix(cellNum,nrow = ceiling(sqrt(numCells)))) %>%
+    dplyr::mutate(cellIndex = linear_to_matrix(.data$cellNum,nrow = ceiling(sqrt(numCells)))) %>%
     # the assignment of cellIndex below will assign cell based on how the old
     # x3pListPlot function plotted scans (i.e., cell 1,1 will actually be in the
     # top-left corner when using the old x3pListPlot). To make things more

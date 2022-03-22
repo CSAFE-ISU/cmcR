@@ -11,7 +11,6 @@
 #'@param type dictates whether one plot faceted by surface matrix or a list of
 #'  plots per surface matrix is returned. The faceted plot will have a
 #'  consistent height scale across all surface matrices.
-#'@param rotate angle (in degrees) to rotate all surface matrices plotted
 #'@param legend.quantiles vector of quantiles to be shown as tick marks on
 #'  legend plot
 #'@param height.quantiles vector of quantiles associated with each color defined
@@ -20,7 +19,6 @@
 #'  that dictates the height value colorscale
 #'@param na.value color to be used for NA values (passed to
 #'  scale_fill_gradientn)
-#'@param guide internal usage
 #'@return A ggplot object or list of ggplot objects showing the surface matrix
 #'  height values.
 #' @examples
@@ -59,12 +57,12 @@ x3pListPlot <- function(x3pList,
                                          #matrix (i.e., element [1,1] of the
                                          #surface matrix is in the top-left
                                          #corner)
-                                         dplyr::mutate(xnew = max(y) - y,
-                                                       ynew = max(x) - x,
+                                         dplyr::mutate(xnew = max(.data$y) - .data$y,
+                                                       ynew = max(.data$x) - .data$x,
                                                        value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                                         dplyr::select(-c(x,y)) %>%
-                                         dplyr::rename(x=xnew,
-                                                       y=ynew) %>%
+                                         dplyr::select(-c(.data$x,.data$y)) %>%
+                                         dplyr::rename(x=.data$xnew,
+                                                       y=.data$ynew) %>%
                                          dplyr::mutate(x3p = rep(name,times = nrow(.)))
                                      }) %>%
       dplyr::mutate(x3p = factor(.data$x3p,levels = names(x3pList)))
@@ -119,12 +117,12 @@ x3pListPlot <- function(x3pList,
                             #matrix (i.e., element [1,1] of the
                             #surface matrix is in the top-left
                             #corner)
-                            dplyr::mutate(xnew = max(y) - y,
-                                          ynew = max(x) - x,
+                            dplyr::mutate(xnew = max(.data$y) - .data$y,
+                                          ynew = max(.data$x) - .data$x,
                                           value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                            dplyr::select(-c(x,y)) %>%
-                            dplyr::rename(x=xnew,
-                                          y=ynew) %>%
+                            dplyr::select(-c(.data$x,.data$y)) %>%
+                            dplyr::rename(x=.data$xnew,
+                                          y=.data$ynew) %>%
                             dplyr::mutate(value = .data$value - median(.data$value,na.rm = TRUE)) %>%
                             dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
@@ -219,10 +217,10 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
   paste0(idx_out_row, sep, idx_out_col)
 }
 
-#' Plot a scan partitioned into a grid of cells.
-#'
+# #' Plot a scan partitioned into a grid of cells.
+# #'
 # #' @name cellGridPlot
-#'
+# #'
 # #' @export
 
 cellGridPlot <- function(x3p,
@@ -242,15 +240,15 @@ cellGridPlot <- function(x3p,
         dplyr::mutate(cellIndex = ..1)
 
     }) %>%
-    dplyr::mutate(value = value - median(value,na.rm = TRUE)) %>%
+    dplyr::mutate(value = .data$value - median(.data$value,na.rm = TRUE)) %>%
     tidyr::separate(col = cellIndex,into = c("row","col"),sep = ", ") %>%
     dplyr::mutate(col = as.numeric(col),
                   row = as.numeric(row),
-                  xnew = max(y) - y,
-                  ynew = max(x) - x) %>%
-    dplyr::select(-c(x,y)) %>%
-    dplyr::rename(x=xnew,
-                  y=ynew)
+                  xnew = max(.data$y) - .data$y,
+                  ynew = max(.data$x) - .data$x) %>%
+    dplyr::select(-c(.data$x,.data$y)) %>%
+    dplyr::rename(x=.data$xnew,
+                  y=.data$ynew)
 
   plt <- surfaceMat_df %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$x,y = .data$y)) +
@@ -392,20 +390,20 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
   ret <- rotatedMask %>%
     imager::as.cimg() %>%
     as.data.frame() %>%
-    dplyr::mutate(xnew = y,
-                  ynew = x) %>%
-    dplyr::select(-c(x,y)) %>%
-    dplyr::rename(x=xnew,y=ynew) %>%
-    dplyr::mutate(x = x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
+    dplyr::mutate(xnew = .data$y,
+                  ynew = .data$x) %>%
+    dplyr::select(-c(.data$x,.data$y)) %>%
+    dplyr::rename(x=.data$xnew,y=.data$ynew) %>%
+    dplyr::mutate(x = .data$x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
                   # x = x - newColPad,
-                  y = y - min(which(rowSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
+                  y = .data$y - min(which(rowSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
                   # y = y - newRowPad,
                   # y = max(y) - y
-                  y = nrow(target$surface.matrix) - y
+                  y = nrow(target$surface.matrix) - .data$y
     ) %>%
-    dplyr::filter(value == 100) %>%
-    dplyr::select(-value) %>%
-    dplyr::group_by(x,y) %>%
+    dplyr::filter(.data$value == 100) %>%
+    dplyr::select(-.data$value) %>%
+    dplyr::group_by(.data$x,.data$y) %>%
     dplyr::distinct() %>%
     dplyr::mutate(cellIndex = cellIndex,
                   theta = theta,
@@ -438,7 +436,7 @@ cmcPlot <- function(reference,
                     target,
                     cmcClassifs,
                     type = "faceted",
-                    # cmcCol = "originalMethod",
+                    cmcCol = "originalMethod",
                     corrCol = "pairwiseCompCor"){
 
   #check that the necessary columns are in cmcClassifs
@@ -499,11 +497,11 @@ cmcPlot <- function(reference,
                              originalMethod = ..3))
 
     }) %>%
-    dplyr::mutate(rowStart = max(rowEnd) - rowStart,
-                  rowEnd = max(rowEnd) - rowEnd,
-                  colMean = map2_dbl(colStart,colEnd,~ mean(c(.x,.y))),
-                  rowMean = map2_dbl(rowStart,rowEnd,~ mean(c(.x,.y)))) %>%
-    dplyr::rename(cmcClassif = cmcCol)
+    dplyr::mutate(rowStart = max(.data$rowEnd) - .data$rowStart,
+                  rowEnd = max(.data$rowEnd) - .data$rowEnd,
+                  colMean = purrr::map2_dbl(.data$colStart,.data$colEnd,~ mean(c(.x,.y))),
+                  rowMean = purrr::map2_dbl(.data$rowStart,.data$rowEnd,~ mean(c(.x,.y)))) %>%
+    dplyr::rename(cmcClassif = .data$cmcCol)
 
   # ggplot2 complains about the guides
   suppressWarnings({
@@ -514,12 +512,12 @@ cmcPlot <- function(reference,
       ggplot2::guides(fill = "none") +
       ggnewscale::new_scale_fill() +
       ggplot2::geom_rect(data = cellData,
-                         ggplot2::aes(xmin = colStart,xmax = colEnd,ymin = rowStart,ymax = rowEnd,fill = cmcClassif),
+                         ggplot2::aes(xmin = .data$colStart,xmax = .data$colEnd,ymin = .data$rowStart,ymax = .data$rowEnd,fill = .data$cmcClassif),
                          alpha = .2,
                          inherit.aes = FALSE) +
       ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
       ggplot2::geom_text(data = cellData,
-                         ggplot2::aes(x = colMean,y = rowMean,label = cellIndex),inherit.aes = FALSE) +
+                         ggplot2::aes(x = .data$colMean,y = .data$rowMean,label = .data$cellIndex),inherit.aes = FALSE) +
       ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
       ggplot2::theme(
         legend.direction = "horizontal"
@@ -539,15 +537,15 @@ cmcPlot <- function(reference,
     plt <- plt +
       ggnewscale::new_scale_fill() +
       ggplot2::geom_raster(data = targetCellData,
-                           ggplot2::aes(x = x,y = y,fill = cmcClassif),
+                           ggplot2::aes(x = .data$x,y = .data$y,fill = .data$cmcClassif),
                            alpha = .2) +
       ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
       ggplot2::geom_text(data = targetCellData %>%
-                           dplyr::group_by(cellIndex) %>%
-                           dplyr::summarise(x = mean(x),
-                                            y = mean(y),
-                                            theta = unique(theta)),
-                         ggplot2::aes(x=x,y=y,label = cellIndex,angle = -1*theta))
+                           dplyr::group_by(.data$cellIndex) %>%
+                           dplyr::summarise(x = mean(.data$x),
+                                            y = mean(.data$y),
+                                            theta = unique(.data$theta)),
+                         ggplot2::aes(x=.data$x,y=.data$y,label = .data$cellIndex,angle = -1*.data$theta))
 
   })
 

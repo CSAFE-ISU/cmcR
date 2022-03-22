@@ -202,40 +202,93 @@ preProcess_ransacLevel <- function(x3p,
 # @keywords internal
 
 preProcess_cropWS <- function(x3p,
-                              croppingThresh = 1){
+                              croppingThresh = 1,
+                              croppingProp = .1,
+                              robust = FALSE){
+
+  #check that rowSum and colSum aren't greater than some percentage of the
+  #overall dimension of the surface matrix (e.g., 25%). Increase croppingProp is
+  #it's too small
 
   surfaceMat <- x3p$surface.matrix
 
-  #Look at the middle 20% of columns and count the number of non-NA pixels in each
-  colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
-                         (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
-    is.na() %>%
-    magrittr::not() %>%
-    colSums()
+  if(!robust){
 
-  #Look at the middle 20% of rows and count the number of non-NA pixels in each
-  rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - .1*ncol(surfaceMat)):
-                         (ncol(surfaceMat)/2 + .1*ncol(surfaceMat))] %>%
-    is.na() %>%
-    magrittr::not() %>%
-    rowSums()
+    #Look at the middle 20% of columns and count the number of non-NA pixels in each
+    colSum <- surfaceMat[(nrow(surfaceMat)/2 - croppingProp*nrow(surfaceMat)):
+                           (nrow(surfaceMat)/2 + croppingProp*nrow(surfaceMat)),] %>%
+      is.na() %>%
+      magrittr::not() %>%
+      colSums()
 
-  #Crop out any rows/columns containing only NA pixels
-  surfaceMatCropped <- surfaceMat[min(which(rowSum >= croppingThresh)):
-                                    max(which(rowSum >= croppingThresh)),
-                                  min(which(colSum >= croppingThresh)):
-                                    max(which(colSum >= croppingThresh))]
+    #Look at the middle 20% of rows and count the number of non-NA pixels in each
+    rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - croppingProp*ncol(surfaceMat)):
+                           (ncol(surfaceMat)/2 + croppingProp*ncol(surfaceMat))] %>%
+      is.na() %>%
+      magrittr::not() %>%
+      rowSums()
+
+    #Crop out any rows/columns containing only NA pixels
+    surfaceMatCropped <- surfaceMat[min(which(rowSum >= croppingThresh)):
+                                      max(which(rowSum >= croppingThresh)),
+                                    min(which(colSum >= croppingThresh)):
+                                      max(which(colSum >= croppingThresh))]
+
+  }
+  else{
+
+    croppingBoundaries <- purrr::map(c(0,90),
+                                     function(theta){
+
+                                       surfaceMat <- rotateSurfaceMatrix(surfaceMat = surfaceMat,
+                                                                                theta = theta)
+
+                                       #Look at the middle 20% of columns and count the number of non-NA pixels in each
+                                       colSum <- surfaceMat[(nrow(surfaceMat)/2 - croppingProp*nrow(surfaceMat)):
+                                                              (nrow(surfaceMat)/2 + croppingProp*nrow(surfaceMat)),] %>%
+                                         is.na() %>%
+                                         magrittr::not() %>%
+                                         colSums()
+
+                                       #Look at the middle 20% of rows and count the number of non-NA pixels in each
+                                       rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - croppingProp*ncol(surfaceMat)):
+                                                              (ncol(surfaceMat)/2 + croppingProp*ncol(surfaceMat))] %>%
+                                         is.na() %>%
+                                         magrittr::not() %>%
+                                         rowSums()
+
+
+                                       return(c("firstRow" = min(which(rowSum >= croppingThresh)),
+                                                "lastRow" = max(which(rowSum >= croppingThresh)),
+                                                "firstCol" = min(which(colSum >= croppingThresh)),
+                                                "lastCol" = max(which(colSum >= croppingThresh))))
+                                     })
+
+    firstRow <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["firstRow"]) %>%
+      min()
+
+    lastRow <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["lastRow"]) %>%
+      max()
+
+    firstCol <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["firstCol"]) %>%
+      min()
+
+    lastCol <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["lastCol"]) %>%
+      max()
+
+    surfaceMatCropped <- surfaceMat[firstRow:lastRow,
+                                    firstCol:lastCol]
+  }
 
   x3p$surface.matrix <- surfaceMatCropped
 
   #need to update metainformation now that rows/cols have been removed
   x3p$header.info$sizeX <- nrow(surfaceMatCropped)
   x3p$header.info$sizeY <- ncol(surfaceMatCropped)
-
-  minCroppingValues <- c("row" = min(which(rowSum >= croppingThresh)),
-                         "col" = min(which(colSum >= croppingThresh)))
-
-  x3p$cmcR.info$exteriorCroppingValues <- minCroppingValues
 
   return(x3p)
 }
@@ -978,3 +1031,184 @@ preProcess_removeTrend <- function(x3p,
   return(x3p_condStatRemoved)
 }
 
+# helper function for preProcess_erodePrimer and preProcess_dilateFP functions
+fpCenterCalc <- function(x3p,
+                         scheme = 3,
+                         high_connectivity = FALSE,
+                         tolerance = 0,
+                         dilate_prop = .1,
+                         centerOffset = c(0,0)){
+
+  mat_bfRegion <- x3p$surface.matrix
+
+  mat_bfRegionBinarized <- mat_bfRegion
+  mat_bfRegionBinarized[!is.na(mat_bfRegionBinarized)] <- 1
+  mat_bfRegionBinarized[is.na(mat_bfRegionBinarized)] <- 0
+
+  #Label the different regions of the scan using the edges as borders
+  mat_bfRegionLabeled <- mat_bfRegionBinarized %>%
+    imager::as.cimg() %>%
+    imager::dilate(mask = imager::px.circle(r = dilate_prop*ncol(mat_bfRegion))) %>%
+    imager::imgradient(scheme = 3) %>%
+    imager::enorm() %>%
+    imager::add() %>%
+    imager::label(high_connectivity = high_connectivity,
+                  tolerance = tolerance) %>%
+    as.matrix()
+
+  #The pixel in the center of the image should be a part of the firing pin
+  #impression hole
+  mat_bfRegioncenterLabel <- mat_bfRegionLabeled[round(nrow(mat_bfRegionLabeled)/2),round(ncol(mat_bfRegionLabeled)/2)]
+
+  #Identify all pixels that share a label with the center pixel (these are
+  #assumed to be only pixels that are a part of the firing pin impression)
+  mat_bfRegionfpHoleIndices <- which(mat_bfRegionLabeled == mat_bfRegioncenterLabel,arr.ind = TRUE)
+
+  #The center pixel of this region is assumed to be the center of the firing pin
+  #impression hole
+  mat_bfRegionfpHoleCenter <- round(colMeans(mat_bfRegionfpHoleIndices)) + centerOffset
+
+  return(mat_bfRegionfpHoleCenter)
+}
+
+preProcess_dilateFP <- function(x3p,dilationRadius = 50){
+
+  #estimate finring pin center index
+  dat_center <- fpCenterCalc(x3p)
+
+  #label regions of scan based on edges between missing/non-missing values.
+  #dilate_square closes some of the gaps in the scan before labeling, which will
+  #avoid the regions "bleeding" into each other
+  dat_label <- x3p$surface.matrix %>%
+    is.na() %>%
+    imager::as.cimg() %>%
+    imager::imgradient() %>%
+    imager::enorm() %>%
+    imager::dilate_square(size = max(1,.005*max(dim(x3p$surface.matrix)))) %>%
+    imager::label() %>%
+    as.matrix()
+
+  #Now binarize labels to either firing pin hole or not
+  dat_2label <- dat_label
+
+  #Assumes that the firing pin center index will have the same label as the rest
+  #of the firing pin hole
+  dat_2label[dat_2label == dat_2label[dat_center[1],dat_center[2]]] <- -1
+  dat_2label[dat_2label != -1] <- 0
+
+  #we want to grow the firing pin hole region <==> shrink the non-firing pin
+  #hole region
+  dat_fpEroded <- dat_2label %>%
+    imager::as.cimg() %>%
+    imager::erode(mask = imager::px.circle(r = dilationRadius)) %>%
+    as.matrix()
+
+  dat_fpRemoved <- x3p
+
+  #replace the firing pin hole observations with NA
+  dat_fpRemoved$surface.matrix[dat_fpEroded == -1] <- NA
+
+  return(dat_fpRemoved)
+}
+
+preProcess_erodePrimer <- function(x3p,erosionRadius = 50){
+
+  dat_label <- x3p$surface.matrix %>%
+    is.na() %>%
+    imager::as.cimg() %>%
+    imager::imgradient() %>%
+    imager::enorm() %>%
+    imager::dilate_square(size = max(1,.01*max(dim(x3p$surface.matrix)))) %>%
+    imager::label() %>%
+    as.matrix()
+
+  dat_bfRemoved <- x3p$surface.matrix
+
+  #We only want to classify pixels as "within the primer" or "outside of the
+  #primer." We'll assume that the labels in the 4 corners of the surface matrix
+  #make up the "outside" labels.
+
+  # most common label in the top/bottom left/right corners of the surface matrix
+  topLeftLabel <- dat_label[1:round(.01*nrow(dat_bfRemoved)),1:round(.01*ncol(dat_bfRemoved))] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  bottomLeftLabel <- dat_label[(nrow(dat_label) - round(.01*nrow(dat_bfRemoved))):nrow(dat_label),1:20] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  topRightLabel <- dat_label[1:20,(ncol(dat_label) - round(.01*ncol(dat_bfRemoved))):ncol(dat_label)] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  bottomRightLabel <- dat_label[(nrow(dat_label) - round(.01*nrow(dat_bfRemoved))):nrow(dat_label),
+                                (ncol(dat_label) - round(.01*ncol(dat_bfRemoved))):ncol(dat_label)] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  dat_bfRemoved[dat_label == topLeftLabel |
+                  dat_label == bottomLeftLabel |
+                  dat_label == topRightLabel |
+                  dat_label == bottomRightLabel] <- -1
+
+  #Any label that aren't the 4 identified above (or are NA) we'll set to 0
+  dat_bfRemoved[dat_bfRemoved != -1 | is.na(dat_bfRemoved)] <- 0
+  dat_bfRemoved[dat_bfRemoved == -1] <- 1
+
+  #We want to erode (shave-off) the boundary of the firing pin <==> dilate the
+  #exterior pixels
+  dat_bfRemoved <-  dat_bfRemoved %>%
+    imager::as.cimg() %>%
+    imager::pad(nPix = 100,axes = "xy",pos = 0,val = 1) %>%
+    imager::dilate(mask = imager::px.circle(r = erosionRadius)) %>%
+    imager::crop.borders(nx = 50,ny = 50) %>%
+    as.matrix()
+
+  dat_exteriorEroded <- x3p
+
+  dat_exteriorEroded$surface.matrix[dat_bfRemoved == 1] <- NA
+
+
+  return(dat_exteriorEroded)
+}
+
+#'Erode the interior or exterior of a cartridge case surface
+#'
+#'@name preProcess_erode
+#'
+#'@description performs the morphological operations and dilation to "shave"
+#'  observations off of the interior or exterior of a cartridge case surface
+#'  matrix.
+#'
+#'@param x3p an x3p object
+#'@param region either "interior," meaning the observations around the firing
+#'  pin hole will be eroded, or "exterior," meaning the observations around the
+#'  outer edge of the cartridge case primer will be eroded
+#'@param morphRadius controls the amount of erosion. Larger values correspond to
+#'  a larger (circular) morphological mask leading to more erosion.
+#'
+#'@export
+preProcess_erode <- function(x3p,region,morphRadius = 50){
+
+  stopifnot(region %in% c("interior","exterior"))
+  stopifnot(is.numeric(morphRadius))
+
+  if(region == "interior"){
+
+    return(preProcess_dilateFP(x3p = x3p,dilationRadius = morphRadius))
+  }
+  if(region == "exterior"){
+
+  return(preProcess_erodePrimer(x3p = x3p,erosionRadius = morphRadius))
+
+  }
+
+}

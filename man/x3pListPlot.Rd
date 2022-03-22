@@ -34,10 +34,6 @@ that dictates the height value colorscale}
 
 \item{na.value}{color to be used for NA values (passed to
 scale_fill_gradientn)}
-
-\item{rotate}{angle (in degrees) to rotate all surface matrices plotted}
-
-\item{guide}{internal usage}
 }
 \value{
 A ggplot object or list of ggplot objects showing the surface matrix

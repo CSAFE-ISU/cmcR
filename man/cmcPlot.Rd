@@ -9,6 +9,7 @@ cmcPlot(
   target,
   cmcClassifs,
   type = "faceted",
+  cmcCol = "originalMethod",
   corrCol = "pairwiseCompCor"
 )
 }
@@ -26,11 +27,11 @@ the reference and target plot will be shown side-by-side or "list" meaning
 each element of the plot (referece, target, and legend) will be returned
 separately as elements of a list}
 
-\item{corrCol}{name of column containing correlation values for each cell.
-Defaults to "pairwiseCompCor," but "fft_ccf" is a common alternative.}
-
 \item{cmcCol}{name of column containing CMC classifications as returned by the
 decision_CMC function. Defaults to "originalMethod"}
+
+\item{corrCol}{name of column containing correlation values for each cell.
+Defaults to "pairwiseCompCor," but "fft_ccf" is a common alternative.}
 }
 \description{
 Plot Congruent Matching Cells results for a pair of cartridge cases.
