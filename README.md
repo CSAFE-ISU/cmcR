@@ -270,9 +270,12 @@ matches from non-matches well). However, the `x` and `y` estimated
 translations are good estimates of the “true” translation values needed
 to align the cell and region. To calculate a more accurate similarity
 score, we can use the pairwise-complete correlation in which only pairs
-of non-missing pixels are considered in the correlation calculation.
-This provides a better similarity metric. The pairwise-complete
-correlation can be calculated with the `comparison_cor` function.
+of non-missing pixels are considered in the correlation calculation. To
+calculate this the `comparison_alignedTargetCell` function takes the
+cell, region, and CCF-based alignment information and returns a matrix
+of the same dimension as the reference cell representing the sub-matrix
+of the target region that the cell aligned to. We can then calculate the
+pairwise-complete correlation as shown below.
 
 ``` r
 cellTibble %>%
@@ -342,8 +345,8 @@ The decision rules described in [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 and [Tong et
 al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)
-are implemented via the `decision_*` functions. The two decision rules
-are referred to as the original method of [Song
+are implemented via the `decision_*` functions. We refer to the two
+decision rules as the original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 and the High CMC method, respectively. Considering the
 `kmComparisonFeatures` data frame returned above, we can interpret both
@@ -448,13 +451,14 @@ kmComparison_originalCMCs %>%
 #> #   originalMethodClassif <chr>
 ```
 
-One criticism of the original method of [Song
+Many have pointed out that there tends to be many cell/region pairs that
+exhibit high correlation other than at the “true” rotation (theta)
+value.  
+In particular, a cell/region pair may attain a very high correlation at
+the “true” theta value, yet attain its maximum correlation at a theta
+value far from the consensus theta value. The original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
-is that many cell/region pairs exhibit high correlation values at a
-number of rotations. In particular, a cell/region pair may attain a very
-high correlation at the “true” theta value, yet attain its maximum
-correlation at a theta value far from the consensus theta value. The
-original method of [Song
+is quite sensitive to this behavior. The original method of [Song
 (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193)
 only considers the “top” vote of each cell/region pairing, so it is not
 sensitive to how that cell/region pairing behaves across multiple
@@ -498,7 +502,7 @@ case pair.
 The figure below shows an example of a CMC-`theta` distribution between
 Fadul 1-1 and Fadul 1-2 constructed using the
 `decision_highCMC_cmcThetaDistrib` function. We can clearly see that a
-mode is attained around -27 to -24 degrees.
+mode is attained around -24 degrees.
 
 ``` r
 kmComparisonFeatures %>%
@@ -552,9 +556,8 @@ The figure below shows the classification of `theta` values into “High”
 and “Low” CMC candidate count groups using the
 `decision_highCMC_identifyHighCMCThetas` function. The High CMC count
 threshold is shown as a dashed line at
-![17 - 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;17%20-%201 "17 - 1")
-CMCs. As expected since this cartridge case pair is a match, the High
-CMC count `theta` values are all close to each other.
+![21 - 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;21%20-%201 "21 - 1")
+CMCs.
 
 ``` r
 kmComparisonFeatures %>%

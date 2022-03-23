@@ -155,7 +155,12 @@ cellTibble %>%
   select(cellIndex,fft_ccf,x,y)
 ```
 
-Because so many missing values need to be replaced, the CCF$_{\max}$ value calculated in the `fft_ccf` column using frequency-domain techniques is not a very good similarity score (doesn't differentiate matches from non-matches well). However, the `x` and `y` estimated translations are good estimates of the "true" translation values needed to align the cell and region. To calculate a more accurate similarity score, we can use the pairwise-complete correlation in which only pairs of non-missing pixels are considered in the correlation calculation. This provides a better similarity metric. The pairwise-complete correlation can be calculated with the `comparison_cor` function.
+Because so many missing values need to be replaced, the CCF$_{\max}$ value calculated in the `fft_ccf` column using frequency-domain techniques is not a very good similarity score (doesn't differentiate matches from non-matches well). 
+However, the `x` and `y` estimated translations are good estimates of the "true" translation values needed to align the cell and region. 
+To calculate a more accurate similarity score, we can use the pairwise-complete correlation in which only pairs of non-missing pixels are considered in the correlation calculation. 
+To calculate this the `comparison_alignedTargetCell` function takes the cell, region, and CCF-based alignment information and returns a matrix of the same dimension as the reference cell representing the sub-matrix of the target region that the cell aligned to.
+We can then calculate the pairwise-complete correlation as shown below.
+
 
 ```{r}
 cellTibble %>%
@@ -187,7 +192,10 @@ kmComparisonFeatures %>%
 
 ### Decision rule
 
-The decision rules described in [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) and [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) are implemented via the `decision_*` functions. The two decision rules are referred to as the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) and the High CMC method, respectively. Considering the `kmComparisonFeatures` data frame returned above, we can interpret both of these decision rules as logic that separates "aberrant" from "homogeneous" similarity features. The two decision rules principally differ in how they define an homogeneity.
+The decision rules described in [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) and [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) are implemented via the `decision_*` functions.
+We refer to the two decision rules as the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) and the High CMC method, respectively. 
+Considering the `kmComparisonFeatures` data frame returned above, we can interpret both of these decision rules as logic that separates "aberrant" from "homogeneous" similarity features. 
+The two decision rules principally differ in how they define an homogeneity.
 
 The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) considers only the similarity features at which the maximum correlation is attained for each cell across all rotations considered. Since there is ambiguity in exactly how the correlation is computed in the original methods, we will consider the features at which specifically the maximum `pairwiseCompCor` is attained (instead of using the `fft_ccf` column).
 
@@ -215,13 +223,16 @@ kmComparison_originalCMCs %>%
   filter(originalMethodClassif == "CMC")
 ```
 
-One criticism of the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) is that many cell/region pairs exhibit high correlation values at a number of rotations. In particular, a cell/region pair may attain a very high correlation at the "true" theta value, yet attain its maximum correlation at a theta value far from the consensus theta value. The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) only considers the "top" vote of each cell/region pairing, so it is not sensitive to how that cell/region pairing behaves across multiple rotations.
+Many have pointed out that there tends to be many cell/region pairs that exhibit high correlation other than at the "true" rotation (theta) value.  
+In particular, a cell/region pair may attain a very high correlation at the "true" theta value, yet attain its maximum correlation at a theta value far from the consensus theta value. 
+The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) is quite sensitive to this behavior.
+The original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) only considers the "top" vote of each cell/region pairing, so it is not sensitive to how that cell/region pairing behaves across multiple rotations.
 
 [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose a different decision rule procedure that considers the behavior of cell/region pairings across multiple rotations. This method would come to be called the High CMC method. The procedure involves computing a "CMC-`theta`" distribution where for each value of `theta`, the `x` and `y` values are compared to consensus `x` and `y` values (again, the median) and the correlation values to a minimum threshold. A cell is considered a "CMC candidate" (our language, not theirs) at a particular `theta` value if its `x` and `y` values are within $T_x$, $T_y$ thresholds of the consensus `x` and `y` values and the correlation is at least as larges as the $T_{\text{CCF}}$ threshold. This is similar to the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193) except that it relaxes the requirement that the top `theta` value be close to a consensus. Continuing with the voting analogy, think of this as an [approval voting system](https://en.wikipedia.org/wiki/Approval_voting) where each cell is allowed to vote for multiple `theta` values as long as the `x` and `y` votes are deemed close to the `theta`-specific `x`,`y` consensuses and the correlation values are sufficiently high.
 
 The CMC-`theta` distribution consists of the "CMC candidates" at each value of `theta`. The assumption made in [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) is that, for a truly matching cartridge case pair, a large number of CMC candidates should be concentrated around true `theta` alignment value. In their words, the CMC-`theta` distribution should exhibit a "prominent peak" close to the rotation at which the two cartridge cases actually align. Such a prominent peak should not occur for a non-match cartridge case pair.
 
-The figure below shows an example of a CMC-`theta` distribution between Fadul 1-1 and Fadul 1-2 constructed using the `decision_highCMC_cmcThetaDistrib` function. We can clearly see that a mode is attained around -27 to -24 degrees.
+The figure below shows an example of a CMC-`theta` distribution between Fadul 1-1 and Fadul 1-2 constructed using the `decision_highCMC_cmcThetaDistrib` function. We can clearly see that a mode is attained around -24 degrees.
 
 ```{r}
 kmComparisonFeatures %>%
@@ -244,7 +255,7 @@ kmComparisonFeatures %>%
 
 The next step of the High CMC method is to automatically determine if a mode (i.e., a "prominent peak") exists in a CMC-`theta` distribution. If we find a mode, then there is evidence that a "true" rotation exists to align the two cartridge cases implying the cartridge cases must be matches (such is the logic employed in [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf)). To automatically identify a mode, [Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) propose determining the range of `theta` values with "high" CMC candidate counts (if this range is small, then there is likely a mode). They define a "high" CMC candidate count to be $CMC_{\text{high}} \equiv CMC_{\max} - \tau$ where $CMC_{\max}$ is the maximum value attained in the CMC-`theta` distribution (17 in the plot shown above) and $\tau$ is a user-defined constant ([Tong et al. (2015)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4730689/pdf/jres.120.008.pdf) use $\tau = 1$). Any `theta` value with associated an associated CMC candidate count at least as large as $CMC_{\text{high}}$ have a "high" CMC candidate count while any others have a "low" CMC candidate count.
 
-The figure below shows the classification of `theta` values into "High" and "Low" CMC candidate count groups using the `decision_highCMC_identifyHighCMCThetas` function. The High CMC count threshold is shown as a dashed line at $17 - 1$ CMCs. As expected since this cartridge case pair is a match, the High CMC count `theta` values are all close to each other.
+The figure below shows the classification of `theta` values into "High" and "Low" CMC candidate count groups using the `decision_highCMC_identifyHighCMCThetas` function. The High CMC count threshold is shown as a dashed line at $21 - 1$ CMCs.
 
 ```{r}
 kmComparisonFeatures %>%
