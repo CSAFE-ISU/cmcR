@@ -8,7 +8,7 @@ comparison_getTargetRegions(
   cellHeightValues,
   target,
   theta = 0,
-  regionSizeMultiplier = 9
+  sideLengthMultiplier = 3
 )
 }
 \arguments{
@@ -21,10 +21,9 @@ reference cell.}
 \item{theta}{degrees that the target scan is to be rotated prior extracting
 regions.}
 
-\item{regionSizeMultiplier}{ratio between the area of each target scan regions
-and the reference scan cells (e.g., 9 means that the regions' surface
-matrices will have thrice the number of rows and columns as the cells'
-surface matrices, 4 means twice the number rows and columns, etc.)}
+\item{sideLengthMultiplier}{ratio between the target region and reference cell
+side lengths. For example, sideLengthMultiplier = 3 implies each region will
+be 9 times larger than its paired reference cell.}
 }
 \value{
 A list of the same length as the input containing x3p objects from the
@@ -38,7 +37,7 @@ Extract regions from a target scan based on associated cells in reference scan
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
-comparison_cellDivision(numCells = 64) \%>\%
+comparison_cellDivision(numCells = c(8,8)) \%>\%
 dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
                                                                target = fadul1.2_processed)) \%>\%
 dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues),

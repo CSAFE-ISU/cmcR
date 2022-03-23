@@ -150,7 +150,6 @@ preProcess_ransacLevel <- function(x3p,
     }
   }
 
-  # final coefs only computed using inliers
   finalRansacPlane <- lm(depth ~ row + col,
                          data = observedPixelLocations[inliers, ]) #fit the plane based on what we've identified to be inliers
 
@@ -202,29 +201,87 @@ preProcess_ransacLevel <- function(x3p,
 # @keywords internal
 
 preProcess_cropWS <- function(x3p,
-                              croppingThresh = 1){
+                              croppingThresh = 1,
+                              croppingProp = .1,
+                              robust = FALSE){
+
+  #check that rowSum and colSum aren't greater than some percentage of the
+  #overall dimension of the surface matrix (e.g., 25%). Increase croppingProp is
+  #it's too small
 
   surfaceMat <- x3p$surface.matrix
 
-  #Look at the middle 20% of columns and count the number of non-NA pixels in each
-  colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
-                         (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
-    is.na() %>%
-    magrittr::not() %>%
-    colSums()
+  if(!robust){
 
-  #Look at the middle 20% of rows and count the number of non-NA pixels in each
-  rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - .1*ncol(surfaceMat)):
-                         (ncol(surfaceMat)/2 + .1*ncol(surfaceMat))] %>%
-    is.na() %>%
-    magrittr::not() %>%
-    rowSums()
+    #Look at the middle 20% of columns and count the number of non-NA pixels in each
+    colSum <- surfaceMat[(nrow(surfaceMat)/2 - croppingProp*nrow(surfaceMat)):
+                           (nrow(surfaceMat)/2 + croppingProp*nrow(surfaceMat)),] %>%
+      is.na() %>%
+      magrittr::not() %>%
+      colSums()
 
-  #Crop out any rows/columns containing only NA pixels
-  surfaceMatCropped <- surfaceMat[min(which(rowSum >= croppingThresh)):
-                                    max(which(rowSum >= croppingThresh)),
-                                  min(which(colSum >= croppingThresh)):
-                                    max(which(colSum >= croppingThresh))]
+    #Look at the middle 20% of rows and count the number of non-NA pixels in each
+    rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - croppingProp*ncol(surfaceMat)):
+                           (ncol(surfaceMat)/2 + croppingProp*ncol(surfaceMat))] %>%
+      is.na() %>%
+      magrittr::not() %>%
+      rowSums()
+
+    #Crop out any rows/columns containing only NA pixels
+    surfaceMatCropped <- surfaceMat[min(which(rowSum >= croppingThresh)):
+                                      max(which(rowSum >= croppingThresh)),
+                                    min(which(colSum >= croppingThresh)):
+                                      max(which(colSum >= croppingThresh))]
+
+  }
+  else{
+
+    croppingBoundaries <- purrr::map(c(0,90),
+                                     function(theta){
+
+                                       surfaceMat <- rotateSurfaceMatrix(surfaceMat = surfaceMat,
+                                                                                theta = theta)
+
+                                       #Look at the middle 20% of columns and count the number of non-NA pixels in each
+                                       colSum <- surfaceMat[(nrow(surfaceMat)/2 - croppingProp*nrow(surfaceMat)):
+                                                              (nrow(surfaceMat)/2 + croppingProp*nrow(surfaceMat)),] %>%
+                                         is.na() %>%
+                                         magrittr::not() %>%
+                                         colSums()
+
+                                       #Look at the middle 20% of rows and count the number of non-NA pixels in each
+                                       rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - croppingProp*ncol(surfaceMat)):
+                                                              (ncol(surfaceMat)/2 + croppingProp*ncol(surfaceMat))] %>%
+                                         is.na() %>%
+                                         magrittr::not() %>%
+                                         rowSums()
+
+
+                                       return(c("firstRow" = min(which(rowSum >= croppingThresh)),
+                                                "lastRow" = max(which(rowSum >= croppingThresh)),
+                                                "firstCol" = min(which(colSum >= croppingThresh)),
+                                                "lastCol" = max(which(colSum >= croppingThresh))))
+                                     })
+
+    firstRow <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["firstRow"]) %>%
+      min()
+
+    lastRow <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["lastRow"]) %>%
+      max()
+
+    firstCol <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["firstCol"]) %>%
+      min()
+
+    lastCol <- croppingBoundaries %>%
+      purrr::map_dbl(~ .["lastCol"]) %>%
+      max()
+
+    surfaceMatCropped <- surfaceMat[firstRow:lastRow,
+                                    firstCol:lastCol]
+  }
 
   x3p$surface.matrix <- surfaceMatCropped
 
@@ -514,11 +571,8 @@ estimateBFRadius <- function(mat,
                              angle = 0,
                              interpolation = 0,
                              boundary = 0,
+                             roughEstimate = FALSE,
                              agg_function = median){
-  # print(angle)
-  # if(angle == -100){
-  # browser()
-  # }
 
   matFake <- (mat*1e5) + 1 #scale and shift all non-NA pixels up 1 (meter)
   matFakeRotated <- matFake %>%
@@ -558,37 +612,47 @@ estimateBFRadius <- function(mat,
   mat_segmented[mat_segmented != exteriorLabel] <- -1
   mat_segmented[mat_segmented == exteriorLabel] <- -2
 
-  mat_segmentedEdges <- mat_segmented %>%
-    imager::as.cimg() %>%
-    imager::imgradient(axes = "xy",
-                       scheme = scheme) %>%
-    imager::enorm() %>%
-    imager::add() %>%
-    as.matrix()
+  mat_radiusInitialEstim <- round(sqrt(sum(mat_segmented == -1)/pi))
 
-  mat_segmentedEdgesMidRow <- mat_segmentedEdges[floor(nrow(mat_segmentedEdges)/2),]
+  mat_bfRegionCenter <- round(colMeans(which(mat_segmented == -1,arr.ind = TRUE)))
 
-  if(sum(mat_segmentedEdgesMidRow > 0) < 2){
-    return(NA)
+  mat_radiusEstimate <- mat_radiusInitialEstim
+
+  if(!roughEstimate){
+    mat_segmentedEdges <- mat_segmented %>%
+      imager::as.cimg() %>%
+      imager::imgradient(axes = "xy",
+                         scheme = scheme) %>%
+      imager::enorm() %>%
+      imager::add() %>%
+      as.matrix()
+
+    mat_segmentedEdgesMidRow <- mat_segmentedEdges[mat_bfRegionCenter[1],]
+
+    if(sum(mat_segmentedEdgesMidRow > 0) < 2){
+      return(list("centerEstimate" = mat_bfRegionCenter,
+                  "radiusEstimate" = mat_radiusEstimate))
+    }
+
+    mat_radiusEstimateCandidate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
+      dplyr::mutate(x = 1:nrow(.)) %>%
+      dplyr::filter(.data$y != 0) %>%
+      dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
+      dplyr::mutate(x_diff = abs(.data$x - .data$x_lag)) %>%
+      dplyr::top_n(n = 1,wt = .data$x_diff) %>%
+      dplyr::summarise(x_lag = agg_function(.data$x_lag),
+                       x = agg_function(.data$x)) %>%
+      dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
+      dplyr::pull(.data$radEstimate) %>%
+      agg_function(na.rm = TRUE)
+
+    if(mat_radiusEstimateCandidate >= min(dim(mat)/4) & mat_radiusEstimateCandidate <= min(dim(mat)/2)){
+      mat_radiusEstimate <- mat_radiusEstimateCandidate
+    }
   }
 
-  mat_radiusEstimate <- data.frame(y = mat_segmentedEdgesMidRow) %>%
-    dplyr::mutate(x = 1:nrow(.)) %>%
-    dplyr::filter(.data$y != 0) %>%
-    dplyr::mutate(x_lag = c(.data$x[2:(nrow(.))],NA)) %>%
-    dplyr::mutate(x_diff = abs(.data$x - .data$x_lag)) %>%
-    dplyr::top_n(n = 1,wt = .data$x_diff) %>%
-    dplyr::summarise(x_lag = agg_function(.data$x_lag),
-                     x = agg_function(.data$x)) %>%
-    dplyr::summarise(radEstimate = round((.data$x_lag - .data$x)/2)) %>%
-    dplyr::pull(.data$radEstimate) %>%
-    agg_function(na.rm = TRUE)
-
-  if(all(2*mat_radiusEstimate < max(nrow(mat)/2,ncol(mat)/2))){
-    return(NA)
-  }
-
-  return(mat_radiusEstimate)
+  return(list("centerEstimate" = mat_bfRegionCenter,
+              "radiusEstimate" = mat_radiusEstimate))
 }
 
 # Crop the exterior of a breech face impression surface matrix
@@ -625,16 +689,26 @@ preProcess_cropExterior <- function(x3p,
                                     tolerance = 0,
                                     radiusOffset = 0,
                                     croppingThresh = 1,
-                                    agg_function = median){
+                                    roughEstimate = FALSE,
+                                    agg_function = median,
+                                    ...){
   mat <- x3p$surface.matrix
 
-  mat_radiusEstimate <- estimateBFRadius(mat = mat,
-                                         scheme = scheme,
-                                         high_connectivity = high_connectivity,
-                                         tolerance = tolerance,
-                                         angle = 0,
-                                         agg_function = agg_function) %>%
-    magrittr::add(radiusOffset)
+  mat_estimates <- estimateBFRadius(mat = mat,
+                                    scheme = scheme,
+                                    high_connectivity = high_connectivity,
+                                    tolerance = tolerance,
+                                    angle = 0,
+                                    roughEstimate = FALSE,
+                                    agg_function = agg_function)
+
+  if(all(!is.na(mat_estimates))){
+    mat_radiusEstimate <- mat_estimates$radiusEstimate %>%
+      magrittr::add(radiusOffset)
+
+    mat_centerEstimateRow <- mat_estimates$centerEstimate[1]
+    mat_centerEstimateCol <- mat_estimates$centerEstimate[2]
+  }
 
   #the edges of some cartridge case scans aren't prominent, so the radius
   #estimate obtained above might not be accurate. The estimateBFRadius function
@@ -644,20 +718,35 @@ preProcess_cropExterior <- function(x3p,
   #estimating the radius per rotation. Since this is computationally more
   #expensive, we only want to do this if necessary (i.e., if the initial radius
   #estimate came back NA).
-  if(is.na(mat_radiusEstimate)){
-    mat_radiusEstimate <- purrr::map_dbl(seq(-180,180,by = 20),
-                                         ~ estimateBFRadius(mat = mat,
-                                                            scheme = scheme,
-                                                            high_connectivity = high_connectivity,
-                                                            tolerance = tolerance,
-                                                            angle = .,
-                                                            agg_function = agg_function)) %>%
+
+  if(all(is.na(mat_estimates)) | !roughEstimate){
+    mat_estimates <- purrr::map(seq(-180,180,by = 20),
+                                ~ estimateBFRadius(mat = mat,
+                                                   scheme = scheme,
+                                                   high_connectivity = high_connectivity,
+                                                   tolerance = tolerance,
+                                                   angle = .,
+                                                   roughEstimate = FALSE,
+                                                   agg_function = agg_function)) %>%
+      purrr::discard(.p = ~ all(is.na(.))) %>%
+      purrr::compact()
+
+    mat_radiusEstimate <- mat_estimates %>%
+      purrr::map_dbl(~ .$radiusEstimate) %>%
       agg_function(na.rm = TRUE) %>%
       magrittr::add(radiusOffset)
+
+    mat_centerEstimateRow <- mat_estimates %>%
+      purrr::map_dbl(~ .$centerEstimate[1]) %>%
+      agg_function(na.rm = TRUE)
+
+    mat_centerEstimateCol <- mat_estimates %>%
+      purrr::map_dbl(~ .$centerEstimate[2]) %>%
+      agg_function(na.rm = TRUE)
   }
 
   exteriorIndices <- expand.grid(row = 1:nrow(mat),col = 1:ncol(mat)) %>%
-    dplyr::filter((row - nrow(mat)/2)^2 + (col - ncol(mat)/2)^2 > mat_radiusEstimate^2) %>%
+    dplyr::filter((row - mat_centerEstimateRow)^2 + (col - mat_centerEstimateCol)^2 > mat_radiusEstimate^2) %>%
     as.matrix()
 
   mat_interior <- mat
@@ -749,51 +838,18 @@ preProcess_filterInterior <- function(x3p,
   return(x3p_clone)
 }
 
-#'Remove observations from the exterior of interior of a breech face scan
+#' Remove observations from the exterior of interior of a breech face scan
 #'
-#'@name preProcess_crop
+#' @name preProcess_crop
 #'
-#'@param x3p an x3p object containing the surface matrix of a cartridge case
+#' @param x3p an x3p object containing the surface matrix of a cartridge case
 #'  scan
-#'@param region dictates whether the observations on the "exterior" or
+#' @param region dictates whether the observations on the "exterior" or
 #'  "interior" of the scan are removed
-#'@param radiusOffset the procedures used to detect the interior/exterior of the
-#'  scan tend to under/overestimate the radius of the region of interest,
-#'  respectively. The number passed to this argument is added to the radius
-#'  estimate as an offset.
-#'@param croppingThresh minimum number of non-NA pixels that need to be in a
-#'  row/column for it to not be cropped out of the breech face scan exterior
-#'@param agg_function the breech face radius estimation procedure returns a
-#'  number of radius estimates. This argument dictates the function used to
-#'  aggregate these into a final estimate.
-#'@param scheme argument for imager::imgradient
-#'@param high_connectivity argument for imager::label
-#'@param tolerance argument for imager::label
-#'@param radiusOffset number of pixels to add to estimated breech face radius.
-#'  This is commonly a negative value (e.g., -30 for region = "exterior") to
-#'  trim the cartridge case primer roll-off from the returned, cropped surface
-#'  matrix or a positive value (e.g., 200 for region = "interior") to remove
-#'  observations around the firing pin impression hole.
 #'
-#'@return An x3p object containing the surface matrix of a breech face
+#' @return An x3p object containing the surface matrix of a breech face
 #'  impression scan where the observations on the exterior/interior of the
 #'  breech face scan surface.
-#'
-#'@note The radius estimation procedure tends to over-estimate the desired
-#'  radius values. As such, a lot of the breech face impression "roll-off" is
-#'  included in the final scan. Excessive roll-off can bias the calculation of
-#'  the CCF. As such, we can manually shrink the radius estimate (-30 or -30
-#'  seems to work well for the Fadul cartridge cases) so that little to no
-#'  roll-off is included in the final processed scan.
-#'
-#'@note The radius estimation procedure is effective at estimating the radius of
-#'  the firing pin hole. Unfortunately, it is often desired that more than just
-#'  observations in firing pin hole are removed. In particular, the plateaued
-#'  region surrounding the firing pin impression hole does not come into contact
-#'  with the breech face of a firearm and is thus unwanted in the final,
-#'  processed scan. The radiusOffset argument must be tuned (around 200 seems to
-#'  work well for the Fadul cartridge cases) to remove these unwanted
-#'  observations.
 #' @examples
 #'
 #' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
@@ -814,34 +870,30 @@ preProcess_filterInterior <- function(x3p,
 #' x3pListPlot(list("Original" = fadul1.1,
 #'                  "Exterior Cropped" = fadul1.1_extCropped,
 #'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
-#'}
-#'@export
+#' }
+#' @export
 
 preProcess_crop <- function(x3p,
-                            region = "exterior",
-                            radiusOffset = 0,
-                            croppingThresh = 1,
-                            agg_function = median,
-                            scheme = 3,
-                            high_connectivity = FALSE,
-                            tolerance = 0){
+                            region = "exterior"){
   #test that region is "exterior" or "interior"
 
   if(region == "exterior"){
-    x3p <- preProcess_cropExterior(x3p,
-                                   radiusOffset = radiusOffset,
-                                   high_connectivity = high_connectivity,
-                                   tolerance = tolerance,
-                                   croppingThresh = croppingThresh,
-                                   agg_function = agg_function)
+    x3p <- preProcess_cropExterior(x3p = x3p,
+                                   radiusOffset = 0,
+                                   high_connectivity = FALSE,
+                                   tolerance = 0,
+                                   croppingThresh = 1,
+                                   agg_function = median,
+                                   scheme = 3)
 
     return(x3p)
   }
   if(region == "interior"){
     x3p <- preProcess_filterInterior(x3p,
-                                     radiusOffset = radiusOffset,
-                                     high_connectivity = high_connectivity,
-                                     tolerance = tolerance)
+                                     radiusOffset = 0,
+                                     high_connectivity = FALSE,
+                                     tolerance = 0,
+                                     scheme = 3)
 
     return(x3p)
   }
@@ -919,3 +971,184 @@ preProcess_removeTrend <- function(x3p,
   return(x3p_condStatRemoved)
 }
 
+# helper function for preProcess_erodePrimer and preProcess_dilateFP functions
+fpCenterCalc <- function(x3p,
+                         scheme = 3,
+                         high_connectivity = FALSE,
+                         tolerance = 0,
+                         dilate_prop = .1,
+                         centerOffset = c(0,0)){
+
+  mat_bfRegion <- x3p$surface.matrix
+
+  mat_bfRegionBinarized <- mat_bfRegion
+  mat_bfRegionBinarized[!is.na(mat_bfRegionBinarized)] <- 1
+  mat_bfRegionBinarized[is.na(mat_bfRegionBinarized)] <- 0
+
+  #Label the different regions of the scan using the edges as borders
+  mat_bfRegionLabeled <- mat_bfRegionBinarized %>%
+    imager::as.cimg() %>%
+    imager::dilate(mask = imager::px.circle(r = dilate_prop*ncol(mat_bfRegion))) %>%
+    imager::imgradient(scheme = 3) %>%
+    imager::enorm() %>%
+    imager::add() %>%
+    imager::label(high_connectivity = high_connectivity,
+                  tolerance = tolerance) %>%
+    as.matrix()
+
+  #The pixel in the center of the image should be a part of the firing pin
+  #impression hole
+  mat_bfRegioncenterLabel <- mat_bfRegionLabeled[round(nrow(mat_bfRegionLabeled)/2),round(ncol(mat_bfRegionLabeled)/2)]
+
+  #Identify all pixels that share a label with the center pixel (these are
+  #assumed to be only pixels that are a part of the firing pin impression)
+  mat_bfRegionfpHoleIndices <- which(mat_bfRegionLabeled == mat_bfRegioncenterLabel,arr.ind = TRUE)
+
+  #The center pixel of this region is assumed to be the center of the firing pin
+  #impression hole
+  mat_bfRegionfpHoleCenter <- round(colMeans(mat_bfRegionfpHoleIndices)) + centerOffset
+
+  return(mat_bfRegionfpHoleCenter)
+}
+
+preProcess_dilateFP <- function(x3p,dilationRadius = 50){
+
+  #estimate finring pin center index
+  dat_center <- fpCenterCalc(x3p)
+
+  #label regions of scan based on edges between missing/non-missing values.
+  #dilate_square closes some of the gaps in the scan before labeling, which will
+  #avoid the regions "bleeding" into each other
+  dat_label <- x3p$surface.matrix %>%
+    is.na() %>%
+    imager::as.cimg() %>%
+    imager::imgradient() %>%
+    imager::enorm() %>%
+    imager::dilate_square(size = max(1,.005*max(dim(x3p$surface.matrix)))) %>%
+    imager::label() %>%
+    as.matrix()
+
+  #Now binarize labels to either firing pin hole or not
+  dat_2label <- dat_label
+
+  #Assumes that the firing pin center index will have the same label as the rest
+  #of the firing pin hole
+  dat_2label[dat_2label == dat_2label[dat_center[1],dat_center[2]]] <- -1
+  dat_2label[dat_2label != -1] <- 0
+
+  #we want to grow the firing pin hole region <==> shrink the non-firing pin
+  #hole region
+  dat_fpEroded <- dat_2label %>%
+    imager::as.cimg() %>%
+    imager::erode(mask = imager::px.circle(r = dilationRadius)) %>%
+    as.matrix()
+
+  dat_fpRemoved <- x3p
+
+  #replace the firing pin hole observations with NA
+  dat_fpRemoved$surface.matrix[dat_fpEroded == -1] <- NA
+
+  return(dat_fpRemoved)
+}
+
+preProcess_erodePrimer <- function(x3p,erosionRadius = 50){
+
+  dat_label <- x3p$surface.matrix %>%
+    is.na() %>%
+    imager::as.cimg() %>%
+    imager::imgradient() %>%
+    imager::enorm() %>%
+    imager::dilate_square(size = max(1,.01*max(dim(x3p$surface.matrix)))) %>%
+    imager::label() %>%
+    as.matrix()
+
+  dat_bfRemoved <- x3p$surface.matrix
+
+  #We only want to classify pixels as "within the primer" or "outside of the
+  #primer." We'll assume that the labels in the 4 corners of the surface matrix
+  #make up the "outside" labels.
+
+  # most common label in the top/bottom left/right corners of the surface matrix
+  topLeftLabel <- dat_label[1:round(.01*nrow(dat_bfRemoved)),1:round(.01*ncol(dat_bfRemoved))] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  bottomLeftLabel <- dat_label[(nrow(dat_label) - round(.01*nrow(dat_bfRemoved))):nrow(dat_label),1:20] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  topRightLabel <- dat_label[1:20,(ncol(dat_label) - round(.01*ncol(dat_bfRemoved))):ncol(dat_label)] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  bottomRightLabel <- dat_label[(nrow(dat_label) - round(.01*nrow(dat_bfRemoved))):nrow(dat_label),
+                                (ncol(dat_label) - round(.01*ncol(dat_bfRemoved))):ncol(dat_label)] %>%
+    table() %>%
+    .[1] %>%
+    names() %>%
+    as.numeric()
+
+  dat_bfRemoved[dat_label == topLeftLabel |
+                  dat_label == bottomLeftLabel |
+                  dat_label == topRightLabel |
+                  dat_label == bottomRightLabel] <- -1
+
+  #Any label that aren't the 4 identified above (or are NA) we'll set to 0
+  dat_bfRemoved[dat_bfRemoved != -1 | is.na(dat_bfRemoved)] <- 0
+  dat_bfRemoved[dat_bfRemoved == -1] <- 1
+
+  #We want to erode (shave-off) the boundary of the firing pin <==> dilate the
+  #exterior pixels
+  dat_bfRemoved <-  dat_bfRemoved %>%
+    imager::as.cimg() %>%
+    imager::pad(nPix = 100,axes = "xy",pos = 0,val = 1) %>%
+    imager::dilate(mask = imager::px.circle(r = erosionRadius)) %>%
+    imager::crop.borders(nx = 50,ny = 50) %>%
+    as.matrix()
+
+  dat_exteriorEroded <- x3p
+
+  dat_exteriorEroded$surface.matrix[dat_bfRemoved == 1] <- NA
+
+
+  return(dat_exteriorEroded)
+}
+
+#'Erode the interior or exterior of a cartridge case surface
+#'
+#'@name preProcess_erode
+#'
+#'@description performs the morphological operations and dilation to "shave"
+#'  observations off of the interior or exterior of a cartridge case surface
+#'  matrix.
+#'
+#'@param x3p an x3p object
+#'@param region either "interior," meaning the observations around the firing
+#'  pin hole will be eroded, or "exterior," meaning the observations around the
+#'  outer edge of the cartridge case primer will be eroded
+#'@param morphRadius controls the amount of erosion. Larger values correspond to
+#'  a larger (circular) morphological mask leading to more erosion.
+#'
+#'@export
+preProcess_erode <- function(x3p,region,morphRadius = 50){
+
+  stopifnot(region %in% c("interior","exterior"))
+  stopifnot(is.numeric(morphRadius))
+
+  if(region == "interior"){
+
+    return(preProcess_dilateFP(x3p = x3p,dilationRadius = morphRadius))
+  }
+  if(region == "exterior"){
+
+    return(preProcess_erodePrimer(x3p = x3p,erosionRadius = morphRadius))
+
+  }
+
+}

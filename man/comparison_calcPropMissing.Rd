@@ -20,7 +20,7 @@ Calculate the proportion of missing values in a breech face scan
 data(fadul1.1_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
-comparison_cellDivision(numCells = 64) \%>\%
+comparison_cellDivision(numCells = c(8,8)) \%>\%
 dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues))
 
 head(cellTibble)

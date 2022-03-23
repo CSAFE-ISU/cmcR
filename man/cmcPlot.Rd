@@ -2,116 +2,37 @@
 % Please edit documentation in R/diagnosticTools.R
 \name{cmcPlot}
 \alias{cmcPlot}
-\title{Visualize initial and high CMCs for a cartridge case pair comparison}
+\title{Plot Congruent Matching Cells results for a pair of cartridge cases.}
 \usage{
 cmcPlot(
   reference,
   target,
-  reference_v_target_CMCs,
-  target_v_reference_CMCs = reference_v_target_CMCs,
-  corColName = "pairwiseCompCor",
+  cmcClassifs,
   type = "faceted",
-  x3pNames = c("reference", "target"),
-  legend.quantiles = c(0, 0.01, 0.25, 0.5, 0.75, 0.99, 1),
-  height.colors = c("#1B1B1B", "#404040", "#7B7B7B", "#B0B0B0", "#DBDBDB", "#F7F7F7",
-    "#E4E4E4", "#C5C5C5", "#999999", "#717171", "#4E4E4E"),
-  cell.colors = c("#a50026", "#313695"),
-  cell.alpha = 0.2,
-  numCells = 64,
-  na.value = "gray80"
+  cmcCol = "originalMethod",
+  corrCol = "pairwiseCompCor"
 )
 }
 \arguments{
-\item{reference}{an x3p object}
+\item{reference}{the scan that is partitioned into a grid of cells}
 
-\item{target}{a different x3p object}
+\item{target}{the scan to which each reference cell is compared during the
+cell-based comparison procedure}
 
-\item{reference_v_target_CMCs}{CMCs for the comparison between the reference
-scan and the target scan.}
+\item{cmcClassifs}{a data frame containing columns cellHeightValues,
+alignedTargetCell, cellIndex, theta, and user-defined cmcCol & corrCol}
 
-\item{target_v_reference_CMCs}{(optional) CMCs for the comparison between the
-target scan and the reference scan. If this is missing, then only the
-original method CMCs will be plotted}
+\item{type}{the form of the returned plot object(s). Either "faceted," meaning
+the reference and target plot will be shown side-by-side or "list" meaning
+each element of the plot (referece, target, and legend) will be returned
+separately as elements of a list}
 
-\item{corColName}{name of correlation similarity score column used to identify
-the CMCs in the two comparison_*_df data frames (e.g., pairwiseCompCor)}
+\item{cmcCol}{name of column containing CMC classifications as returned by the
+decision_CMC function. Defaults to "originalMethod"}
 
-\item{type}{argument to be passed to cmcR::x3pListPlot function}
-
-\item{x3pNames}{(Optional) Names of x3p objects to be included in x3pListPlot
-function}
-
-\item{legend.quantiles}{vector of quantiles to be shown as tick marks on
-legend plot}
-
-\item{height.colors}{vector of colors to be passed to scale_fill_gradientn
-that dictates the height value colorscale}
-
-\item{cell.colors}{vector of 2 colors for plotting non-matching and matching
-(in that order) cells}
-
-\item{cell.alpha}{sets alpha of cells (passed to geom_polygon)}
-
-\item{numCells}{the size of the grid used to compare the reference and target
-scans. Must be a perfect square.}
-
-\item{na.value}{color to be used for NA values (passed to
-scale_fill_gradientn)}
-}
-\value{
-A list of 4 ggplot objects showing the CMCs identified under both
-decision rules and in both comparison directions.
+\item{corrCol}{name of column containing correlation values for each cell.
+Defaults to "pairwiseCompCor," but "fft_ccf" is a common alternative.}
 }
 \description{
-Constructs either a single faceted plot or a list of plots
-depicting the CMCs/non-CMCs under the initially proposed and High CMC
-methods for a pair of cartridge case scans
-}
-\examples{
-#Takes > 5 seconds to run
-\dontrun{
-data(fadul1.1_processed,fadul1.2_processed)
-
-comparisonDF_1to2 <- purrr::map_dfr(seq(-30,30,by = 3),
-                                   ~ comparison_allTogether(fadul1.1_processed,
-                                                       fadul1.2_processed,
-                                                       theta = .))
-comparisonDF_2to1 <- purrr::map_dfr(seq(-30,30,by = 3),
-                                   ~ comparison_allTogether(fadul1.2_processed,
-                                                       fadul1.1_processed,
-                                                       theta = .))
-
-comparisonDF_1to2 <- comparisonDF_1to2 \%>\%
-dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
-                                                   x = x,
-                                                   y = y,
-                                                   theta = theta,
-                                                   corr = pairwiseCompCor),
-              highCMCClassif = decision_CMC(cellIndex = cellIndex,
-                                           x = x,
-                                           y = y,
-                                           theta = theta,
-                                           corr = pairwiseCompCor,
-                                           tau = 1))
-
-
-comparisonDF_2to1 <- comparisonDF_2to1 \%>\%
-dplyr::mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
-                                                   x = x,
-                                                   y = y,
-                                                   theta = theta,
-                                                   corr = pairwiseCompCor),
-              highCMCClassif = decision_CMC(cellIndex = cellIndex,
-                                           x = x,
-                                           y = y,
-                                           theta = theta,
-                                           corr = pairwiseCompCor,
-                                           tau = 1))
-
-plt <- cmcPlot(fadul1.1_processed,
-              fadul1.2_processed,
-              comparisonDF_1to2,
-              comparisonDF_2to1,
-              corColName = "pairwiseCompCor")
-}
+Plot Congruent Matching Cells results for a pair of cartridge cases.
 }

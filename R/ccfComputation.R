@@ -183,9 +183,9 @@ ccfComparison <- function(mat1, mat2, ccfMethod = "fft") {
   #     as.matrix()
   # }
 
-  # else if(ccfMethod == "fft"){
-  resp <- filterViaFFT(mat1, mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
-  # }
+  if(ccfMethod == "fft"){
+    resp <- filterViaFFT(mat1, mat2) / (sqrt(sum(mat1^2)) * sqrt(sum(mat2^2)))
+  }
 
   corr <- max(resp)
   tmp <- which(resp == corr, arr.ind = TRUE)[1, ]
@@ -390,56 +390,56 @@ calcRawCorr <- function(cell,
     }
 
     #4 different copies if both dimensions are too small
-  #   if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) < nrow(cell)){
-  #     colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
-  #
-  #     rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
-  #
-  #     #both rows and cols pre-padded
-  #     regionCroppedBothPre <- cbind(matrix(NA,
-  #                                          nrow = nrow(regionCroppedInitial),
-  #                                          ncol = colsToPad),
-  #                                   regionCroppedInitial)
-  #     regionCroppedBothPre <- rbind(matrix(NA,
-  #                                          nrow = rowsToPad,
-  #                                          ncol = ncol(regionCroppedBothPre)),
-  #                                   regionCroppedBothPre)
-  #
-  #     #rows post-padded and cols pre-padded
-  #     regionCroppedRowPost <- cbind(matrix(NA,
-  #                                          nrow = nrow(regionCroppedInitial),
-  #                                          ncol = colsToPad),
-  #                                   regionCroppedInitial)
-  #     regionCroppedRowPost <- rbind(regionCroppedRowPost,
-  #                                   matrix(NA,
-  #                                          nrow = rowsToPad,
-  #                                          ncol = ncol(regionCroppedRowPost)))
-  #
-  #     #rows pre-padded and cols post-padded
-  #     regionCroppedColPost <- cbind(regionCroppedInitial,
-  #                                   matrix(NA,
-  #                                          nrow = nrow(regionCroppedInitial),
-  #                                          ncol = colsToPad))
-  #     regionCroppedColPost <- rbind(matrix(NA,
-  #                                          nrow = rowsToPad,
-  #                                          ncol = ncol(regionCroppedColPost)),
-  #                                   regionCroppedColPost)
-  #
-  #     #rows and cols both post-padded
-  #     regionCroppedBothPost <- cbind(regionCroppedInitial,
-  #                                    matrix(NA,
-  #                                           nrow = nrow(regionCroppedInitial),
-  #                                           ncol = colsToPad))
-  #     regionCroppedBothPost <- rbind(regionCroppedBothPost,
-  #                                    matrix(NA,
-  #                                           nrow = rowsToPad,
-  #                                           ncol = ncol(regionCroppedBothPost)))
-  #
-  #     regionCroppedList$bothPre <- regionCroppedBothPre
-  #     regionCroppedList$rowPost <- regionCroppedRowPost
-  #     regionCroppedList$colPost <- regionCroppedColPost
-  #     regionCroppedList$bothPost <- regionCroppedBothPost
-  #   }
+    #   if(ncol(regionCroppedInitial) < ncol(cell) & nrow(regionCroppedInitial) < nrow(cell)){
+    #     colsToPad <- abs(ncol(regionCroppedInitial) - ncol(cell))
+    #
+    #     rowsToPad <- abs(nrow(regionCroppedInitial) - nrow(cell))
+    #
+    #     #both rows and cols pre-padded
+    #     regionCroppedBothPre <- cbind(matrix(NA,
+    #                                          nrow = nrow(regionCroppedInitial),
+    #                                          ncol = colsToPad),
+    #                                   regionCroppedInitial)
+    #     regionCroppedBothPre <- rbind(matrix(NA,
+    #                                          nrow = rowsToPad,
+    #                                          ncol = ncol(regionCroppedBothPre)),
+    #                                   regionCroppedBothPre)
+    #
+    #     #rows post-padded and cols pre-padded
+    #     regionCroppedRowPost <- cbind(matrix(NA,
+    #                                          nrow = nrow(regionCroppedInitial),
+    #                                          ncol = colsToPad),
+    #                                   regionCroppedInitial)
+    #     regionCroppedRowPost <- rbind(regionCroppedRowPost,
+    #                                   matrix(NA,
+    #                                          nrow = rowsToPad,
+    #                                          ncol = ncol(regionCroppedRowPost)))
+    #
+    #     #rows pre-padded and cols post-padded
+    #     regionCroppedColPost <- cbind(regionCroppedInitial,
+    #                                   matrix(NA,
+    #                                          nrow = nrow(regionCroppedInitial),
+    #                                          ncol = colsToPad))
+    #     regionCroppedColPost <- rbind(matrix(NA,
+    #                                          nrow = rowsToPad,
+    #                                          ncol = ncol(regionCroppedColPost)),
+    #                                   regionCroppedColPost)
+    #
+    #     #rows and cols both post-padded
+    #     regionCroppedBothPost <- cbind(regionCroppedInitial,
+    #                                    matrix(NA,
+    #                                           nrow = nrow(regionCroppedInitial),
+    #                                           ncol = colsToPad))
+    #     regionCroppedBothPost <- rbind(regionCroppedBothPost,
+    #                                    matrix(NA,
+    #                                           nrow = rowsToPad,
+    #                                           ncol = ncol(regionCroppedBothPost)))
+    #
+    #     regionCroppedList$bothPre <- regionCroppedBothPre
+    #     regionCroppedList$rowPost <- regionCroppedRowPost
+    #     regionCroppedList$colPost <- regionCroppedColPost
+    #     regionCroppedList$bothPost <- regionCroppedBothPost
+    #   }
   }
 
   #return NA if cor fails.

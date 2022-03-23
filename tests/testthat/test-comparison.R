@@ -3,9 +3,33 @@
 x3p1 <- x3ptools::read_x3p(tmpfile1)
 x3p2 <- x3ptools::read_x3p(tmpfile2)
 
+if(!exists("skipPreprocess")){
+
+  x3p1 <- x3p1 %>%
+    cmcR::preProcess_crop(region = "exterior") %>%
+    cmcR::preProcess_crop(region = "interior") %>%
+    cmcR::preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
+    cmcR::preProcess_gaussFilter(wavelength = c(16,500),
+                                 filtertype = "bp") %>%
+    x3ptools::sample_x3p()
+
+  x3p2 <- x3p2 %>%
+    cmcR::preProcess_crop(region = "exterior") %>%
+    cmcR::preProcess_crop(region = "interior") %>%
+    cmcR::preProcess_removeTrend(statistic = "quantile",
+                                 tau = .5,
+                                 method = "fn") %>%
+    cmcR::preProcess_gaussFilter(wavelength = c(16,500),
+                                 filtertype = "bp") %>%
+    x3ptools::sample_x3p()
+
+}
+
 #Perform entire comparison procedure explicitly
 cellTibble <- x3p1 %>%
-  cmcR::comparison_cellDivision(numCells = 64) %>%
+  cmcR::comparison_cellDivision(numCells = c(8,8)) %>%
   dplyr::mutate(regionHeightValues = cmcR::comparison_getTargetRegions(cellHeightValues = cellHeightValues,
                                                                        target = x3p2,
                                                                        theta = 0)) %>%
@@ -25,9 +49,10 @@ cellTibble <- x3p1 %>%
 #Use comparison_allTogether and compare results
 
 cellTibble2 <- cmcR::comparison_allTogether(x3p1,x3p2,
-                                            theta = 0,numCells = 64,
+                                            theta = 0,
+                                            numCells = c(8,8),
                                             maxMissingProp = .85) %>%
-  dplyr::select(-cellIndex)
+  dplyr::select(-c(cellIndex,refMissingCount,targMissingCount,jointlyMissing,pairwiseCompCor))
 
 testthat::test_that("comparison_ functions work as expected", {
 
@@ -35,7 +60,7 @@ testthat::test_that("comparison_ functions work as expected", {
                       c("cellIndex","cellHeightValues","regionHeightValues","cellPropMissing","regionPropMissing","cellHeightValues_replaced","regionHeightValues_replaced","fft_ccf","x","y","pairwiseCompCor"))
   testthat::expect_s3_class(cellTibble,c("tbl_df","tbl","data.frame"))
 
-  testthat::expect_true(identical(dplyr::select(cellTibble,c("x","y","fft_ccf","pairwiseCompCor","theta")),
+  testthat::expect_true(identical(dplyr::select(cellTibble,c("x","y","fft_ccf","theta")),
                                   cellTibble2))
 
   #Add more "expect failure" tests?

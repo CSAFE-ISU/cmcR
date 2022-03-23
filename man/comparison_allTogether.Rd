@@ -8,8 +8,10 @@ comparison_allTogether(
   reference,
   target,
   theta = 0,
-  numCells = 64,
-  maxMissingProp = 0.85
+  numCells = c(8, 8),
+  maxMissingProp = 0.85,
+  sideLengthMultiplier = 3,
+  returnX3Ps = FALSE
 )
 }
 \arguments{
@@ -22,11 +24,19 @@ the "reference scan" partitioned into a grid of cells}
 \item{theta}{degrees that the target scan is to be rotated prior extracting
 regions.}
 
-\item{numCells}{number of cells to partition the breech face scan into. Must
-be a perfect square (49, 64, 81, etc.)}
+\item{numCells}{a vector of two numbers representing the number of cells along
+the row and column dimensions into which the x3p is partitioned}
 
 \item{maxMissingProp}{maximum proportion of missing values allowed for each
-cell/region.
+cell/region.}
+
+\item{sideLengthMultiplier}{ratio between the target region and reference cell
+side lengths. For example, sideLengthMultiplier = 3 implies each region will
+be 9 times larger than its paired reference cell.}
+
+\item{returnX3Ps}{boolean to return the cellHeightValues and
+alignedTargetCells for each cell index. Note that setting this argument to
+TRUE significantly increases the size of the returned object.
 
 data(fadul1.1_processed,fadul1.2_processed)
 

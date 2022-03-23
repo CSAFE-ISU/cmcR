@@ -21,8 +21,7 @@ testthat::test_that("preProcess_ functions work as expected", {
     x3p1_raw_missing <- sum(is.na(x3p1$surface.matrix))
 
     x3p1 <- x3p1 %>%
-      cmcR::preProcess_crop(region = "exterior",
-                            radiusOffset = -30)
+      cmcR::preProcess_crop(region = "exterior")
 
     #cropping exterior should reduce dimension, but remove NAs on exterior of scan
     x3p1_extCrop_dim <- dim(x3p1$surface.matrix)
@@ -30,8 +29,7 @@ testthat::test_that("preProcess_ functions work as expected", {
 
     #remove firing pin observations
     x3p1 <- x3p1 %>%
-      cmcR::preProcess_crop(region = "interior",
-                            radiusOffset = 200)
+      cmcR::preProcess_crop(region = "interior")
 
     x3p1_intCrop_dim <- dim(x3p1$surface.matrix)
     x3p1_intCrop_missing <- sum(is.na(x3p1$surface.matrix))
@@ -81,27 +79,25 @@ testthat::test_that("preProcess_ functions work as expected", {
   testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
   testthat::expect_true(x3p1_extCrop_missing <= x3p1_raw_missing)
 
-  #croppint interior should not change dimension, but should introduct more NAs
-  testthat::expect_equal(x3p1_intCrop_dim, x3p1_extCrop_dim)
-  testthat::expect_true(x3p1_intCrop_missing >=  x3p1_extCrop_missing)
+  testthat::test_that("preProcess_ functions work as expected", {
+    # if(x3p1$cmcR.info$skipPreprocess == 1){
+    #   testthat::skip()
+    # }
 
-  #de-trending shouldn't affect which indices contain NAs or observed values
-  testthat::expect_true(all(which(is.na(x3p1_meanDeTrend$surface.matrix)) == x3p1_preDeTrend_missingIndices))
-  testthat::expect_true(all(which(is.na(x3p1_medianDeTrend$surface.matrix)) == x3p1_preDeTrend_missingIndices))
+    testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
+    testthat::expect_true(x3p1_extCrop_missing <= x3p1_raw_missing)
 
-  #de-trending should reduce (large scale) variability in height values
-  testthat::expect_true(x3p1_meanDeTrend_var <= x3p1_preDeTrend_var)
-  testthat::expect_true(x3p1_medianDeTrend_var <= x3p1_preDeTrend_var)
+    #croppint interior should not change dimension, but should introduct more NAs
+    testthat::expect_equal(x3p1_intCrop_dim, x3p1_extCrop_dim)
+    testthat::expect_true(x3p1_intCrop_missing >=  x3p1_extCrop_missing)
 
-  #any Gaussian filter should attenuate affect of certain frequencies (and thus
-  #reduce variability)
-  testthat::expect_true(postFilterVar_lp < x3p1_medianDeTrend_var)
-  testthat::expect_true(postFilterVar_hp < x3p1_medianDeTrend_var)
-  testthat::expect_true(postFilterVar_bp < x3p1_medianDeTrend_var)
+    #de-trending shouldn't affect which indices contain NAs or observed values
+    testthat::expect_true(all(which(is.na(x3p1_meanDeTrend$surface.matrix)) == x3p1_preDeTrend_missingIndices))
+    testthat::expect_true(all(which(is.na(x3p1_medianDeTrend$surface.matrix)) == x3p1_preDeTrend_missingIndices))
 
-  #final downsampled scan should have exactly half the dimension of original
-  #(since original has even dimension)
-  testthat::expect_equal(dim(x3p1$surface.matrix), x3p1_intCrop_dim/2)
+    #de-trending should reduce (large scale) variability in height values
+    testthat::expect_true(x3p1_meanDeTrend_var <= x3p1_preDeTrend_var)
+    testthat::expect_true(x3p1_medianDeTrend_var <= x3p1_preDeTrend_var)
 
   #Now check older preProcess functions:
 
@@ -135,11 +131,18 @@ testthat::test_that("preProcess_ functions work as expected", {
   testthat::expect_true(all(x3p1_ransacLeveled_dim == x3p1_downSampled_dim))
   testthat::expect_true(x3p1_ransacLeveled_missing >= x3p1_downSampled_missing)
 
-  #removing firing pin circle should introduce more NAs and reduce variability
-  testthat::expect_true(all(x3p1_fpCircleRemoved_dim == x3p1_downSampled_dim))
-  testthat::expect_true(x3p1_fpCircleRemoved_missing >= x3p1_ransacLeveled_missing)
-  testthat::expect_true(x3p1_fpCircleRemoved_var <= x3p1_ransacLeveled_var)
+    #applying RANSAC method shouldn't affect dimension, but should introduce more
+    #NAs
+    testthat::expect_true(all(x3p1_ransacLeveled_dim == x3p1_downSampled_dim))
+    testthat::expect_true(x3p1_ransacLeveled_missing >= x3p1_downSampled_missing)
 
-  #Add more "expect failure" tests?
+    #removing firing pin circle should introduce more NAs and reduce variability
+    testthat::expect_true(all(x3p1_fpCircleRemoved_dim == x3p1_downSampled_dim))
+    testthat::expect_true(x3p1_fpCircleRemoved_missing >= x3p1_ransacLeveled_missing)
+    testthat::expect_true(x3p1_fpCircleRemoved_var <= x3p1_ransacLeveled_var)
+
+    #Add more "expect failure" tests?
+  })
+
+
 })
-
