@@ -240,7 +240,7 @@ preProcess_cropWS <- function(x3p,
                                      function(theta){
 
                                        surfaceMat <- rotateSurfaceMatrix(surfaceMat = surfaceMat,
-                                                                                theta = theta)
+                                                                         theta = theta)
 
                                        #Look at the middle 20% of columns and count the number of non-NA pixels in each
                                        colSum <- surfaceMat[(nrow(surfaceMat)/2 - croppingProp*nrow(surfaceMat)):
@@ -843,13 +843,15 @@ preProcess_filterInterior <- function(x3p,
 #' @name preProcess_crop
 #'
 #' @param x3p an x3p object containing the surface matrix of a cartridge case
-#'  scan
+#'   scan
 #' @param region dictates whether the observations on the "exterior" or
-#'  "interior" of the scan are removed
+#'   "interior" of the scan are removed
+#' @param offset an integer (positive or negative) value to add to the estimated
+#'   radius of the associated region
 #'
 #' @return An x3p object containing the surface matrix of a breech face
-#'  impression scan where the observations on the exterior/interior of the
-#'  breech face scan surface.
+#'   impression scan where the observations on the exterior/interior of the
+#'   breech face scan surface.
 #' @examples
 #'
 #' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
@@ -874,7 +876,8 @@ preProcess_filterInterior <- function(x3p,
 #' @export
 
 preProcess_crop <- function(x3p,
-                            region = "exterior"){
+                            region = "exterior",
+                            offset = 0){
   #test that region is "exterior" or "interior"
 
   if(region == "exterior"){

@@ -99,37 +99,37 @@ testthat::test_that("preProcess_ functions work as expected", {
     testthat::expect_true(x3p1_meanDeTrend_var <= x3p1_preDeTrend_var)
     testthat::expect_true(x3p1_medianDeTrend_var <= x3p1_preDeTrend_var)
 
-  #Now check older preProcess functions:
+    #Now check older preProcess functions:
 
-  x3p1_downSampled <- x3p1_raw %>%
-    x3ptools::sample_x3p()
+    x3p1_downSampled <- x3p1_raw %>%
+      x3ptools::sample_x3p()
 
-  x3p1_downSampled_dim <- dim(x3p1_downSampled$surface.matrix)
-  x3p1_downSampled_missing <- sum(is.na(x3p1_downSampled$surface.matrix))
+    x3p1_downSampled_dim <- dim(x3p1_downSampled$surface.matrix)
+    x3p1_downSampled_missing <- sum(is.na(x3p1_downSampled$surface.matrix))
 
-  x3p1_downSampled <- x3p1_downSampled %>%
-    cmcR::preProcess_ransacLevel()
+    x3p1_downSampled <- x3p1_downSampled %>%
+      cmcR::preProcess_ransacLevel()
 
-  x3p1_ransacLeveled_dim <- dim(x3p1_downSampled$surface.matrix)
-  x3p1_ransacLeveled_missing <- sum(is.na(x3p1_downSampled$surface.matrix))
+    x3p1_ransacLeveled_dim <- dim(x3p1_downSampled$surface.matrix)
+    x3p1_ransacLeveled_missing <- sum(is.na(x3p1_downSampled$surface.matrix))
 
-  x3p1_ransacLeveled_var <- var(x3p1_downSampled$surface.matrix[!is.na(x3p1_downSampled$surface.matrix)])
+    x3p1_ransacLeveled_var <- var(x3p1_downSampled$surface.matrix[!is.na(x3p1_downSampled$surface.matrix)])
 
-  x3p1_fpCircleRemoved <- x3p1_downSampled %>%
-    cmcR::preProcess_removeFPCircle()
+    x3p1_fpCircleRemoved <- x3p1_downSampled %>%
+      cmcR::preProcess_removeFPCircle()
 
-  x3p1_fpCircleRemoved_dim <- dim(x3p1_fpCircleRemoved$surface.matrix)
-  x3p1_fpCircleRemoved_missing <- sum(is.na(x3p1_fpCircleRemoved$surface.matrix))
-  x3p1_fpCircleRemoved_var <- var(x3p1_fpCircleRemoved$surface.matrix[!is.na(x3p1_fpCircleRemoved$surface.matrix)])
+    x3p1_fpCircleRemoved_dim <- dim(x3p1_fpCircleRemoved$surface.matrix)
+    x3p1_fpCircleRemoved_missing <- sum(is.na(x3p1_fpCircleRemoved$surface.matrix))
+    x3p1_fpCircleRemoved_var <- var(x3p1_fpCircleRemoved$surface.matrix[!is.na(x3p1_fpCircleRemoved$surface.matrix)])
 
-  # if(x3p1$cmcR.info$skipPreprocess == 1){
-  #   testthat::skip()
-  # }
+    # if(x3p1$cmcR.info$skipPreprocess == 1){
+    #   testthat::skip()
+    # }
 
-  #applying RANSAC method shouldn't affect dimension, but should introduce more
-  #NAs
-  testthat::expect_true(all(x3p1_ransacLeveled_dim == x3p1_downSampled_dim))
-  testthat::expect_true(x3p1_ransacLeveled_missing >= x3p1_downSampled_missing)
+    #applying RANSAC method shouldn't affect dimension, but should introduce more
+    #NAs
+    testthat::expect_true(all(x3p1_ransacLeveled_dim == x3p1_downSampled_dim))
+    testthat::expect_true(x3p1_ransacLeveled_missing >= x3p1_downSampled_missing)
 
     #applying RANSAC method shouldn't affect dimension, but should introduce more
     #NAs

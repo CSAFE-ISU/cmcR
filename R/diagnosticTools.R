@@ -281,7 +281,7 @@ cellGridPlot <- function(x3p,
                     colour =  'none') +
     ggplot2::labs(fill = expression("Rel. Height ["*mu*"m]")) +
     ggplot2::facet_grid(rows = ggplot2::vars(row),
-               cols = ggplot2::vars(col))
+                        cols = ggplot2::vars(col))
 
   return(plt)
 

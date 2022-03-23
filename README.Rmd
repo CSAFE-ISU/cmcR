@@ -48,7 +48,7 @@ Cartridge case scan data can be accessed at the [NIST Ballisitics Toolmark Resea
 
 We will illustrate the package's functionality here. Please refer to the package vignettes available under the "Articles" tab of the [package website](https://csafe-isu.github.io/cmcR/index.html) for more information.
 
-```{r setup}
+```{r setup,warning=FALSE,message=FALSE}
 library(cmcR)
 library(magrittr)
 library(dplyr)
@@ -80,32 +80,30 @@ To perform a proper comparison of these two cartridge cases, we need to remove r
 
 ```{r}
 fadul1.1_processed <- fadul1.1_raw %>%
-  preProcess_crop(region = "exterior",
-                  radiusOffset = -30) %>%
-  preProcess_crop(region = "interior",
-                  radiusOffset = 200) %>%
+  x3ptools::sample_x3p() %>%
+  preProcess_crop(region = "exterior") %>%
+  preProcess_crop(region = "interior") %>%
+  preProcess_erode(region = "exterior",morphRadius = 15) %>%
+  preProcess_erode(region = "interior",morphRadius = 100) %>%
   preProcess_removeTrend(statistic = "quantile",
-                                 tau = .5,
-                                 method = "fn") %>%
-  preProcess_gaussFilter() %>%
-  x3ptools::sample_x3p()
+                         tau = .5,
+                         method = "fn") %>%
+  preProcess_gaussFilter()
 
-fadul1.2_processed <- fadul1.2_raw  %>%
-  preProcess_crop(region = "exterior",
-                  radiusOffset = -30) %>%
-  preProcess_crop(region = "interior",
-                  radiusOffset = 200) %>%
+fadul1.2_processed <- fadul1.2_raw %>%
+  x3ptools::sample_x3p() %>%
+  preProcess_crop(region = "exterior") %>%
+  preProcess_crop(region = "interior") %>%
+  preProcess_erode(region = "exterior",morphRadius = 15) %>%
+  preProcess_erode(region = "interior",morphRadius = 100) %>%
   preProcess_removeTrend(statistic = "quantile",
-                                 tau = .5,
-                                 method = "fn") %>%
-  preProcess_gaussFilter() %>%
-  x3ptools::sample_x3p()
+                         tau = .5,
+                         method = "fn") %>%
+  preProcess_gaussFilter()
 
-processedScans <- x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
-                                   "Processed Fadul1-2" = fadul1.2_processed),
-                              type = "faceted")
-
-processedScans
+x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
+                 "Processed Fadul1-2" = fadul1.2_processed),
+            type = "faceted")
 ```
 
 
@@ -117,7 +115,7 @@ The `comparison_cellDivision` function divides a scan up into a grid of cells. T
 
 ```{r}
 cellTibble <- fadul1.1_processed %>%
-  comparison_cellDivision(numCells = 64)
+  comparison_cellDivision(numCells = c(8,8))
 
 cellTibble
 ```
@@ -167,8 +165,15 @@ Because so many missing values need to be replaced, the CCF$_{\max}$ value calcu
 
 ```{r}
 cellTibble %>%
-  mutate(pairwiseCompCor = comparison_cor(cellHeightValues,regionHeightValues,fft_ccf_df)) %>%
-  tidyr::unnest(fft_ccf_df) %>%
+  dplyr::mutate(alignedTargetCell = comparison_alignedTargetCell(cellHeightValues = .data$cellHeightValues,
+                                                                   regionHeightValues = .data$regionHeightValues,
+                                                                   target = fadul1.2_processed,
+                                                                   theta = 0,
+                                                                   fft_ccf_df = .data$fft_ccf_df)) %>%
+    dplyr::mutate(pairwiseCompCor = purrr::map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
+                                             ~ cor(c(.x$surface.matrix),c(.y$surface.matrix),
+                                                   use = "pairwise.complete.obs"))) %>%
+    tidyr::unnest(.data$fft_ccf_df) %>%
   select(cellIndex,x,y,pairwiseCompCor)
 ```
 
@@ -179,9 +184,11 @@ kmComparisonFeatures <- purrr::map_dfr(seq(-30,30,by = 3),
                                        ~ comparison_allTogether(reference = fadul1.1_processed,
                                                                 target = fadul1.2_processed,
                                                                 
-                                                                theta = .))
+                                                                theta = .,
+                                                                returnX3Ps = TRUE))
 
-kmComparisonFeatures
+kmComparisonFeatures %>%
+  arrange(theta,cellIndex)
 ```
 
 ### Decision rule
@@ -304,14 +311,14 @@ kmComparison_allCMCs <- kmComparisonFeatures %>%
                                               thetaThresh = 6,
                                               corrThresh = .5),
          highCMCClassif = decision_CMC(cellIndex = cellIndex,
-                                              x = x,
-                                              y = y,
-                                              theta = theta,
-                                              corr = pairwiseCompCor,
-                                              xThresh = 20,
-                                              thetaThresh = 6,
-                                              corrThresh = .5,
-                                              tau = 1))
+                                       x = x,
+                                       y = y,
+                                       theta = theta,
+                                       corr = pairwiseCompCor,
+                                       xThresh = 20,
+                                       thetaThresh = 6,
+                                       corrThresh = .5,
+                                       tau = 1))
 
 #Example of cells classified as CMC under 1 decision rule but not the other.
 kmComparison_allCMCs %>%
@@ -338,20 +345,21 @@ kmComparison_allCMCs_rev <- kmComparisonFeatures_rev %>%
                                               thetaThresh = 6,
                                               corrThresh = .5),
          highCMCClassif = decision_CMC(cellIndex = cellIndex,
-                                              x = x,
-                                              y = y,
-                                              theta = theta,
-                                              corr = pairwiseCompCor,
-                                              xThresh = 20,
-                                              thetaThresh = 6,
-                                              corrThresh = .5,
-                                              tau = 1))
+                                       x = x,
+                                       y = y,
+                                       theta = theta,
+                                       corr = pairwiseCompCor,
+                                       xThresh = 20,
+                                       thetaThresh = 6,
+                                       corrThresh = .5,
+                                       tau = 1))
 ```
 
 The logic required to combine the results in `kmComparison_allCMCs` and `kmComparison_allCMCs_rev` can get a little complicated (although entirely doable using `dplyr` and other `tidyverse` functions). The user must decide precisely how results from both directions are to be combined. For example, if one direction fails the High CMC criterion yet the other passes, should we treat this as if *both* directions failed? Will you only count the CMCs in the direction that passed? We have found the best option to be treating a failure in one direction as a failure in both directions -- such cartridge case pairs would then be assigned the minimum of the two CMC counts determined under the original method of [Song (2013)](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193). The `decision_combineDirections` function implements the logic to combine the two sets of results, assuming the data frame contains columns named `originalMethodClassif` and `highCMCClassif` (as defined above).
 
 ```{r}
-decision_combineDirections(kmComparison_allCMCs,
+decision_combineDirections(kmComparison_allCMCs %>%
+                             select(-c(cellHeightValues,alignedTargetCell)),
                            kmComparison_allCMCs_rev)
 ```
 
@@ -359,17 +367,19 @@ The final step is to decide whether the number of CMCs computed under your prefe
 
 Finally, we can visualize the regions of the scan identified as CMCs.
 
-```{r, fig.height=16}
-cmcPlots <- cmcPlot(reference = fadul1.1_processed,
+```{r}
+cmcPlot(reference = fadul1.1_processed,
                     target  = fadul1.2_processed,
-                    reference_v_target_CMCs = kmComparison_allCMCs,
-                    target_v_reference_CMCs = kmComparison_allCMCs_rev,
-                    x3pNames = c("Fadul 1-1","Fadul 1-2"))
-
-gridExtra::grid.arrange(cmcPlots[[1]],
-                        cmcPlots[[2]],
-                        cmcPlots[[3]],
-                        cmcPlots[[4]],
-                        ncol = 1,
-                        nrow = 4)
+                    cmcClassifs = kmComparisonFeatures %>%
+  mutate(originalMethodClassif = decision_CMC(cellIndex = cellIndex,
+                                              x = x,
+                                              y = y,
+                                              theta = theta,
+                                              corr = pairwiseCompCor,
+                                              xThresh = 20,
+                                              thetaThresh = 6,
+                                              corrThresh = .5)) %>%
+    group_by(cellIndex) %>%
+    filter(pairwiseCompCor == max(pairwiseCompCor)),
+                    cmcCol = "originalMethodClassif")
 ```

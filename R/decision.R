@@ -356,11 +356,11 @@ decision_convergence <- function(cellIndex,
 
   convergenceCMCs <- comparisonFeaturesDF %>%
     dplyr::left_join(thetaRefs,
-              by = c("direction")) %>%
+                     by = c("direction")) %>%
     dplyr::group_by(.data$direction)  %>%
     dplyr::filter(.data$theta >= .data$thetaRef - thetaThresh & .data$theta <= .data$thetaRef + thetaThresh &
-             abs(.data$x - median(.data$x)) <= translationThresh &
-             abs(.data$y - median(.data$y)) <= translationThresh) %>%
+                    abs(.data$x - median(.data$x)) <= translationThresh &
+                    abs(.data$y - median(.data$y)) <= translationThresh) %>%
     dplyr::filter(.data$corr >= corrThresh) %>%
     dplyr::ungroup() %>%
     dplyr::group_by(.data$direction,.data$cellIndex) %>%
@@ -369,7 +369,7 @@ decision_convergence <- function(cellIndex,
 
   comparisonFeaturesDF %>%
     dplyr::left_join(convergenceCMCs,
-              by = c("cellIndex","x","y","corr","theta","direction")) %>%
+                     by = c("cellIndex","x","y","corr","theta","direction")) %>%
     dplyr::mutate(convergenceCMCClassif = ifelse(is.na(.data$convergenceCMCClassif),"non-CMC",.data$convergenceCMCClassif)) %>%
     dplyr::pull(.data$convergenceCMCClassif)
 }
