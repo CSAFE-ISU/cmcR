@@ -224,7 +224,7 @@ linear_to_matrix <- function(index, nrow = 7, ncol = nrow, byrow = TRUE, sep = "
 # #' @export
 
 cellGridPlot <- function(x3p,
-                         numCells = 64,
+                         numCells = c(8,8),
                          legend.quantiles = c(0,.01,.25,.5,.75,.99,1),
                          height.colors = rev(c('#7f3b08','#b35806','#e08214','#fdb863','#fee0b6','#f7f7f7','#d8daeb','#b2abd2','#8073ac','#542788','#2d004b')),
                          na.value = "gray65"){
@@ -449,6 +449,8 @@ cmcPlot <- function(reference,
 
   stopifnot("Make sure that there is a column called 'theta'" = any(stringr::str_detect(names(cmcClassifs),"theta")))
 
+  stopifnot(any(stringr::str_detect(names(cmcClassifs),cmcCol)))
+
   stopifnot(any(stringr::str_detect(names(cmcClassifs),corrCol)))
 
   # get the indices for the necessary columns
@@ -501,7 +503,7 @@ cmcPlot <- function(reference,
                   rowEnd = max(.data$rowEnd) - .data$rowEnd,
                   colMean = purrr::map2_dbl(.data$colStart,.data$colEnd,~ mean(c(.x,.y))),
                   rowMean = purrr::map2_dbl(.data$rowStart,.data$rowEnd,~ mean(c(.x,.y)))) %>%
-    dplyr::rename(cmcClassif = .data$cmcCol)
+    dplyr::rename(cmcClassif = cmcCol)
 
   # ggplot2 complains about the guides
   suppressWarnings({

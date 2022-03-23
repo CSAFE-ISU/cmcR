@@ -129,7 +129,7 @@ rotateSurfaceMatrix <- function(surfaceMat,
 getMat2SplitIndices <- function(cellRanges,
                                 cellSideLengths,
                                 mat2Dim,
-                                sidelengthMultiplier,
+                                sideLengthMultiplier,
                                 ...){
   mat2_splitCorners <- cellRanges %>%
     #pull all numbers from cellRange strings:
@@ -144,10 +144,10 @@ getMat2SplitIndices <- function(cellRanges,
                 .y = cellSideLengths,
                 function(xyLoc,sideLength){
                   expandedCellCorners <-
-                    c(floor(xyLoc["y"] - sidelengthMultiplier*sideLength["col"]/2),
-                      ceiling(xyLoc["y"] + sidelengthMultiplier*sideLength["col"]/2),
-                      floor(xyLoc["x"] - sidelengthMultiplier*sideLength["row"]/2),
-                      ceiling(xyLoc["x"] + sidelengthMultiplier*sideLength["row"]/2)) %>%
+                    c(floor(xyLoc["y"] - sideLengthMultiplier*sideLength["col"]/2),
+                      ceiling(xyLoc["y"] + sideLengthMultiplier*sideLength["col"]/2),
+                      floor(xyLoc["x"] - sideLengthMultiplier*sideLength["row"]/2),
+                      ceiling(xyLoc["x"] + sideLengthMultiplier*sideLength["row"]/2)) %>%
                     setNames(c("left","right","top","bottom"))
 
                   #replace negative indices with 1 (left/upper-most cells):
@@ -186,46 +186,42 @@ swapcellRangeAxes <- function(cellRange){
          stringr::str_replace(string = sSplit[[1]][2],pattern = "y =",replacement = "cols:"))
 }
 
-#' Split a reference scan into a grid of cells
+#'Split a reference scan into a grid of cells
 #'
-#' @name comparison_cellDivision
+#'@name comparison_cellDivision
 #'
-#' @param x3p an x3p object containing a breech face scan
-#' @param numCells number of cells to partition the breech face scan into. Must be
-#'   a perfect square (49, 64, 81, etc.)
+#'@param x3p an x3p object containing a breech face scan
+#'@param numCells a vector of two numbers representing the number of cells along
+#'  the row and column dimensions into which the x3p is partitioned
 #'
-#' @return A tibble containing a numCells number of rows. Each row contains a
-#'   single cell's index of the form (row #, col #) and an x3p object containing
-#'   the breech face scan of that cell.
+#'@return A tibble containing a prod(numCells) number of rows. Each row contains
+#'  a single cell's index of the form (row #, col #) and an x3p object
+#'  containing the breech face scan of that cell.
 #'
 #'@examples
 #'data(fadul1.1_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64)
+#' comparison_cellDivision(numCells = c(8,8))
 #'
 #'head(cellTibble)
 #'
 #'@importFrom rlang .data
-#' @export
+#'@export
 
 utils::globalVariables(c(".x",".y"))
 
-comparison_cellDivision <- function(x3p,numCells = 64){
+comparison_cellDivision <- function(x3p,numCells = c(8,8)){
 
-  # Future note: put `cellRange` column information in each x3p's metadata?
-  # Would then need to change the getTargetRegions function below to look in the
-  # metadata rather than expecting the column cellRange
-
-  assertthat::are_equal(sqrt(numCells) %% 1, 0)
+  # assertthat::are_equal(sqrt(numCells) %% 1, 0)
 
   splitSurfaceMat <- x3p$surface.matrix %>%
     imager::as.cimg() %>%
     imager::imsplit(axis = "x",
-                    nb = sqrt(numCells)) %>%
+                    nb = numCells[1]) %>%
     purrr::map(.f = ~ imager::imsplit(.x,
                                       axis = "y",
-                                      nb = sqrt(numCells))) %>%
+                                      nb = numCells[2])) %>%
     purrr::map_depth(.depth = 2,
                      .f = ~ purrr::set_names(as.matrix(.),NULL))
 
@@ -257,9 +253,9 @@ comparison_cellDivision <- function(x3p,numCells = 64){
                   return(cell_x3p)
                 })
 
-  cellTibble <- tibble::tibble(cellNum = 1:numCells,
+  cellTibble <- tibble::tibble(cellNum = 1:(prod(numCells)),
                                cellHeightValues = splitSurfaceMat) %>%
-    dplyr::mutate(cellIndex = linear_to_matrix(.data$cellNum,nrow = ceiling(sqrt(numCells)))) %>%
+    dplyr::mutate(cellIndex = linear_to_matrix(.data$cellNum,nrow = numCells[1])) %>%
     # the assignment of cellIndex below will assign cell based on how the old
     # x3pListPlot function plotted scans (i.e., cell 1,1 will actually be in the
     # top-left corner when using the old x3pListPlot). To make things more
@@ -287,7 +283,7 @@ comparison_cellDivision <- function(x3p,numCells = 64){
 #'data(fadul1.1_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues))
 #'
 #'head(cellTibble)
@@ -309,10 +305,9 @@ comparison_calcPropMissing <- function(heightValues){
 #'  reference cell.
 #'@param theta degrees that the target scan is to be rotated prior extracting
 #'  regions.
-#'@param regionSizeMultiplier ratio between the area of each target scan regions
-#'  and the reference scan cells (e.g., 9 means that the regions' surface
-#'  matrices will have thrice the number of rows and columns as the cells'
-#'  surface matrices, 4 means twice the number rows and columns, etc.)
+#'@param sideLengthMultiplier ratio between the target region and reference cell
+#'  side lengths. For example, sideLengthMultiplier = 3 implies each region will
+#'  be 9 times larger than its paired reference cell.
 #'@return A list of the same length as the input containing x3p objects from the
 #'  target scan.
 #'@examples
@@ -320,7 +315,7 @@ comparison_calcPropMissing <- function(heightValues){
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
 #'                                                                target = fadul1.2_processed)) %>%
 #' dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues),
@@ -334,7 +329,7 @@ comparison_calcPropMissing <- function(heightValues){
 comparison_getTargetRegions <- function(cellHeightValues,
                                         target,
                                         theta = 0,
-                                        regionSizeMultiplier = 9){
+                                        sideLengthMultiplier = 3){
 
   cellSideLengths <- cellHeightValues %>%
     purrr::map(~ c("row" = nrow(.$surface.matrix),
@@ -346,7 +341,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
   target_regionIndices <- getMat2SplitIndices(cellRanges = cellRange,
                                               cellSideLengths = cellSideLengths,
                                               mat2Dim = dim(target$surface.matrix),
-                                              sidelengthMultiplier = floor(sqrt(regionSizeMultiplier)))
+                                              sideLengthMultiplier = sideLengthMultiplier)
 
   target_surfaceMat_rotated <- rotateSurfaceMatrix(target$surface.matrix,
                                                    theta = theta)
@@ -401,7 +396,7 @@ comparison_getTargetRegions <- function(cellHeightValues,
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
 #'                                                                target = fadul1.2_processed)) %>%
 #' dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues),
@@ -490,7 +485,7 @@ comparison_standardizeHeights <- function(heightValues,
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(regionHeightValues =
 #'              comparison_getTargetRegions(cellHeightValues = cellHeightValues,
 #'                                          target = fadul1.2_processed)) %>%
@@ -553,7 +548,7 @@ comparison_replaceMissing <- function(heightValues,
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(regionHeightValues =
 #'              comparison_getTargetRegions(cellHeightValues = cellHeightValues,
 #'                                          target = fadul1.2_processed)) %>%
@@ -974,7 +969,7 @@ comparison_alignedTargetCell <- function(cellHeightValues,
 #'data(fadul1.1_processed,fadul1.2_processed)
 #'
 #'cellTibble <- fadul1.1_processed %>%
-#' comparison_cellDivision(numCells = 64) %>%
+#' comparison_cellDivision(numCells = c(8,8)) %>%
 #' dplyr::mutate(regionHeightValues =
 #'              comparison_getTargetRegions(cellHeightValues = cellHeightValues,
 #'                                          target = fadul1.2_processed)) %>%
@@ -1037,13 +1032,13 @@ comparison_cor <- function(cellHeightValues,
 #'  "target scan" that the reference scan's cells are compared to
 #'@param theta degrees that the target scan is to be rotated prior extracting
 #'  regions.
-#'@param numCells number of cells to partition the breech face scan into. Must
-#'  be a perfect square (49, 64, 81, etc.)
+#'@param numCells a vector of two numbers representing the number of cells along
+#'  the row and column dimensions into which the x3p is partitioned
 #'@param maxMissingProp maximum proportion of missing values allowed for each
 #'  cell/region.
-#'@param regionSizeMultiplier an integer indicating the ratio between the areas
-#'  of each target region and reference cell. Must be a perfect square (4, 9,
-#'  16, etc.)
+#'@param sideLengthMultiplier ratio between the target region and reference cell
+#'  side lengths. For example, sideLengthMultiplier = 3 implies each region will
+#'  be 9 times larger than its paired reference cell.
 #'@param returnX3Ps boolean to return the cellHeightValues and
 #'  alignedTargetCells for each cell index. Note that setting this argument to
 #'  TRUE significantly increases the size of the returned object.
@@ -1074,9 +1069,9 @@ comparison_cor <- function(cellHeightValues,
 comparison_allTogether <- function(reference,
                                    target,
                                    theta = 0,
-                                   numCells = 64,
+                                   numCells = c(8,8),
                                    maxMissingProp = .85,
-                                   regionSizeMultiplier = 9,
+                                   sideLengthMultiplier = 3,
                                    returnX3Ps = FALSE){
 
   ret <- reference %>%
@@ -1087,7 +1082,7 @@ comparison_allTogether <- function(reference,
     dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = .data$cellHeightValues,
                                                                    target = target,
                                                                    theta = theta,
-                                                                   regionSizeMultiplier = regionSizeMultiplier)) %>%
+                                                                   sideLengthMultiplier = sideLengthMultiplier)) %>%
     dplyr::mutate(targMissingProp = comparison_calcPropMissing(.data$regionHeightValues),
            targMissingCount = purrr::map_dbl(.data$regionHeightValues,~ sum(is.na(.$surface.matrix)))) %>%
     dplyr::filter(.data$targMissingProp <= maxMissingProp) %>%

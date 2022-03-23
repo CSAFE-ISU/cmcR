@@ -150,7 +150,6 @@ preProcess_ransacLevel <- function(x3p,
     }
   }
 
-  # final coefs only computed using inliers
   finalRansacPlane <- lm(depth ~ row + col,
                          data = observedPixelLocations[inliers, ]) #fit the plane based on what we've identified to be inliers
 
@@ -852,112 +851,67 @@ preProcess_filterInterior <- function(x3p,
   return(x3p_clone)
 }
 
-# #' Remove observations from the exterior of interior of a breech face scan
-# #'
-# #' @name preProcess_crop
-# #'
-# #' @param x3p an x3p object containing the surface matrix of a cartridge case
-# #'  scan
-# #' @param region dictates whether the observations on the "exterior" or
-# #'  "interior" of the scan are removed
-# #' @param radiusOffset the procedures used to detect the interior/exterior of the
-# #'  scan tend to under/overestimate the radius of the region of interest,
-# #'  respectively. The number passed to this argument is added to the radius
-# #'  estimate as an offset.
-# #' @param croppingThresh minimum number of non-NA pixels that need to be in a
-# #'  row/column for it to not be cropped out of the breech face scan exterior
-# #' @param agg_function the breech face radius estimation procedure returns a
-# #'  number of radius estimates. This argument dictates the function used to
-# #'  aggregate these into a final estimate.
-# #' @param scheme argument for imager::imgradient
-# #' @param high_connectivity argument for imager::label
-# #' @param tolerance argument for imager::label
-# #' @param radiusOffset number of pixels to add to estimated breech face radius.
-# #'  This is commonly a negative value (e.g., -30 for region = "exterior") to
-# #'  trim the cartridge case primer roll-off from the returned, cropped surface
-# #'  matrix or a positive value (e.g., 200 for region = "interior") to remove
-# #'  observations around the firing pin impression hole.
-# #'
-# #' @return An x3p object containing the surface matrix of a breech face
-# #'  impression scan where the observations on the exterior/interior of the
-# #'  breech face scan surface.
-# #'
-# #' @note The radius estimation procedure tends to over-estimate the desired
-# #'  radius values. As such, a lot of the breech face impression "roll-off" is
-# #'  included in the final scan. Excessive roll-off can bias the calculation of
-# #'  the CCF. As such, we can manually shrink the radius estimate (-30 or -30
-# #'  seems to work well for the Fadul cartridge cases) so that little to no
-# #'  roll-off is included in the final processed scan.
-# #'
-# #' @note The radius estimation procedure is effective at estimating the radius of
-# #'  the firing pin hole. Unfortunately, it is often desired that more than just
-# #'  observations in firing pin hole are removed. In particular, the plateaued
-# #'  region surrounding the firing pin impression hole does not come into contact
-# #'  with the breech face of a firearm and is thus unwanted in the final,
-# #'  processed scan. The radiusOffset argument must be tuned (around 200 seems to
-# #'  work well for the Fadul cartridge cases) to remove these unwanted
-# #'  observations.
-# #' @examples
-# #'
-# #' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
-# #' \dontrun{
-# #' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
-# #' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
-# #'
-# #' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
-# #'
-# #' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
-# #'                                        radiusOffset = -30,
-# #'                                        region = "exterior")
-# #'
-# #' fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
-# #'                                           radiusOffset = 200,
-# #'                                           region = "interior")
-# #'
-# #' x3pListPlot(list("Original" = fadul1.1,
-# #'                  "Exterior Cropped" = fadul1.1_extCropped,
-# #'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
-# #' }
-# #' @export
+#' Remove observations from the exterior of interior of a breech face scan
+#'
+#' @name preProcess_crop
+#'
+#' @param x3p an x3p object containing the surface matrix of a cartridge case
+#'  scan
+#' @param region dictates whether the observations on the "exterior" or
+#'  "interior" of the scan are removed
+#'
+#' @return An x3p object containing the surface matrix of a breech face
+#'  impression scan where the observations on the exterior/interior of the
+#'  breech face scan surface.
+#' @examples
+#'
+#' #Process fadul1.1 "from scratch" (takes > 5 seconds to run)
+#' \dontrun{
+#' nbtrd_link <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
+#' fadul1.1_link <- "DownloadMeasurement/2d9cc51f-6f66-40a0-973a-a9292dbee36d"
+#'
+#' fadul1.1 <- x3ptools::read_x3p(paste0(nbtrd_link,fadul1.1_link))
+#'
+#' fadul1.1_extCropped <- preProcess_crop(x3p = fadul1.1,
+#'                                        radiusOffset = -30,
+#'                                        region = "exterior")
+#'
+#' fadul1.1_extIntCropped <- preProcess_crop(x3p = fadul1.1_extCropped,
+#'                                           radiusOffset = 200,
+#'                                           region = "interior")
+#'
+#' x3pListPlot(list("Original" = fadul1.1,
+#'                  "Exterior Cropped" = fadul1.1_extCropped,
+#'                  "Exterior & Interior Cropped" = fadul1.1_extIntCropped ))
+#' }
+#' @export
 
-# preProcess_crop <- function(x3p,
-#                             region = "exterior",
-#                             radiusOffset = 0,
-#                             croppingThresh = 1,
-#                             agg_function = median,
-#                             scheme = 3,
-#                             high_connectivity = FALSE,
-#                             tolerance = 0,
-#                             roughEstimateExterior = FALSE,
-#                             ...){
-#   #test that region is "exterior" or "interior"
-#
-#   optionalInput <- list(...)
-#
-#   if(region == "exterior"){
-#     x3p <- preProcess_cropExterior(x3p = x3p,
-#                                    radiusOffset = radiusOffset,
-#                                    high_connectivity = high_connectivity,
-#                                    tolerance = tolerance,
-#                                    croppingThresh = croppingThresh,
-#                                    roughEstimate = roughEstimateExterior,
-#                                    agg_function = agg_function,
-#                                    scheme = scheme,
-#                                    optionalInput)
-#
-#     return(x3p)
-#   }
-#   if(region == "interior"){
-#     x3p <- preProcess_filterInterior(x3p,
-#                                      radiusOffset = radiusOffset,
-#                                      high_connectivity = high_connectivity,
-#                                      tolerance = tolerance,
-#                                      scheme = scheme,
-#                                      optionalInput)
-#
-#     return(x3p)
-#   }
-# }
+preProcess_crop <- function(x3p,
+                            region = "exterior"){
+  #test that region is "exterior" or "interior"
+
+  if(region == "exterior"){
+    x3p <- preProcess_cropExterior(x3p = x3p,
+                                   radiusOffset = 0,
+                                   high_connectivity = FALSE,
+                                   tolerance = 0,
+                                   croppingThresh = 1,
+                                   roughEstimate = FALSE,
+                                   agg_function = median,
+                                   scheme = 3)
+
+    return(x3p)
+  }
+  if(region == "interior"){
+    x3p <- preProcess_filterInterior(x3p,
+                                     radiusOffset = 0,
+                                     high_connectivity = FALSE,
+                                     tolerance = 0,
+                                     scheme = 3)
+
+    return(x3p)
+  }
+}
 
 #' Level a breech face impression surface matrix by a conditional statistic
 #'

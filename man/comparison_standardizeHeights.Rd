@@ -42,7 +42,7 @@ pairwise-complete correlation using the comparison_cor function.
 data(fadul1.1_processed,fadul1.2_processed)
 
 cellTibble <- fadul1.1_processed \%>\%
-comparison_cellDivision(numCells = 64) \%>\%
+comparison_cellDivision(numCells = c(8,8)) \%>\%
 dplyr::mutate(regionHeightValues = comparison_getTargetRegions(cellHeightValues = cellHeightValues,
                                                                target = fadul1.2_processed)) \%>\%
 dplyr::mutate(cellPropMissing = comparison_calcPropMissing(heightValues = cellHeightValues),
