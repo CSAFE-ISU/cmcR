@@ -4,7 +4,7 @@
 \alias{preProcess_crop}
 \title{Remove observations from the exterior of interior of a breech face scan}
 \usage{
-preProcess_crop(x3p, region = "exterior")
+preProcess_crop(x3p, region = "exterior", offset = 0)
 }
 \arguments{
 \item{x3p}{an x3p object containing the surface matrix of a cartridge case
@@ -12,6 +12,9 @@ scan}
 
 \item{region}{dictates whether the observations on the "exterior" or
 "interior" of the scan are removed}
+
+\item{offset}{an integer (positive or negative) value to add to the estimated
+radius of the associated region}
 }
 \value{
 An x3p object containing the surface matrix of a breech face
