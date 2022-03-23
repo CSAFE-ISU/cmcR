@@ -745,12 +745,6 @@ preProcess_cropExterior <- function(x3p,
       agg_function(na.rm = TRUE)
   }
 
-  optionalInput <- list(...)
-  if(length(optionalInput[[1]]) > 0 & !all(unlist(optionalInput[[1]]) == -1)){
-    mat_centerEstimateRow <- unlist(optionalInput)[[1]]
-    mat_centerEstimateCol <- unlist(optionalInput)[[2]]
-  }
-
   exteriorIndices <- expand.grid(row = 1:nrow(mat),col = 1:ncol(mat)) %>%
     dplyr::filter((row - mat_centerEstimateRow)^2 + (col - mat_centerEstimateCol)^2 > mat_radiusEstimate^2) %>%
     as.matrix()
@@ -828,12 +822,6 @@ preProcess_filterInterior <- function(x3p,
     sqrt() %>%
     round() %>%
     magrittr::add(radiusOffset)
-
-  optionalInput <- list(...)
-  if(length(optionalInput[[1]]) > 0 & !all(unlist(optionalInput[[1]]) == -1) & !is.null(x3p$cmcR.info$exteriorCroppingValues)){
-    mat_bfRegionfpHoleCenter[1] <- unlist(optionalInput)[[1]] - x3p$cmcR.info$exteriorCroppingValues[1]
-    mat_bfRegionfpHoleCenter[2] <- unlist(optionalInput)[[2]] - x3p$cmcR.info$exteriorCroppingValues[2]
-  }
 
   interiorIndices <- expand.grid(row = 1:nrow(mat_bfRegion),col = 1:ncol(mat_bfRegion)) %>%
     dplyr::filter((row - mat_bfRegionfpHoleCenter[1])^2 + (col - mat_bfRegionfpHoleCenter[2])^2 <= mat_bfRegionfpHoleRadiusEstim^2) %>%
@@ -1161,7 +1149,7 @@ preProcess_erode <- function(x3p,region,morphRadius = 50){
   }
   if(region == "exterior"){
 
-  return(preProcess_erodePrimer(x3p = x3p,erosionRadius = morphRadius))
+    return(preProcess_erodePrimer(x3p = x3p,erosionRadius = morphRadius))
 
   }
 

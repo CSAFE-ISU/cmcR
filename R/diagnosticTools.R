@@ -488,22 +488,21 @@ cmcPlot <- function(reference,
         stringr::str_remove("cols: ") %>%
         stringr::str_split(pattern = ", ")
 
-      cellInds_rows <- str_split(cellInds[[1]][1]," - ")[[1]]
-      cellInds_cols <- str_split(cellInds[[1]][2]," - ")[[1]]
+      cellInds_rows <- stringr::str_split(cellInds[[1]][1]," - ")[[1]]
+      cellInds_cols <- stringr::str_split(cellInds[[1]][2]," - ")[[1]]
 
       return(data.frame(rowStart = as.numeric(cellInds_rows[1]),
                         rowEnd = as.numeric(cellInds_rows[2]),
                         colStart = as.numeric(cellInds_cols[1]),
                         colEnd = as.numeric(cellInds_cols[2])) %>%
                dplyr::mutate(cellIndex = ..1,
-                             originalMethod = ..3))
+                             cmcClassif = ..3))
 
     }) %>%
     dplyr::mutate(rowStart = max(.data$rowEnd) - .data$rowStart,
                   rowEnd = max(.data$rowEnd) - .data$rowEnd,
                   colMean = purrr::map2_dbl(.data$colStart,.data$colEnd,~ mean(c(.x,.y))),
-                  rowMean = purrr::map2_dbl(.data$rowStart,.data$rowEnd,~ mean(c(.x,.y)))) %>%
-    dplyr::rename(cmcClassif = cmcCol)
+                  rowMean = purrr::map2_dbl(.data$rowStart,.data$rowEnd,~ mean(c(.x,.y))))
 
   # ggplot2 complains about the guides
   suppressWarnings({
