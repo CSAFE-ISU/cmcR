@@ -5,16 +5,11 @@
 
 <!-- badges: start -->
 
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD [![Codecov test
+[![Codecov test
 coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://app.codecov.io/gh/CSAFE-ISU/cmcR?branch=master/)
 [![R build
 status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions/)
-======= [![Codecov test
-coverage](https://codecov.io/gh/CSAFE-ISU/cmcR/branch/master/graph/badge.svg)](https://codecov.io/gh/CSAFE-ISU/cmcR?branch=master)
-<!-- [![Travis build status](https://travis-ci.com/CSAFE-ISU/cmcR.svg?branch=master)](https://travis-ci.com/CSAFE-ISU/cmcR) -->
-[![R build
-status](https://github.com/CSAFE-ISU/cmcR/workflows/R-CMD-check/badge.svg)](https://github.com/CSAFE-ISU/cmcR/actions)
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; dev <!-- badges: end -->
+<!-- badges: end -->
 
 The cmcR package provides an open-source implementation of the Congruent
 Matching Cells method for cartridge case identification as proposed by
