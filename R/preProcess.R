@@ -882,7 +882,7 @@ preProcess_crop <- function(x3p,
 
   if(region == "exterior"){
     x3p <- preProcess_cropExterior(x3p = x3p,
-                                   radiusOffset = 0,
+                                   radiusOffset = offset,
                                    high_connectivity = FALSE,
                                    tolerance = 0,
                                    croppingThresh = 1,
@@ -893,7 +893,7 @@ preProcess_crop <- function(x3p,
   }
   if(region == "interior"){
     x3p <- preProcess_filterInterior(x3p,
-                                     radiusOffset = 0,
+                                     radiusOffset = offset,
                                      high_connectivity = FALSE,
                                      tolerance = 0,
                                      scheme = 3)

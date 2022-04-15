@@ -390,11 +390,8 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
                   ynew = .data$x) %>%
     dplyr::select(-c(.data$x,.data$y)) %>%
     dplyr::rename(x=.data$xnew,y=.data$ynew) %>%
-    dplyr::mutate(x = .data$x - min(which(colSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
-                  # x = x - newColPad,
-                  y = .data$y - min(which(rowSums(rotatedMaskCopy,na.rm = TRUE) > 0)),
-                  # y = y - newRowPad,
-                  # y = max(y) - y
+    dplyr::mutate(x = .data$x - min(which(colSums(abs(rotatedMaskCopy),na.rm = TRUE) > 0)),
+                  y = .data$y - min(which(rowSums(abs(rotatedMaskCopy),na.rm = TRUE) > 0)),
                   y = nrow(target$surface.matrix) - .data$y
     ) %>%
     dplyr::filter(.data$value == 100) %>%

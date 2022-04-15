@@ -69,8 +69,10 @@ fadul1.2_id <- "DownloadMeasurement/cb296c98-39f5-46eb-abff-320a2f5568e8"
 # Code to download breech face impressions:
 nbtrd_url <- "https://tsapps.nist.gov/NRBTD/Studies/CartridgeMeasurement/"
 
-fadul1.1_raw <- x3p_read(paste0(nbtrd_url,fadul1.1_id))
-fadul1.2_raw <- x3p_read(paste0(nbtrd_url,fadul1.2_id))
+fadul1.1_raw <- x3p_read(paste0(nbtrd_url,fadul1.1_id)) %>%
+  x3ptools::x3p_scale_unit(scale_by = 1e6)
+fadul1.2_raw <- x3p_read(paste0(nbtrd_url,fadul1.2_id)) %>%
+  x3ptools::x3p_scale_unit(scale_by = 1e6)
 
 x3pListPlot(list("Fadul 1-1" = fadul1.1_raw,
                  "Fadul 1-2" = fadul1.2_raw),
