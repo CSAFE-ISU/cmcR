@@ -8,7 +8,8 @@ comparison_getTargetRegions(
   cellHeightValues,
   target,
   theta = 0,
-  sideLengthMultiplier = 3
+  sideLengthMultiplier = 3,
+  ...
 )
 }
 \arguments{

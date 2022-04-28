@@ -14,6 +14,16 @@
 extractCellbyCornerLocs <- function(cornerLocs,
                                     rotatedSurfaceMat,
                                     mat2Dim){
+
+  # if there is a large difference in the size of the two scans (e.g., Fadul 1-1
+  # vs. Fadul 8-1), then it's possible that the theoretical region from the
+  # target scan may not fit at all within the bounds of the target scan. For
+  # example, the left-most index for the region may be larger than the actual
+  # number of columns in the target scan. In these cases, we effectively toss
+  # those cell pairs out.
+  if((cornerLocs[["left"]] > mat2Dim[2]) | (cornerLocs[["top"]] > mat2Dim[1])){
+    return(matrix(NA))
+  }
   #perform the appropriate subsetting of image A to create a list of larger
   #cells than those in image B. There's a good chance that the
   #splitRotatedSurfaceMat object will need to be padded in various ways, which
@@ -329,7 +339,18 @@ comparison_calcPropMissing <- function(heightValues){
 comparison_getTargetRegions <- function(cellHeightValues,
                                         target,
                                         theta = 0,
-                                        sideLengthMultiplier = 3){
+                                        sideLengthMultiplier = 3,...){
+
+  optional <- list(...)
+
+  if(!is.null(optional$method)){
+
+    target_splitRotated <- legacy_comparison_getTargetRegions(cellHeightValues = cellHeightValues,
+                                       target = target,theta = theta,regionSizeMultiplier = sideLengthMultiplier**2)
+
+    return(target_splitRotated)
+
+  }
 
   stopifnot("Scan resolutions must be equal" = all.equal(cellHeightValues[[1]]$header.info$incrementX,target$header.info$incrementX) &
               all.equal(cellHeightValues[[1]]$header.info$incrementY, target$header.info$incrementY))
@@ -1076,4 +1097,160 @@ comparison_allTogether <- function(reference,
 
   return(ret)
 
+}
+
+
+
+
+
+
+
+
+
+
+
+#XXX start legacy functionality here
+
+legacy_extractCellbyCornerLocs <- function(cornerLocs,
+                                    rotatedSurfaceMat,
+                                    mat2Dim){
+  #perform the appropriate subsetting of image A to create a list of larger
+  #cells than those in image B
+  splitRotatedSurfaceMat <- rotatedSurfaceMat[cornerLocs[["top"]]:cornerLocs[["bottom"]],
+                                              cornerLocs[["left"]]:cornerLocs[["right"]]]
+
+  if(nrow(splitRotatedSurfaceMat) != ncol(splitRotatedSurfaceMat)){ #if the matrix isn't square...
+
+    #if the rows need padding...
+    if(nrow(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+
+      rowsToPad <- ncol(splitRotatedSurfaceMat) - nrow(splitRotatedSurfaceMat)
+      rowPadder <- matrix(NA,nrow = rowsToPad,ncol = ncol(splitRotatedSurfaceMat))
+
+      #if the split comes from the top of the overall matrix...
+      if(cornerLocs[["top"]] == 1){
+        splitRotatedSurfaceMat <- rbind(rowPadder,
+                                        splitRotatedSurfaceMat)
+      }
+
+      #if the split comes from the bottom of the overall matrix....
+      if(cornerLocs[["bottom"]] == mat2Dim[1]){
+        splitRotatedSurfaceMat <- rbind(splitRotatedSurfaceMat,
+                                        rowPadder)
+      }
+    }
+
+    #if the cols need padding...
+    if(ncol(splitRotatedSurfaceMat) < max(dim(splitRotatedSurfaceMat))){
+
+      colsToPad <- nrow(splitRotatedSurfaceMat) - ncol(splitRotatedSurfaceMat)
+      colPadder <- matrix(NA,ncol = colsToPad,nrow = nrow(splitRotatedSurfaceMat))
+
+      #if the split comes from the left side of the overall matrix...
+      if(cornerLocs[["left"]] == 1){
+        splitRotatedSurfaceMat <- cbind(colPadder,
+                                        splitRotatedSurfaceMat)
+      }
+      #if the split comes from the right side of the overall matrix....
+      if(cornerLocs[["right"]] == mat2Dim[2]){
+        splitRotatedSurfaceMat <- cbind(splitRotatedSurfaceMat,
+                                        colPadder)
+      }
+    }
+  }
+
+  return(splitRotatedSurfaceMat)
+}
+
+legacy_getMat2SplitIndices <- function(cellRanges,
+                                cellSideLengths,
+                                mat2Dim,
+                                sideLengthMultiplier,
+                                ...){
+  mat2_splitCorners <- cellRanges %>%
+    #pull all numbers from cellRange strings:
+    purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
+    purrr::map(~ c(
+      #y-position of each cell's center:
+      "y" = mean(c(as.numeric(.[[1]][[3]]),as.numeric(.[[1]][[4]]))),
+      #x-position of each cell's center:
+      "x" = mean(c(as.numeric(.[[1]][[1]]),as.numeric(.[[1]][[2]]))))) %>%
+    #determine the indices of a larger cell to search in image B
+    purrr::map2(.x = .,
+                .y = cellSideLengths,
+                function(xyLoc,sideLength){
+                  expandedCellCorners <-
+                    c(floor(xyLoc["y"] - sideLengthMultiplier*sideLength["col"]/2),
+                      ceiling(xyLoc["y"] + sideLengthMultiplier*sideLength["col"]/2),
+                      floor(xyLoc["x"] - sideLengthMultiplier*sideLength["row"]/2),
+                      ceiling(xyLoc["x"] + sideLengthMultiplier*sideLength["row"]/2)) %>%
+                    setNames(c("left","right","top","bottom"))
+
+                  #replace negative indices with 1 (left/upper-most cells):
+                  expandedCellCorners[expandedCellCorners <= 0] <- 1
+                  #replace indices greater than the maximum index with the
+                  #maximum index (right/bottom-most cells): Note that imager
+                  #treats the rows of a matrix as the "x" axis and the columns
+                  #as the "y" axis, contrary to intuition - effectively treating
+                  #a matrix as its transpose. As such, we need
+                  #to swap the dimensions for when we subset the image further
+                  #down in the function
+                  if(expandedCellCorners[c("right")] > mat2Dim[2]){
+                    expandedCellCorners[c("right")] <- mat2Dim[2]
+                  }
+                  if(expandedCellCorners[c("bottom")] > mat2Dim[1]){
+                    expandedCellCorners[c("bottom")] <- mat2Dim[1]
+                  }
+
+                  return(expandedCellCorners)
+                }) %>%
+    setNames(cellRanges)
+
+  return(mat2_splitCorners)
+}
+
+legacy_comparison_getTargetRegions <- function(cellHeightValues,
+                                        target,
+                                        theta = 0,
+                                        regionSizeMultiplier = 9){
+
+  stopifnot("Scan resolutions must be equal" = all.equal(cellHeightValues[[1]]$header.info$incrementX,target$header.info$incrementX) &
+              all.equal(cellHeightValues[[1]]$header.info$incrementY, target$header.info$incrementY))
+
+  cellSideLengths <- cellHeightValues %>%
+    purrr::map(~ c("row" = nrow(.$surface.matrix),
+                   "col" = ncol(.$surface.matrix)))
+
+  cellRange <- cellHeightValues %>%
+    purrr::map_chr(~ .$cmcR.info$cellRange)
+
+  target_regionIndices <- getMat2SplitIndices(cellRanges = cellRange,
+                                              cellSideLengths = cellSideLengths,
+                                              mat2Dim = dim(target$surface.matrix),
+                                              sideLengthMultiplier = floor(sqrt(regionSizeMultiplier)))
+
+  target_surfaceMat_rotated <- rotateSurfaceMatrix(target$surface.matrix,
+                                                   theta = theta)
+
+
+  target_splitRotated <-
+    purrr::map(.x = target_regionIndices,
+               function(cornerIndices){
+                 regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
+                                                         rotatedSurfaceMat = target_surfaceMat_rotated,
+                                                         mat2Dim = dim(target$surface.matrix))
+
+                 region_x3p <- x3ptools::df_to_x3p(data.frame(x = 1,y = 1,value = NA))
+
+                 region_x3p$surface.matrix <- regionMatrix
+
+                 #update metainformation
+                 region_x3p$header.info <- target$header.info
+                 region_x3p$header.info$sizeY <- ncol(regionMatrix)
+                 region_x3p$header.info$sizeX <- nrow(regionMatrix)
+
+                 return(region_x3p)
+               } )
+
+  return(target_splitRotated)
 }

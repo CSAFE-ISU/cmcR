@@ -19,7 +19,7 @@ surface matrix and returns them in a list."><!-- mathjax --><script src="https:/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
       </span>
     </div>
 
@@ -28,7 +28,7 @@ surface matrix and returns them in a list."><!-- mathjax --><script src="https:/
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -64,12 +64,11 @@ surface matrix and returns them in a list.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">x3pListPlot</span><span class="op">(</span>
   <span class="va">x3pList</span>,
   type <span class="op">=</span> <span class="st">"faceted"</span>,
-  rotate <span class="op">=</span> <span class="fl">0</span>,
   legend.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.99</span>, <span class="fl">1</span><span class="op">)</span>,
+  height.quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">0.025</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.975</span>, <span class="fl">0.99</span>, <span class="fl">1</span><span class="op">)</span>,
   height.colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#7f3b08"</span>, <span class="st">"#b35806"</span>, <span class="st">"#e08214"</span>, <span class="st">"#fdb863"</span>, <span class="st">"#fee0b6"</span>,
     <span class="st">"#f7f7f7"</span>, <span class="st">"#d8daeb"</span>, <span class="st">"#b2abd2"</span>, <span class="st">"#8073ac"</span>, <span class="st">"#542788"</span>, <span class="st">"#2d004b"</span><span class="op">)</span><span class="op">)</span>,
-  na.value <span class="op">=</span> <span class="st">"gray80"</span>,
-  guide <span class="op">=</span> <span class="st">"colorbar"</span>
+  na.value <span class="op">=</span> <span class="st">"gray65"</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -83,19 +82,18 @@ plot</p></dd>
 <dd><p>dictates whether one plot faceted by surface matrix or a list of
 plots per surface matrix is returned. The faceted plot will have a
 consistent height scale across all surface matrices.</p></dd>
-<dt>rotate</dt>
-<dd><p>angle (in degrees) to rotate all surface matrices plotted</p></dd>
 <dt>legend.quantiles</dt>
 <dd><p>vector of quantiles to be shown as tick marks on
 legend plot</p></dd>
+<dt>height.quantiles</dt>
+<dd><p>vector of quantiles associated with each color defined
+in the height.colors argument</p></dd>
 <dt>height.colors</dt>
 <dd><p>vector of colors to be passed to scale_fill_gradientn
 that dictates the height value colorscale</p></dd>
 <dt>na.value</dt>
 <dd><p>color to be used for NA values (passed to
 scale_fill_gradientn)</p></dd>
-<dt>guide</dt>
-<dd><p>internal usage</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>

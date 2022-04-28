@@ -55,6 +55,9 @@
     <loc>/reference/cmcPlot.html</loc>
   </url>
   <url>
+    <loc>/reference/comparison_alignedTargetCell.html</loc>
+  </url>
+  <url>
     <loc>/reference/comparison_allTogether.html</loc>
   </url>
   <url>
@@ -146,6 +149,9 @@
   </url>
   <url>
     <loc>/reference/preProcess_detectFPCircle.html</loc>
+  </url>
+  <url>
+    <loc>/reference/preProcess_erode.html</loc>
   </url>
   <url>
     <loc>/reference/preProcess_filterInterior.html</loc>

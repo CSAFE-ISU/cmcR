@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
       </span>
     </div>
 
@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -62,14 +62,14 @@
     <dl><dt>x3p</dt>
 <dd><p>an x3p object containing a breech face scan</p></dd>
 <dt>numCells</dt>
-<dd><p>number of cells to partition the breech face scan into. Must be
-a perfect square (49, 64, 81, etc.)</p></dd>
+<dd><p>a vector of two numbers representing the number of cells along
+the row and column dimensions into which the x3p is partitioned</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A tibble containing a numCells number of rows. Each row contains a
-single cell's index of the form (row #, col #) and an x3p object containing
-the breech face scan of that cell.</p>
+    <p>A tibble containing a prod(numCells) number of rows. Each row contains
+a single cell's index of the form (row #, col #) and an x3p object
+containing the breech face scan of that cell.</p>
     </div>
 
     <div id="ref-examples">
@@ -77,18 +77,18 @@ the breech face scan of that cell.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fadul1.1_processed</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_processed</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in"><span class="fu">comparison_cellDivision</span><span class="op">(</span>numCells <span class="op">=</span> <span class="fl">64</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">comparison_cellDivision</span><span class="op">(</span>numCells <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>,<span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cellTibble</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   cellIndex cellHeightValues</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span>    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 8, 1      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 8, 2      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 8, 3      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 8, 4      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 8, 5      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 8, 6      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1, 1      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1, 2      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 1, 3      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 1, 4      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 1, 5      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 1, 6      <span style="color: #949494;">&lt;x3p&gt;</span>           </span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>

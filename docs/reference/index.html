@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
       </span>
     </div>
 
@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -57,7 +57,12 @@
       </tr></tbody><tbody><tr><td>
           <p><code><a href="cmcPlot.html">cmcPlot()</a></code> </p>
         </td>
-        <td><p>Visualize initial and high CMCs for a cartridge case pair comparison</p></td>
+        <td><p>Plot Congruent Matching Cells results for a pair of cartridge cases.</p></td>
+      </tr><tr><td>
+          <p><code><a href="comparison_alignedTargetCell.html">comparison_alignedTargetCell()</a></code> </p>
+        </td>
+        <td><p>Extract a matrix from the target region of the same dimension as the reference
+cell depending on the estimated translation calculated from comparison_fft_ccf</p></td>
       </tr><tr><td>
           <p><code><a href="comparison_allTogether.html">comparison_allTogether()</a></code> </p>
         </td>
@@ -120,6 +125,10 @@ preProcess_* functions from the cmcR package</p></td>
           <p><code><a href="preProcess_crop.html">preProcess_crop()</a></code> </p>
         </td>
         <td><p>Remove observations from the exterior of interior of a breech face scan</p></td>
+      </tr><tr><td>
+          <p><code><a href="preProcess_erode.html">preProcess_erode()</a></code> </p>
+        </td>
+        <td><p>Erode the interior or exterior of a cartridge case surface</p></td>
       </tr><tr><td>
           <p><code><a href="preProcess_gaussFilter.html">preProcess_gaussFilter()</a></code> </p>
         </td>

@@ -880,7 +880,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
   if(compareThetas){
 
     thetaCompareBool <- (((abs((thetaMax$reference_v_target - median(originalCMCs_reference_v_target$theta,na.rm = TRUE)))) > thetaThresh) |
-                           (abs((thetaMax$target_v_reference - median(originalCMCs_reference_v_target$theta,na.rm = TRUE))) > thetaThresh))
+                           (abs((thetaMax$target_v_reference - median(originalCMCs_target_v_reference$theta,na.rm = TRUE))) > thetaThresh))
 
     if(thetaCompareBool | is.na(thetaCompareBool) | purrr::is_empty(thetaCompareBool)){
       return(list("originalMethodCMCs" = originalMethodCMCs,

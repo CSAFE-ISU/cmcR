@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
       </span>
     </div>
 
@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -57,16 +57,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">preProcess_crop</span><span class="op">(</span>
-  <span class="va">x3p</span>,
-  region <span class="op">=</span> <span class="st">"exterior"</span>,
-  radiusOffset <span class="op">=</span> <span class="fl">0</span>,
-  croppingThresh <span class="op">=</span> <span class="fl">1</span>,
-  agg_function <span class="op">=</span> <span class="va">median</span>,
-  scheme <span class="op">=</span> <span class="fl">3</span>,
-  high_connectivity <span class="op">=</span> <span class="cn">FALSE</span>,
-  tolerance <span class="op">=</span> <span class="fl">0</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">preProcess_crop</span><span class="op">(</span><span class="va">x3p</span>, region <span class="op">=</span> <span class="st">"exterior"</span>, offset <span class="op">=</span> <span class="fl">0</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -77,48 +68,15 @@ scan</p></dd>
 <dt>region</dt>
 <dd><p>dictates whether the observations on the "exterior" or
 "interior" of the scan are removed</p></dd>
-<dt>radiusOffset</dt>
-<dd><p>number of pixels to add to estimated breech face radius.
-This is commonly a negative value (e.g., -30 for region = "exterior") to
-trim the cartridge case primer roll-off from the returned, cropped surface
-matrix or a positive value (e.g., 200 for region = "interior") to remove
-observations around the firing pin impression hole.</p></dd>
-<dt>croppingThresh</dt>
-<dd><p>minimum number of non-NA pixels that need to be in a
-row/column for it to not be cropped out of the breech face scan exterior</p></dd>
-<dt>agg_function</dt>
-<dd><p>the breech face radius estimation procedure returns a
-number of radius estimates. This argument dictates the function used to
-aggregate these into a final estimate.</p></dd>
-<dt>scheme</dt>
-<dd><p>argument for imager::imgradient</p></dd>
-<dt>high_connectivity</dt>
-<dd><p>argument for imager::label</p></dd>
-<dt>tolerance</dt>
-<dd><p>argument for imager::label</p></dd>
+<dt>offset</dt>
+<dd><p>an integer (positive or negative) value to add to the estimated
+radius of the associated region</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <p>An x3p object containing the surface matrix of a breech face
 impression scan where the observations on the exterior/interior of the
 breech face scan surface.</p>
-    </div>
-    <div id="note">
-    <h2>Note</h2>
-    <p>The radius estimation procedure tends to over-estimate the desired
-radius values. As such, a lot of the breech face impression "roll-off" is
-included in the final scan. Excessive roll-off can bias the calculation of
-the CCF. As such, we can manually shrink the radius estimate (-30 or -30
-seems to work well for the Fadul cartridge cases) so that little to no
-roll-off is included in the final processed scan.</p>
-<p>The radius estimation procedure is effective at estimating the radius of
-the firing pin hole. Unfortunately, it is often desired that more than just
-observations in firing pin hole are removed. In particular, the plateaued
-region surrounding the firing pin impression hole does not come into contact
-with the breech face of a firearm and is thus unwanted in the final,
-processed scan. The radiusOffset argument must be tuned (around 200 seems to
-work well for the Fadul cartridge cases) to remove these unwanted
-observations.</p>
     </div>
 
     <div id="ref-examples">

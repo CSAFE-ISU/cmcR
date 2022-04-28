@@ -20,7 +20,7 @@ extracted from the cell's associated region."><!-- mathjax --><script src="https
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cmcR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@ extracted from the cell's associated region."><!-- mathjax --><script src="https
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -96,7 +96,7 @@ target region</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fadul1.1_processed</span>,<span class="va">fadul1.2_processed</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">cellTibble</span> <span class="op">&lt;-</span> <span class="va">fadul1.1_processed</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
-<span class="r-in"><span class="fu"><a href="comparison_cellDivision.html">comparison_cellDivision</a></span><span class="op">(</span>numCells <span class="op">=</span> <span class="fl">64</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
+<span class="r-in"><span class="fu"><a href="comparison_cellDivision.html">comparison_cellDivision</a></span><span class="op">(</span>numCells <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>,<span class="fl">8</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
 <span class="r-in"><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>regionHeightValues <span class="op">=</span></span>
 <span class="r-in">             <span class="fu"><a href="comparison_getTargetRegions.html">comparison_getTargetRegions</a></span><span class="op">(</span>cellHeightValues <span class="op">=</span> <span class="va">cellHeightValues</span>,</span>
 <span class="r-in">                                         target <span class="op">=</span> <span class="va">fadul1.2_processed</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span>
@@ -123,12 +123,12 @@ target region</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 x 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   cellIndex cellHeightValues regionHeightValues cellPropMissing regionPropMissi~</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;named list&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 8, 6      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.833            0.808</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 7, 7      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.657            0.700</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 7, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.834            0.757</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 6, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.353            0.638</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 5, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.153            0.576</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 4, 1      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.117            0.767</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1, 6      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.833            0.811</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 2, 7      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.657            0.700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 2, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.834            0.757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 3, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.353            0.638</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 4, 8      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.153            0.576</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 5, 1      <span style="color: #949494;">&lt;x3p&gt;</span>            <span style="color: #949494;">&lt;x3p&gt;</span>                        0.117            0.771</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ... with 2 more variables: fft_ccf_df &lt;named list&gt;, pairwiseCompCor &lt;dbl&gt;</span></span>
 <span class="r-in"></span>
 </code></pre></div>

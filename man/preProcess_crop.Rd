@@ -4,7 +4,7 @@
 \alias{preProcess_crop}
 \title{Remove observations from the exterior of interior of a breech face scan}
 \usage{
-preProcess_crop(x3p, region = "exterior", offset = 0)
+preProcess_crop(x3p, region = "exterior", offset = 0, ...)
 }
 \arguments{
 \item{x3p}{an x3p object containing the surface matrix of a cartridge case
