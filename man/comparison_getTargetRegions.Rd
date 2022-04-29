@@ -25,6 +25,8 @@ regions.}
 \item{sideLengthMultiplier}{ratio between the target region and reference cell
 side lengths. For example, sideLengthMultiplier = 3 implies each region will
 be 9 times larger than its paired reference cell.}
+
+\item{...}{internal usage}
 }
 \value{
 A list of the same length as the input containing x3p objects from the

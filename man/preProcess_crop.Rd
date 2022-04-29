@@ -15,6 +15,8 @@ scan}
 
 \item{offset}{an integer (positive or negative) value to add to the estimated
 radius of the associated region}
+
+\item{...}{internal usage}
 }
 \value{
 An x3p object containing the surface matrix of a breech face

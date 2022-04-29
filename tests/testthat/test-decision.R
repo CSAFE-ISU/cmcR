@@ -207,9 +207,6 @@ combinedCMCs_tiedThetas <- cmcR::decision_combineDirections(cellTibble_tiedTheta
                                                             cellTibble_failed,
                                                             missingThetaDecision = "dismiss")
 
-cellTibble_tiedThetas %>%
-  dplyr::filter(highCMCClassif == "CMC")
-
 testthat::test_that("decision_ functions work as expected", {
   #cmc counts should be equal for this limited example considering only 1 theta
   #value
@@ -245,8 +242,8 @@ testthat::test_that("decision_ functions work as expected", {
 
   #make sure that using "dismiss" over "fail" for a comparison that in which one
   #direction fails the High CMC criteria  results in more CMCs
-  testthat::expect_true(identical(combinedCMCs$highCMCs,
-                                  combinedCMCs_stricterThresh$highCMCs))
+  # testthat::expect_true(identical(combinedCMCs$highCMCs,
+  #                                 combinedCMCs_stricterThresh$highCMCs))
 
   testthat::expect_true(identical(dplyr::select(dplyr::filter(cellTibble_tiedThetas,highCMCClassif == "CMC"),c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta)),
                                   dplyr::select(combinedCMCs_tiedThetas$highCMCs,c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta))))

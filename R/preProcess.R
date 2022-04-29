@@ -203,11 +203,19 @@ preProcess_ransacLevel <- function(x3p,
 preProcess_cropWS <- function(x3p,
                               croppingThresh = 1,
                               croppingProp = .1,
-                              robust = FALSE){
+                              robust = FALSE,...){
 
   #check that rowSum and colSum aren't greater than some percentage of the
   #overall dimension of the surface matrix (e.g., 25%). Increase croppingProp is
   #it's too small
+
+  optional <- list(...)
+
+  if(!is.null(optional$method)){
+
+    return(legacy_preProcess_cropWS(x3p = x3p,croppingThresh = croppingThresh))
+
+  }
 
   surfaceMat <- x3p$surface.matrix
 
@@ -848,6 +856,7 @@ preProcess_filterInterior <- function(x3p,
 #'   "interior" of the scan are removed
 #' @param offset an integer (positive or negative) value to add to the estimated
 #'   radius of the associated region
+#'@param ... internal usage
 #'
 #' @return An x3p object containing the surface matrix of a breech face
 #'   impression scan where the observations on the exterior/interior of the
@@ -883,27 +892,30 @@ preProcess_crop <- function(x3p,
 
   optionalParams <- list(...)
 
-  # previous version of preProcess_cropExterior behaves somewhat differently
-  if(region == "exterior" & !is.null(optionalParams$method)){
-
-    x3p <- legacy_preProcess_cropExterior(x3p = x3p,
-                                   radiusOffset = offset,
-                                   high_connectivity = FALSE,
-                                   tolerance = 0,
-                                   croppingThresh = 1,
-                                   agg_function = median,
-                                   scheme = 3)
-
-  }
-
   if(region == "exterior"){
-    x3p <- preProcess_cropExterior(x3p = x3p,
-                                   radiusOffset = offset,
-                                   high_connectivity = FALSE,
-                                   tolerance = 0,
-                                   croppingThresh = 1,
-                                   agg_function = median,
-                                   scheme = 3)
+    if(!is.null(optionalParams$method)){
+
+      x3p <- legacy_preProcess_cropExterior(x3p = x3p,
+                                            radiusOffset = offset,
+                                            high_connectivity = FALSE,
+                                            tolerance = 0,
+                                            croppingThresh = 1,
+                                            agg_function = median,
+                                            scheme = 3)
+
+
+    }
+    else{
+
+      x3p <- preProcess_cropExterior(x3p = x3p,
+                                     radiusOffset = offset,
+                                     high_connectivity = FALSE,
+                                     tolerance = 0,
+                                     croppingThresh = 1,
+                                     agg_function = median,
+                                     scheme = 3)
+
+    }
 
     return(x3p)
   }
@@ -1305,6 +1317,40 @@ legacy_preProcess_cropExterior <- function(x3p,
   x3p$surface.matrix <- mat_interior
 
   x3p <- preProcess_cropWS(x3p,croppingThresh = croppingThresh)
+
+  return(x3p)
+}
+
+legacy_preProcess_cropWS <- function(x3p,
+                              croppingThresh = 1){
+
+  surfaceMat <- x3p$surface.matrix
+
+  #Look at the middle 20% of columns and count the number of non-NA pixels in each
+  colSum <- surfaceMat[(nrow(surfaceMat)/2 - .1*nrow(surfaceMat)):
+                         (nrow(surfaceMat)/2 + .1*nrow(surfaceMat)),] %>%
+    is.na() %>%
+    magrittr::not() %>%
+    colSums()
+
+  #Look at the middle 20% of rows and count the number of non-NA pixels in each
+  rowSum <- surfaceMat[,(ncol(surfaceMat)/2 - .1*ncol(surfaceMat)):
+                         (ncol(surfaceMat)/2 + .1*ncol(surfaceMat))] %>%
+    is.na() %>%
+    magrittr::not() %>%
+    rowSums()
+
+  #Crop out any rows/columns containing only NA pixels
+  surfaceMatCropped <- surfaceMat[min(which(rowSum >= croppingThresh)):
+                                    max(which(rowSum >= croppingThresh)),
+                                  min(which(colSum >= croppingThresh)):
+                                    max(which(colSum >= croppingThresh))]
+
+  x3p$surface.matrix <- surfaceMatCropped
+
+  #need to update metainformation now that rows/cols have been removed
+  x3p$header.info$sizeX <- nrow(surfaceMatCropped)
+  x3p$header.info$sizeY <- ncol(surfaceMatCropped)
 
   return(x3p)
 }

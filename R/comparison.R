@@ -318,6 +318,7 @@ comparison_calcPropMissing <- function(heightValues){
 #'@param sideLengthMultiplier ratio between the target region and reference cell
 #'  side lengths. For example, sideLengthMultiplier = 3 implies each region will
 #'  be 9 times larger than its paired reference cell.
+#'@param ... internal usage
 #'@return A list of the same length as the input containing x3p objects from the
 #'  target scan.
 #'@examples
@@ -1224,7 +1225,7 @@ legacy_comparison_getTargetRegions <- function(cellHeightValues,
   cellRange <- cellHeightValues %>%
     purrr::map_chr(~ .$cmcR.info$cellRange)
 
-  target_regionIndices <- getMat2SplitIndices(cellRanges = cellRange,
+  target_regionIndices <- legacy_getMat2SplitIndices(cellRanges = cellRange,
                                               cellSideLengths = cellSideLengths,
                                               mat2Dim = dim(target$surface.matrix),
                                               sideLengthMultiplier = floor(sqrt(regionSizeMultiplier)))
@@ -1236,7 +1237,7 @@ legacy_comparison_getTargetRegions <- function(cellHeightValues,
   target_splitRotated <-
     purrr::map(.x = target_regionIndices,
                function(cornerIndices){
-                 regionMatrix <- extractCellbyCornerLocs(cornerLocs = cornerIndices,
+                 regionMatrix <- legacy_extractCellbyCornerLocs(cornerLocs = cornerIndices,
                                                          rotatedSurfaceMat = target_surfaceMat_rotated,
                                                          mat2Dim = dim(target$surface.matrix))
 
