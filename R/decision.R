@@ -299,80 +299,80 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 
 #TODO: incorporate this into the decision_CMC function
 # the convergence CMC method of Chen et al. (2017)
-decision_convergence <- function(cellIndex,
-                                 x,
-                                 y,
-                                 theta,
-                                 corr,
-                                 direction,
-                                 translationThresh = 25,
-                                 thetaThresh = 3,
-                                 corrThresh = .4){
-
-  comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
-                                     x = x,
-                                     y = y,
-                                     theta = theta,
-                                     corr = corr,
-                                     direction = direction)
-
-  convergenceIndicators <- comparisonFeaturesDF %>%
-    dplyr::group_by(.data$theta,.data$direction) %>%
-    dplyr::mutate(distanceToMed = sqrt((.data$x - median(.data$x))^2 + (.data$y - median(.data$y))^2)) %>%
-    dplyr::summarise(distanceToMed = median(.data$distanceToMed)) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(.data$direction) %>%
-    dplyr::group_split() %>%
-    purrr::map_dfr(~ {
-      data.frame(direction = unique(.$direction),
-                 theta = unique(.$theta[which(.$distanceToMed == min(.$distanceToMed))]),
-                 distanceToMed = min(.$distanceToMed))
-    })
-
-  thetaDistanceInd <- convergenceIndicators %>%
-    dplyr::pull(.data$theta) %>%
-    abs() %>%
-    diff() %>%
-    abs() %>%
-    magrittr::is_weakly_less_than(thetaThresh)
-
-  distanceToMedInd <- convergenceIndicators %>%
-    dplyr::pull(.data$distanceToMed) %>%
-    magrittr::is_weakly_less_than(translationThresh)
-
-  convergenceInd <- thetaDistanceInd & all(distanceToMedInd)
-
-  if(!convergenceInd){
-    return("non-CMC (failed)")
-  }
-
-  thetaRefs <- comparisonFeaturesDF %>%
-    dplyr::group_by(.data$cellIndex,.data$direction) %>%
-    dplyr::filter(corr == max(.data$corr)) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(.data$direction) %>%
-    dplyr::summarise(thetaRef = median(.data$theta))
-
-
-  convergenceCMCs <- comparisonFeaturesDF %>%
-    dplyr::left_join(thetaRefs,
-                     by = c("direction")) %>%
-    dplyr::group_by(.data$direction)  %>%
-    dplyr::filter(.data$theta >= .data$thetaRef - thetaThresh & .data$theta <= .data$thetaRef + thetaThresh &
-                    abs(.data$x - median(.data$x)) <= translationThresh &
-                    abs(.data$y - median(.data$y)) <= translationThresh) %>%
-    dplyr::filter(.data$corr >= corrThresh) %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(.data$direction,.data$cellIndex) %>%
-    dplyr::filter(.data$corr == max(.data$corr)) %>%
-    dplyr::mutate(convergenceCMCClassif = "CMC")
-
-  comparisonFeaturesDF %>%
-    dplyr::left_join(convergenceCMCs,
-                     by = c("cellIndex","x","y","corr","theta","direction")) %>%
-    dplyr::mutate(convergenceCMCClassif = ifelse(is.na(.data$convergenceCMCClassif),"non-CMC",.data$convergenceCMCClassif)) %>%
-    dplyr::pull(.data$convergenceCMCClassif)
-}
+# decision_convergence <- function(cellIndex,
+#                                  x,
+#                                  y,
+#                                  theta,
+#                                  corr,
+#                                  direction,
+#                                  translationThresh = 25,
+#                                  thetaThresh = 3,
+#                                  corrThresh = .4){
+#
+#   comparisonFeaturesDF <- data.frame(cellIndex = cellIndex,
+#                                      x = x,
+#                                      y = y,
+#                                      theta = theta,
+#                                      corr = corr,
+#                                      direction = direction)
+#
+#   convergenceIndicators <- comparisonFeaturesDF %>%
+#     dplyr::group_by(.data$theta,.data$direction) %>%
+#     dplyr::mutate(distanceToMed = sqrt((.data$x - median(.data$x))^2 + (.data$y - median(.data$y))^2)) %>%
+#     dplyr::summarise(distanceToMed = median(.data$distanceToMed)) %>%
+#     dplyr::ungroup() %>%
+#     dplyr::group_by(.data$direction) %>%
+#     dplyr::group_split() %>%
+#     purrr::map_dfr(~ {
+#       data.frame(direction = unique(.$direction),
+#                  theta = unique(.$theta[which(.$distanceToMed == min(.$distanceToMed))]),
+#                  distanceToMed = min(.$distanceToMed))
+#     })
+#
+#   thetaDistanceInd <- convergenceIndicators %>%
+#     dplyr::pull(.data$theta) %>%
+#     abs() %>%
+#     diff() %>%
+#     abs() %>%
+#     magrittr::is_weakly_less_than(thetaThresh)
+#
+#   distanceToMedInd <- convergenceIndicators %>%
+#     dplyr::pull(.data$distanceToMed) %>%
+#     magrittr::is_weakly_less_than(translationThresh)
+#
+#   convergenceInd <- thetaDistanceInd & all(distanceToMedInd)
+#
+#   if(!convergenceInd){
+#     return("non-CMC (failed)")
+#   }
+#
+#   thetaRefs <- comparisonFeaturesDF %>%
+#     dplyr::group_by(.data$cellIndex,.data$direction) %>%
+#     dplyr::filter(corr == max(.data$corr)) %>%
+#     dplyr::ungroup() %>%
+#     dplyr::group_by(.data$direction) %>%
+#     dplyr::summarise(thetaRef = median(.data$theta))
+#
+#
+#   convergenceCMCs <- comparisonFeaturesDF %>%
+#     dplyr::left_join(thetaRefs,
+#                      by = c("direction")) %>%
+#     dplyr::group_by(.data$direction)  %>%
+#     dplyr::filter(.data$theta >= .data$thetaRef - thetaThresh & .data$theta <= .data$thetaRef + thetaThresh &
+#                     abs(.data$x - median(.data$x)) <= translationThresh &
+#                     abs(.data$y - median(.data$y)) <= translationThresh) %>%
+#     dplyr::filter(.data$corr >= corrThresh) %>%
+#     dplyr::ungroup() %>%
+#     dplyr::group_by(.data$direction,.data$cellIndex) %>%
+#     dplyr::filter(.data$corr == max(.data$corr)) %>%
+#     dplyr::mutate(convergenceCMCClassif = "CMC")
+#
+#   comparisonFeaturesDF %>%
+#     dplyr::left_join(convergenceCMCs,
+#                      by = c("cellIndex","x","y","corr","theta","direction")) %>%
+#     dplyr::mutate(convergenceCMCClassif = ifelse(is.na(.data$convergenceCMCClassif),"non-CMC",.data$convergenceCMCClassif)) %>%
+#     dplyr::pull(.data$convergenceCMCClassif)
+# }
 
 #'Applies the decision rules of the original method of Song (2013) or the High
 #'CMC method of Tong et al. (2015)

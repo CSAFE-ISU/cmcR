@@ -20,12 +20,32 @@ testthat::test_that("preProcess_ functions work as expected", {
     x3p1_raw_dim <- dim(x3p1$surface.matrix)
     x3p1_raw_missing <- sum(is.na(x3p1$surface.matrix))
 
+    #preProcess_ransacLevel reduces the variability in scan
+    set.seed(4292022)
+
+    x3p1_ransac <- x3p1_raw %>%
+      x3ptools::sample_x3p(m = 4) %>%
+      cmcR::preProcess_ransacLevel()
+
+    preRansacVar <- var(c(x3p1_raw$surface.matrix),na.rm = TRUE)*1e12
+    postRansacVar <- var(c(x3p1_ransac$surface.matrix),na.rm = TRUE)*1e12
+
     x3p1 <- x3p1 %>%
-      cmcR::preProcess_crop(region = "exterior")
+      cmcR::preProcess_crop(region = "exterior",
+                            offset = -50)
 
     #cropping exterior should reduce dimension, but remove NAs on exterior of scan
     x3p1_extCrop_dim <- dim(x3p1$surface.matrix)
     x3p1_extCrop_missing <- sum(is.na(x3p1$surface.matrix))
+
+    #cropping with robust estimate shouldn't affect the scan dimensions
+    x3p1_cropped <- x3p1 %>%
+      x3ptools::sample_x3p() %>%
+      cmcR:::preProcess_cropWS(croppingThresh = .5,robust = TRUE)
+
+    x3p1_center <- x3p1 %>%
+      x3ptools::sample_x3p(2) %>%
+      cmcR:::fpCenterCalc()
 
     #remove firing pin observations
     x3p1 <- x3p1 %>%
@@ -68,6 +88,10 @@ testthat::test_that("preProcess_ functions work as expected", {
     x3p1 <- x3p1 %>%
       x3ptools::sample_x3p()
 
+    x3p1_eroded <- x3p1 %>%
+      cmcR::preProcess_erode(region = "interior") %>%
+      cmcR::preProcess_erode(region = "exterior") %>%
+      cmcR:::preProcess_cropWS(croppingProp = .5)
 
     message("Skipping downloading of remote scan on CRAN.")
   }
@@ -79,15 +103,20 @@ testthat::test_that("preProcess_ functions work as expected", {
   testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
   testthat::expect_true(x3p1_extCrop_missing <= x3p1_raw_missing)
 
-  testthat::test_that("preProcess_ functions work as expected", {
     # if(x3p1$cmcR.info$skipPreprocess == 1){
     #   testthat::skip()
     # }
 
+    # ransac-leveled scan should reduce in extremes and variance of height
+    # values
+    testthat::expect_true(postRansacVar < preRansacVar &
+                            abs(min(c(x3p1_raw$surface.matrix),na.rm = TRUE)) < abs(min(c(x3p1_ransac$surface.matrix),na.rm = TRUE)) &
+                            abs(max(c(x3p1_raw$surface.matrix),na.rm = TRUE)) > abs(max(c(x3p1_ransac$surface.matrix),na.rm = TRUE)))
+
     testthat::expect_true(all(x3p1_extCrop_dim <= x3p1_raw_dim))
     testthat::expect_true(x3p1_extCrop_missing <= x3p1_raw_missing)
 
-    #croppint interior should not change dimension, but should introduct more NAs
+    #cropping interior should not change dimension, but should introduct more NAs
     testthat::expect_equal(x3p1_intCrop_dim, x3p1_extCrop_dim)
     testthat::expect_true(x3p1_intCrop_missing >=  x3p1_extCrop_missing)
 
@@ -98,6 +127,12 @@ testthat::test_that("preProcess_ functions work as expected", {
     #de-trending should reduce (large scale) variability in height values
     testthat::expect_true(x3p1_meanDeTrend_var <= x3p1_preDeTrend_var)
     testthat::expect_true(x3p1_medianDeTrend_var <= x3p1_preDeTrend_var)
+
+    # robust preProcess_cropWS shouldn't affect dimensions after cropping
+    testthat::expect_true(all(dim(x3p1$surface.matrix) == dim(x3p1_cropped$surface.matrix)))
+
+    # fpCenterCalc should work as expected
+    testthat::expect_true(all(x3p1_center == c(215,259)))
 
     #Now check older preProcess functions:
 
@@ -141,8 +176,8 @@ testthat::test_that("preProcess_ functions work as expected", {
     testthat::expect_true(x3p1_fpCircleRemoved_missing >= x3p1_ransacLeveled_missing)
     testthat::expect_true(x3p1_fpCircleRemoved_var <= x3p1_ransacLeveled_var)
 
+    #preProcess_erode + preProcess_cropWS reduces the dimension of the surface matrix as expected
+    testthat::expect_true(all(dim(x3p1_eroded$surface.matrix) == c(423,429)))
+
     #Add more "expect failure" tests?
-  })
-
-
 })

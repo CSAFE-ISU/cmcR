@@ -240,11 +240,6 @@ testthat::test_that("decision_ functions work as expected", {
   testthat::expect_true(identical(combinedCMCs$originalMethodCMCs[[1]],
                                   combinedCMCs_fakeTheta$highCMCs))
 
-  #make sure that using "dismiss" over "fail" for a comparison that in which one
-  #direction fails the High CMC criteria  results in more CMCs
-  # testthat::expect_true(identical(combinedCMCs$highCMCs,
-  #                                 combinedCMCs_stricterThresh$highCMCs))
-
   testthat::expect_true(identical(dplyr::select(dplyr::filter(cellTibble_tiedThetas,highCMCClassif == "CMC"),c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta)),
                                   dplyr::select(combinedCMCs_tiedThetas$highCMCs,c(cellIndex,x,y,fft_ccf,pairwiseCompCor,theta))))
 })
