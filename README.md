@@ -30,7 +30,7 @@ Install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jzemmels/cmcR@dev")
+devtools::install_github("jzemmels/cmcR")
 ```
 
 Cartridge case scan data can be accessed at the [NIST Ballisitics
@@ -820,30 +820,21 @@ decision_combineDirections(kmComparison_allCMCs %>%
 #> 
 #> 
 #> $highCMCs
-#> # A tibble: 19 x 10
+#> # A tibble: 24 x 10
 #>    cellIndex     x     y fft_ccf pairwiseCompCor theta refMissingCount
 #>    <chr>     <dbl> <dbl>   <dbl>           <dbl> <dbl>           <dbl>
-#>  1 5, 2         -4    20   0.175           0.825   -27            4338
-#>  2 7, 5          7     2   0.172           0.722   -27            1688
-#>  3 8, 6          6    -2   0.269           0.650   -27            2874
-#>  4 4, 1         -6    10   0.353           0.844   -24            1666
-#>  5 4, 8         -7     2   0.190           0.661   -24            1427
-#>  6 5, 1         -6    11   0.331           0.840   -24            1278
-#>  7 5, 8         -6     3   0.248           0.745   -24            1548
-#>  8 6, 7         -6     3   0.222           0.696   -24             313
-#>  9 6, 8         -5     7   0.257           0.789   -24            2912
-#> 10 7, 3         -3     8   0.217           0.749   -24             412
-#> 11 7, 6         -2     1   0.227           0.774   -24              43
-#> 12 7, 7         -4     5   0.360           0.839   -24            1103
-#> 13 3, 7         -4    17   0.177           0.748   -21            4428
-#> 14 6, 1        -11     1   0.317           0.822   -21            2826
-#> 15 6, 2         -6    -4   0.344           0.797   -21             852
-#> 16 7, 2        -11    -1   0.312           0.738   -21            1048
-#> 17 7, 4        -14     4   0.251           0.805   -21            2132
-#> 18 8, 3         -9    -4   0.269           0.755   -21            2753
-#> 19 3, 1          4    -9   0.514           0.874   -18            2829
-#> # ... with 3 more variables: targMissingCount <dbl>, jointlyMissing <dbl>,
-#> #   direction <chr>
+#>  1 3, 1         -9    15   0.442           0.828   -24            2829
+#>  2 3, 7        -11     5   0.181           0.739   -24            4428
+#>  3 5, 1         -6    11   0.331           0.840   -24            1278
+#>  4 5, 2         -5    10   0.180           0.790   -24            4338
+#>  5 6, 1         -7    14   0.330           0.813   -24            2826
+#>  6 6, 7         -6     3   0.222           0.696   -24             313
+#>  7 7, 4         -4     6   0.252           0.800   -24            2132
+#>  8 7, 6         -2     1   0.227           0.774   -24              43
+#>  9 7, 7         -4     5   0.360           0.839   -24            1103
+#> 10 8, 3          3     2   0.269           0.734   -24            2753
+#> # ... with 14 more rows, and 3 more variables: targMissingCount <dbl>,
+#> #   jointlyMissing <dbl>, direction <chr>
 ```
 
 The final step is to decide whether the number of CMCs computed under
@@ -875,8 +866,6 @@ cmcPlot(reference = fadul1.1_processed,
     group_by(cellIndex) %>%
     filter(pairwiseCompCor == max(pairwiseCompCor)),
                     cmcCol = "originalMethodClassif")
-#> Warning: Raster pixels are placed at uneven vertical intervals and will be
-#> shifted. Consider using geom_tile() instead.
 ```
 
 <img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />

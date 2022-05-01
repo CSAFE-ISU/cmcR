@@ -1,5 +1,8 @@
 ---
-output: github_document
+output:   
+  github_document:
+    pandoc_args: --webtex=https://ibm.codecogs.com/png.latex?
+always_allow_html: yes
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -34,7 +37,7 @@ Install the development version from [GitHub](https://github.com/CSAFE-ISU/cmcR)
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("jzemmels/cmcR@dev")
+devtools::install_github("jzemmels/cmcR")
 ```
 Cartridge case scan data can be accessed at the [NIST Ballisitics Toolmark Research Database](https://tsapps.nist.gov/NRBTD/Studies/Search)
 
