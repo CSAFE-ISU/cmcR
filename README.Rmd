@@ -79,26 +79,22 @@ To perform a proper comparison of these two cartridge cases, we need to remove r
 
 ```{r}
 fadul1.1_processed <- fadul1.1_raw %>%
-  x3ptools::sample_x3p() %>%
-  preProcess_crop(region = "exterior") %>%
-  preProcess_crop(region = "interior") %>%
-  preProcess_erode(region = "exterior",morphRadius = 15) %>%
-  preProcess_erode(region = "interior",morphRadius = 100) %>%
+  preProcess_crop(region = "exterior",offset = -30) %>%
+  preProcess_crop(region = "interior",offset = 200) %>%
   preProcess_removeTrend(statistic = "quantile",
                          tau = .5,
                          method = "fn") %>%
-  preProcess_gaussFilter()
+  preProcess_gaussFilter() %>%
+  x3ptools::x3p_sample()
 
 fadul1.2_processed <- fadul1.2_raw %>%
-  x3ptools::sample_x3p() %>%
-  preProcess_crop(region = "exterior") %>%
-  preProcess_crop(region = "interior") %>%
-  preProcess_erode(region = "exterior",morphRadius = 15) %>%
-  preProcess_erode(region = "interior",morphRadius = 100) %>%
+  preProcess_crop(region = "exterior",offset = -30) %>%
+  preProcess_crop(region = "interior",offset = 200) %>%
   preProcess_removeTrend(statistic = "quantile",
                          tau = .5,
                          method = "fn") %>%
-  preProcess_gaussFilter()
+  preProcess_gaussFilter() %>%
+  x3ptools::x3p_sample()
 
 x3pListPlot(list("Processed Fadul 1-1" = fadul1.1_processed,
                  "Processed Fadul1-2" = fadul1.2_processed),
