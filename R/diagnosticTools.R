@@ -500,46 +500,117 @@ cmcPlot <- function(reference,
   # ggplot2 complains about the guides
   suppressWarnings({
 
-    refPlt <- x3pListPlot(list("reference" = reference),
-                          height.colors =
-                            c('#1B1B1B','#404040','#7B7B7B','#B0B0B0','#DBDBDB','#F7F7F7','#E4E4E4','#C5C5C5','#999999','#717171','#4E4E4E')) +
-      ggplot2::guides(fill = "none") +
-      ggnewscale::new_scale_fill() +
-      ggplot2::geom_rect(data = cellData,
-                         ggplot2::aes(xmin = .data$colStart,xmax = .data$colEnd,ymin = .data$rowStart,ymax = .data$rowEnd,fill = .data$cmcClassif),
-                         alpha = .2,
-                         inherit.aes = FALSE) +
-      ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
-      ggplot2::geom_text(data = cellData,
-                         ggplot2::aes(x = .data$colMean,y = .data$rowMean,label = .data$cellIndex),inherit.aes = FALSE) +
-      ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
-      ggplot2::theme(
-        legend.direction = "horizontal"
-      ) +
-      ggplot2::labs(fill = "CMC Classif.")
-
-    cmcLegend <- ggplotify::as.ggplot(cowplot::get_legend(refPlt)$grobs[[1]])
-
-    refPlt <- refPlt +
-      ggplot2::theme(legend.position = "none")
-
     plt <- x3pListPlot(list("target" = target),
                        height.colors =
                          c('#1B1B1B','#404040','#7B7B7B','#B0B0B0','#DBDBDB','#F7F7F7','#E4E4E4','#C5C5C5','#999999','#717171','#4E4E4E')) +
       ggplot2::theme(legend.position = "none")
 
-    plt <- plt +
-      ggnewscale::new_scale_fill() +
-      ggplot2::geom_raster(data = targetCellData,
-                           ggplot2::aes(x = .data$x,y = .data$y,fill = .data$cmcClassif),
-                           alpha = .2) +
-      ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
-      ggplot2::geom_text(data = targetCellData %>%
-                           dplyr::group_by(.data$cellIndex) %>%
-                           dplyr::summarise(x = mean(.data$x),
-                                            y = mean(.data$y),
-                                            theta = unique(.data$theta)),
-                         ggplot2::aes(x=.data$x,y=.data$y,label = .data$cellIndex,angle = -1*.data$theta))
+    if(all(targetCellData$cmcClassif == "CMC")){
+
+      refPlt <- x3pListPlot(list("reference" = reference),
+                            height.colors =
+                              c('#1B1B1B','#404040','#7B7B7B','#B0B0B0','#DBDBDB','#F7F7F7','#E4E4E4','#C5C5C5','#999999','#717171','#4E4E4E')) +
+        ggplot2::guides(fill = "none") +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_rect(data = cellData,
+                           ggplot2::aes(xmin = .data$colStart,xmax = .data$colEnd,ymin = .data$rowStart,ymax = .data$rowEnd,fill = .data$cmcClassif),
+                           alpha = .2,
+                           inherit.aes = FALSE) +
+        ggplot2::scale_fill_manual(values = c("#313695")) +
+        ggplot2::geom_text(data = cellData,
+                           ggplot2::aes(x = .data$colMean,y = .data$rowMean,label = .data$cellIndex),inherit.aes = FALSE) +
+        ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
+        ggplot2::theme(
+          legend.direction = "horizontal"
+        ) +
+        ggplot2::labs(fill = "CMC Classif.")
+
+      plt <- plt +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_raster(data = targetCellData,
+                             ggplot2::aes(x = .data$x,y = .data$y,fill = .data$cmcClassif),
+                             alpha = .2) +
+        ggplot2::scale_fill_manual(values = c("#313695")) +
+        ggplot2::geom_text(data = targetCellData %>%
+                             dplyr::group_by(.data$cellIndex) %>%
+                             dplyr::summarise(x = mean(.data$x),
+                                              y = mean(.data$y),
+                                              theta = unique(.data$theta)),
+                           ggplot2::aes(x=.data$x,y=.data$y,label = .data$cellIndex,angle = -1*.data$theta))
+
+    }
+    else if(all(targetCellData$cmcClassif == "non-CMC")){
+
+      refPlt <- x3pListPlot(list("reference" = reference),
+                            height.colors =
+                              c('#1B1B1B','#404040','#7B7B7B','#B0B0B0','#DBDBDB','#F7F7F7','#E4E4E4','#C5C5C5','#999999','#717171','#4E4E4E')) +
+        ggplot2::guides(fill = "none") +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_rect(data = cellData,
+                           ggplot2::aes(xmin = .data$colStart,xmax = .data$colEnd,ymin = .data$rowStart,ymax = .data$rowEnd,fill = .data$cmcClassif),
+                           alpha = .2,
+                           inherit.aes = FALSE) +
+        ggplot2::scale_fill_manual(values = c("#a50026")) +
+        ggplot2::geom_text(data = cellData,
+                           ggplot2::aes(x = .data$colMean,y = .data$rowMean,label = .data$cellIndex),inherit.aes = FALSE) +
+        ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
+        ggplot2::theme(
+          legend.direction = "horizontal"
+        ) +
+        ggplot2::labs(fill = "CMC Classif.")
+
+      plt <- plt +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_raster(data = targetCellData,
+                             ggplot2::aes(x = .data$x,y = .data$y,fill = .data$cmcClassif),
+                             alpha = .2) +
+        ggplot2::scale_fill_manual(values = c("#a50026")) +
+        ggplot2::geom_text(data = targetCellData %>%
+                             dplyr::group_by(.data$cellIndex) %>%
+                             dplyr::summarise(x = mean(.data$x),
+                                              y = mean(.data$y),
+                                              theta = unique(.data$theta)),
+                           ggplot2::aes(x=.data$x,y=.data$y,label = .data$cellIndex,angle = -1*.data$theta))
+
+    }
+    else{
+      refPlt <- x3pListPlot(list("reference" = reference),
+                            height.colors =
+                              c('#1B1B1B','#404040','#7B7B7B','#B0B0B0','#DBDBDB','#F7F7F7','#E4E4E4','#C5C5C5','#999999','#717171','#4E4E4E')) +
+        ggplot2::guides(fill = "none") +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_rect(data = cellData,
+                           ggplot2::aes(xmin = .data$colStart,xmax = .data$colEnd,ymin = .data$rowStart,ymax = .data$rowEnd,fill = .data$cmcClassif),
+                           alpha = .2,
+                           inherit.aes = FALSE) +
+        ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
+        ggplot2::geom_text(data = cellData,
+                           ggplot2::aes(x = .data$colMean,y = .data$rowMean,label = .data$cellIndex),inherit.aes = FALSE) +
+        ggplot2::guides(fill = ggplot2::guide_legend(order = 1)) +
+        ggplot2::theme(
+          legend.direction = "horizontal"
+        ) +
+        ggplot2::labs(fill = "CMC Classif.")
+
+      plt <- plt +
+        ggnewscale::new_scale_fill() +
+        ggplot2::geom_raster(data = targetCellData,
+                             ggplot2::aes(x = .data$x,y = .data$y,fill = .data$cmcClassif),
+                             alpha = .2) +
+        ggplot2::scale_fill_manual(values = c("#313695","#a50026")) +
+        ggplot2::geom_text(data = targetCellData %>%
+                             dplyr::group_by(.data$cellIndex) %>%
+                             dplyr::summarise(x = mean(.data$x),
+                                              y = mean(.data$y),
+                                              theta = unique(.data$theta)),
+                           ggplot2::aes(x=.data$x,y=.data$y,label = .data$cellIndex,angle = -1*.data$theta))
+
+    }
+
+    cmcLegend <- ggplotify::as.ggplot(cowplot::get_legend(refPlt)$grobs[[1]])
+
+    refPlt <- refPlt +
+      ggplot2::theme(legend.position = "none")
 
   })
 
