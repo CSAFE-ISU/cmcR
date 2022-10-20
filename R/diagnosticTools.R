@@ -462,7 +462,7 @@ cmcPlot <- function(reference,
   #   dplyr::filter(!!as.name(corrCol) == max(!!as.name(corrCol)))
 
   targetCellData <- cmcClassifs %>%
-    dplyr::select(any_of(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol))) %>%
+    dplyr::select(dplyr::any_of(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol))) %>%
     purrr::pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
                                         cellIndex = ..2,
                                         theta = ..3,
@@ -473,7 +473,7 @@ cmcPlot <- function(reference,
     dplyr::pull(referenceCellCol)
 
   cellData <- cmcClassifs %>%
-    dplyr::select(any_of(c(cellIndexCol,referenceCellCol,cmcIndexCol))) %>%
+    dplyr::select(dplyr::any_of(c(cellIndexCol,referenceCellCol,cmcIndexCol))) %>%
     purrr::pmap_dfr(~ {
 
       cellInds <- ..2$cmcR.info$cellRange %>%
