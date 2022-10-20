@@ -173,7 +173,7 @@ cellTibble %>%
     dplyr::mutate(pairwiseCompCor = purrr::map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
                                              ~ cor(c(.x$surface.matrix),c(.y$surface.matrix),
                                                    use = "pairwise.complete.obs"))) %>%
-    tidyr::unnest(.data$fft_ccf_df) %>%
+    tidyr::unnest("fft_ccf_df") %>%
   select(cellIndex,x,y,pairwiseCompCor)
 ```
 

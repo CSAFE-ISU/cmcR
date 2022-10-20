@@ -48,7 +48,7 @@ decision_originalMethod_classifyCMCs <- function(cellIndex,
                                                    abs(theta - median(theta)) <= thetaThresh &
                                                    corr >= corrThresh,"CMC","non-CMC")) %>%
     dplyr::filter(originalMethodClassif == "CMC") %>%
-    dplyr::select(cellIndex,theta,originalMethodClassif)
+    dplyr::select("cellIndex","theta","originalMethodClassif")
 
   originalMethodClassif <- comparisonFeaturesDF %>%
     dplyr::left_join(originalMethodCMCs,by = c("cellIndex","theta")) %>%
@@ -129,7 +129,7 @@ decision_highCMC_cmcThetaDistrib <- function(cellIndex,
                                                     corr >= corrThresh,
                                                   "CMC Candidate","not CMC Candidate")) %>%
     dplyr::ungroup() %>%
-    dplyr::select(cellIndex,theta,cmcThetaDistribClassif)
+    dplyr::select("cellIndex","theta","cmcThetaDistribClassif")
 
 
   cmcThetaDistribClassif <- comparisonFeaturesDF %>%
@@ -269,7 +269,7 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
 
   passesHighCMCCriterion <- cmcThetaDistrib_classified %>%
     dplyr::filter(.data$thetaCMCIdentif == "High") %>%
-    dplyr::select(theta) %>%
+    dplyr::select("theta") %>%
     dplyr::distinct() %>%
     dplyr::summarise(distance = abs(max(theta) - min(theta))) %>%
     dplyr::pull(.data$distance) %>%
@@ -281,7 +281,7 @@ decision_highCMC_classifyCMCs <- function(cellIndex,
       dplyr::group_by(cellIndex) %>%
       dplyr::filter(highCMCClassif == "CMC") %>%
       dplyr::filter(corr == max(corr)) %>%
-      dplyr::select(c(cellIndex,theta,highCMCClassif))
+      dplyr::select("cellIndex","theta","highCMCClassif")
 
     highCMCClassif <- comparisonFeaturesDF %>%
       dplyr::left_join(highCMCs,by = c("cellIndex","theta")) %>%
@@ -648,12 +648,12 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
 
   originalCMCs_reference_v_target <- reference_v_target_CMCs %>%
     dplyr::filter(.data$originalMethodClassif == "CMC") %>%
-    dplyr::select(-c(.data$originalMethodClassif,.data$highCMCClassif)) %>%
+    dplyr::select(-c("originalMethodClassif","highCMCClassif")) %>%
     dplyr::mutate(direction = "reference_v_target")
 
   originalCMCs_target_v_reference <- target_v_reference_CMCs %>%
     dplyr::filter(.data$originalMethodClassif == "CMC") %>%
-    dplyr::select(-c(.data$originalMethodClassif,.data$highCMCClassif)) %>%
+    dplyr::select(-c("originalMethodClassif","highCMCClassif")) %>%
     dplyr::mutate(direction = "target_v_reference")
 
   smallerDirection <- which.min(c(nrow(originalCMCs_reference_v_target),nrow(originalCMCs_target_v_reference)))
@@ -739,7 +739,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
         dplyr::group_by(.data$cellIndex) %>% #we don't want a cell being double-counted between the two comparisons
         dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName)))) %>%
         dplyr::ungroup() %>%
-        dplyr::select(-c(.data$originalMethodClassif,.data$highCMCClassif))
+        dplyr::select(-c("originalMethodClassif","highCMCClassif"))
 
       #we want to make sure that the modal theta value in one direction is the
       #opposite (or close to the opposite) of the modal theta value in the other
@@ -926,7 +926,7 @@ cmcFilter_improved <- function(reference_v_target_CMCs,
       dplyr::group_by(.data$cellIndex) %>% #we don't want a cell being double-counted between the two comparisons
       dplyr::filter((!!as.name(corColName)) == max((!!as.name(corColName)), na.rm = TRUE)) %>%
       dplyr::ungroup() %>%
-      dplyr::select(-c(.data$originalMethodClassif,.data$highCMCClassif))
+      dplyr::select(-c("originalMethodClassif","highCMCClassif"))
 
     return(list("originalMethodCMCs" = originalMethodCMCs,
                 "highCMCs" = highCMCs))
