@@ -278,7 +278,7 @@ comparison_cellDivision <- function(x3p,numCells = c(8,8)){
     #                                              ifelse(.data$cellNum %% ceiling(sqrt(max(.data$cellNum))) == 0,ceiling(sqrt(max(.data$cellNum))),0),
     #                                            nrow = ceiling(sqrt(max(.data$cellNum))),
     #                                            byrow = TRUE)) %>%
-    dplyr::select(.data$cellIndex,.data$cellHeightValues)
+    dplyr::select("cellIndex", "cellHeightValues")
 
   return(cellTibble)
 }
@@ -1080,19 +1080,19 @@ comparison_allTogether <- function(reference,
                   pairwiseCompCor = purrr::map2_dbl(.data$cellHeightValues,.data$alignedTargetCell,
                                              ~ cor(c(.x$surface.matrix),c(.y$surface.matrix),
                                                    use = "pairwise.complete.obs"))) %>%
-    tidyr::unnest(.data$fft_ccf_df) %>%
+    tidyr::unnest("fft_ccf_df") %>%
     dplyr::mutate(theta = theta)
 
   if(!returnX3Ps){
 
     ret <- ret %>%
-      dplyr::select(.data$cellIndex,.data$x,.data$y,.data$fft_ccf,.data$pairwiseCompCor,.data$theta,.data$refMissingCount,.data$targMissingCount,.data$jointlyMissing)
+      dplyr::select("cellIndex","x","y","fft_ccf","pairwiseCompCor","theta","refMissingCount","targMissingCount","jointlyMissing")
 
   }
   else{
 
     ret <- ret %>%
-      dplyr::select(.data$cellIndex,.data$x,.data$y,.data$fft_ccf,.data$pairwiseCompCor,.data$theta,.data$refMissingCount,.data$targMissingCount,.data$jointlyMissing,.data$cellHeightValues,.data$alignedTargetCell)
+      dplyr::select("cellIndex","x","y","fft_ccf","pairwiseCompCor","theta","refMissingCount","targMissingCount","jointlyMissing","cellHeightValues","alignedTargetCell")
 
   }
 

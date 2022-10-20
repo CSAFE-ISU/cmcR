@@ -61,9 +61,9 @@ x3pListPlot <- function(x3pList,
                                          dplyr::mutate(xnew = max(.data$y) - .data$y,
                                                        ynew = max(.data$x) - .data$x,
                                                        value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                                         dplyr::select(-c(.data$x,.data$y)) %>%
-                                         dplyr::rename(x=.data$xnew,
-                                                       y=.data$ynew) %>%
+                                         dplyr::select(-c("x","y")) %>%
+                                         dplyr::rename(x="xnew",
+                                                       y="ynew") %>%
                                          dplyr::mutate(x3p = rep(name,times = nrow(.)))
                                      }) %>%
       dplyr::mutate(x3p = factor(.data$x3p,levels = names(x3pList)))
@@ -119,9 +119,9 @@ x3pListPlot <- function(x3pList,
                             dplyr::mutate(xnew = max(.data$y) - .data$y,
                                           ynew = max(.data$x) - .data$x,
                                           value = .data$value - median(.data$value,na.rm = TRUE)) %>%
-                            dplyr::select(-c(.data$x,.data$y)) %>%
-                            dplyr::rename(x=.data$xnew,
-                                          y=.data$ynew) %>%
+                            dplyr::select(-c("x","y")) %>%
+                            dplyr::rename(x="xnew",
+                                          y="ynew") %>%
                             dplyr::mutate(value = .data$value - median(.data$value,na.rm = TRUE)) %>%
                             dplyr::mutate(x3p = rep(name,times = nrow(.)))
 
@@ -388,14 +388,14 @@ targetCellCorners <- function(alignedTargetCell,cellIndex,theta,cmcClassif,targe
     as.data.frame() %>%
     dplyr::mutate(xnew = .data$y,
                   ynew = .data$x) %>%
-    dplyr::select(-c(.data$x,.data$y)) %>%
-    dplyr::rename(x=.data$xnew,y=.data$ynew) %>%
+    dplyr::select(-c("x","y")) %>%
+    dplyr::rename(x="xnew",y="ynew") %>%
     dplyr::mutate(x = .data$x - min(which(colSums(abs(rotatedMaskCopy),na.rm = TRUE) > 0)),
                   y = .data$y - min(which(rowSums(abs(rotatedMaskCopy),na.rm = TRUE) > 0)),
                   y = nrow(target$surface.matrix) - .data$y
     ) %>%
     dplyr::filter(.data$value == 100) %>%
-    dplyr::select(-.data$value) %>%
+    dplyr::select(-"value") %>%
     dplyr::group_by(.data$x,.data$y) %>%
     dplyr::distinct() %>%
     dplyr::mutate(cellIndex = cellIndex,
@@ -462,7 +462,7 @@ cmcPlot <- function(reference,
   #   dplyr::filter(!!as.name(corrCol) == max(!!as.name(corrCol)))
 
   targetCellData <- cmcClassifs %>%
-    dplyr::select(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol)) %>%
+    dplyr::select(dplyr::any_of(c(targetCellCol,cellIndexCol,thetaCol,cmcIndexCol))) %>%
     purrr::pmap_dfr(~ targetCellCorners(alignedTargetCell = ..1,
                                         cellIndex = ..2,
                                         theta = ..3,
@@ -473,7 +473,7 @@ cmcPlot <- function(reference,
     dplyr::pull(referenceCellCol)
 
   cellData <- cmcClassifs %>%
-    dplyr::select(c(cellIndexCol,referenceCellCol,cmcIndexCol)) %>%
+    dplyr::select(dplyr::any_of(c(cellIndexCol,referenceCellCol,cmcIndexCol))) %>%
     purrr::pmap_dfr(~ {
 
       cellInds <- ..2$cmcR.info$cellRange %>%
