@@ -1170,7 +1170,7 @@ legacy_getMat2SplitIndices <- function(cellRanges,
                                 ...){
   mat2_splitCorners <- cellRanges %>%
     #pull all numbers from cellRange strings:
-    purrr::map(~ stringr::str_extract_all(string = .,pattern = "[0-9]{1,}")) %>%
+    purrr::map(~ stringr::str_extract_all(pattern = "[0-9]{1,}")) %>%
     purrr::map(~ c(
       #y-position of each cell's center:
       "y" = mean(c(as.numeric(.[[1]][[3]]),as.numeric(.[[1]][[4]]))),
