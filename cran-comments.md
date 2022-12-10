@@ -1,5 +1,37 @@
 ## Resubmission
 
+Dr. Ligges requested re-writing a DOI address in the Description file.
+
+### Explanation of changes
+
+I have rewritten the DOI address from "<doi:10.6028> (10.6028/jres.120.008)" to "<doi:10.6028/jres.120.008>"
+
+## Version 0.1.10 Test environments
+* local R installation: release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+#Previous cran-comments
+
+## Resubmission
+
+The cmcR tests failed due to recent changes to the tidyselect package.
+
+### Explanation of changes
+
+An author of tidyselect, Hadley Wickham, made the necessary changes to work with tidyselect.
+See the following github commit for proof: https://github.com/CSAFE-ISU/cmcR/commit/974f5b9fb3ceea3956019ca9bc43d184f0ff4f1c
+Tests are passing without notes, warnings, or errors on all test environments
+
+## Version 0.1.10 Test environments
+* local R installation: release
+* win-builder: devel
+* GitHub Actions (windows): release
+* GitHub Actions (ubuntu-20.04): release, devel
+
+## Resubmission
+
 There was an "Additional issue" while running an example that included a donttest tag.
 This issue has been resolved by changing this example tag to dontrun.
 
@@ -15,8 +47,6 @@ The other URLs included in the note link to U.S. government websites. Each of th
 * win-builder: devel
 * GitHub Actions (windows): release
 * GitHub Actions (ubuntu-20.04): release, devel
-
-#Previous cran-comments
 
 ## Resubmission
 

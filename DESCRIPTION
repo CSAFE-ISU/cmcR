@@ -1,7 +1,7 @@
 Package: cmcR
 Type: Package
 Title: An Implementation of the 'Congruent Matching Cells' Method
-Version: 0.1.9
+Version: 0.1.11
 Authors@R: 
     c(person(given = "Joe",family = "Zemmels",role = c("aut","cre"),email = "jzemmels@iastate.edu"),
       person(given = "Heike",family = "Hofmann",email = "hofmann@iastate.edu",role = "aut"),
@@ -9,7 +9,7 @@ Authors@R:
 Maintainer: Joe Zemmels <jzemmels@iastate.edu>
 Description: An open-source implementation of the 'Congruent Matching Cells' 
     method for cartridge case identification as proposed by Song (2013) <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=911193> as well 
-    as an extension of the method proposed by Tong et al. (2015) <doi:10.6028> (10.6028/jres.120.008).
+    as an extension of the method proposed by Tong et al. (2015) <doi:10.6028/jres.120.008>.
     Provides a wide range of pre, inter, and post-processing options when
     working with cartridge case scan data and their associated comparisons. See
     the cmcR package website for more details and examples.
@@ -17,7 +17,7 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
 Imports: 
     magrittr,
     x3ptools,
