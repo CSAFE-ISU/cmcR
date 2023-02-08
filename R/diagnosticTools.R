@@ -49,6 +49,7 @@ x3pListPlot <- function(x3pList,
 
                                        x3p$header.info$incrementX <- 1
                                        x3p$header.info$incrementY <- 1
+                                       x3p$mask <- NULL
 
                                        x3p %>%
                                          x3ptools::x3p_to_df() %>%
